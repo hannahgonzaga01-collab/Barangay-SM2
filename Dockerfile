@@ -1,9 +1,10 @@
-﻿FROM php:8.2-apache
+﻿FROM php:8.3-apache
 
+# Install system dependencies & extensions needed for Laravel/Excel
 RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev zip unzip git \
+    libpng-dev libjpeg-dev libfreetype6-dev libzip-dev zip unzip git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
+    && docker-php-ext-install gd pdo pdo_mysql zip
 
 RUN a2enmod rewrite
 
