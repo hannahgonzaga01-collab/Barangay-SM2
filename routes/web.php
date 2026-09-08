@@ -13,7 +13,7 @@ use App\Http\Controllers\AdminController;
 
 // 1. Landing Page
 Route::get('/', function () {
-    return redirect('/login');
+    return redirect()->route('resident.index');
 });
 
 // 2. Dashboard redirect by role
