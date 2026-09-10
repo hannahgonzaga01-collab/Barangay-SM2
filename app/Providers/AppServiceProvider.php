@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.env') === 'production' || request()->header('x-forwarded-proto') === 'https' || str_contains((string)config('app.url'), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         $sources = [
             'C:/Users/Administrator/.gemini/antigravity/brain/d60c782f-eb68-4616-ac9e-0d2e9b3733be/.user_uploaded/media_1787883671344.jpg',
             'C:/Users/Administrator/.gemini/antigravity/brain/d60c782f-eb68-4616-ac9e-0d2e9b3733be/.user_uploaded/media_1787882864514.jpg',

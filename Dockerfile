@@ -1,4 +1,4 @@
-﻿FROM php:8.3-apache
+FROM php:8.3-apache
 
 # Install system dependencies & extensions needed for Laravel/Excel
 RUN apt-get update && apt-get install -y \
@@ -20,6 +20,8 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/conf-available/*.conf
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN rm -rf /var/www/html/public/storage && php artisan storage:link
+
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
 
 EXPOSE 80

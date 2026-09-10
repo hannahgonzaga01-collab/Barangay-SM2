@@ -1,2 +1,16 @@
 *
 !.gitignore
+!announcements/
+!announcements/**
+!events/
+!events/**
+!officials/
+!officials/**
+!settings/
+!settings/**
+!residents/
+!residents/**
+!profile_photos/
+!profile_photos/**
+!pet_photos/
+!pet_photos/**

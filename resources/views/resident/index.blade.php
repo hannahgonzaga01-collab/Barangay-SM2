@@ -58,8 +58,14 @@ html, body {
 /* NAVY BOX */
 .navy-box{background:linear-gradient(165deg,#000052 0%,#04192D 60%,#0E5393 100%);border-radius:24px;padding:28px;margin-bottom:24px;box-shadow:var(--card-shadow);border:1px solid rgba(255,255,255,0.1);}
 .section-lbl{font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
-.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-@media(max-width:500px){.service-grid{grid-template-columns:repeat(2,1fr);}}
+.service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+@media(max-width:768px){.service-grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
+@media(max-width:440px){.service-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
+.duty-grid-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+@media(max-width:640px){.duty-grid-cols{grid-template-columns:1fr;gap:10px;}}
+.activity-carousel-box{position:relative;width:100%;height:360px;}
+@media(max-width:640px){.activity-carousel-box{height:230px;}}
+@media(max-width:420px){.activity-carousel-box{height:200px;}}
 .service-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px 12px 20px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;}
 .service-card:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);transform:translateY(-5px);box-shadow:0 12px 30px rgba(0,0,0,0.3);}
 .service-ico{width:52px;height:52px;background:rgba(255,255,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .3s;}
@@ -142,8 +148,8 @@ html, body {
 .s-released{color:#64748b;font-weight:900;}
 
 /* ABOUT TABS */
-.about-tabs{display:flex;gap:5px;padding:5px;background:#f8fafc;border-bottom:1px solid var(--border);}
-.about-tab{padding:7px 14px;border-radius:8px;font-size:10px;font-weight:800;color:var(--muted);border:none;background:transparent;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .15s;font-family:inherit;}
+.about-tabs{display:flex;gap:5px;padding:5px;background:#f8fafc;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.about-tab{padding:7px 14px;border-radius:8px;font-size:10px;font-weight:800;color:var(--muted);border:none;background:transparent;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .15s;font-family:inherit;white-space:nowrap;flex-shrink:0;}
 .about-tab.active{background:var(--btn-grad);color:#fff;}
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;}
 .about-card{background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 100%);border:1px solid #bfdbfe;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(14,83,147,0.06);transition:all .2s;}
@@ -276,19 +282,35 @@ html, body {
 .item-modal-img-wrap{width:100%;height:300px;overflow-y:auto;overflow-x:hidden;}
 
 @media(max-width:640px){
-    .rp-wrap{padding:0 12px 60px;}
-    .docu-grid{grid-template-columns:repeat(3,1fr);}
-    .about-grid{grid-template-columns:1fr;}
+    .rp-wrap{padding:0 10px 60px;}
+    .navy-box{padding:18px 14px;border-radius:18px;margin-bottom:16px;}
+    .duty-widget{padding:14px 12px;border-radius:14px;}
+    .duty-name{font-size:15px;}
+    .duty-view-btn{padding:6px 14px;font-size:10px;}
+    .service-card{padding:16px 8px 14px;border-radius:14px;}
+    .service-ico{width:42px;height:42px;border-radius:12px;margin-bottom:8px;}
+    .service-ico i{font-size:16px;}
+    .service-name{font-size:11px;letter-spacing:0.02em;line-height:1.2;}
+    .service-sub{font-size:9.5px;margin-top:4px;line-height:1.25;}
+    .docu-grid{grid-template-columns:repeat(3,1fr);gap:6px;}
+    .about-grid{grid-template-columns:1fr;padding:12px;gap:10px;}
     .fgrid2,.fgrid3,.fgrid4{grid-template-columns:1fr;}
     .fspan2{grid-column:span 1;}
     .service-grid{gap:8px;}
     .recent-ann-grid{grid-template-columns:1fr;}
+    .recent-ann-list{padding:12px;}
     .recent-ann-list .recent-ann-card{flex-direction:column;align-items:stretch;}
     .recent-ann-list .recent-ann-img, .recent-ann-list .recent-ann-img-placeholder{width:100%;height:160px;}
     .item-modal-img-wrap{height:200px;}
-    .modal-box{max-height:85vh;border-radius:16px;}
-    .login-notice-btns { flex-direction: column; gap: 8px; }
-    .login-notice-btns a, .login-notice-btns button { width: 100%; justify-content: center; }
+    .modal-box{max-height:90vh;border-radius:16px;margin:8px;width:100%;}
+    .modal-in{padding:16px 14px;}
+    .login-notice-btns, .lp-btns { flex-direction: column; gap: 8px; }
+    .login-notice-btns a, .login-notice-btns button, .lp-btns a, .lp-btns button { width: 100%; justify-content: center; }
+    .ask-float{bottom:16px;right:14px;padding:10px 14px;font-size:10px;}
+    .hero-carousel{min-height:220px;max-height:300px;}
+    .carousel-slide{padding:24px 16px;}
+    .carousel-slide h2{font-size:22px;}
+    .carousel-slide p{font-size:12px;}
 }
 </style>
 
@@ -721,7 +743,7 @@ html, body {
                 </div>
 
                 {{-- 2 Distinct Columns Layout --}}
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+                <div class="duty-grid-cols">
                     
                     {{-- Column 1: Official on Duty (Kagawad) --}}
                     <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; justify-content:space-between;">
@@ -828,7 +850,7 @@ html, body {
                 @endif
             </div>
 
-            <div class="service-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+            <div class="service-grid">
                 <div class="service-card service-card-sos" @click="isAuth ? triggerEmergencySos() : window.location.href='{{ route('login') }}'">
                     <div class="service-ico" style="background: rgba(220, 38, 38, 0.4);"><i class="fas fa-exclamation-triangle" style="color:#fff; font-size: 20px;"></i></div>
                     <div class="service-name" style="color:#fff;" x-text="t('emergency_sos')">EMERGENCY / REQUEST TANOD</div>
@@ -854,13 +876,13 @@ html, body {
 
         {{-- BARANGAY ACTIVITIES & HIGHLIGHTS --}}
         <div class="wcard" style="position:relative; margin-bottom:20px; box-shadow:var(--card-shadow); border-radius:var(--r-card); overflow:hidden; background-color:#04192D;">
-            <div style="position:relative; width:100%; height:380px;">
+            <div class="activity-carousel-box">
                 <template x-for="(item, index) in activeSlides" :key="index">
                     <div x-show="currentActivitySlide === index" 
                          x-transition.opacity.duration.700ms
                          style="position:absolute; inset:0; background-color:#04192D;">
                         
-                        <img :src="item.image" style="width:100%; height:100%; object-fit:cover; object-position:center;" alt="Carousel Highlight">
+                        <img :src="item.image" @error="$event.target.src='{{ asset('images/womens.jpg') }}'" style="width:100%; height:100%; object-fit:cover; object-position:center;" alt="Carousel Highlight">
                         
                         {{-- Title Overlay --}}
                         <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, rgba(4,25,45,0.95), transparent); padding:50px 22px 20px;">
@@ -1087,10 +1109,15 @@ html, body {
                         
                         @if($orgChartPath)
                             <div style="background:#fff; border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:var(--card-shadow);">
-                                <img src="{{ asset('storage/' . $orgChartPath) }}" style="width:100%; height:auto; display:block;" alt="Barangay Organizational Chart">
+                                <img src="{{ asset('storage/' . $orgChartPath) }}" style="width:100%; height:auto; display:block;" alt="Barangay Organizational Chart" onerror="this.parentElement.style.display='none'; document.getElementById('org-chart-missing').style.display='block';">
+                            </div>
+                            <div id="org-chart-missing" style="display:none; padding:40px 20px; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; color:var(--light); text-align:center;">
+                                <i class="fas fa-sitemap" style="font-size:40px; margin-bottom:12px; opacity:.3;"></i>
+                                <div style="font-size:12px; font-weight:800;">Organizational Chart is currently being updated.</div>
+                                <div style="font-size:10px; font-weight:600; margin-top:4px;">Please check back later.</div>
                             </div>
                         @else
-                            <div style="padding:40px 20px; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; color:var(--light);">
+                            <div style="padding:40px 20px; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; color:var(--light); text-align:center;">
                                 <i class="fas fa-sitemap" style="font-size:40px; margin-bottom:12px; opacity:.3;"></i>
                                 <div style="font-size:12px; font-weight:800;">Organizational Chart is currently being updated.</div>
                                 <div style="font-size:10px; font-weight:600; margin-top:4px;">Please check back later.</div>
@@ -1207,7 +1234,7 @@ html, body {
                     <div class="recent-ann-card" style="cursor:pointer;" x-show="(filterMonth === '' || '{{ $upd->created_at->format('m') }}' === filterMonth) && (filterYear === '' || '{{ $upd->created_at->format('Y') }}' === filterYear)" @click="activeItem={type:{{ json_encode($upd->type) }},title:{{ json_encode($upd->title) }},description:{{ json_encode($upd->content ?? $upd->description) }},image:{{ $upd->image_path?json_encode(asset('storage/'.$upd->image_path)):json_encode(null) }},images:{{ json_encode($upd->images_list) }},tag:{{ json_encode($upd->tag) }},date:{{ json_encode($upd->created_at->format('M d, Y')) }},location:{{ json_encode($upd->location ?? '') }},time_range:{{ json_encode($upd->time_range ?? '') }}}; activeImgIndex=0; itemModal=true">
                         @if($upd->image_path)
                         <div style="position:relative;">
-                            <img src="{{ asset('storage/'.$upd->image_path) }}" class="recent-ann-img" alt="{{ $upd->title }}">
+                            <img src="{{ asset('storage/'.$upd->image_path) }}" class="recent-ann-img" alt="{{ $upd->title }}" onerror="this.onerror=null; this.src='{{ asset('images/canal.jpg') }}';">
                             @if(count($upd->images_list) > 1)
                                 <span style="position:absolute;bottom:8px;right:8px;background:rgba(4,25,45,0.85);color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
                                     <i class="fas fa-images"></i> +{{ count($upd->images_list) }}
@@ -2519,8 +2546,10 @@ html, body {
                     <button @click="idView='back'" :class="idView==='back'?'btn-grad btn-sm':'btn-plain btn-edit'" style="min-width:90px;"><i class="fas fa-qrcode"></i> Back</button>
                 </div>
 
+                {{-- FRONT & BACK CARD CONTAINER --}}
+                <div style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; padding:4px 0;">
                 {{-- FRONT CARD: 3-ROW EXACT STRUCTURE --}}
-                <div x-show="idView==='front'" style="width:100%;max-width:440px;height:270px;border:1.5px solid #000;border-radius:10px;overflow:hidden;background:#ffffff url('{{ asset('images/id_front_bg.jpg') }}') center/cover no-repeat;font-family:Arial,Helvetica,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,0.15);margin:0 auto;box-sizing:border-box;padding:10px 14px 4px;display:flex;flex-direction:column;justify-content:space-between;">
+                <div x-show="idView==='front'" style="width:100%;max-width:440px;min-width:320px;height:270px;border:1.5px solid #000;border-radius:10px;overflow:hidden;background:#ffffff url('{{ asset('images/id_front_bg.jpg') }}') center/cover no-repeat;font-family:Arial,Helvetica,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,0.15);margin:0 auto;box-sizing:border-box;padding:10px 14px 4px;display:flex;flex-direction:column;justify-content:space-between;">
                     {{-- 1. Top Header --}}
                     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">
                         <img src="{{ asset('images/dasma.png') }}" style="width:38px;height:38px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">
@@ -2601,6 +2630,7 @@ html, body {
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <div style="display:flex;justify-content:flex-end;margin-top:12px;">

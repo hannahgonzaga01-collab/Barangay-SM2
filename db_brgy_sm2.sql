@@ -1,9 +1,10 @@
+SET SESSION sql_require_primary_key = 0;
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 05, 2026 at 06:06 AM
+-- Generation Time: Sep 08, 2026 at 12:54 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -268,6 +269,30 @@ INSERT INTO `document_requests` (`id`, `user_id`, `claimant_type`, `authorizatio
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `emergency_sos_alerts`
+--
+
+CREATE TABLE `emergency_sos_alerts` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `resident_name` varchar(255) NOT NULL,
+  `contact_number` varchar(255) DEFAULT NULL,
+  `home_address` varchar(255) DEFAULT NULL,
+  `latitude` decimal(11,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `accuracy` varchar(255) DEFAULT NULL,
+  `google_maps_url` varchar(255) DEFAULT NULL,
+  `status` varchar(255) NOT NULL DEFAULT 'active',
+  `responder_notes` text DEFAULT NULL,
+  `dispatched_at` timestamp NULL DEFAULT NULL,
+  `resolved_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `events`
 --
 
@@ -521,7 +546,10 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (75, '2026_08_30_122500_add_victim_fields_and_transfer_reason_to_issue_reports', 51),
 (76, '2026_08_30_122600_create_vawc_audit_logs_table', 51),
 (77, '2026_08_30_125000_add_official_document_to_issue_reports', 52),
-(78, '2026_09_03_035813_create_department_reports_table', 53);
+(78, '2026_09_03_035813_create_department_reports_table', 53),
+(79, '2026_09_07_000001_create_projects_table', 54),
+(80, '2026_09_07_000002_create_emergency_sos_alerts_table', 54),
+(81, '2026_09_07_000003_update_projects_table', 55);
 
 -- --------------------------------------------------------
 
@@ -568,13 +596,14 @@ INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `
 ('4c491a4a-0155-4d4c-a132-171975e4ad90', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 9, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report VAWC \\u2013 Domestic Violence is now On going\",\"id\":2}', '2026-04-28 18:55:45', '2026-03-27 22:22:46', '2026-04-28 18:55:45'),
 ('4d07a7b8-6d69-4896-a58d-232fbae2631a', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 15, '{\"type\":\"document_status_updated\",\"title\":\"Document Being Processed \\ud83d\\udd04\",\"message\":\"Your Movein is now being processed. We will notify you when it\'s ready.\"}', NULL, '2026-04-02 04:45:49', '2026-04-02 04:45:49'),
 ('5352efdc-d2af-4d8a-a28f-1f1ef55b5a6c', 'App\\Notifications\\DocumentRequestReceived', 'App\\Models\\User', 8, '{\"type\":\"document_received\",\"title\":\"Document Request Received\\u2714\\ufe0f\",\"message\":\"Your request for Clearance has been received and is now pending review.\"}', '2026-05-09 06:51:14', '2026-05-09 06:49:54', '2026-05-09 06:51:14'),
-('54a00035-d947-4db6-96a0-ab11182182c0', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 7, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report Physical Assault is now Pending\",\"id\":9}', NULL, '2026-09-02 19:19:33', '2026-09-02 19:19:33'),
+('54a00035-d947-4db6-96a0-ab11182182c0', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 7, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report Physical Assault is now Pending\",\"id\":9}', '2026-09-06 19:50:11', '2026-09-02 19:19:33', '2026-09-06 19:50:11'),
 ('5795ecb6-b6ca-476a-b549-5f2eda03b5f0', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 8, '{\"type\":\"document_status_updated\",\"title\":\"Document Ready\",\"message\":\"\\ud83c\\udf89 Your Clearance is ready for pick-up at the Barangay Hall!\",\"document_type\":\"clearance\",\"status\":\"ready\",\"request_id\":1}', '2026-03-20 05:43:28', '2026-03-19 02:15:48', '2026-03-20 05:43:28'),
 ('608732e5-4d34-4821-9c72-ca7fa0689988', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 9, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report VAWC \\u2013 Domestic Violence is now Under review\",\"id\":2}', '2026-04-28 18:55:45', '2026-03-27 21:48:20', '2026-04-28 18:55:45'),
 ('6b4092ea-3ba0-4040-9340-012ab18fb3d3', 'App\\Notifications\\DocumentRequestReceived', 'App\\Models\\User', 8, '{\"type\":\"document_received\",\"title\":\"Document Request Received\\u2714\\ufe0f\",\"message\":\"Your request for Jobseeker has been received and is now pending review.\"}', '2026-09-01 08:49:28', '2026-05-13 08:19:44', '2026-09-01 08:49:28'),
 ('7600f6d9-8a40-4fb0-afec-652787baa567', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 8, '{\"type\":\"document_status_updated\",\"title\":\"Document Released\",\"message\":\"Your Clearance has been released.\",\"document_type\":\"clearance\",\"status\":\"released\",\"request_id\":1}', '2026-03-20 05:43:28', '2026-03-19 02:57:57', '2026-03-20 05:43:28'),
 ('7b92aac1-ebeb-462e-8e5b-31c10306ea1d', 'App\\Notifications\\DocumentAppointmentReminder', 'App\\Models\\User', 8, '{\"type\":\"appointment_reminder\",\"reminder_type\":\"1_day\",\"doc_id\":20,\"document_type\":\"clearance\",\"appointment_date\":\"2026-09-02\",\"appointment_time\":\"09:00:00\",\"title\":\"\\ud83d\\udcc5 Pick-up Reminder Tomorrow (Sep 02, 2026)\",\"message\":\"Reminder: You have an appointment tomorrow (Sep 02, 2026) at 09:00 AM to pick up your Clearance. Please bring your Valid ID.\"}', NULL, '2026-09-01 09:40:39', '2026-09-01 09:40:39'),
 ('897c309f-8be2-488b-97b9-417830839b70', 'App\\Notifications\\DocumentRequestReceived', 'App\\Models\\User', 11, '{\"type\":\"document_received\",\"title\":\"\\ud83d\\udcc4 Document Request Received\",\"message\":\"Your request for Jobseeker has been received and is now pending review.\"}', '2026-03-24 00:06:10', '2026-03-23 23:12:20', '2026-03-24 00:06:10'),
+('8cbc2ba2-ae52-4f6d-92ff-34baaa689114', 'App\\Notifications\\DocumentRequestReceived', 'App\\Models\\User', 1, '{\"type\":\"document_received\",\"title\":\"Document Request Received\\u2714\\ufe0f\",\"message\":\"Your request for Barangay Clearance has been received and is now pending review.\"}', NULL, '2026-09-06 20:30:06', '2026-09-06 20:30:06'),
 ('94cafa93-2bdf-4468-bcfc-ee4cd43af92d', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 8, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report Trespassing is now Pending\",\"id\":7}', '2026-04-22 20:50:21', '2026-04-21 08:55:18', '2026-04-22 20:50:21'),
 ('98fadb99-b7e7-4773-a7d5-1c3051697642', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 11, '{\"type\":\"document_status_updated\",\"title\":\"Ready for Pick-up! \\u2705\",\"message\":\"Your Cashgift is ready! Please visit Barangay Hall (Mon\\u2013Fri, 8AM\\u20135PM) to claim it.\"}', '2026-03-24 00:06:10', '2026-03-24 00:03:36', '2026-03-24 00:06:10'),
 ('9e9f1b4d-b2b0-4742-a27c-af3eed2f3a88', 'App\\Notifications\\DocumentRequestReceived', 'App\\Models\\User', 7, '{\"type\":\"document_received\",\"title\":\"Document Request Received\\u2714\\ufe0f\",\"message\":\"Your request for Clearance has been received and is now pending review.\"}', '2026-05-09 07:57:57', '2026-05-09 07:57:44', '2026-05-09 07:57:57'),
@@ -586,13 +615,13 @@ INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `
 ('aa8dc655-2c83-4947-829e-d7d988ad4ecb', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 12, '{\"type\":\"document_status_updated\",\"title\":\"Document Being Processed \\ud83d\\udd04\",\"message\":\"Your Indigency is now being processed. We will notify you when it\'s ready.\"}', NULL, '2026-03-27 06:54:12', '2026-03-27 06:54:12'),
 ('abd5be8b-d9b7-4697-a495-225ae224b39f', 'App\\Notifications\\DocumentRequestReceived', 'App\\Models\\User', 8, '{\"type\":\"document_received\",\"title\":\"Document Request Received\\u2714\\ufe0f\",\"message\":\"Your request for Residency has been received and is now pending review.\"}', '2026-05-04 07:08:44', '2026-05-04 07:08:34', '2026-05-04 07:08:44'),
 ('ae437fb0-b94d-41d0-8bce-5eb9257f0535', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 10, '{\"type\":\"document_status_updated\",\"title\":\"Ready for Pick-up! \\u2705\",\"message\":\"Your Residency is ready! Please visit Barangay Hall (Mon\\u2013Fri, 8AM\\u20135PM) to claim it.\"}', '2026-03-25 08:18:20', '2026-03-23 22:58:34', '2026-03-25 08:18:20'),
-('b5e3f971-42d9-4b81-9692-e1da8462ab36', 'App\\Notifications\\DocumentAppointmentReminder', 'App\\Models\\User', 7, '{\"type\":\"appointment_reminder\",\"reminder_type\":\"missed\",\"doc_id\":18,\"document_type\":\"indigency\",\"appointment_date\":\"2026-09-01\",\"appointment_time\":\"08:00:00\",\"title\":\"\\u26a0\\ufe0f Missed Appointment (Sep 01, 2026)\",\"message\":\"You missed your scheduled pick-up for Indigency on Sep 01, 2026 at 08:00 AM. Would you like to reschedule?\"}', NULL, '2026-09-01 09:40:36', '2026-09-01 09:40:36'),
+('b5e3f971-42d9-4b81-9692-e1da8462ab36', 'App\\Notifications\\DocumentAppointmentReminder', 'App\\Models\\User', 7, '{\"type\":\"appointment_reminder\",\"reminder_type\":\"missed\",\"doc_id\":18,\"document_type\":\"indigency\",\"appointment_date\":\"2026-09-01\",\"appointment_time\":\"08:00:00\",\"title\":\"\\u26a0\\ufe0f Missed Appointment (Sep 01, 2026)\",\"message\":\"You missed your scheduled pick-up for Indigency on Sep 01, 2026 at 08:00 AM. Would you like to reschedule?\"}', '2026-09-06 19:50:11', '2026-09-01 09:40:36', '2026-09-06 19:50:11'),
 ('b648b89f-4de0-435c-b621-8b348b5ac441', 'App\\Notifications\\AdminReplyNotification', 'App\\Models\\User', 8, '{\"type\":\"admin_reply\",\"title\":\"\\ud83d\\udcec Reply from Barangay Office\",\"message\":\"The office replied to your message: \\\"Other\\\"\"}', '2026-03-23 22:33:24', '2026-03-23 22:31:37', '2026-03-23 22:33:24'),
 ('c28b31ce-33f6-4733-a7ea-dc7e9dd9e3e5', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 8, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report Noise Disturbance is now Under review\",\"id\":1}', '2026-03-28 21:30:32', '2026-03-28 02:05:24', '2026-03-28 21:30:32'),
 ('c581526b-55ca-4b5c-9b67-9cb61daafa9b', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 8, '{\"type\":\"document_status_updated\",\"document_request_id\":13,\"status\":\"processing\",\"title\":\"Document Being Processed \\ud83d\\udd04\",\"message\":\"Your Clearance is now being processed. We will notify you when it\'s ready.\"}', '2026-09-01 08:49:28', '2026-05-14 21:05:15', '2026-09-01 08:49:28'),
 ('cf6343ec-1e6e-4158-aeda-9a53d56d07ef', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 15, '{\"type\":\"document_status_updated\",\"title\":\"Document Status Updated\\ud83d\\udccb \",\"message\":\"Your document request status has been updated to: Pending\"}', NULL, '2026-04-21 08:48:11', '2026-04-21 08:48:11'),
 ('d3fe58cc-baf8-4652-8057-6431aef08c19', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 4, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report Others is now Submitted\",\"id\":3}', NULL, '2026-09-01 09:44:00', '2026-09-01 09:44:00'),
-('d72fb430-e239-4bab-865c-b9f66606362c', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 7, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report Physical Assault is now Under review\",\"id\":9}', NULL, '2026-09-02 19:43:58', '2026-09-02 19:43:58'),
+('d72fb430-e239-4bab-865c-b9f66606362c', 'App\\Notifications\\IssueStatusUpdated', 'App\\Models\\User', 7, '{\"type\":\"issue_status\",\"title\":\"Incident Status Updated\",\"message\":\"Status for your report Physical Assault is now Under review\",\"id\":9}', '2026-09-06 19:50:11', '2026-09-02 19:43:58', '2026-09-06 19:50:11'),
 ('da31d351-761d-4dc4-aaa6-3e4dbb1f5c69', 'App\\Notifications\\DocumentRequestStatusUpdated', 'App\\Models\\User', 11, '{\"type\":\"document_status_updated\",\"title\":\"Document Being Processed \\ud83d\\udd04\",\"message\":\"Your Cashgift is now being processed. We will notify you when it\'s ready.\"}', '2026-03-24 00:06:10', '2026-03-23 23:37:52', '2026-03-24 00:06:10'),
 ('de621455-d25d-4230-99a4-3d168f42ccfa', 'App\\Notifications\\AdminReplyNotification', 'App\\Models\\User', 11, '{\"type\":\"admin_reply\",\"title\":\"\\ud83d\\udcec Reply from Barangay Office\",\"message\":\"The office replied to your message: \\\"General Inquiry\\\"\"}', NULL, '2026-03-24 00:07:25', '2026-03-24 00:07:25'),
 ('e6f07a1f-51fc-4dc0-b47b-fb47d7fe129b', 'App\\Notifications\\DocumentRequestReceived', 'App\\Models\\User', 8, '{\"type\":\"document_received\",\"title\":\"Document Request Received\\u2714\\ufe0f\",\"message\":\"Your request for Indigency has been received and is now pending review.\"}', '2026-03-27 06:24:47', '2026-03-27 06:24:07', '2026-03-27 06:24:47'),
@@ -718,6 +747,32 @@ INSERT INTO `pets` (`id`, `resident_id`, `pet_name`, `pet_photo`, `photo_updated
 (28, 13, 'petite', 'pet_photos/uWS6BPeK3fGQj8r338QimAqoh3eRocRerjo3EU2e.jpg', NULL, 'Dog', 'hotdog', '1', '1', 1, 'Vaccinated', NULL, NULL, 'pet_vaccine_proofs/quXnEnxcuTUbONDjvHjm1ngHHgJZoKk5tl8gTmeH.jpg', 'verified', NULL, '2026-04-27 02:53:16', '2026-08-20 20:16:28', 'alive', 0),
 (29, 2, 'phantom', 'pet_photos/SSW46vFQUOy8w04hMCzvI1Ogl6fhCJpM5yCSrkW9.jpg', NULL, 'Cat', 'bombay cat', '1', '6', 1, 'Vaccinated', NULL, NULL, 'pet_vaccine_proofs/CWtYWEqgD4BEUHSjODgJKGrb8tiXzojpFKSf1APQ.jpg', 'rejected', 'Wrong Photo Submitted (Not a Vaccination Card)', '2026-04-27 07:44:52', '2026-08-20 20:29:23', 'alive', 0),
 (30, 1, 'pusa', NULL, NULL, 'Cat', 'orange', '1', '1', 1, 'Vaccinated', NULL, NULL, 'pet_vaccine_proofs/nYFWxLdpPRfYYNhAHhJLUHDLvWMLNCxh1KXS3ACy.jpg', 'pending', NULL, '2026-04-28 21:54:57', '2026-04-28 21:54:57', 'alive', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `projects`
+--
+
+CREATE TABLE `projects` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL DEFAULT 'General',
+  `description` text DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `completion_date` date DEFAULT NULL,
+  `status` varchar(255) NOT NULL DEFAULT 'Planning',
+  `budget` decimal(15,2) DEFAULT NULL,
+  `contractor_lead` varchar(255) DEFAULT NULL,
+  `images` text DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `is_archived` tinyint(1) NOT NULL DEFAULT 0,
+  `archived_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -889,24 +944,24 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `first_name`, `middle_name`, `last_name`, `contact_number`, `birthday`, `birthplace`, `gender`, `civil_status`, `spouse_name`, `address`, `occupation`, `photo`, `photo_updated_at`, `resident_code`, `is_voter`, `precinct_no`, `voter_id_photo`, `voter_status`, `decline_reason`, `is_non_voter`, `is_senior`, `is_pwd`, `is_single_parent`, `is_student`, `is_bedridden`, `email`, `role`, `status`, `is_active`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `security_question`, `security_answer`, `password_history`, `otp`, `otp_expires_at`) VALUES
-(1, 'Office Staff', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'office@brgysm2.com', 'office', 'active', 1, NULL, '$2y$12$24PnilfhEs6l/RVpt.OwH.YFheC01u06ebqDp9S2tWtgoSwMxU/Aq', NULL, '2026-03-14 22:03:27', '2026-03-30 21:51:43', 'What is the name of our Barangay?', 'San Miguel II', NULL, NULL, NULL),
+(1, 'Office Staff', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'office@brgysm2.com', 'office', 'active', 1, NULL, '$2y$12$4CfzhgO0E3CSR7DHR6zZQOzIyTH7pTcmcLd2HEtwfdos3Ndmn74K.', NULL, '2026-03-14 22:03:27', '2026-09-07 22:29:15', 'What is the name of our Barangay?', 'San Miguel II', NULL, NULL, NULL),
 (2, 'Justice Officer', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'justice@brgysm2.com', 'justice', 'active', 1, NULL, '$2y$12$eGvFsGb9i1L/7gil4ceSJOIWrxyXFpfUd0RRAGPQY0jbGzOENx95C', NULL, '2026-03-14 22:03:28', '2026-03-30 21:51:43', 'What is the name of our Barangay?', 'San Miguel II', NULL, NULL, NULL),
 (3, 'VAWC Staff', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'vawc@brgysm2.com', 'vawc', 'active', 1, NULL, '$2y$12$.sDQ9CD6poWWKlfEBXkO0.6281mKWGrl880lGvDiOPwOJWfY71.QW', NULL, '2026-03-14 22:03:28', '2026-03-30 21:51:43', 'What is the name of our Barangay?', 'San Miguel II', NULL, NULL, NULL),
-(4, 'Peace Staff', NULL, NULL, NULL, NULL, NULL, NULL, 'Male', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'peace@brgysm2.com', 'peace', 'active', 1, NULL, '$2y$12$EsDU5OUydFiA7LeHqS4jpewaQp.PwT8nGWKLhvVJspS7cQ2AVN.L.', 'qgNBii7RCi819nqmIDLKsfAWNDuVlMVnVedRz4ezr3aGy2BWFLhdspJSQ9c1', '2026-03-14 22:03:29', '2026-09-01 06:38:29', 'What is the name of our Barangay?', 'San Miguel II', NULL, NULL, NULL),
-(5, 'Juan Dela Cruz', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, 'declined', 'not in the masterlist', 1, 0, 0, 0, 0, 0, 'juan@brgysm2.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', NULL, '2026-03-14 22:03:29', '2026-09-04 18:47:44', NULL, NULL, NULL, NULL, NULL),
+(4, 'Peace Staff', NULL, NULL, NULL, NULL, NULL, NULL, 'Male', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'peace@brgysm2.com', 'peace', 'active', 1, NULL, '$2y$12$EsDU5OUydFiA7LeHqS4jpewaQp.PwT8nGWKLhvVJspS7cQ2AVN.L.', 'nMLiGneFOQNOkUdGQhDtBaNXYvdgf5L8n0z4jsFkpGd21Uz5n9yFuce4PqF6', '2026-03-14 22:03:29', '2026-09-01 06:38:29', 'What is the name of our Barangay?', 'San Miguel II', NULL, NULL, NULL),
+(5, 'Juan Dela Cruz', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, 'declined', 'not in the masterlist', 1, 0, 0, 0, 0, 0, 'juan@brgysm2.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', NULL, '2026-03-14 22:03:29', '2026-09-08 00:04:51', NULL, NULL, NULL, NULL, NULL),
 (6, 'Admin User', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'admin@brgysm2.com', 'admin', 'active', 1, NULL, '$2y$12$Kt.HGysFCET/6hNaOgkMfOOH/V.f8P4znZP7.anROgIEMiv4dVO/S', NULL, '2026-03-14 22:03:30', '2026-03-30 21:51:43', 'What is the name of our Barangay?', 'San Miguel II', NULL, NULL, NULL),
-(7, 'Maria Clara Dizon', 'Patricia Angela', 'Siangco', 'David', '09765432152', '1990-03-20', 'Dasma, Cavite', 'Female', 'Married', NULL, 'Blk 143 Lot 9 Phase 4', NULL, 'residents/photos/vt7iLeDRtMdtUFua07T9mx9Jrn8s7axTJQC3iEdg.png', NULL, 'RES-J72D88ZN', 0, NULL, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 'hannahgonzaga01@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', 'uqoA5TiTVy60KWSmRAxKzJPESow9eFZeAKG545Yq8BBTKYe6dZXm2Dyf6oxs', '2026-03-15 02:40:46', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$Ye7dYMUEnhel08H.BLrtWu00EEkTOtyQOzUkyJs1aOzK.mMIpI6gi\",\"$2y$12$RbMY9\\/EQtFtZNbSWYF2wx.nKvYigv2\\/28KIIh6ik4goMfDmyp.\\/3S\",\"$2y$12$vRrb\\/.vZnPp3vTf40kldXuFUo2ZM6y0kzZYUo8Qqv4V1z.3i5KXZi\"]', '141262', '2026-05-14 21:57:20'),
-(8, 'Antonio Reyes', 'Antonio', 'Hiro', 'Reyes', '09327359733', '2003-03-28', 'Bahay', 'Male', 'Married', 'Shimiya Yoshida', 'Blk 123 Lot 4 Subdivision', NULL, 'profile_photos/9tQzalcBfDoz4byNOhqP6NghGssgffk2ijgBhJbp.jpg', '2026-05-14 20:47:37', 'RES-MEVJVMHE', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'gonzaga.hannahkhayera.kld@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', NULL, '2026-03-19 00:15:04', '2026-09-04 18:47:44', NULL, NULL, NULL, NULL, NULL),
-(9, 'Anne Smith', 'Anne', 'Salish', 'Smith', '09567984316', '2001-05-05', 'Hospital', 'Female', 'Single', NULL, 'Blk 187 Lot 12 Phase 2', NULL, NULL, NULL, 'RES-J3EKHHWG', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 1, 0, 0, 'gonzagahkr@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', 'bkKy3QnYG89usQtwAWh5kUzcIj8cgIk54ducDrR59COCsLnI3rcME5yBSTjQ', '2026-03-19 01:24:12', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$fDyRm\\/.rCvs\\/tnDvKIaOXuHg3nD3yS\\/xz0SKfRhU4LTy44tuxHt9y\",\"$2y$12$kD9NXY9mRlJl9Ul.m7D.cuqlu7LA3reb1Wo\\/G7CQV.KUcdPy8YyJm\"]', NULL, NULL),
-(10, 'Van Cornelius Paragas', 'Van Cornelius', 'Lobusta', 'Paragas', '09763444053', '2005-11-29', 'Dasmariñas, Cavite', 'Male', 'Married', 'Hannah Khaye Gonzaga', 'Blk 15 Lot A R5 Cityhomes Resortville', 'Chef/Baker', 'residents/photos/L6MbViinFSInkh98x8rl5ELyCoU9s2ZymPKQ5Mm4.jpg', NULL, 'RES-BYDIW8OD', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'vclparagas@kld.edu.ph', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', NULL, '2026-03-20 07:36:44', '2026-09-04 18:47:44', NULL, NULL, NULL, NULL, NULL),
-(11, 'Rheamay Diongco', 'Rheamay', 'Rebay', 'Diongco', '09633951836', '2003-11-01', 'bahay', 'Female', 'Single', NULL, 'phase 5 site', NULL, 'residents/photos/klgOBqKgGTLtdhJCviJELuhEonQTMitYmNAC5ysv.jpg', NULL, 'RES-VPFQP9KG', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'rrdiongco@kld.edu.ph', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', 'NiZ5a5RVu0kitFPtfieSTBTGNNxpU8A8aJ0ehfmP9WpcXQPCWIwRo8uU68Ut', '2026-03-23 23:09:54', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$4TnPtxClgVdi99wY.txIU.VNHDBeSkuPL3Lad5m32AdjlHlU4M3\\/a\"]', NULL, NULL),
-(12, 'Joann M Manubis', 'Joann', 'M', 'Manubis', '091233333333', '2026-03-28', 'bahay', 'Female', 'Married', 'lods', 'manubis store', NULL, NULL, NULL, 'RES-PUNSAQVO', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'jowanamanubis@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', 'tDAA93El2Pfo5yeI6HMetd8lBlEHSHczWCsFGdlxXx41765vodzhjWDNtS67', '2026-03-27 06:11:37', '2026-09-04 18:47:44', NULL, NULL, NULL, NULL, NULL),
-(13, 'Jayson rivera', 'Jayson', NULL, 'Rivera', '0999999999999', '2001-03-27', 'dasma', 'Male', 'Married', 'gf nya', 'san mig 2', NULL, NULL, NULL, 'RES-TM7YIOX4', 0, NULL, NULL, NULL, NULL, 1, 0, 0, 0, 1, 0, 'riverajayson2002@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', NULL, '2026-03-27 06:16:33', '2026-09-04 18:47:44', NULL, NULL, NULL, NULL, NULL),
-(14, 'mamiyu meme minime', 'mamiyu', 'meme', 'minime', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'mimiyu299@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', 'ZuLee5lVtOyXUim9A7QbIOyRX96lj5XbDG7bpR5ATGlDXOg5eOvGtuhNvKLa', '2026-04-01 04:47:48', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$wnraIx9eqR42jzNZqpoupuyBUNdXuueptp.TCmIprZA86vTPyj952\",\"$2y$12$VTdk4OYoDAfv3swfKDYUGewEu1gMS3UL72Auj\\/N1Iu6DBK3gH8gqG\"]', NULL, NULL),
-(15, 'Nosi Sino Balasi', 'Nosi', 'Sino', 'Balasi', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, 'declined', 'No Id uploaded', 1, 0, 0, 0, 0, 0, 'hkrgonzaga@kld.edu.ph', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', '9mIu1uJ5svBRWlHFgxYKMzQsEhehHZAasVdCB9OLwHYcdU5OJPqudaeW2Vl2', '2026-04-02 04:03:56', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$AEkd67PquEjLOS11gzZrm.EfdRaKlM2OKU49uxj5Xinyu1T\\/h3H7S\",\"$2y$12$X5sP3sXG8\\/hY.4EkXLdU\\/.LRMjjNLN\\/kZigjudXWt8ZpMud0SYXk.\",\"$2y$12$9cu.mB2kFdnWaUXIoaeyHe00hhDgJHyfieWPsj1JzamUO9A7TWcdO\"]', NULL, NULL),
-(16, 'Jennie Kim Manoban', 'Jennie', 'Kim', 'Manoban', '09878656346', '1995-04-30', 'mabuhay', 'Female', 'Single', NULL, 'Mabuhay City', 'Artist', NULL, NULL, 'RES-OA8GVLDA', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'vclparagas@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', NULL, '2026-04-09 04:19:00', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$H4qL1mBUHhm7xunlEDUJ0.dY2FIJt81cQPDk9EIbFcTe9OxcGAqAO\"]', NULL, NULL),
-(17, 'prince revilloza dela cruz', 'prince', 'revilloza', 'dela cruz', '09660136815', '2004-12-24', 'Dasma, Cavite', 'Male', 'Single', NULL, 'blk 90 lot 3 brgy san juan', 'jnt', NULL, NULL, 'RES-H3VOTEGN', 0, NULL, 'voter_ids/h3SObBejkKrnqkGNSLz9faeUe6sat3msO1nDVGI5.jpg', 'declined', 'Your submitted valid ID isn\'t valid please to resubmit a VALID ID.', 1, 0, 0, 0, 0, 0, 'princedel0123@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', NULL, '2026-04-26 22:52:10', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$8zRIETQjn7qjtxuoRBx9XOhILbbymEOYxvBJI8LVTDzpZ3MkKSCU2\"]', NULL, NULL),
-(18, 'Juan Dela Cruz', 'Juan', NULL, 'Dela Cruz', NULL, '2000-06-14', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, 'declined', 'not in the masterlist', 1, 0, 0, 0, 0, 0, 'juan@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$Q.kTOkxAfw9cTqlsfdYz5eKyzx0S0hLk8S.jKpuLJuM8OsontSoxq', NULL, '2026-04-27 15:55:27', '2026-09-04 18:47:44', NULL, NULL, '[\"$2y$12$m2sVJwKaPwJvbRIG54Wwu.N5n7BY1Hf4AW23WvUtHj2psfgNaAs82\"]', NULL, NULL);
+(7, 'Maria Clara Dizon', 'Patricia Angela', 'Siangco', 'David', '09765432152', '1990-03-20', 'Dasma, Cavite', 'Female', 'Married', NULL, 'Blk 143 Lot 9 Phase 4', NULL, 'residents/photos/vt7iLeDRtMdtUFua07T9mx9Jrn8s7axTJQC3iEdg.png', NULL, 'RES-J72D88ZN', 0, NULL, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 'hannahgonzaga01@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', 'HnURYL1kcayw8cRrIpPaGbsL2dLptLvnSokwQmAtCEXXHWX3FHxiJx7MjUa2', '2026-03-15 02:40:46', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$Ye7dYMUEnhel08H.BLrtWu00EEkTOtyQOzUkyJs1aOzK.mMIpI6gi\",\"$2y$12$RbMY9\\/EQtFtZNbSWYF2wx.nKvYigv2\\/28KIIh6ik4goMfDmyp.\\/3S\",\"$2y$12$vRrb\\/.vZnPp3vTf40kldXuFUo2ZM6y0kzZYUo8Qqv4V1z.3i5KXZi\"]', '141262', '2026-05-14 21:57:20'),
+(8, 'Antonio Reyes', 'Antonio', 'Hiro', 'Reyes', '09327359733', '2003-03-28', 'Bahay', 'Male', 'Married', 'Shimiya Yoshida', 'Blk 123 Lot 4 Subdivision', NULL, 'profile_photos/9tQzalcBfDoz4byNOhqP6NghGssgffk2ijgBhJbp.jpg', '2026-05-14 20:47:37', 'RES-MEVJVMHE', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'gonzaga.hannahkhayera.kld@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', NULL, '2026-03-19 00:15:04', '2026-09-08 00:04:51', NULL, NULL, NULL, NULL, NULL),
+(9, 'Anne Smith', 'Anne', 'Salish', 'Smith', '09567984316', '2001-05-05', 'Hospital', 'Female', 'Single', NULL, 'Blk 187 Lot 12 Phase 2', NULL, NULL, NULL, 'RES-J3EKHHWG', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 1, 0, 0, 'gonzagahkr@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', 'bkKy3QnYG89usQtwAWh5kUzcIj8cgIk54ducDrR59COCsLnI3rcME5yBSTjQ', '2026-03-19 01:24:12', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$fDyRm\\/.rCvs\\/tnDvKIaOXuHg3nD3yS\\/xz0SKfRhU4LTy44tuxHt9y\",\"$2y$12$kD9NXY9mRlJl9Ul.m7D.cuqlu7LA3reb1Wo\\/G7CQV.KUcdPy8YyJm\"]', NULL, NULL),
+(10, 'Van Cornelius Paragas', 'Van Cornelius', 'Lobusta', 'Paragas', '09763444053', '2005-11-29', 'Dasmariñas, Cavite', 'Male', 'Married', 'Hannah Khaye Gonzaga', 'Blk 15 Lot A R5 Cityhomes Resortville', 'Chef/Baker', 'residents/photos/L6MbViinFSInkh98x8rl5ELyCoU9s2ZymPKQ5Mm4.jpg', NULL, 'RES-BYDIW8OD', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'vclparagas@kld.edu.ph', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', NULL, '2026-03-20 07:36:44', '2026-09-08 00:04:51', NULL, NULL, NULL, NULL, NULL),
+(11, 'Rheamay Diongco', 'Rheamay', 'Rebay', 'Diongco', '09633951836', '2003-11-01', 'bahay', 'Female', 'Single', NULL, 'phase 5 site', NULL, 'residents/photos/klgOBqKgGTLtdhJCviJELuhEonQTMitYmNAC5ysv.jpg', NULL, 'RES-VPFQP9KG', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'rrdiongco@kld.edu.ph', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', 'NiZ5a5RVu0kitFPtfieSTBTGNNxpU8A8aJ0ehfmP9WpcXQPCWIwRo8uU68Ut', '2026-03-23 23:09:54', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$4TnPtxClgVdi99wY.txIU.VNHDBeSkuPL3Lad5m32AdjlHlU4M3\\/a\"]', NULL, NULL),
+(12, 'Joann M Manubis', 'Joann', 'M', 'Manubis', '091233333333', '2026-03-28', 'bahay', 'Female', 'Married', 'lods', 'manubis store', NULL, NULL, NULL, 'RES-PUNSAQVO', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'jowanamanubis@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', 'tDAA93El2Pfo5yeI6HMetd8lBlEHSHczWCsFGdlxXx41765vodzhjWDNtS67', '2026-03-27 06:11:37', '2026-09-08 00:04:51', NULL, NULL, NULL, NULL, NULL),
+(13, 'Jayson rivera', 'Jayson', NULL, 'Rivera', '0999999999999', '2001-03-27', 'dasma', 'Male', 'Married', 'gf nya', 'san mig 2', NULL, NULL, NULL, 'RES-TM7YIOX4', 0, NULL, NULL, NULL, NULL, 1, 0, 0, 0, 1, 0, 'riverajayson2002@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', NULL, '2026-03-27 06:16:33', '2026-09-08 00:04:51', NULL, NULL, NULL, NULL, NULL),
+(14, 'mamiyu meme minime', 'mamiyu', 'meme', 'minime', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'mimiyu299@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', 'ZuLee5lVtOyXUim9A7QbIOyRX96lj5XbDG7bpR5ATGlDXOg5eOvGtuhNvKLa', '2026-04-01 04:47:48', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$wnraIx9eqR42jzNZqpoupuyBUNdXuueptp.TCmIprZA86vTPyj952\",\"$2y$12$VTdk4OYoDAfv3swfKDYUGewEu1gMS3UL72Auj\\/N1Iu6DBK3gH8gqG\"]', NULL, NULL),
+(15, 'Nosi Sino Balasi', 'Nosi', 'Sino', 'Balasi', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, 'declined', 'No Id uploaded', 1, 0, 0, 0, 0, 0, 'hkrgonzaga@kld.edu.ph', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', 'el2CTOeT0shfxdaIV0uFF3bxDhRC5yKB7L1Av3duhfrMf9YC0DLcFzIq5uuA', '2026-04-02 04:03:56', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$AEkd67PquEjLOS11gzZrm.EfdRaKlM2OKU49uxj5Xinyu1T\\/h3H7S\",\"$2y$12$X5sP3sXG8\\/hY.4EkXLdU\\/.LRMjjNLN\\/kZigjudXWt8ZpMud0SYXk.\",\"$2y$12$9cu.mB2kFdnWaUXIoaeyHe00hhDgJHyfieWPsj1JzamUO9A7TWcdO\"]', NULL, NULL),
+(16, 'Jennie Kim Manoban', 'Jennie', 'Kim', 'Manoban', '09878656346', '1995-04-30', 'mabuhay', 'Female', 'Single', NULL, 'Mabuhay City', 'Artist', NULL, NULL, 'RES-OA8GVLDA', 1, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 'vclparagas@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', NULL, '2026-04-09 04:19:00', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$H4qL1mBUHhm7xunlEDUJ0.dY2FIJt81cQPDk9EIbFcTe9OxcGAqAO\"]', NULL, NULL),
+(17, 'prince revilloza dela cruz', 'prince', 'revilloza', 'dela cruz', '09660136815', '2004-12-24', 'Dasma, Cavite', 'Male', 'Single', NULL, 'blk 90 lot 3 brgy san juan', 'jnt', NULL, NULL, 'RES-H3VOTEGN', 0, NULL, 'voter_ids/h3SObBejkKrnqkGNSLz9faeUe6sat3msO1nDVGI5.jpg', 'declined', 'Your submitted valid ID isn\'t valid please to resubmit a VALID ID.', 1, 0, 0, 0, 0, 0, 'princedel0123@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', NULL, '2026-04-26 22:52:10', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$8zRIETQjn7qjtxuoRBx9XOhILbbymEOYxvBJI8LVTDzpZ3MkKSCU2\"]', NULL, NULL),
+(18, 'Juan Dela Cruz', 'Juan', NULL, 'Dela Cruz', NULL, '2000-06-14', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, 'declined', 'not in the masterlist', 1, 0, 0, 0, 0, 0, 'juan@gmail.com', 'resident', 'active', 1, NULL, '$2y$12$bGUcDphIo1.O2Y1Exk.SueA8QEk7mBVLwlulXGTsfSpABN95aF6Bu', NULL, '2026-04-27 15:55:27', '2026-09-08 00:04:51', NULL, NULL, '[\"$2y$12$m2sVJwKaPwJvbRIG54Wwu.N5n7BY1Hf4AW23WvUtHj2psfgNaAs82\"]', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1021,6 +1076,13 @@ ALTER TABLE `document_requests`
   ADD KEY `document_requests_user_id_foreign` (`user_id`);
 
 --
+-- Indexes for table `emergency_sos_alerts`
+--
+ALTER TABLE `emergency_sos_alerts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `emergency_sos_alerts_user_id_foreign` (`user_id`);
+
+--
 -- Indexes for table `events`
 --
 ALTER TABLE `events`
@@ -1098,6 +1160,12 @@ ALTER TABLE `patrol_schedules`
 ALTER TABLE `pets`
   ADD PRIMARY KEY (`id`),
   ADD KEY `pets_resident_id_foreign` (`resident_id`);
+
+--
+-- Indexes for table `projects`
+--
+ALTER TABLE `projects`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `residents`
@@ -1185,6 +1253,12 @@ ALTER TABLE `document_requests`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
+-- AUTO_INCREMENT for table `emergency_sos_alerts`
+--
+ALTER TABLE `emergency_sos_alerts`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
@@ -1218,7 +1292,7 @@ ALTER TABLE `mediation_cases`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `officials`
@@ -1237,6 +1311,12 @@ ALTER TABLE `patrol_schedules`
 --
 ALTER TABLE `pets`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT for table `projects`
+--
+ALTER TABLE `projects`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `residents`
@@ -1302,6 +1382,12 @@ ALTER TABLE `documents`
 --
 ALTER TABLE `document_requests`
   ADD CONSTRAINT `document_requests_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `emergency_sos_alerts`
+--
+ALTER TABLE `emergency_sos_alerts`
+  ADD CONSTRAINT `emergency_sos_alerts_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `issue_reports`
