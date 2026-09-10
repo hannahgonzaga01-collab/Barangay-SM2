@@ -882,7 +882,7 @@ html, body {
                          x-transition.opacity.duration.700ms
                          style="position:absolute; inset:0; background-color:#04192D;">
                         
-                        <img :src="item.image" @error="$event.target.src='{{ asset('images/womens.jpg') }}'" style="width:100%; height:100%; object-fit:cover; object-position:center;" alt="Carousel Highlight">
+                        <img :src="item.image" x-on:error="$event.target.src='{{ asset('images/womens.jpg') }}'" style="width:100%; height:100%; object-fit:cover; object-position:center;" alt="Carousel Highlight">
                         
                         {{-- Title Overlay --}}
                         <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, rgba(4,25,45,0.95), transparent); padding:50px 22px 20px;">
