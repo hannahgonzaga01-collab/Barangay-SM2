@@ -1880,20 +1880,18 @@ html, body {
 
                     <div style="display:grid; gap:8px;">
                         <template x-for="d in dutySchedule" :key="d.day">
-                            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-radius:12px; border:1.5px solid; transition:all .2s; gap:12px;"
+                            <div style="display:grid; grid-template-columns:100px 1fr auto; align-items:center; padding:12px 16px; border-radius:12px; border:1.5px solid; transition:all .2s; gap:12px;"
                                  :style="d.day === todayDay ? 'background:#f0f9ff; border-color:#7dd3fc; box-shadow:0 2px 8px rgba(14,165,233,0.12);' : 'background:#ffffff; border-color:#e2e8f0;'">
-                                <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
-                                    <div style="width:90px; flex-shrink:0;">
-                                        <span style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.05em;"
-                                              :style="d.day === todayDay ? 'color:#0284c7;' : 'color:#64748b;'"
-                                              x-text="d.day"></span>
-                                    </div>
-                                    <div style="min-width:0;">
-                                        <div style="font-size:13px; font-weight:800; color:#0f172a;" x-text="d.name"></div>
-                                        <div style="font-size:10px; color:#64748b; font-weight:600;">Barangay Kagawad of the Day</div>
-                                    </div>
+                                <div>
+                                    <span style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.05em;"
+                                          :style="d.day === todayDay ? 'color:#0284c7;' : 'color:#64748b;'"
+                                          x-text="d.day"></span>
                                 </div>
-                                <div style="flex-shrink:0; text-align:right;">
+                                <div style="min-width:0;">
+                                    <div style="font-size:13px; font-weight:800; color:#0f172a; line-height:1.3;" x-text="d.name"></div>
+                                    <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:2px;">Barangay Kagawad of the Day</div>
+                                </div>
+                                <div style="text-align:right; display:flex; align-items:center; justify-content:flex-end;">
                                     <template x-if="d.day === todayDay">
                                         <span style="font-size:9.5px; font-weight:900; background:#0284c7; color:#fff; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.05em; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(2,132,199,0.25); white-space:nowrap;">
                                             <i class="fas fa-check-circle" style="font-size:9px;"></i> Active Today
