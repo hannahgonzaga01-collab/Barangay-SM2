@@ -281,7 +281,44 @@ html, body {
 
 .item-modal-img-wrap{width:100%;height:300px;overflow-y:auto;overflow-x:hidden;}
 
+/* DUTY SCHEDULE TABLE */
+.duty-table-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.duty-table-header {
+    display: grid;
+    grid-template-columns: 110px 1fr 120px;
+    align-items: center;
+    padding: 10px 18px;
+    background: #f8fafc;
+    border-bottom: 1.5px solid #e2e8f0;
+    border-left: 4px solid transparent;
+    gap: 12px;
+}
+.duty-table-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 120px;
+    align-items: center;
+    padding: 13px 18px;
+    gap: 12px;
+    transition: background .15s;
+    border-bottom: 1px solid #f1f5f9;
+    border-left: 4px solid transparent;
+}
+.duty-table-row:last-child {
+    border-bottom: none;
+}
+
 @media(max-width:640px){
+    .duty-table-header, .duty-table-row {
+        grid-template-columns: 85px 1fr auto !important;
+        padding: 11px 12px !important;
+        gap: 8px !important;
+    }
     .rp-wrap{padding:0 10px 60px;}
     .navy-box{padding:18px 14px;border-radius:18px;margin-bottom:16px;}
     .duty-widget{padding:14px 12px;border-radius:14px;}
@@ -1878,23 +1915,36 @@ html, body {
                         </div>
                     </div>
 
-                    <div style="display:grid; gap:8px;">
+                    <div class="duty-table-card">
+                        <div class="duty-table-header">
+                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em;">Day</div>
+                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em;">Barangay Official</div>
+                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em; text-align:right;">Duty Status</div>
+                        </div>
+
                         <template x-for="d in dutySchedule" :key="d.day">
-                            <div style="display:grid; grid-template-columns:100px 1fr auto; align-items:center; padding:12px 16px; border-radius:12px; border:1.5px solid; transition:all .2s; gap:12px;"
-                                 :style="d.day === todayDay ? 'background:#f0f9ff; border-color:#7dd3fc; box-shadow:0 2px 8px rgba(14,165,233,0.12);' : 'background:#ffffff; border-color:#e2e8f0;'">
+                            <div class="duty-table-row"
+                                 :style="d.day === todayDay 
+                                    ? 'background:#eff6ff; border-left-color:#0284c7;' 
+                                    : 'background:#ffffff;'">
                                 <div>
-                                    <span style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.05em;"
-                                          :style="d.day === todayDay ? 'color:#0284c7;' : 'color:#64748b;'"
+                                    <span style="font-size:11.5px; font-weight:900; text-transform:uppercase; letter-spacing:.05em;"
+                                          :style="d.day === todayDay ? 'color:#0284c7;' : 'color:#334155;'"
                                           x-text="d.day"></span>
                                 </div>
                                 <div style="min-width:0;">
-                                    <div style="font-size:13px; font-weight:800; color:#0f172a; line-height:1.3;" x-text="d.name"></div>
+                                    <div style="font-size:13px; font-weight:800; color:#0f172a; line-height:1.25;" x-text="d.name"></div>
                                     <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:2px;">Barangay Kagawad of the Day</div>
                                 </div>
                                 <div style="text-align:right; display:flex; align-items:center; justify-content:flex-end;">
                                     <template x-if="d.day === todayDay">
-                                        <span style="font-size:9.5px; font-weight:900; background:#0284c7; color:#fff; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.05em; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(2,132,199,0.25); white-space:nowrap;">
+                                        <span style="font-size:9.5px; font-weight:900; background:#0284c7; color:#fff; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(2,132,199,0.25); white-space:nowrap;">
                                             <i class="fas fa-check-circle" style="font-size:9px;"></i> Active Today
+                                        </span>
+                                    </template>
+                                    <template x-if="d.day !== todayDay">
+                                        <span style="font-size:9px; font-weight:700; background:#f1f5f9; color:#94a3b8; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;">
+                                            Scheduled
                                         </span>
                                     </template>
                                 </div>
