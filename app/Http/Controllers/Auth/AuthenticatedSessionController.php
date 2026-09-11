@@ -16,15 +16,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        // Automatically set all resident passwords to 'password123' for testing
-        try {
-            \App\Models\User::where('role', 'resident')->update([
-                'password' => \Illuminate\Support\Facades\Hash::make('password123')
-            ]);
-        } catch (\Throwable $e) {
-            // Silently ignore if DB issue
-        }
-
         return view('auth.login');
     }
 

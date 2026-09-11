@@ -17,12 +17,12 @@ class PeaceController extends Controller
         $patrols = PatrolSchedule::latest()->get();
         $peaceReports = \App\Models\DepartmentReport::where('department', 'Peace & Order')->latest()->get();
 
-        $sosAlerts = EmergencySosAlert::with(['user.resident', 'resident'])
-            ->whereIn('status', ['triggered', 'acknowledged', 'responding'])
+        $sosAlerts = EmergencySosAlert::with(['user.resident'])
+            ->whereIn('status', ['active', 'triggered', 'acknowledged', 'responding'])
             ->latest()
             ->get();
 
-        $recentResolvedSos = EmergencySosAlert::with(['user.resident', 'resident'])
+        $recentResolvedSos = EmergencySosAlert::with(['user.resident'])
             ->where('status', 'resolved')
             ->latest()
             ->take(10)
@@ -501,41 +501,41 @@ class PeaceController extends Controller
     // ── Emergency SOS Dispatch Endpoints ──
     public function getSosAlerts()
     {
-        $alerts = EmergencySosAlert::with(['user.resident', 'resident'])
-            ->whereIn('status', ['triggered', 'acknowledged', 'responding'])
+        $alerts = EmergencySosAlert::with(['user.resident'])
+            ->whereIn('status', ['active', 'triggered', 'acknowledged', 'responding'])
             ->latest()
             ->get()
             ->map(function ($a) {
                 $name = $a->resident_name;
                 if (!$name && $a->user) {
-                    $name = $a->user->first_name . ' ' . $a->user->last_name;
+                    $name = trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? ''));
                 }
-                $contact = $a->resident_contact ?? ($a->user?->phone_number ?? 'N/A');
-                $address = $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II'));
+                $contact = $a->contact_number ?? $a->resident_contact ?? ($a->user?->contact_number ?? $a->user?->phone_number ?? 'N/A');
+                $address = $a->home_address ?? $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II'));
 
                 return [
                     'id'               => $a->id,
                     'resident_name'    => $name ?? 'Barangay Resident',
                     'resident_contact' => $contact,
                     'resident_address' => $address,
-                    'emergency_type'   => $a->emergency_type,
-                    'message'          => $a->message,
+                    'emergency_type'   => $a->emergency_type ?? 'Emergency SOS',
+                    'message'          => $a->message ?? ($a->responder_notes ?? 'Emergency assistance requested via Resident Portal.'),
                     'latitude'         => $a->latitude,
                     'longitude'        => $a->longitude,
                     'status'           => $a->status,
                     'dispatched_units' => $a->dispatched_units,
                     'responder_notes'  => $a->responder_notes,
-                    'created_at_fmt'   => $a->created_at->format('M d, Y h:i A'),
-                    'time_ago'         => $a->created_at->diffForHumans(),
-                    'google_maps_url'  => ($a->latitude && $a->longitude) 
+                    'created_at_fmt'   => $a->created_at ? $a->created_at->format('M d, Y h:i A') : 'Just now',
+                    'time_ago'         => $a->created_at ? $a->created_at->diffForHumans() : 'Just now',
+                    'google_maps_url'  => $a->google_maps_url ?: (($a->latitude && $a->longitude) 
                         ? "https://www.google.com/maps?q={$a->latitude},{$a->longitude}" 
-                        : null,
+                        : null),
                 ];
             });
 
         return response()->json([
             'alerts'        => $alerts,
-            'active_count'  => $alerts->where('status', 'triggered')->count(),
+            'active_count'  => $alerts->whereIn('status', ['active', 'triggered'])->count(),
             'total_pending' => $alerts->count(),
         ]);
     }
@@ -543,7 +543,7 @@ class PeaceController extends Controller
     public function updateSosStatus(Request $request, $id)
     {
         $request->validate([
-            'status'           => 'required|in:acknowledged,responding,resolved',
+            'status'           => 'required|in:active,triggered,acknowledged,responding,resolved',
             'dispatched_units' => 'nullable|string',
             'responder_notes'  => 'nullable|string',
         ]);
@@ -567,7 +567,7 @@ class PeaceController extends Controller
 
         $alert->update($data);
 
-        if ($request->wantsJson()) {
+        if ($request->wantsJson() || $request->expectsJson() || $request->ajax() || $request->isJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'SOS status updated successfully.',

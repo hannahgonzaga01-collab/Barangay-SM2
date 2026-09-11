@@ -28,6 +28,9 @@ class DocumentRequestReceived extends Notification
     {
         $docType  = ucwords(str_replace('_', ' ', $this->docRequest->document_type));
         $name     = trim(($notifiable->first_name ?? '') . ' ' . ($notifiable->last_name ?? ''));
+        if (empty($name)) {
+            $name = $this->docRequest->claimant_name ?: trim(($this->docRequest->guest_first_name ?? '') . ' ' . ($this->docRequest->guest_last_name ?? ''));
+        }
         $logoUrl  = config('app.url') . '/images/circlelogo.png';
 
         return (new MailMessage)

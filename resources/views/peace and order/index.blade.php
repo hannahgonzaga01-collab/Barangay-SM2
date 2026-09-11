@@ -243,17 +243,17 @@ html, body {
         sosAlerts: {{ json_encode($sosAlerts->map(function($a) {
             return [
                 'id'               => $a->id,
-                'resident_name'    => $a->resident_name ?? ($a->user ? $a->user->first_name . ' ' . $a->user->last_name : 'Barangay Resident'),
-                'resident_contact' => $a->resident_contact ?? ($a->user?->phone_number ?? 'N/A'),
-                'resident_address' => $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II')),
-                'emergency_type'   => $a->emergency_type,
-                'message'          => $a->message,
+                'resident_name'    => $a->resident_name ?? ($a->user ? trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? '')) : 'Barangay Resident'),
+                'resident_contact' => $a->contact_number ?? $a->resident_contact ?? ($a->user?->contact_number ?? $a->user?->phone_number ?? 'N/A'),
+                'resident_address' => $a->home_address ?? $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II')),
+                'emergency_type'   => $a->emergency_type ?? 'Emergency SOS',
+                'message'          => $a->message ?? ($a->responder_notes ?? 'Emergency assistance requested via Resident Portal.'),
                 'latitude'         => $a->latitude,
                 'longitude'        => $a->longitude,
                 'status'           => $a->status,
-                'created_at_fmt'   => $a->created_at->format('M d, Y h:i A'),
-                'time_ago'         => $a->created_at->diffForHumans(),
-                'google_maps_url'  => ($a->latitude && $a->longitude) ? 'https://www.google.com/maps?q=' . $a->latitude . ',' . $a->longitude : null,
+                'created_at_fmt'   => $a->created_at ? $a->created_at->format('M d, Y h:i A') : 'Just now',
+                'time_ago'         => $a->created_at ? $a->created_at->diffForHumans() : 'Just now',
+                'google_maps_url'  => $a->google_maps_url ?: (($a->latitude && $a->longitude) ? 'https://www.google.com/maps?q=' . $a->latitude . ',' . $a->longitude : null),
             ];
         })) }},
         sosPollingInterval: null,
@@ -279,7 +279,7 @@ html, body {
             fetch('{{ route('peace.sos.alerts') }}')
                 .then(r => r.json())
                 .then(data => {
-                    const prevTriggered = this.sosAlerts.filter(a => a.status === 'triggered').length;
+                    const prevTriggered = this.sosAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length;
                     this.sosAlerts = data.alerts;
                     if (data.active_count > prevTriggered) {
                         this.playEmergencyChime();
@@ -287,7 +287,7 @@ html, body {
                 }).catch(e => console.error(e));
         },
         updateSosStatus(alertId, newStatus) {
-            fetch('/peace-and-order/sos/' + alertId + '/status', {
+            fetch('/peace/sos-alerts/' + alertId + '/status', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

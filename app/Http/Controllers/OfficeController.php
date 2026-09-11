@@ -472,6 +472,11 @@ class OfficeController extends Controller
             try {
                 $docRequest->user->notify(new DocumentRequestStatusUpdated($docRequest));
             } catch (\Exception $e) { }
+        } elseif (!empty($docRequest->guest_email)) {
+            try {
+                \Illuminate\Support\Facades\Notification::route('mail', $docRequest->guest_email)
+                    ->notify(new DocumentRequestStatusUpdated($docRequest));
+            } catch (\Exception $e) { }
         }
 
         $msg = $newStatus === 'disapproved' ? 'Request disapproved. Reason sent to resident.' : 'Status updated to ' . ucfirst($newStatus) . '. Resident notified.';

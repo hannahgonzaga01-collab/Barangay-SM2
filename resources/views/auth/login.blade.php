@@ -233,11 +233,52 @@
             transform: translateX(-3px);
             box-shadow: 0 6px 15px rgba(14, 83, 147, 0.3);
         }
+
+        .login-btn-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .login-btn-actions .btn-login {
+            margin-top: 0;
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            padding: 12px 16px;
+        }
+
+        .login-btn-actions .btn-back-portal {
+            margin-top: 0;
+            white-space: nowrap;
+            padding: 11px 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 480px) {
+            .login-btn-actions {
+                flex-direction: column;
+                gap: 9px;
+            }
+            .login-btn-actions .btn-login,
+            .login-btn-actions .btn-back-portal {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+                box-sizing: border-box;
+            }
+        }
     </style>
 
     <div class="auth-card-head">
         <h2><i class="fas fa-sign-in-alt" style="margin-right:8px;opacity:.8;"></i> Welcome Back</h2>
-        <p>Sign in to access your Barangay SM2 account</p>
+        <p>Sign in to access your Barangay San Miguel II account</p>
     </div>
 
     <div class="auth-card-body">
@@ -292,17 +333,17 @@
                 @endif
             </div>
 
-            <div style="display:flex; align-items:center; gap:10px; margin-top:12px;">
-                <button type="submit" class="btn-login" style="margin-top:0; flex:1;">
+            <div class="login-btn-actions">
+                <button type="submit" class="btn-login">
                     <i class="fas fa-sign-in-alt" style="margin-right:7px;"></i> Log In
                 </button>
-                <a href="{{ route('resident.index') }}" class="btn-back-portal" style="margin-top:0; white-space:nowrap; padding:11px 18px;">
+                <a href="{{ route('resident.index') }}" class="btn-back-portal">
                     <i class="fas fa-arrow-left"></i> Back to Portal
                 </a>
             </div>
 
             <div class="register-row" style="border-top:none; margin-top:12px; padding-top:0;">
-                <p style="font-size:13px;">Don't have an account? <a href="{{ route('register') }}">Create one here</a></p>
+                <p style="font-size:13px;">Don't have an account yet? <a href="{{ route('register') }}">Create one here</a></p>
             </div>
         </form>
     </div>

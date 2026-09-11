@@ -161,8 +161,8 @@ html, body {
 
 /* LOGIN PROMPT */
 .login-prompt{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1.5px solid #bfdbfe;border-radius:var(--r-card);padding:22px 20px;margin-bottom:16px;text-align:center;}
-.lp-icon{width:52px;height:52px;background:var(--btn-grad);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
-.lp-icon i{color:#fff;font-size:20px;}
+.lp-icon{width:auto;height:auto;background:none;border-radius:0;box-shadow:none;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}
+.lp-icon i{color:var(--brand);font-size:36px;}
 .lp-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
 
 /* MODALS */
@@ -909,7 +909,7 @@ html, body {
         {{-- LOGIN PROMPT --}}
         @if(!$isAuth)
         <div class="login-prompt">
-            <div class="lp-icon"><i class="fas fa-house-user"></i></div>
+            <div class="lp-icon"><i class="fas fa-home"></i></div>
             <h3 style="font-size:14px;font-weight:900;color:#1e3a5f;margin-bottom:5px;">Resident Portal Access</h3>
             <p style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:14px;line-height:1.5;">This portal is for legitimate residents. Non-residents can still request documents by clicking the service cards above and selecting "Non-Resident".</p>
             <div class="lp-btns">

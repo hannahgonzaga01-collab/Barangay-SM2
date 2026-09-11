@@ -32,6 +32,9 @@ class DocumentRequestStatusUpdated extends Notification
         $docType = ucwords(str_replace('_', ' ', $this->docRequest->document_type));
         $status  = $this->docRequest->status;
         $name    = trim(($notifiable->first_name ?? '') . ' ' . ($notifiable->last_name ?? ''));
+        if (empty($name)) {
+            $name = $this->docRequest->claimant_name ?: trim(($this->docRequest->guest_first_name ?? '') . ' ' . ($this->docRequest->guest_last_name ?? ''));
+        }
 
         // Subject & emoji per status
         $subjects = [

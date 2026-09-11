@@ -196,7 +196,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/peace/issues/{id}/escalate-justice', [\App\Http\Controllers\PeaceController::class, 'escalateToJustice']);
     Route::patch('/peace/issues/{id}/transfer-vawc', [\App\Http\Controllers\PeaceController::class, 'transferToVawc'])->name('peace.transfer.vawc');
     Route::get('/peace/sos-alerts', [\App\Http\Controllers\PeaceController::class, 'getSosAlerts'])->name('peace.sos.alerts');
-    Route::patch('/peace/sos-alerts/{id}/status', [\App\Http\Controllers\PeaceController::class, 'updateSosStatus'])->name('peace.sos.update');
+    Route::match(['patch', 'post'], '/peace/sos-alerts/{id}/status', [\App\Http\Controllers\PeaceController::class, 'updateSosStatus'])->name('peace.sos.update');
+    Route::match(['patch', 'post'], '/peace-and-order/sos/{id}/status', [\App\Http\Controllers\PeaceController::class, 'updateSosStatus']);
     Route::get('/peace/export', [\App\Http\Controllers\PeaceController::class, 'export'])->name('peace.export');
     Route::post('/peace/import', [\App\Http\Controllers\PeaceController::class, 'importBlotter'])->name('peace.import');
     Route::get('/peace/sample-template', [\App\Http\Controllers\PeaceController::class, 'sampleTemplate'])->name('peace.sample.template');

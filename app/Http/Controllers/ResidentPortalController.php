@@ -225,9 +225,80 @@ class ResidentPortalController extends Controller
             'longitude' => $lng,
             'accuracy' => $request->accuracy,
             'google_maps_url' => $mapsUrl,
-            'status' => 'active',
+            'status' => 'triggered',
             'dispatched_at' => now(),
         ]);
+
+        // Send emergency alert email to Barangay Hall / Peace & Order team
+        try {
+            $adminEmail = config('mail.from.address') ?: 'brgysanmigueldos@gmail.com';
+            $mailData = [
+                'alert_id'        => $alert->id,
+                'resident_name'   => $name,
+                'contact_number'  => $contact,
+                'home_address'    => $address,
+                'latitude'        => $lat,
+                'longitude'       => $lng,
+                'accuracy'        => $request->accuracy,
+                'google_maps_url' => $mapsUrl,
+                'dispatched_at'   => now()->format('F d, Y h:i A'),
+            ];
+
+            \Illuminate\Support\Facades\Mail::send([], [], function ($m) use ($adminEmail, $mailData) {
+                $locationLine = ($mailData['latitude'] && $mailData['longitude'])
+                    ? "<p><strong>📍 GPS Location:</strong> <a href=\"{$mailData['google_maps_url']}\" target=\"_blank\" style=\"color:#dc2626;font-weight:bold;\">View on Google Maps ({$mailData['latitude']}, {$mailData['longitude']})</a> (Accuracy: " . htmlspecialchars($mailData['accuracy'] ?? 'N/A') . ")</p>"
+                    : "<p><strong>📍 Location:</strong> GPS coordinates not provided.</p>";
+
+                $body = "
+                <div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:2px solid #dc2626;border-radius:10px;overflow:hidden;\">
+                    <div style=\"background:#dc2626;color:#fff;padding:16px 20px;text-align:center;\">
+                        <h2 style=\"margin:0;font-size:20px;text-transform:uppercase;letter-spacing:1px;\">🚨 HIGH-PRIORITY EMERGENCY SOS ALERT</h2>
+                        <p style=\"margin:4px 0 0;font-size:12px;opacity:0.9;\">Barangay San Miguel II — Peace & Order Quick Response</p>
+                    </div>
+                    <div style=\"padding:20px;color:#1f2937;line-height:1.6;\">
+                        <p style=\"font-size:15px;margin-top:0;\">An emergency SOS signal has been triggered by a resident requesting immediate patrol dispatch.</p>
+                        <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:15px 0;\">
+                        <p><strong>👤 Resident Name:</strong> " . htmlspecialchars($mailData['resident_name']) . "</p>
+                        <p><strong>📞 Contact Number:</strong> " . htmlspecialchars($mailData['contact_number']) . "</p>
+                        <p><strong>🏠 Home Address:</strong> " . htmlspecialchars($mailData['home_address']) . "</p>
+                        {$locationLine}
+                        <p><strong>🕒 Time Dispatched:</strong> {$mailData['dispatched_at']}</p>
+                        <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:15px 0;\">
+                        <div style=\"background:#fef2f2;border:1px solid #fecaca;padding:12px;border-radius:8px;color:#991b1b;font-weight:bold;\">
+                            ⚠️ ACTION REQUIRED: Open Peace & Order Dashboard immediately to dispatch nearest patrol officers.
+                        </div>
+                    </div>
+                </div>";
+
+                $m->to($adminEmail)
+                  ->subject("🚨 [URGENT] Emergency SOS Alert #{$mailData['alert_id']} — {$mailData['resident_name']}")
+                  ->html($body);
+            });
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SOS Email failed: ' . $e->getMessage());
+        }
+
+        // In-app notifications to all Peace & Order and Admin users
+        try {
+            $officers = \App\Models\User::whereIn('role', ['peace', 'admin'])->get();
+            foreach ($officers as $officer) {
+                $officer->notifications()->create([
+                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'type' => 'App\Notifications\EmergencySosTriggered',
+                    'data' => [
+                        'type' => 'emergency_sos',
+                        'title' => '🚨 Emergency SOS Dispatched!',
+                        'message' => "Resident {$name} triggered an SOS alert at {$address}.",
+                        'alert_id' => $alert->id,
+                        'maps_url' => $mapsUrl,
+                    ],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SOS In-App Notif failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'success' => true,
@@ -601,10 +672,15 @@ class ResidentPortalController extends Controller
 
     private function notifyUser($docRequest)
     {
-        if (auth()->check()) {
-            try {
+        try {
+            if (auth()->check()) {
                 auth()->user()->notify(new \App\Notifications\DocumentRequestReceived($docRequest));
-            } catch (\Exception $e) {}
+            } elseif (!empty($docRequest->guest_email)) {
+                \Illuminate\Support\Facades\Notification::route('mail', $docRequest->guest_email)
+                    ->notify(new \App\Notifications\DocumentRequestReceived($docRequest));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to notify user for document request: ' . $e->getMessage());
         }
     }
 
