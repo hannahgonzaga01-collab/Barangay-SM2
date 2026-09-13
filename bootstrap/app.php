@@ -19,8 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->validateCsrfTokens(except: [
             'logout',
+            'resident/family',
+            'resident/family/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Your session has expired. Please refresh and try again.'], 419);
+            }
+            return redirect()->route('resident.index')->with('error', 'Session expired or refreshed. Please try submitting again.');
+        });
     })->create();

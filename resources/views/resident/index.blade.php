@@ -313,6 +313,10 @@ html, body {
     border-bottom: none;
 }
 
+@media(max-width:768px) and (min-width:641px){
+    .fgrid4{grid-template-columns:repeat(2,1fr);}
+}
+
 @media(max-width:640px){
     .duty-table-header, .duty-table-row {
         grid-template-columns: 85px 1fr auto !important;
@@ -2734,7 +2738,7 @@ html, body {
                     <button type="button" @click="familyModal=false;profileModal=true" class="modal-close"><i class="fas fa-arrow-circle-left"></i></button>
                 </div>
                 <p style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:14px;">Family members added here are pending approval. You cannot edit them once submitted.</p>
-                <form action="{{ route('resident.family.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('resident.family.store') }}" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
                     @csrf
                     <div class="fgrid4" style="gap:7px;margin-bottom:12px;">
                         <div class="fspan2"><label class="flbl">First Name</label><input type="text" name="first_name" required class="finput" style="padding:8px;"></div>
@@ -2799,7 +2803,11 @@ html, body {
                     </div>
 
                     <div style="display:flex;justify-content:flex-end;gap:9px;padding-top:10px;border-top:1px solid var(--border);">
-                        <button type="submit" class="btn-grad"><i class="fas fa-save"></i> Submit Member</button>
+                        <button type="button" @click="familyModal=false;profileModal=true" class="btn-plain btn-ghost" :disabled="isSubmitting">Cancel</button>
+                        <button type="submit" class="btn-grad" :disabled="isSubmitting" style="display:inline-flex;align-items:center;gap:6px;">
+                            <span x-show="!isSubmitting"><i class="fas fa-save"></i> Submit Member</span>
+                            <span x-show="isSubmitting" style="display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-spinner fa-spin"></i> Submitting...</span>
+                        </button>
                     </div>
                 </form>
             </div>

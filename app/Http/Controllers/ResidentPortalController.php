@@ -362,7 +362,7 @@ class ResidentPortalController extends Controller
 
         $user = auth()->user();
         if (!$user->resident) {
-            return redirect()->back()->with('error', 'You must have a verified resident profile to add family members.');
+            return redirect()->route('resident.index')->with('error', 'You must have a verified resident profile to add family members.');
         }
 
         $classification = $request->classification;
@@ -398,7 +398,7 @@ class ResidentPortalController extends Controller
 
             $existing->update($updateData);
 
-            return redirect()->back()->with('success', 'Family member matched with Masterlist! They have been added to your family automatically.');
+            return redirect()->route('resident.index')->with('success', 'Family member matched with Masterlist! They have been added to your family automatically.');
         }
 
         // 2. Otherwise, create a new pending resident record
@@ -446,7 +446,7 @@ class ResidentPortalController extends Controller
 
         $resident->save();
 
-        return redirect()->back()->with('success', 'Family member added and is pending approval (Resident not found in Masterlist).');
+        return redirect()->route('resident.index')->with('success', 'Family member added and is pending approval (Resident not found in Masterlist).');
     }
 
     public function requestDigitalId(Request $request)
