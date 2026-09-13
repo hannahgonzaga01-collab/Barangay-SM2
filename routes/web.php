@@ -50,22 +50,30 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['verified_resident'])->group(function () {
     Route::get('/resident', [ResidentPortalController::class, 'index'])->name('resident.index');
     Route::post('/resident/document-request', [ResidentPortalController::class, 'storeDocumentRequest'])->name('resident.document.request');
+    Route::get('/resident/document-request', fn() => redirect()->route('resident.index'));
     Route::post('/resident/issue-report', [ResidentPortalController::class, 'storeIssueReport'])->name('resident.issue.report');
+    Route::get('/resident/issue-report', fn() => redirect()->route('resident.index'));
     Route::post('/resident/digital-id/request', [ResidentPortalController::class, 'requestDigitalId'])->name('resident.digital.id.request');
+    Route::get('/resident/digital-id/request', fn() => redirect()->route('resident.index'));
     Route::post('/resident/voter/upload', [ResidentPortalController::class, 'reuploadVoterId'])->name('resident.voter.upload');
+    Route::get('/resident/voter/upload', fn() => redirect()->route('resident.index'));
     Route::post('/resident/message', [ResidentPortalController::class, 'sendMessage'])->name('resident.message.send');
+    Route::get('/resident/message', fn() => redirect()->route('resident.index'));
     Route::post('/resident/notifications/read', [ResidentPortalController::class, 'markNotificationsRead'])->name('resident.notifications.read');
     Route::post('/resident/profile-photo', [ResidentPortalController::class, 'uploadProfilePhoto'])->name('resident.profile.photo')->middleware('auth');
+    Route::get('/resident/profile-photo', fn() => redirect()->route('resident.index'));
     Route::post('/resident/family', [ResidentPortalController::class, 'storeFamilyMember'])->name('resident.family.store')->middleware('auth');
     Route::get('/resident/family', fn() => redirect()->route('resident.index'));
 
     Route::post('/resident/digital-id', [ResidentPortalController::class, 'requestDigitalId'])
         ->middleware('auth')
-        ->name('resident.digital.id.request');
+        ->name('resident.digital.id.request.alias');
+    Route::get('/resident/digital-id', fn() => redirect()->route('resident.index'));
     Route::post('/resident/pet/{id}', [ResidentPortalController::class, 'updatePet'])->name('resident.pet.update')->middleware('auth');
     Route::post('/resident/document-request/{id}/reschedule', [ResidentPortalController::class, 'rescheduleDocument'])->name('resident.document.reschedule');
     Route::get('/resident/document-request/availability', [ResidentPortalController::class, 'checkAvailability'])->name('resident.document.availability');
     Route::post('/resident/emergency-sos', [ResidentPortalController::class, 'storeEmergencySos'])->name('resident.emergency.sos');
+    Route::get('/resident/emergency-sos', fn() => redirect()->route('resident.index'));
 });
 
 // 5. Staff & Admin (auth required)
