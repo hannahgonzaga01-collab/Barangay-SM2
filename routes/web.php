@@ -36,13 +36,23 @@ Route::get('/diagnose-email', function () {
     }
 
     $t0 = microtime(true);
-    $fp2 = @fsockopen('ssl://smtp.gmail.com', 465, $errno2, $errstr2, 5);
+    $fp_2525 = @fsockopen('smtp.elasticemail.com', 2525, $errno_2525, $errstr_2525, 5);
     $t1 = microtime(true);
-    if ($fp2) {
-        $results['socket_test_465'] = 'CONNECTED (' . round(($t1 - $t0) * 1000) . 'ms)';
-        fclose($fp2);
+    if ($fp_2525) {
+        $results['socket_test_2525_elastic'] = 'CONNECTED (' . round(($t1 - $t0) * 1000) . 'ms)';
+        fclose($fp_2525);
     } else {
-        $results['socket_test_465'] = "FAILED: $errstr2 ($errno2) in " . round(($t1 - $t0) * 1000) . 'ms';
+        $results['socket_test_2525_elastic'] = "FAILED: $errstr_2525 ($errno_2525) in " . round(($t1 - $t0) * 1000) . 'ms';
+    }
+
+    $t0 = microtime(true);
+    $fp_brevo = @fsockopen('smtp-relay.brevo.com', 2525, $errno_b, $errstr_b, 5);
+    $t1 = microtime(true);
+    if ($fp_brevo) {
+        $results['socket_test_2525_brevo'] = 'CONNECTED (' . round(($t1 - $t0) * 1000) . 'ms)';
+        fclose($fp_brevo);
+    } else {
+        $results['socket_test_2525_brevo'] = "FAILED: $errstr_b ($errno_b) in " . round(($t1 - $t0) * 1000) . 'ms';
     }
 
     $latest = \App\Models\DocumentRequest::latest()->take(3)->get();
