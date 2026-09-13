@@ -57,6 +57,7 @@ Route::middleware(['verified_resident'])->group(function () {
     Route::post('/resident/notifications/read', [ResidentPortalController::class, 'markNotificationsRead'])->name('resident.notifications.read');
     Route::post('/resident/profile-photo', [ResidentPortalController::class, 'uploadProfilePhoto'])->name('resident.profile.photo')->middleware('auth');
     Route::post('/resident/family', [ResidentPortalController::class, 'storeFamilyMember'])->name('resident.family.store')->middleware('auth');
+    Route::get('/resident/family', fn() => redirect()->route('resident.index'));
 
     Route::post('/resident/digital-id', [ResidentPortalController::class, 'requestDigitalId'])
         ->middleware('auth')
