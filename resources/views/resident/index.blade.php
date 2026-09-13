@@ -2798,36 +2798,6 @@ html, body {
                         </div>
                     </div>
 
-                    <div x-show="age >= 60 || classification === 'Senior'" x-transition style="margin-bottom:12px;background:#fff7ed;padding:10px;border-radius:8px;border:1px solid #fdba74;" x-data="{ isDragging: false }">
-                        <label class="flbl" style="color:#c2410c;">Senior Citizen ID Proof *</label>
-                        <div class="fwrap" :style="isDragging ? 'border-color:#fdba74; background:#ffedd5;' : ''"
-                             @dragover.prevent="isDragging = true"
-                             @dragleave.prevent="isDragging = false"
-                             @drop.prevent="isDragging = false; $refs.seniorInput.files = $event.dataTransfer.files; $refs.seniorInput.dispatchEvent(new Event('change'))">
-                            <input type="file" name="senior_proof" x-ref="seniorInput" accept="image/*,.pdf" :required="age >= 60 || classification === 'Senior'" class="finput" style="padding:6px;background:#fff;">
-                        </div>
-                    </div>
-
-                    <div x-show="classification === 'PWD'" x-transition style="margin-bottom:12px;background:#faf5ff;padding:10px;border-radius:8px;border:1px solid #d8b4fe;" x-data="{ isDragging: false }">
-                        <label class="flbl" style="color:#6b21a8;">PWD ID Proof *</label>
-                        <div class="fwrap" :style="isDragging ? 'border-color:#d8b4fe; background:#faf5ff;' : ''"
-                             @dragover.prevent="isDragging = true"
-                             @dragleave.prevent="isDragging = false"
-                             @drop.prevent="isDragging = false; $refs.pwdInput.files = $event.dataTransfer.files; $refs.pwdInput.dispatchEvent(new Event('change'))">
-                            <input type="file" name="pwd_proof" x-ref="pwdInput" accept="image/*,.pdf" :required="classification === 'PWD'" class="finput" style="padding:6px;background:#fff;">
-                        </div>
-                    </div>
-
-                    <div x-show="classification === 'Bed-ridden'" x-transition style="margin-bottom:12px;background:#fef2f2;padding:10px;border-radius:8px;border:1px solid #fca5a5;" x-data="{ isDragging: false }">
-                        <label class="flbl" style="color:#b91c1c;">Medical Record (Bed-ridden Proof) *</label>
-                        <div class="fwrap" :style="isDragging ? 'border-color:#fca5a5; background:#fef2f2;' : ''"
-                             @dragover.prevent="isDragging = true"
-                             @dragleave.prevent="isDragging = false"
-                             @drop.prevent="isDragging = false; $refs.bedriddenInput.files = $event.dataTransfer.files; $refs.bedriddenInput.dispatchEvent(new Event('change'))">
-                            <input type="file" name="bedridden_proof" x-ref="bedriddenInput" accept="image/*,.pdf" :required="classification === 'Bed-ridden'" class="finput" style="padding:6px;background:#fff;">
-                        </div>
-                    </div>
-
                     <div style="display:flex;justify-content:flex-end;gap:9px;padding-top:10px;border-top:1px solid var(--border);">
                         <button type="submit" class="btn-grad"><i class="fas fa-save"></i> Submit Member</button>
                     </div>

@@ -48,7 +48,11 @@ class AdminController extends Controller
         $unvaccinated      = Pet::where('vaccine_status', 'Unvaccinated')->count();
         $male              = Resident::where('gender', 'Male')->count();
         $female            = Resident::where('gender', 'Female')->count();
-        $seniors           = Resident::where('is_senior', true)->count();
+        $seniors           = Resident::where(function($q) {
+            $q->where('is_senior', true)
+              ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
+              ->orWhere('age', '>=', 60);
+        })->count();
         $pwds              = Resident::where('is_pwd', true)->count();
         $bedridden         = Resident::where('is_bedridden', true)->count();
         $soloParents       = Resident::where('is_single_parent', true)->count();

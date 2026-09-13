@@ -51,7 +51,11 @@ class OfficeController extends Controller
 
         $currentMonth = now()->month;
         $birthdayThisMonth = Resident::whereMonth('birthday', $currentMonth)->get();
-        $seniors = Resident::where('is_senior', true)->get();
+        $seniors = Resident::where(function($q) {
+            $q->where('is_senior', true)
+              ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
+              ->orWhere('age', '>=', 60);
+        })->get();
         $pwds = Resident::where('is_pwd', true)->get();
         $soloParents = Resident::where('is_single_parent', true)->get();
         $nonVoters = Resident::where('is_non_voter', true)->get();
@@ -191,7 +195,11 @@ class OfficeController extends Controller
         if ($filter === 'birthday') {
             $query->whereMonth('birthday', now()->month);
         } elseif ($filter === 'senior') {
-            $query->where('is_senior', 1);
+            $query->where(function($q) {
+                $q->where('is_senior', 1)
+                  ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
+                  ->orWhere('age', '>=', 60);
+            });
         } elseif ($filter === 'pwd') {
             $query->where('is_pwd', 1);
         } elseif ($filter === 'solo') {

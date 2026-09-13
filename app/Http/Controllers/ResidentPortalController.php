@@ -365,7 +365,10 @@ class ResidentPortalController extends Controller
             return redirect()->back()->with('error', 'You must have a verified resident profile to add family members.');
         }
 
-        $isVoter = $request->input('is_voter') == '1' || $request->input('classification') === 'Voter';
+        $classification = $request->classification;
+        $calcAge = !empty($request->birthday) ? \Carbon\Carbon::parse($request->birthday)->age : (int)$request->age;
+        $age = $calcAge > 0 ? $calcAge : (int)$request->age;
+        $isSenior = ($age >= 60) || ($classification === 'Senior');
 
         // 1. Check if resident already exists in masterlist (First Name + Last Name + Birthday)
         $existing = Resident::where('first_name', 'LIKE', $request->first_name)
@@ -374,15 +377,25 @@ class ResidentPortalController extends Controller
             ->first();
 
         if ($existing) {
-            // Auto-link and approve since they are already in the masterlist
-            $existing->update([
+            $existingAge = !empty($existing->birthday) ? \Carbon\Carbon::parse($existing->birthday)->age : ($existing->age ?? 0);
+            $isSenior = ($existingAge >= 60) || ($existing->age >= 60) || ($isSenior) || $existing->is_senior;
+
+            $updateData = [
                 'household_head_id'   => $user->resident->id,
                 'is_household_head'   => false,
                 'relationship'        => $request->relationship,
                 'verification_status' => 'approved', // Skip pending for masterlist members
                 'is_voter'            => $isVoter,
                 'is_non_voter'        => !$isVoter,
-            ]);
+                'is_senior'           => $isSenior,
+            ];
+
+            if ($classification === 'Bed-ridden') $updateData['is_bedridden'] = true;
+            if ($classification === 'PWD') $updateData['is_pwd'] = true;
+            if ($classification === 'Solo Parent') $updateData['is_single_parent'] = true;
+            if ($classification === 'Student') $updateData['is_student'] = true;
+
+            $existing->update($updateData);
 
             return redirect()->back()->with('success', 'Family member matched with Masterlist! They have been added to your family automatically.');
         }
@@ -395,7 +408,7 @@ class ResidentPortalController extends Controller
         $resident->suffix = $request->suffix;
         $resident->relationship = $request->relationship;
         $resident->birthday = $request->birthday;
-        $resident->age = $request->age;
+        $resident->age = $age;
         $resident->gender = $request->gender;
         $resident->civil_status = $request->civil_status;
         $resident->address = $user->resident->address;
@@ -404,9 +417,8 @@ class ResidentPortalController extends Controller
         $resident->is_non_voter = !$isVoter;
         $resident->voter_status = $isVoter ? 'pending' : 'non-voter';
         
-        $classification = $request->classification;
+        $resident->is_senior = $isSenior;
         $resident->is_pwd = ($classification === 'PWD');
-        $resident->is_senior = ($classification === 'Senior' || $request->age >= 60);
         $resident->is_single_parent = ($classification === 'Solo Parent');
         $resident->is_student = ($classification === 'Student');
         $resident->is_bedridden = ($classification === 'Bed-ridden');
