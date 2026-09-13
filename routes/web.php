@@ -11,9 +11,71 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 
 
-// 1. Landing Page
 Route::get('/', function () {
     return redirect()->route('resident.index');
+});
+
+Route::get('/diagnose-email', function () {
+    $results = [];
+    $results['mail_default'] = config('mail.default');
+    $results['mail_host'] = config('mail.mailers.smtp.host');
+    $results['mail_port'] = config('mail.mailers.smtp.port');
+    $results['mail_user'] = config('mail.mailers.smtp.username');
+    $results['mail_pw_len'] = strlen(config('mail.mailers.smtp.password') ?? '');
+    $results['mail_encryption'] = config('mail.mailers.smtp.encryption');
+    $results['mail_from'] = config('mail.from.address');
+
+    $t0 = microtime(true);
+    $fp = @fsockopen(config('mail.mailers.smtp.host'), (int)config('mail.mailers.smtp.port'), $errno, $errstr, 5);
+    $t1 = microtime(true);
+    if ($fp) {
+        $results['socket_test_port'] = 'CONNECTED (' . round(($t1 - $t0) * 1000) . 'ms)';
+        fclose($fp);
+    } else {
+        $results['socket_test_port'] = "FAILED: $errstr ($errno) in " . round(($t1 - $t0) * 1000) . 'ms';
+    }
+
+    $t0 = microtime(true);
+    $fp2 = @fsockopen('ssl://smtp.gmail.com', 465, $errno2, $errstr2, 5);
+    $t1 = microtime(true);
+    if ($fp2) {
+        $results['socket_test_465'] = 'CONNECTED (' . round(($t1 - $t0) * 1000) . 'ms)';
+        fclose($fp2);
+    } else {
+        $results['socket_test_465'] = "FAILED: $errstr2 ($errno2) in " . round(($t1 - $t0) * 1000) . 'ms';
+    }
+
+    $latest = \App\Models\DocumentRequest::latest()->take(3)->get();
+    $results['latest_requests'] = $latest->map(function ($r) {
+        $u = \App\Models\User::find($r->user_id);
+        return [
+            'id' => $r->id,
+            'type' => $r->document_type,
+            'user_id' => $r->user_id,
+            'user_email' => $u ? $u->email : 'NONE',
+            'created_at' => (string)$r->created_at,
+        ];
+    });
+
+    $logPath = storage_path('logs/laravel.log');
+    if (file_exists($logPath)) {
+        $lines = file($logPath);
+        $results['recent_logs'] = array_slice($lines, -25);
+    } else {
+        $results['recent_logs'] = 'No log file found';
+    }
+
+    $to = request('to', 'brgysanmigueldos@gmail.com');
+    try {
+        \Illuminate\Support\Facades\Mail::raw('Diagnostic test email from Render at ' . now(), function ($msg) use ($to) {
+            $msg->to($to)->subject('Render Live SMTP Diagnostic Test');
+        });
+        $results['send_result'] = "SUCCESS sent to $to";
+    } catch (\Throwable $e) {
+        $results['send_result'] = 'FAILED: ' . $e->getMessage();
+    }
+
+    return response()->json($results, 200, [], JSON_PRETTY_PRINT);
 });
 
 // 2. Dashboard redirect by role
