@@ -384,130 +384,135 @@ class ResidentPortalController extends Controller
             'bedridden_proof' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
-        $user = auth()->user();
-        $headResident = $user->resident 
-            ?? Resident::where('user_id', $user->id)->first()
-            ?? ($user->resident_code ? Resident::where('resident_code', $user->resident_code)->first() : null);
+        try {
+            $user = auth()->user();
+            $headResident = $user->resident 
+                ?? Resident::where('user_id', $user->id)->first()
+                ?? ($user->resident_code ? Resident::where('resident_code', $user->resident_code)->first() : null);
 
-        if (!$headResident && $user->first_name && $user->last_name) {
-            $headResident = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($user->first_name)])
-                ->whereRaw('LOWER(last_name) = ?', [strtolower($user->last_name)])
+            if (!$headResident && $user->first_name && $user->last_name) {
+                $headResident = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($user->first_name)])
+                    ->whereRaw('LOWER(last_name) = ?', [strtolower($user->last_name)])
+                    ->first();
+                if ($headResident && !$headResident->user_id) {
+                    $headResident->update(['user_id' => $user->id]);
+                }
+            }
+
+            if (!$headResident) {
+                $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
+                $random = strtoupper(substr(uniqid(), -6));
+                $headResident = Resident::create([
+                    'user_id'             => $user->id,
+                    'resident_code'       => $user->resident_code ?? "R-{$prefix}-{$random}",
+                    'first_name'          => $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'Resident'),
+                    'middle_name'         => $user->middle_name,
+                    'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
+                    'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
+                    'birthplace'          => !empty($user->birthplace) ? $user->birthplace : 'Barangay San Miguel II, Dasmariñas, Cavite',
+                    'gender'              => $user->gender ?? 'Other',
+                    'civil_status'        => $user->civil_status ?? 'Single',
+                    'address'             => $user->address ?? 'Barangay San Miguel II',
+                    'is_voter'            => (bool)($user->is_voter ?? false),
+                    'is_non_voter'        => (bool)($user->is_non_voter ?? false),
+                    'is_senior'           => (bool)($user->is_senior ?? false),
+                    'is_household_head'   => true,
+                    'verification_status' => 'approved',
+                ]);
+                $user->update(['resident_code' => $headResident->resident_code]);
+            } else {
+                if (!$headResident->user_id) {
+                    $headResident->update(['user_id' => $user->id]);
+                }
+            }
+
+            $classification = $request->classification;
+            $calcAge = !empty($request->birthday) ? \Carbon\Carbon::parse($request->birthday)->age : (int)$request->age;
+            $age = $calcAge > 0 ? $calcAge : (int)$request->age;
+            $isSenior = ($age >= 60) || ($classification === 'Senior');
+            $isVoter = $request->input('is_voter') == '1' || $request->input('classification') === 'Voter';
+
+            // 1. Check if resident already exists in masterlist (First Name + Last Name + Birthday)
+            $existing = Resident::where('first_name', 'LIKE', $request->first_name)
+                ->where('last_name', 'LIKE', $request->last_name)
+                ->where('birthday', $request->birthday)
                 ->first();
-            if ($headResident && !$headResident->user_id) {
-                $headResident->update(['user_id' => $user->id]);
-            }
-        }
 
-        if (!$headResident) {
-            $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
+            if ($existing) {
+                $existingAge = !empty($existing->birthday) ? \Carbon\Carbon::parse($existing->birthday)->age : ($existing->age ?? 0);
+                $isSenior = ($existingAge >= 60) || ($existing->age >= 60) || ($isSenior) || $existing->is_senior;
+
+                $updateData = [
+                    'household_head_id'   => $headResident->id,
+                    'is_household_head'   => false,
+                    'relationship'        => $request->relationship,
+                    'verification_status' => 'approved', // Skip pending for masterlist members
+                    'is_voter'            => $isVoter,
+                    'is_non_voter'        => !$isVoter,
+                    'is_senior'           => $isSenior,
+                ];
+
+                if ($classification === 'Bed-ridden') $updateData['is_bedridden'] = true;
+                if ($classification === 'PWD') $updateData['is_pwd'] = true;
+                if ($classification === 'Solo Parent') $updateData['is_single_parent'] = true;
+                if ($classification === 'Student') $updateData['is_student'] = true;
+
+                $existing->update($updateData);
+
+                return redirect()->route('resident.index')->with('success', 'Family member matched with Masterlist! They have been added to your family automatically.');
+            }
+
+            // 2. Otherwise, create a new pending resident record
+            $resident = new Resident();
+            $resident->first_name = $request->first_name;
+            $resident->middle_name = $request->middle_name;
+            $resident->last_name = $request->last_name;
+            $resident->suffix = $request->suffix;
+            $resident->relationship = $request->relationship;
+            $resident->birthday = $request->birthday;
+            $resident->age = $age;
+            $resident->birthplace = !empty($headResident->birthplace) ? $headResident->birthplace : (!empty($user->birthplace) ? $user->birthplace : 'Barangay San Miguel II, Dasmariñas, Cavite');
+            $resident->gender = $request->gender;
+            $resident->civil_status = $request->civil_status;
+            $resident->address = $headResident->address ?? $user->address ?? 'Barangay San Miguel II';
+            
+            $resident->is_voter = $isVoter;
+            $resident->is_non_voter = !$isVoter;
+            $resident->voter_status = $isVoter ? 'pending' : 'non-voter';
+            
+            $resident->is_senior = $isSenior;
+            $resident->is_pwd = ($classification === 'PWD');
+            $resident->is_single_parent = ($classification === 'Solo Parent');
+            $resident->is_student = ($classification === 'Student');
+            $resident->is_bedridden = ($classification === 'Bed-ridden');
+
+            // Handle Proof Uploads
+            if ($request->hasFile('senior_proof')) {
+                $resident->senior_proof = $request->file('senior_proof')->store('proofs/senior', 'public');
+            }
+            if ($request->hasFile('pwd_proof')) {
+                $resident->pwd_proof = $request->file('pwd_proof')->store('proofs/pwd', 'public');
+            }
+            if ($request->hasFile('bedridden_proof')) {
+                $resident->bedridden_proof = $request->file('bedridden_proof')->store('proofs/bedridden', 'public');
+            }
+
+            $resident->household_head_id = $headResident->id;
+            $resident->is_household_head = false;
+            $resident->verification_status = 'pending';
+
+            // Auto-generate code
+            $prefix = strtoupper(substr($resident->last_name, 0, 1) . substr($resident->first_name, 0, 1));
             $random = strtoupper(substr(uniqid(), -6));
-            $headResident = Resident::create([
-                'user_id'             => $user->id,
-                'resident_code'       => $user->resident_code ?? "R-{$prefix}-{$random}",
-                'first_name'          => $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'Resident'),
-                'middle_name'         => $user->middle_name,
-                'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
-                'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
-                'birthplace'          => $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite',
-                'gender'              => $user->gender ?? 'Other',
-                'civil_status'        => $user->civil_status ?? 'Single',
-                'address'             => $user->address ?? 'Barangay San Miguel II',
-                'is_voter'            => (bool)($user->is_voter ?? false),
-                'is_non_voter'        => (bool)($user->is_non_voter ?? false),
-                'is_senior'           => (bool)($user->is_senior ?? false),
-                'is_household_head'   => true,
-                'verification_status' => 'approved',
-            ]);
-            $user->update(['resident_code' => $headResident->resident_code]);
-        } else {
-            if (!$headResident->user_id) {
-                $headResident->update(['user_id' => $user->id]);
-            }
+            $resident->resident_code = "R-{$prefix}-{$random}";
+
+            $resident->save();
+
+            return redirect()->route('resident.index')->with('success', 'Family member added and is pending approval (Resident not found in Masterlist).');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error adding family member: ' . $e->getMessage());
+            return redirect()->route('resident.index')->with('error', 'Error adding family member: ' . $e->getMessage());
         }
-
-        $classification = $request->classification;
-        $calcAge = !empty($request->birthday) ? \Carbon\Carbon::parse($request->birthday)->age : (int)$request->age;
-        $age = $calcAge > 0 ? $calcAge : (int)$request->age;
-        $isSenior = ($age >= 60) || ($classification === 'Senior');
-        $isVoter = $request->input('is_voter') == '1' || $request->input('classification') === 'Voter';
-
-        // 1. Check if resident already exists in masterlist (First Name + Last Name + Birthday)
-        $existing = Resident::where('first_name', 'LIKE', $request->first_name)
-            ->where('last_name', 'LIKE', $request->last_name)
-            ->where('birthday', $request->birthday)
-            ->first();
-
-        if ($existing) {
-            $existingAge = !empty($existing->birthday) ? \Carbon\Carbon::parse($existing->birthday)->age : ($existing->age ?? 0);
-            $isSenior = ($existingAge >= 60) || ($existing->age >= 60) || ($isSenior) || $existing->is_senior;
-
-            $updateData = [
-                'household_head_id'   => $headResident->id,
-                'is_household_head'   => false,
-                'relationship'        => $request->relationship,
-                'verification_status' => 'approved', // Skip pending for masterlist members
-                'is_voter'            => $isVoter,
-                'is_non_voter'        => !$isVoter,
-                'is_senior'           => $isSenior,
-            ];
-
-            if ($classification === 'Bed-ridden') $updateData['is_bedridden'] = true;
-            if ($classification === 'PWD') $updateData['is_pwd'] = true;
-            if ($classification === 'Solo Parent') $updateData['is_single_parent'] = true;
-            if ($classification === 'Student') $updateData['is_student'] = true;
-
-            $existing->update($updateData);
-
-            return redirect()->route('resident.index')->with('success', 'Family member matched with Masterlist! They have been added to your family automatically.');
-        }
-
-        // 2. Otherwise, create a new pending resident record
-        $resident = new Resident();
-        $resident->first_name = $request->first_name;
-        $resident->middle_name = $request->middle_name;
-        $resident->last_name = $request->last_name;
-        $resident->suffix = $request->suffix;
-        $resident->relationship = $request->relationship;
-        $resident->birthday = $request->birthday;
-        $resident->age = $age;
-        $resident->birthplace = $headResident->birthplace ?? $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite';
-        $resident->gender = $request->gender;
-        $resident->civil_status = $request->civil_status;
-        $resident->address = $headResident->address ?? $user->address ?? 'Barangay San Miguel II';
-        
-        $resident->is_voter = $isVoter;
-        $resident->is_non_voter = !$isVoter;
-        $resident->voter_status = $isVoter ? 'pending' : 'non-voter';
-        
-        $resident->is_senior = $isSenior;
-        $resident->is_pwd = ($classification === 'PWD');
-        $resident->is_single_parent = ($classification === 'Solo Parent');
-        $resident->is_student = ($classification === 'Student');
-        $resident->is_bedridden = ($classification === 'Bed-ridden');
-
-        // Handle Proof Uploads
-        if ($request->hasFile('senior_proof')) {
-            $resident->senior_proof = $request->file('senior_proof')->store('proofs/senior', 'public');
-        }
-        if ($request->hasFile('pwd_proof')) {
-            $resident->pwd_proof = $request->file('pwd_proof')->store('proofs/pwd', 'public');
-        }
-        if ($request->hasFile('bedridden_proof')) {
-            $resident->bedridden_proof = $request->file('bedridden_proof')->store('proofs/bedridden', 'public');
-        }
-
-        $resident->household_head_id = $headResident->id;
-        $resident->is_household_head = false;
-        $resident->verification_status = 'pending';
-
-        // Auto-generate code
-        $prefix = strtoupper(substr($resident->last_name, 0, 1) . substr($resident->first_name, 0, 1));
-        $random = strtoupper(substr(uniqid(), -6));
-        $resident->resident_code = "R-{$prefix}-{$random}";
-
-        $resident->save();
-
-        return redirect()->route('resident.index')->with('success', 'Family member added and is pending approval (Resident not found in Masterlist).');
     }
 
     public function requestDigitalId(Request $request)
