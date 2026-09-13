@@ -369,6 +369,7 @@ class ResidentPortalController extends Controller
         $calcAge = !empty($request->birthday) ? \Carbon\Carbon::parse($request->birthday)->age : (int)$request->age;
         $age = $calcAge > 0 ? $calcAge : (int)$request->age;
         $isSenior = ($age >= 60) || ($classification === 'Senior');
+        $isVoter = $request->input('is_voter') == '1' || $request->input('classification') === 'Voter';
 
         // 1. Check if resident already exists in masterlist (First Name + Last Name + Birthday)
         $existing = Resident::where('first_name', 'LIKE', $request->first_name)
