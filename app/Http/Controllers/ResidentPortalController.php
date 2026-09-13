@@ -353,6 +353,8 @@ class ResidentPortalController extends Controller
             'birthday' => 'required|date',
             'gender' => 'required|string',
             'civil_status' => 'required|string',
+            'is_voter' => 'nullable|in:0,1',
+            'classification' => 'nullable|string',
             'senior_proof' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
             'pwd_proof' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
             'bedridden_proof' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
@@ -362,6 +364,8 @@ class ResidentPortalController extends Controller
         if (!$user->resident) {
             return redirect()->back()->with('error', 'You must have a verified resident profile to add family members.');
         }
+
+        $isVoter = $request->input('is_voter') == '1' || $request->input('classification') === 'Voter';
 
         // 1. Check if resident already exists in masterlist (First Name + Last Name + Birthday)
         $existing = Resident::where('first_name', 'LIKE', $request->first_name)
@@ -376,6 +380,8 @@ class ResidentPortalController extends Controller
                 'is_household_head'   => false,
                 'relationship'        => $request->relationship,
                 'verification_status' => 'approved', // Skip pending for masterlist members
+                'is_voter'            => $isVoter,
+                'is_non_voter'        => !$isVoter,
             ]);
 
             return redirect()->back()->with('success', 'Family member matched with Masterlist! They have been added to your family automatically.');
@@ -392,10 +398,13 @@ class ResidentPortalController extends Controller
         $resident->age = $request->age;
         $resident->gender = $request->gender;
         $resident->civil_status = $request->civil_status;
+        $resident->address = $user->resident->address;
+        
+        $resident->is_voter = $isVoter;
+        $resident->is_non_voter = !$isVoter;
+        $resident->voter_status = $isVoter ? 'pending' : 'non-voter';
         
         $classification = $request->classification;
-        $resident->is_voter = ($classification === 'Voter');
-        $resident->is_non_voter = ($classification === 'Non Voter');
         $resident->is_pwd = ($classification === 'PWD');
         $resident->is_senior = ($classification === 'Senior' || $request->age >= 60);
         $resident->is_single_parent = ($classification === 'Solo Parent');

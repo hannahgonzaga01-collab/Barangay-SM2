@@ -2274,9 +2274,15 @@ html, body {
                         </div>
                         <div style="display:flex;flex-wrap:wrap;">
                             @forelse($myFamily as $fm)
-                            <div style="display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:800;margin:3px;background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;">
+                            <div style="display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:800;margin:3px;background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;flex-wrap:wrap;">
                                 <i class="fas fa-user" style="font-size:8px;"></i>
                                 {{ $fm->first_name }} {{ $fm->last_name }} ({{ $fm->relationship ?? 'Member' }})
+                                @if($fm->is_voter)<span style="font-size:8px;background:#dbeafe;color:#1d4ed8;padding:1px 6px;border-radius:99px;font-weight:900;">Voter</span>@endif
+                                @if($fm->is_senior)<span style="font-size:8px;background:#ffedd5;color:#ea580c;padding:1px 6px;border-radius:99px;font-weight:900;">Senior</span>@endif
+                                @if($fm->is_pwd)<span style="font-size:8px;background:#ede9fe;color:#7c3aed;padding:1px 6px;border-radius:99px;font-weight:900;">PWD</span>@endif
+                                @if($fm->is_bedridden)<span style="font-size:8px;background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:99px;font-weight:900;">Bed-ridden</span>@endif
+                                @if($fm->is_single_parent)<span style="font-size:8px;background:#fce7f3;color:#be185d;padding:1px 6px;border-radius:99px;font-weight:900;">Solo Parent</span>@endif
+                                @if($fm->is_student)<span style="font-size:8px;background:#fef3c7;color:#a16207;padding:1px 6px;border-radius:99px;font-weight:900;">Student</span>@endif
                                 @if($fm->verification_status === 'pending')<span style="font-size:8px;opacity:.8;color:#d97706;background:#fef3c7;padding:1px 4px;border-radius:3px;margin-left:4px;" title="Awaiting office approval">(Pending)</span>@endif
                             </div>
                             @empty
@@ -2767,18 +2773,22 @@ html, body {
                         </div>
                     </div>
 
-                    <div class="fgrid3" style="gap:7px;margin-bottom:12px;">
+                    <div class="fgrid4" style="gap:7px;margin-bottom:12px;">
                         <div><label class="flbl">Birthday</label>
                             <input type="date" name="birthday" x-model="birthday" required @input="if(birthday){const bd=new Date(birthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;age=a;}" @change="if(birthday){const bd=new Date(birthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;age=a;}" class="finput" style="padding:8px;">
                         </div>
                         <div><label class="flbl">Age</label>
                             <input type="number" name="age" x-model="age" readonly class="finput" style="padding:8px;background:#e2e8f0;">
                         </div>
+                        <div><label class="flbl">Voter? (Yes/No)</label>
+                            <select name="is_voter" required class="finput fselect" style="padding:8px;">
+                                <option value="0">No (Non-Voter)</option>
+                                <option value="1">Yes (Voter)</option>
+                            </select>
+                        </div>
                         <div><label class="flbl">Classification</label>
                             <select name="classification" x-model="classification" class="finput fselect" style="padding:8px;">
                                 <option value="">None</option>
-                                <option value="Voter">Voter</option>
-                                <option value="Non Voter">Non Voter</option>
                                 <option value="PWD">PWD</option>
                                 <option value="Senior">Senior</option>
                                 <option value="Solo Parent">Solo Parent</option>

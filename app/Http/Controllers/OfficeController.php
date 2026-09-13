@@ -528,6 +528,8 @@ class OfficeController extends Controller
                 if (empty($member['first_name']) || empty($member['last_name']))
                     continue;
 
+                $isMemVoter = isset($member['is_voter']) ? ($member['is_voter'] == '1') : (($member['classification'] ?? '') === 'Voter');
+
                 Resident::create([
                     'resident_code' => 'RES-' . strtoupper(Str::random(8)),
                     'first_name' => $member['first_name'],
@@ -543,8 +545,9 @@ class OfficeController extends Controller
                     'is_senior' => ($member['classification'] ?? '') === 'Senior' || ($member['age'] ?? 0) >= 60 ? 1 : 0,
                     'is_pwd' => ($member['classification'] ?? '') === 'PWD' ? 1 : 0,
                     'is_bedridden' => ($member['classification'] ?? '') === 'Bed-ridden' ? 1 : 0,
-                    'is_voter' => ($member['classification'] ?? '') === 'Voter' ? 1 : 0,
-                    'is_non_voter' => ($member['classification'] ?? '') === 'Non Voter' ? 1 : 0,
+                    'is_voter' => $isMemVoter ? 1 : 0,
+                    'is_non_voter' => $isMemVoter ? 0 : 1,
+                    'voter_status' => $isMemVoter ? 'approved' : 'non-voter',
                     'is_single_parent' => ($member['classification'] ?? '') === 'Solo Parent' ? 1 : 0,
                     'is_student' => ($member['classification'] ?? '') === 'Student' ? 1 : 0,
                     'address' => $request->address,
@@ -638,6 +641,8 @@ class OfficeController extends Controller
                 if (empty($member['first_name']) || empty($member['last_name']))
                     continue;
 
+                $isMemVoter = isset($member['is_voter']) ? ($member['is_voter'] == '1') : (($member['classification'] ?? '') === 'Voter');
+
                 Resident::create([
                     'resident_code' => 'RES-' . strtoupper(Str::random(8)),
                     'first_name' => $member['first_name'],
@@ -653,8 +658,9 @@ class OfficeController extends Controller
                     'is_senior' => ($member['classification'] ?? '') === 'Senior' || ($member['age'] ?? 0) >= 60 ? 1 : 0,
                     'is_pwd' => ($member['classification'] ?? '') === 'PWD' ? 1 : 0,
                     'is_bedridden' => ($member['classification'] ?? '') === 'Bed-ridden' ? 1 : 0,
-                    'is_voter' => ($member['classification'] ?? '') === 'Voter' ? 1 : 0,
-                    'is_non_voter' => ($member['classification'] ?? '') === 'Non Voter' ? 1 : 0,
+                    'is_voter' => $isMemVoter ? 1 : 0,
+                    'is_non_voter' => $isMemVoter ? 0 : 1,
+                    'voter_status' => $isMemVoter ? 'approved' : 'non-voter',
                     'is_single_parent' => ($member['classification'] ?? '') === 'Solo Parent' ? 1 : 0,
                     'is_student' => ($member['classification'] ?? '') === 'Student' ? 1 : 0,
                     'address' => $request->address,
