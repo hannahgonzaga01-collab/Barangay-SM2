@@ -83,6 +83,7 @@ class ResidentPortalController extends Controller
                     'middle_name'         => $user->middle_name,
                     'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
                     'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
+                    'birthplace'          => $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite',
                     'gender'              => $user->gender ?? 'Other',
                     'civil_status'        => $user->civil_status ?? 'Single',
                     'address'             => $user->address ?? 'Barangay San Miguel II',
@@ -407,6 +408,7 @@ class ResidentPortalController extends Controller
                 'middle_name'         => $user->middle_name,
                 'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
                 'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
+                'birthplace'          => $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite',
                 'gender'              => $user->gender ?? 'Other',
                 'civil_status'        => $user->civil_status ?? 'Single',
                 'address'             => $user->address ?? 'Barangay San Miguel II',
@@ -468,6 +470,7 @@ class ResidentPortalController extends Controller
         $resident->relationship = $request->relationship;
         $resident->birthday = $request->birthday;
         $resident->age = $age;
+        $resident->birthplace = $headResident->birthplace ?? $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite';
         $resident->gender = $request->gender;
         $resident->civil_status = $request->civil_status;
         $resident->address = $headResident->address ?? $user->address ?? 'Barangay San Miguel II';
