@@ -72,6 +72,29 @@ class ResidentPortalController extends Controller
                 }
             }
 
+            // ── 5. Auto-create resident profile if user still has none ──
+            if (!$resident && $user->role === 'resident') {
+                $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
+                $random = strtoupper(substr(uniqid(), -6));
+                $resident = Resident::create([
+                    'user_id'             => $user->id,
+                    'resident_code'       => $user->resident_code ?? "R-{$prefix}-{$random}",
+                    'first_name'          => $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'Resident'),
+                    'middle_name'         => $user->middle_name,
+                    'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
+                    'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
+                    'gender'              => $user->gender ?? 'Other',
+                    'civil_status'        => $user->civil_status ?? 'Single',
+                    'address'             => $user->address ?? 'Barangay San Miguel II',
+                    'is_voter'            => (bool)($user->is_voter ?? false),
+                    'is_non_voter'        => (bool)($user->is_non_voter ?? false),
+                    'is_senior'           => (bool)($user->is_senior ?? false),
+                    'is_household_head'   => true,
+                    'verification_status' => 'approved',
+                ]);
+                $user->update(['resident_code' => $resident->resident_code]);
+            }
+
             // ── Sync ALL resident details to user record ──
             if ($resident) {
                 $user->update([
@@ -361,8 +384,43 @@ class ResidentPortalController extends Controller
         ]);
 
         $user = auth()->user();
-        if (!$user->resident) {
-            return redirect()->route('resident.index')->with('error', 'You must have a verified resident profile to add family members.');
+        $headResident = $user->resident 
+            ?? Resident::where('user_id', $user->id)->first()
+            ?? ($user->resident_code ? Resident::where('resident_code', $user->resident_code)->first() : null);
+
+        if (!$headResident && $user->first_name && $user->last_name) {
+            $headResident = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($user->first_name)])
+                ->whereRaw('LOWER(last_name) = ?', [strtolower($user->last_name)])
+                ->first();
+            if ($headResident && !$headResident->user_id) {
+                $headResident->update(['user_id' => $user->id]);
+            }
+        }
+
+        if (!$headResident) {
+            $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
+            $random = strtoupper(substr(uniqid(), -6));
+            $headResident = Resident::create([
+                'user_id'             => $user->id,
+                'resident_code'       => $user->resident_code ?? "R-{$prefix}-{$random}",
+                'first_name'          => $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'Resident'),
+                'middle_name'         => $user->middle_name,
+                'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
+                'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
+                'gender'              => $user->gender ?? 'Other',
+                'civil_status'        => $user->civil_status ?? 'Single',
+                'address'             => $user->address ?? 'Barangay San Miguel II',
+                'is_voter'            => (bool)($user->is_voter ?? false),
+                'is_non_voter'        => (bool)($user->is_non_voter ?? false),
+                'is_senior'           => (bool)($user->is_senior ?? false),
+                'is_household_head'   => true,
+                'verification_status' => 'approved',
+            ]);
+            $user->update(['resident_code' => $headResident->resident_code]);
+        } else {
+            if (!$headResident->user_id) {
+                $headResident->update(['user_id' => $user->id]);
+            }
         }
 
         $classification = $request->classification;
@@ -382,7 +440,7 @@ class ResidentPortalController extends Controller
             $isSenior = ($existingAge >= 60) || ($existing->age >= 60) || ($isSenior) || $existing->is_senior;
 
             $updateData = [
-                'household_head_id'   => $user->resident->id,
+                'household_head_id'   => $headResident->id,
                 'is_household_head'   => false,
                 'relationship'        => $request->relationship,
                 'verification_status' => 'approved', // Skip pending for masterlist members
@@ -412,7 +470,7 @@ class ResidentPortalController extends Controller
         $resident->age = $age;
         $resident->gender = $request->gender;
         $resident->civil_status = $request->civil_status;
-        $resident->address = $user->resident->address;
+        $resident->address = $headResident->address ?? $user->address ?? 'Barangay San Miguel II';
         
         $resident->is_voter = $isVoter;
         $resident->is_non_voter = !$isVoter;
@@ -435,7 +493,7 @@ class ResidentPortalController extends Controller
             $resident->bedridden_proof = $request->file('bedridden_proof')->store('proofs/bedridden', 'public');
         }
 
-        $resident->household_head_id = $user->resident->id;
+        $resident->household_head_id = $headResident->id;
         $resident->is_household_head = false;
         $resident->verification_status = 'pending';
 

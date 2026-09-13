@@ -2267,8 +2267,12 @@ html, body {
 
                 {{-- MY FAMILY --}}
                 @php 
-                    $myFamily = \App\Models\Resident::where('household_head_id', $authUser?->resident?->id ?? -1)
-                        ->where('id', '!=', $authUser?->resident?->id ?? -1)
+                    $userResId = $authUser?->resident?->id 
+                        ?? \App\Models\Resident::where('user_id', $authUser?->id ?? -1)->value('id') 
+                        ?? ($authUser?->resident_code ? \App\Models\Resident::where('resident_code', $authUser->resident_code)->value('id') : null)
+                        ?? -1;
+                    $myFamily = \App\Models\Resident::where('household_head_id', $userResId)
+                        ->where('id', '!=', $userResId)
                         ->get(); 
                 @endphp
                 <div>
