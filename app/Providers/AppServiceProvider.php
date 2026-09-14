@@ -34,5 +34,23 @@ class AppServiceProvider extends ServiceProvider
                 break;
             }
         }
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('emergency_sos_alerts')) {
+                \Illuminate\Support\Facades\Schema::table('emergency_sos_alerts', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('emergency_sos_alerts', 'emergency_type')) {
+                        $table->string('emergency_type')->nullable()->after('home_address');
+                    }
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('emergency_sos_alerts', 'message')) {
+                        $table->text('message')->nullable()->after('emergency_type');
+                    }
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('emergency_sos_alerts', 'dispatched_units')) {
+                        $table->string('dispatched_units')->nullable()->after('status');
+                    }
+                });
+            }
+        } catch (\Throwable $e) {
+            // Ignored during early container boot or offline migrations
+        }
     }
 }

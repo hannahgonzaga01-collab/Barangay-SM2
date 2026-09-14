@@ -90,6 +90,35 @@ html, body {
 .btn-icon{width:30px;height:30px;border-radius:7px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;background:#f1f5f9;color:var(--muted);}
 .btn-icon:hover{background:var(--btn-grad);color:#fff;}
 
+@keyframes bell-ring {
+    0%, 100% { transform: rotate(0); }
+    10% { transform: rotate(18deg); }
+    20% { transform: rotate(-18deg); }
+    30% { transform: rotate(14deg); }
+    40% { transform: rotate(-14deg); }
+    50% { transform: rotate(10deg); }
+    60% { transform: rotate(-10deg); }
+    70% { transform: rotate(6deg); }
+    80% { transform: rotate(-6deg); }
+    90% { transform: rotate(2deg); }
+}
+.ringing-bell {
+    animation: bell-ring 1.1s ease-in-out infinite;
+    transform-origin: top center;
+    display: inline-block;
+}
+@keyframes pulse-banner {
+    0%, 100% { box-shadow: 0 8px 30px rgba(220,38,38,0.4); }
+    50% { box-shadow: 0 8px 38px rgba(220,38,38,0.8), 0 0 24px rgba(239,68,68,0.6); }
+}
+@keyframes pulse-siren {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(225,29,72,0.7); }
+    50% { box-shadow: 0 0 0 10px rgba(225,29,72,0); }
+}
+.siren-badge {
+    animation: pulse-siren 1.5s infinite;
+}
+
 .alert-banner{background:linear-gradient(135deg,#0c1445 0%,#1e3a8a 100%);border-radius:13px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:18px;border:1px solid rgba(59,130,246,.2);}
 .alert-ico{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .alert-ico i{color:#7dd3fc;font-size:16px;}
@@ -246,8 +275,8 @@ html, body {
                 'resident_name'    => $a->resident_name ?? ($a->user ? trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? '')) : 'Barangay Resident'),
                 'resident_contact' => $a->contact_number ?? $a->resident_contact ?? ($a->user?->contact_number ?? $a->user?->phone_number ?? 'N/A'),
                 'resident_address' => $a->home_address ?? $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II')),
-                'emergency_type'   => $a->emergency_type ?? 'Emergency SOS',
-                'message'          => $a->message ?? ($a->responder_notes ?? 'Emergency assistance requested via Resident Portal.'),
+                'emergency_type'   => !empty($a->emergency_type) ? $a->emergency_type : 'Emergency SOS',
+                'message'          => !empty($a->message) ? $a->message : (!empty($a->responder_notes) ? $a->responder_notes : 'Emergency assistance requested via Resident Portal.'),
                 'latitude'         => $a->latitude,
                 'longitude'        => $a->longitude,
                 'status'           => $a->status,
@@ -259,29 +288,54 @@ html, body {
         sosPollingInterval: null,
         playEmergencyChime() {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(880, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.4);
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!window._brgyAudioCtx) {
+                    window._brgyAudioCtx = new AudioCtx();
+                }
+                const ctx = window._brgyAudioCtx;
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
+                // High-urgency alternating two-tone emergency siren pulses (960Hz / 720Hz / 1040Hz)
+                const now = ctx.currentTime;
+                const tones = [
+                    { f: 960, dur: 0.25 },
+                    { f: 720, dur: 0.25 },
+                    { f: 960, dur: 0.25 },
+                    { f: 720, dur: 0.25 },
+                    { f: 1040, dur: 0.35 },
+                    { f: 780, dur: 0.35 }
+                ];
+
+                let t = now;
+                tones.forEach(tone => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(tone.f, t);
+                    gain.gain.setValueAtTime(0.35, t);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + tone.dur);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + tone.dur);
+                    t += tone.dur;
+                });
             } catch(e) {
-                console.log('Audio error:', e);
+                console.warn('Emergency siren audio error:', e);
             }
         },
         pollSosAlerts() {
             fetch('{{ route('peace.sos.alerts') }}')
                 .then(r => r.json())
                 .then(data => {
-                    const prevTriggered = this.sosAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length;
-                    this.sosAlerts = data.alerts;
-                    if (data.active_count > prevTriggered) {
+                    const prevTriggered = this.sosAlerts ? this.sosAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length : 0;
+                    const newAlerts = data.alerts || [];
+                    const newTriggered = newAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length;
+                    this.sosAlerts = newAlerts;
+                    if (newTriggered > prevTriggered) {
                         this.playEmergencyChime();
                     }
                 }).catch(e => console.error(e));
@@ -340,6 +394,13 @@ html, body {
         openTransfer(id) { this.transferIssueId = id; this.transferModal = true; },
         init() {
             this.$watch('activeTab', value => localStorage.setItem('brgy_peace_tab', value));
+            window.addEventListener('click', () => {
+                try {
+                    if (window._brgyAudioCtx && window._brgyAudioCtx.state === 'suspended') {
+                        window._brgyAudioCtx.resume();
+                    }
+                } catch(e){}
+            }, { once: true });
             this.pollSosAlerts();
             this.sosPollingInterval = setInterval(() => {
                 this.pollSosAlerts();
@@ -353,18 +414,18 @@ html, body {
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div style="width:44px;height:44px;border-radius:12px;background:#fff;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 10px rgba(0,0,0,0.2);">
-                            <i class="fas fa-bullhorn fa-bounce"></i>
+                            <i class="fas fa-bullhorn ringing-bell"></i>
                         </div>
                         <div>
                             <div style="display:flex;align-items:center;gap:8px;">
                                 <span style="font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;">🚨 HIGH-PRIORITY EMERGENCY SOS ALERT</span>
-                                <span style="font-size:10px;font-weight:900;background:#fff;color:#dc2626;padding:2px 8px;border-radius:99px;" x-text="sosAlerts.length + ' ACTIVE'"></span>
+                                <span class="siren-badge" style="font-size:10px;font-weight:900;background:#fff;color:#dc2626;padding:2px 8px;border-radius:99px;" x-text="sosAlerts.length + ' ACTIVE'"></span>
                             </div>
                             <div style="font-size:11px;color:rgba(255,255,255,0.85);font-weight:700;">Immediate Tanod Response Requested by Resident</div>
                         </div>
                     </div>
-                    <button type="button" @click="playEmergencyChime()" class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">
-                        <i class="fas fa-volume-up"></i> Test Alert Chime
+                    <button type="button" @click="playEmergencyChime()" class="btn btn-sm" style="background:rgba(255,255,255,0.22);color:#fff;border:1.5px solid rgba(255,255,255,0.4);font-weight:900;">
+                        <i class="fas fa-bullhorn ringing-bell"></i> Sound Emergency Siren
                     </button>
                 </div>
 
@@ -382,9 +443,14 @@ html, body {
                                     <i class="fas fa-phone-alt"></i> <span x-text="alert.resident_contact"></span> &bull; 
                                     <i class="fas fa-map-marker-alt"></i> <span x-text="alert.resident_address"></span>
                                 </div>
-                                <template x-if="alert.message">
-                                    <div style="font-size:11px;color:#fff;background:rgba(255,255,255,0.12);padding:6px 10px;border-radius:6px;margin-top:6px;font-style:italic;" x-text="'“' + alert.message + '”'"></div>
-                                </template>
+                                
+                                {{-- Prominent Landmark / Situation Box in Live Banner --}}
+                                <div style="margin-top:9px;padding:9px 13px;background:rgba(0,0,0,0.4);border-left:4px solid #facc15;border-radius:8px;">
+                                    <div style="font-size:9.5px;font-weight:900;color:#fde047;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
+                                        <i class="fas fa-map-pin"></i> Situation Note / Landmarks:
+                                    </div>
+                                    <div style="font-size:13px;color:#ffffff;font-weight:800;margin-top:3px;line-height:1.4;" x-text="alert.message ? alert.message : 'No specific landmark provided by resident.'"></div>
+                                </div>
                             </div>
 
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -427,6 +493,13 @@ html, body {
                 <div class="hstat"><div class="hstat-n" style="color:#fca5a5;">{{ $newPeace }}</div><div class="hstat-l">New</div></div>
                 <div class="hstat"><div class="hstat-n" style="color:#7dd3fc;">{{ $activePeace }}</div><div class="hstat-l">Active</div></div>
                 <div class="hstat"><div class="hstat-n" style="color:#86efac;">{{ $settledPeace }}</div><div class="hstat-l">Settled</div></div>
+                <div class="hstat" :style="sosAlerts.length > 0 ? 'background:rgba(220,38,38,.35);border-color:#ef4444;box-shadow:0 0 16px rgba(239,68,68,0.5);' : ''" @click="activeTab='sos'" style="cursor:pointer;" title="Click to view SOS dispatches">
+                    <div class="hstat-n" style="display:flex;align-items:center;justify-content:center;gap:6px;" :style="sosAlerts.length > 0 ? 'color:#fecaca;' : ''">
+                        <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="font-size:16px;"></i>
+                        <span x-text="sosAlerts.length"></span>
+                    </div>
+                    <div class="hstat-l" :style="sosAlerts.length > 0 ? 'color:#fee2e2;' : ''">Active SOS</div>
+                </div>
             </div>
         </div>
 
@@ -442,11 +515,13 @@ html, body {
                 <div class="ac-name">Patrol Schedule</div>
                 <div class="ac-sub">Duty roster & proof</div>
             </div>
-            <div class="action-card" @click="activeTab='sos'" :class="activeTab==='sos'?'active':''" style="position:relative;">
-                <div class="ac-ico" style="background:#fef2f2;"><i class="fas fa-bullhorn" style="color:#e11d48;"></i></div>
+            <div class="action-card" @click="activeTab='sos'" :class="activeTab==='sos'?'active':''" :style="sosAlerts.length > 0 ? 'border-color:#e11d48;background:#fff1f2;' : ''" style="position:relative;">
+                <div class="ac-ico" :style="sosAlerts.length > 0 ? 'background:#fee2e2;' : 'background:#fef2f2;'">
+                    <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="color:#e11d48;font-size:22px;"></i>
+                </div>
                 <div class="ac-name">
                     Emergency SOS
-                    <span x-show="sosAlerts.length > 0" class="cbadge cbadge-red" style="font-size:8px;margin-left:4px;" x-text="sosAlerts.length"></span>
+                    <span x-show="sosAlerts.length > 0" class="cbadge cbadge-red siren-badge" style="font-size:8.5px;margin-left:4px;" x-text="sosAlerts.length + ' ACTIVE'"></span>
                 </div>
                 <div class="ac-sub">Live alerts & dispatch log</div>
             </div>
@@ -787,7 +862,7 @@ html, body {
             {{-- Active Dispatches --}}
             <div class="card" style="margin-bottom:20px;">
                 <div class="card-head">
-                    <div class="card-title" style="color:#e11d48;"><i class="fas fa-bullhorn"></i> Active SOS Emergency Alerts</div>
+                    <div class="card-title" style="color:#e11d48;"><i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''"></i> Active SOS Emergency Alerts</div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <button type="button" @click="pollSosAlerts()" class="btn btn-ghost btn-sm"><i class="fas fa-sync-alt"></i> Refresh</button>
                         <span class="cbadge" style="background:#fee2e2;color:#dc2626;" x-text="sosAlerts.length + ' Pending Dispatches'"></span>
@@ -819,9 +894,14 @@ html, body {
                                         <i class="fas fa-phone-alt" style="color:var(--brand);margin-right:3px;"></i> <span x-text="alert.resident_contact"></span> &bull; 
                                         <i class="fas fa-map-marker-alt" style="color:var(--brand);margin-right:3px;"></i> <span x-text="alert.resident_address"></span>
                                     </div>
-                                    <template x-if="alert.message">
-                                        <div style="font-size:11px;color:#1e293b;background:#fff;border:1px solid #fed7aa;padding:8px 12px;border-radius:8px;margin-top:8px;font-style:italic;" x-text="'Situation Note: ' + alert.message"></div>
-                                    </template>
+                                    
+                                    {{-- Prominent Landmark / Situation Box in SOS Tab --}}
+                                    <div style="margin-top:9px;padding:10px 14px;background:#fffbeb;border:1.5px solid #fde68a;border-left:4px solid #d97706;border-radius:8px;">
+                                        <div style="font-size:9.5px;font-weight:900;color:#b45309;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
+                                            <i class="fas fa-map-pin"></i> Situation Note / Landmarks:
+                                        </div>
+                                        <div style="font-size:12.5px;color:#78350f;font-weight:800;margin-top:3px;line-height:1.4;" x-text="alert.message ? alert.message : 'No specific landmark provided by resident.'"></div>
+                                    </div>
                                 </div>
 
                                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -874,8 +954,12 @@ html, body {
                                 <td style="font-weight:900;color:var(--brand);">#SOS-{{ sprintf('%04d', $rsos->id) }}</td>
                                 <td style="font-weight:800;color:var(--text);">{{ $rname }}</td>
                                 <td>
-                                    <span style="font-size:8px;font-weight:900;background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:99px;text-transform:uppercase;">{{ $rsos->emergency_type }}</span>
-                                    @if($rsos->message)<div style="font-size:9.5px;color:var(--muted);margin-top:2px;">{{ \Illuminate\Support\Str::limit($rsos->message, 45) }}</div>@endif
+                                    <span style="font-size:8px;font-weight:900;background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:99px;text-transform:uppercase;">{{ $rsos->emergency_type ?? 'Emergency SOS' }}</span>
+                                    @if($rsos->message)
+                                        <div style="font-size:10px;font-weight:700;color:#1e293b;margin-top:3px;background:#fffbeb;padding:3px 7px;border-radius:4px;border-left:2.5px solid #d97706;">
+                                            <span style="font-size:8.5px;font-weight:900;color:#b45309;text-transform:uppercase;">Landmark:</span> {{ \Illuminate\Support\Str::limit($rsos->message, 80) }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td style="font-size:10.5px;color:#475569;font-weight:600;">
                                     <div><i class="fas fa-phone-alt" style="font-size:9px;margin-right:2px;"></i> {{ $rcontact }}</div>

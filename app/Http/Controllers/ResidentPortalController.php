@@ -222,10 +222,12 @@ class ResidentPortalController extends Controller
     public function storeEmergencySos(Request $request)
     {
         $request->validate([
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'accuracy' => 'nullable|string',
-            'home_address' => 'nullable|string',
+            'latitude'       => 'nullable|numeric',
+            'longitude'      => 'nullable|numeric',
+            'accuracy'       => 'nullable|string',
+            'home_address'   => 'nullable|string',
+            'emergency_type' => 'nullable|string',
+            'message'        => 'nullable|string',
         ]);
 
         $user = auth()->user();
@@ -236,21 +238,34 @@ class ResidentPortalController extends Controller
         $contact = $user ? ($user->contact_number ?? $user->email) : ($request->contact ?? 'N/A');
         $address = $request->home_address ?: ($user ? ($user->address ?? 'Barangay San Miguel II') : 'Barangay San Miguel II');
 
+        $typeLabels = [
+            'general'  => 'General Emergency / Tanod Assistance',
+            'security' => 'Security Threat / Disturbance / Intruder',
+            'medical'  => 'Medical Emergency / First Responder',
+            'fire'     => 'Fire / Hazard Alert',
+            'dispute'  => 'Neighborhood Incident / Domestic Disturbance',
+        ];
+        $rawType = $request->emergency_type;
+        $emergencyType = $typeLabels[$rawType] ?? ($rawType ?: 'General Emergency / Tanod Assistance');
+        $situationNote = $request->message ?: $request->situation_note;
+
         $lat = $request->latitude;
         $lng = $request->longitude;
         $mapsUrl = ($lat && $lng) ? "https://www.google.com/maps?q={$lat},{$lng}" : null;
 
         $alert = \App\Models\EmergencySosAlert::create([
-            'user_id' => $user?->id,
-            'resident_name' => $name,
-            'contact_number' => $contact,
-            'home_address' => $address,
-            'latitude' => $lat,
-            'longitude' => $lng,
-            'accuracy' => $request->accuracy,
+            'user_id'         => $user?->id,
+            'resident_name'   => $name,
+            'contact_number'  => $contact,
+            'home_address'    => $address,
+            'emergency_type'  => $emergencyType,
+            'message'         => $situationNote,
+            'latitude'        => $lat,
+            'longitude'       => $lng,
+            'accuracy'        => $request->accuracy,
             'google_maps_url' => $mapsUrl,
-            'status' => 'triggered',
-            'dispatched_at' => now(),
+            'status'          => 'triggered',
+            'dispatched_at'   => now(),
         ]);
 
         // Send emergency alert email to Barangay Hall / Peace & Order team
@@ -261,6 +276,8 @@ class ResidentPortalController extends Controller
                 'resident_name'   => $name,
                 'contact_number'  => $contact,
                 'home_address'    => $address,
+                'emergency_type'  => $emergencyType,
+                'message'         => $situationNote,
                 'latitude'        => $lat,
                 'longitude'       => $lng,
                 'accuracy'        => $request->accuracy,
@@ -273,6 +290,10 @@ class ResidentPortalController extends Controller
                     ? "<p><strong>📍 GPS Location:</strong> <a href=\"{$mailData['google_maps_url']}\" target=\"_blank\" style=\"color:#dc2626;font-weight:bold;\">View on Google Maps ({$mailData['latitude']}, {$mailData['longitude']})</a> (Accuracy: " . htmlspecialchars($mailData['accuracy'] ?? 'N/A') . ")</p>"
                     : "<p><strong>📍 Location:</strong> GPS coordinates not provided.</p>";
 
+                $landmarkLine = !empty($mailData['message'])
+                    ? "<p style=\"background:#fffbeb;border-left:4px solid #f59e0b;padding:8px 12px;margin:10px 0;color:#92400e;font-size:13px;\"><strong>📍 Situation / Landmarks:</strong> " . htmlspecialchars($mailData['message']) . "</p>"
+                    : "<p><strong>📍 Situation / Landmarks:</strong> None provided.</p>";
+
                 $body = "
                 <div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:2px solid #dc2626;border-radius:10px;overflow:hidden;\">
                     <div style=\"background:#dc2626;color:#fff;padding:16px 20px;text-align:center;\">
@@ -282,9 +303,11 @@ class ResidentPortalController extends Controller
                     <div style=\"padding:20px;color:#1f2937;line-height:1.6;\">
                         <p style=\"font-size:15px;margin-top:0;\">An emergency SOS signal has been triggered by a resident requesting immediate patrol dispatch.</p>
                         <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:15px 0;\">
+                        <p><strong>🚨 Emergency Nature:</strong> <span style=\"color:#dc2626;font-weight:bold;\">" . htmlspecialchars($mailData['emergency_type']) . "</span></p>
                         <p><strong>👤 Resident Name:</strong> " . htmlspecialchars($mailData['resident_name']) . "</p>
                         <p><strong>📞 Contact Number:</strong> " . htmlspecialchars($mailData['contact_number']) . "</p>
                         <p><strong>🏠 Home Address:</strong> " . htmlspecialchars($mailData['home_address']) . "</p>
+                        {$landmarkLine}
                         {$locationLine}
                         <p><strong>🕒 Time Dispatched:</strong> {$mailData['dispatched_at']}</p>
                         <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:15px 0;\">
@@ -295,7 +318,7 @@ class ResidentPortalController extends Controller
                 </div>";
 
                 $m->to($adminEmail)
-                  ->subject("🚨 [URGENT] Emergency SOS Alert #{$mailData['alert_id']} — {$mailData['resident_name']}")
+                  ->subject("🚨 [URGENT SOS] {$mailData['emergency_type']} — {$mailData['resident_name']}")
                   ->html($body);
             });
         } catch (\Throwable $e) {
@@ -305,16 +328,19 @@ class ResidentPortalController extends Controller
         // In-app notifications to all Peace & Order and Admin users
         try {
             $officers = \App\Models\User::whereIn('role', ['peace', 'admin'])->get();
+            $notifDesc = "Resident {$name} triggered an SOS ({$emergencyType}) at {$address}." . ($situationNote ? " Landmark: {$situationNote}" : '');
             foreach ($officers as $officer) {
                 $officer->notifications()->create([
                     'id' => (string) \Illuminate\Support\Str::uuid(),
                     'type' => 'App\Notifications\EmergencySosTriggered',
                     'data' => [
-                        'type' => 'emergency_sos',
-                        'title' => '🚨 Emergency SOS Dispatched!',
-                        'message' => "Resident {$name} triggered an SOS alert at {$address}.",
-                        'alert_id' => $alert->id,
-                        'maps_url' => $mapsUrl,
+                        'type'           => 'emergency_sos',
+                        'title'          => "🚨 Emergency SOS: {$emergencyType}!",
+                        'message'        => $notifDesc,
+                        'emergency_type' => $emergencyType,
+                        'situation_note' => $situationNote,
+                        'alert_id'       => $alert->id,
+                        'maps_url'       => $mapsUrl,
                     ],
                     'created_at' => now(),
                     'updated_at' => now(),

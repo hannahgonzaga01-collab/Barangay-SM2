@@ -893,11 +893,11 @@ html, body {
 
             <div class="service-grid">
                 <div class="service-card service-card-sos" @click="isAuth ? triggerEmergencySos() : window.location.href='{{ route('login') }}'">
-                    <div class="service-ico" style="background: rgba(220, 38, 38, 0.4);"><i class="fas fa-exclamation-triangle" style="color:#fff; font-size: 20px;"></i></div>
+                    <div class="service-ico" style="background: rgba(220, 38, 38, 0.4);"><i class="fas fa-truck-medical" style="color:#fff; font-size: 20px;"></i></div>
                     <div class="service-name" style="color:#fff;" x-text="t('emergency_sos')">EMERGENCY / REQUEST TANOD</div>
                     <div class="service-sub" style="color:rgba(255,255,255,0.95); font-weight:700;" x-text="t('emergency_sub')">Immediate Tanod SOS Dispatch</div>
                 </div>
-                <div class="service-card" @click="docuModal=true; selectedDoc=''">
+                <div class="service-card" @click="isAuth ? (docuModal=true, selectedDoc='') : window.location.href='{{ route('login') }}'">
                     <div class="service-ico"><i class="fas fa-file-alt"></i></div>
                     <div class="service-name" x-text="t('doc_services')">Document Services</div>
                     <div class="service-sub" x-text="t('doc_services_sub')">Request certificates online</div>
@@ -952,7 +952,7 @@ html, body {
         <div class="login-prompt">
             <div class="lp-icon"><i class="fas fa-home"></i></div>
             <h3 style="font-size:14px;font-weight:900;color:#1e3a5f;margin-bottom:5px;">Resident Portal Access</h3>
-            <p style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:14px;line-height:1.5;">This portal is for legitimate residents. Non-residents can still request documents by clicking the service cards above and selecting "Non-Resident".</p>
+            <p style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:14px;line-height:1.5;">Please log in or create an account to request barangay certificates, clearances, report blotter issues, or dispatch emergency SOS.</p>
             <div class="lp-btns">
                 <a href="{{ route('register') }}" class="btn-grad btn-sm"><i class="fas fa-user-plus"></i> Create Account</a>
                 <a href="{{ route('login') }}" class="btn-plain btn-outline btn-sm"><i class="fas fa-sign-in-alt"></i> Resident Login</a>
@@ -2934,7 +2934,7 @@ html, body {
                     <div>
                         <div class="modal-hd" style="margin-bottom:14px;">
                             <div class="modal-ttl">
-                                <div class="modal-ico" style="background:rgba(225,29,72,0.12);color:#e11d48;"><i class="fas fa-exclamation-triangle"></i></div>
+                                <div class="modal-ico" style="background:rgba(225,29,72,0.12);color:#e11d48;"><i class="fas fa-truck-medical"></i></div>
                                 <div>
                                     <div style="color:#991b1b;font-weight:900;font-size:15px;">EMERGENCY SOS ALERT</div>
                                     <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:none;">Direct Dispatch to Barangay Peace & Order Patrol</div>
