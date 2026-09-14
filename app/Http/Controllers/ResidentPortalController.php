@@ -288,6 +288,7 @@ class ResidentPortalController extends Controller
                 'dispatched_at'   => now()->format('F d, Y h:i A'),
             ];
 
+            // 1. Email Alert to Barangay Hall / Peace & Order Tanod On-Duty
             \Illuminate\Support\Facades\Mail::send([], [], function ($m) use ($adminEmail, $mailData) {
                 $locationLine = ($mailData['latitude'] && $mailData['longitude'])
                     ? "<p><strong>📍 GPS Location:</strong> <a href=\"{$mailData['google_maps_url']}\" target=\"_blank\" style=\"color:#dc2626;font-weight:bold;\">View on Google Maps ({$mailData['latitude']}, {$mailData['longitude']})</a> (Accuracy: " . htmlspecialchars($mailData['accuracy'] ?? 'N/A') . ")</p>"
@@ -304,12 +305,13 @@ class ResidentPortalController extends Controller
                 $body = "
                 <div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:2px solid #dc2626;border-radius:10px;overflow:hidden;\">
                     <div style=\"background:#dc2626;color:#fff;padding:16px 20px;text-align:center;\">
-                        <h2 style=\"margin:0;font-size:20px;text-transform:uppercase;letter-spacing:1px;\">🚨 HIGH-PRIORITY EMERGENCY SOS ALERT</h2>
-                        <p style=\"margin:4px 0 0;font-size:12px;opacity:0.9;\">Barangay San Miguel II — Peace & Order Quick Response</p>
+                        <h2 style=\"margin:0;font-size:18px;text-transform:uppercase;letter-spacing:1px;\">🚨 [OFFICIAL DISPATCH ALERT] PEACE & ORDER COMMAND</h2>
+                        <p style=\"margin:4px 0 0;font-size:12px;opacity:0.9;\">Barangay San Miguel II — Quick Response Tanod Division</p>
                     </div>
                     <div style=\"padding:20px;color:#1f2937;line-height:1.6;\">
-                        <p style=\"font-size:15px;margin-top:0;\">An emergency SOS signal has been triggered by a resident requesting immediate patrol dispatch.</p>
-                        <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:15px 0;\">
+                        <div style=\"background:#fef2f2;border:1px solid #fecaca;padding:10px 14px;border-radius:6px;color:#991b1b;font-weight:bold;margin-bottom:15px;\">
+                            📢 NOTICE FOR BARANGAY ON-DUTY OFFICERS: A resident has triggered an emergency SOS. Please coordinate immediate dispatch.
+                        </div>
                         <p><strong>🚨 Emergency Nature:</strong> <span style=\"color:#dc2626;font-weight:bold;\">" . htmlspecialchars($mailData['emergency_type']) . "</span></p>
                         <p><strong>👤 Resident Name:</strong> " . htmlspecialchars($mailData['resident_name']) . "</p>
                         <p><strong>📞 Contact Number:</strong> " . htmlspecialchars($mailData['contact_number']) . "</p>
@@ -319,18 +321,105 @@ class ResidentPortalController extends Controller
                         {$locationLine}
                         <p><strong>🕒 Time Dispatched:</strong> {$mailData['dispatched_at']}</p>
                         <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:15px 0;\">
-                        <div style=\"background:#fef2f2;border:1px solid #fecaca;padding:12px;border-radius:8px;color:#991b1b;font-weight:bold;\">
-                            ⚠️ ACTION REQUIRED: Open Peace & Order Dashboard immediately to dispatch nearest patrol officers.
+                        <div style=\"background:#dc2626;color:#fff;padding:12px;border-radius:8px;text-align:center;font-weight:bold;\">
+                            ⚠️ ACTION REQUIRED: Dispatch nearest patrol officers and check Peace & Order Dashboard.
                         </div>
                     </div>
                 </div>";
 
                 $m->to($adminEmail)
-                  ->subject("🚨 [URGENT SOS] {$mailData['emergency_type']} — {$mailData['resident_name']}")
+                  ->subject("🚨 [TANOD DISPATCH ALERT] {$mailData['emergency_type']} — {$mailData['resident_name']}")
                   ->html($body);
             });
+
+            // 2. Email Confirmation Receipt directly to the Resident's personal email
+            $residentEmail = $user?->email ?: $request->email;
+            if (!empty($residentEmail) && filter_var($residentEmail, FILTER_VALIDATE_EMAIL)) {
+                \Illuminate\Support\Facades\Mail::send([], [], function ($m) use ($residentEmail, $mailData) {
+                    $landmarkLine = !empty($mailData['landmark'])
+                        ? "<p style=\"background:#fef2f2;border-left:4px solid #dc2626;padding:10px 14px;margin:10px 0;color:#991b1b;font-size:13px;\"><strong>📍 Reported Landmark / Location:</strong> " . htmlspecialchars($mailData['landmark']) . "</p>"
+                        : "<p><strong>📍 Reported Location:</strong> " . htmlspecialchars($mailData['home_address']) . "</p>";
+
+                    $situationLine = !empty($mailData['message'])
+                        ? "<p style=\"background:#fffbeb;border-left:4px solid #f59e0b;padding:10px 14px;margin:10px 0;color:#92400e;font-size:13px;\"><strong>ℹ️ Situation Reason / Details:</strong> " . htmlspecialchars($mailData['message']) . "</p>"
+                        : "";
+
+                    $body = "
+                    <div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:2px solid #dc2626;border-radius:10px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);\">
+                        <div style=\"background:#dc2626;color:#ffffff;padding:18px 20px;text-align:center;\">
+                            <h2 style=\"margin:0;font-size:19px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;\">🚨 EMERGENCY SOS RECEIVED & ACKNOWLEDGED</h2>
+                            <p style=\"margin:4px 0 0;font-size:12px;opacity:0.95;\">Barangay San Miguel II — Peace & Order Quick Response</p>
+                        </div>
+                        <div style=\"padding:22px;color:#1f2937;line-height:1.6;\">
+                            <p style=\"font-size:15px;margin-top:0;\">Dear <strong>" . htmlspecialchars($mailData['resident_name']) . "</strong>,</p>
+                            
+                            <div style=\"background:#f0fdf4;border-left:4px solid #16a34a;padding:12px 14px;margin:12px 0;color:#166534;border-radius:0 8px 8px 0;font-size:13.5px;\">
+                                <strong>✅ Your distress signal has been received by our command center!</strong><br>
+                                Our on-duty Barangay Tanods and Peace & Order team have been alerted and dispatched to assist you.
+                            </div>
+
+                            <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:16px 0;\">
+                            <h4 style=\"margin:0 0 10px;color:#111827;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;\">📋 Transmission Summary:</h4>
+                            <p style=\"margin:4px 0;\"><strong>🚨 Emergency Type:</strong> <span style=\"color:#dc2626;font-weight:bold;\">" . htmlspecialchars($mailData['emergency_type']) . "</span></p>
+                            <p style=\"margin:4px 0;\"><strong>👤 Reported By:</strong> " . htmlspecialchars($mailData['resident_name']) . "</p>
+                            <p style=\"margin:4px 0;\"><strong>📞 Contact on Record:</strong> " . htmlspecialchars($mailData['contact_number']) . "</p>
+                            {$landmarkLine}
+                            {$situationLine}
+                            <p style=\"margin:4px 0;\"><strong>🕒 Dispatched At:</strong> {$mailData['dispatched_at']}</p>
+
+                            <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:16px 0;\">
+                            <div style=\"background:#fef2f2;border:1px solid #fecaca;padding:12px 14px;border-radius:8px;margin:12px 0;\">
+                                <h4 style=\"margin:0 0 6px;color:#991b1b;font-size:13px;\">⚠️ SAFETY REMINDERS WHILE WAITING:</h4>
+                                <ul style=\"margin:0;padding-left:18px;color:#7f1d1d;font-size:12.5px;line-height:1.6;\">
+                                    <li>Stay calm and remain in a safe, visible or secured spot.</li>
+                                    <li>Keep your phone line open in case our responding officers need to call you.</li>
+                                    <li>If you need direct phone assistance, call any of our 24/7 hotlines below immediately.</li>
+                                </ul>
+                            </div>
+
+                            <div style=\"background:#f8fafc;border:1px solid #e2e8f0;padding:12px 14px;border-radius:8px;margin:12px 0;\">
+                                <h4 style=\"margin:0 0 6px;color:#334155;font-size:12px;text-transform:uppercase;\">📞 24/7 Emergency Hotlines:</h4>
+                                <p style=\"margin:3px 0;font-size:12.5px;\">🏢 <strong>Barangay San Miguel II Hall:</strong> (046) 416-0245 / 0917-828-SM22</p>
+                                <p style=\"margin:3px 0;font-size:12.5px;\">🚓 <strong>PNP Dasmariñas Police:</strong> (046) 416-0252 / 117</p>
+                                <p style=\"margin:3px 0;font-size:12.5px;\">🚒 <strong>BFP Dasmariñas Fire Station:</strong> (046) 416-0253</p>
+                                <p style=\"margin:3px 0;font-size:12.5px;\">🚑 <strong>City Emergency Hotline:</strong> 911 / (046) 416-0245</p>
+                            </div>
+
+                            <p style=\"font-size:11.5px;color:#6b7280;margin-top:16px;text-align:center;\">
+                                Automated emergency notification from Barangay San Miguel II, City of Dasmariñas, Cavite.
+                            </p>
+                        </div>
+                    </div>";
+
+                    $m->to($residentEmail)
+                      ->subject("🚨 [SOS CONFIRMATION] Emergency Assistance Received — Barangay San Miguel II")
+                      ->html($body);
+                });
+            }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('SOS Email failed: ' . $e->getMessage());
+        }
+
+        // In-app notification for the resident themselves
+        if ($user) {
+            try {
+                $user->notifications()->create([
+                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'type' => 'App\Notifications\EmergencySosTriggered',
+                    'data' => [
+                        'type'           => 'emergency_sos_receipt',
+                        'title'          => "🚨 SOS Dispatched: {$emergencyType}",
+                        'message'        => "Your emergency distress signal was received. Barangay Tanod responders are alerted.",
+                        'emergency_type' => $emergencyType,
+                        'landmark'       => $landmark,
+                        'alert_id'       => $alert->id,
+                    ],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('SOS Resident In-App Notif failed: ' . $e->getMessage());
+            }
         }
 
         // In-app notifications to all Peace & Order and Admin users

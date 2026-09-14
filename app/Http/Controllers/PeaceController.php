@@ -597,6 +597,24 @@ class PeaceController extends Controller
 
         $alert->update($data);
 
+        if ($request->status === 'resolved' && $alert->user) {
+            try {
+                $alert->user->notifications()->create([
+                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'type' => 'App\Notifications\EmergencySosTriggered',
+                    'data' => [
+                        'type'           => 'emergency_sos_resolved',
+                        'title'          => "✅ SOS Resolved: {$alert->emergency_type}",
+                        'message'        => "Your emergency SOS dispatch has been marked as resolved by the Peace & Order team.",
+                        'emergency_type' => $alert->emergency_type,
+                        'alert_id'       => $alert->id,
+                    ],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (\Throwable $e) {}
+        }
+
         if ($request->wantsJson() || $request->expectsJson() || $request->ajax() || $request->isJson()) {
             return response()->json([
                 'success' => true,
