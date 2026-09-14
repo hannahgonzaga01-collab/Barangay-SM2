@@ -534,10 +534,39 @@ class PeaceController extends Controller
                 ];
             });
 
+        $resolved = EmergencySosAlert::with(['user.resident'])
+            ->where('status', 'resolved')
+            ->latest()
+            ->take(15)
+            ->get()
+            ->map(function ($a) {
+                $name = $a->resident_name;
+                if (!$name && $a->user) {
+                    $name = trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? ''));
+                }
+                $contact = $a->contact_number ?? $a->resident_contact ?? ($a->user?->contact_number ?? $a->user?->phone_number ?? 'N/A');
+                $address = $a->home_address ?? $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II'));
+
+                return [
+                    'id'               => $a->id,
+                    'id_formatted'     => '#SOS-' . sprintf('%04d', $a->id),
+                    'resident_name'    => $name ?? 'Barangay Resident',
+                    'resident_contact' => $contact,
+                    'resident_address' => $address,
+                    'emergency_type'   => !empty($a->emergency_type) ? $a->emergency_type : 'Emergency SOS',
+                    'landmark'         => !empty($a->landmark) ? $a->landmark : null,
+                    'message'          => !empty($a->message) ? $a->message : (!empty($a->responder_notes) ? $a->responder_notes : null),
+                    'date_fmt'         => $a->created_at ? $a->created_at->format('M d, Y') : '—',
+                    'time_fmt'         => $a->created_at ? $a->created_at->format('h:i A') : '—',
+                    'status'           => 'resolved',
+                ];
+            });
+
         return response()->json([
-            'alerts'        => $alerts,
-            'active_count'  => $alerts->whereIn('status', ['active', 'triggered'])->count(),
-            'total_pending' => $alerts->count(),
+            'alerts'          => $alerts,
+            'resolved_alerts' => $resolved,
+            'active_count'    => $alerts->whereIn('status', ['active', 'triggered'])->count(),
+            'total_pending'   => $alerts->count(),
         ]);
     }
 

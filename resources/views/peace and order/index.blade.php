@@ -365,6 +365,27 @@ html, body {
                 'google_maps_url'  => $a->google_maps_url ?: (($a->latitude && $a->longitude) ? 'https://www.google.com/maps?q=' . $a->latitude . ',' . $a->longitude : null),
             ];
         })) }},
+        resolvedSos: {{ json_encode($recentResolvedSos->map(function($a) {
+            $name = $a->resident_name;
+            if (!$name && $a->user) {
+                $name = trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? ''));
+            }
+            $contact = $a->contact_number ?? $a->resident_contact ?? ($a->user?->contact_number ?? $a->user?->phone_number ?? 'N/A');
+            $address = $a->home_address ?? $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II'));
+            return [
+                'id'               => $a->id,
+                'id_formatted'     => '#SOS-' . sprintf('%04d', $a->id),
+                'resident_name'    => $name ?? 'Barangay Resident',
+                'resident_contact' => $contact,
+                'resident_address' => $address,
+                'emergency_type'   => !empty($a->emergency_type) ? $a->emergency_type : 'Emergency SOS',
+                'landmark'         => !empty($a->landmark) ? $a->landmark : null,
+                'message'          => !empty($a->message) ? $a->message : (!empty($a->responder_notes) ? $a->responder_notes : null),
+                'date_fmt'         => $a->created_at ? $a->created_at->format('M d, Y') : '—',
+                'time_fmt'         => $a->created_at ? $a->created_at->format('h:i A') : '—',
+                'status'           => 'resolved',
+            ];
+        })) }},
         sosPollingInterval: null,
         hasInitialPollRun: false,
         sosTitleInterval: null,
@@ -401,6 +422,9 @@ html, body {
                     const hasNewAlert = newAlerts.some(a => !prevIds.has(Number(a.id)));
 
                     this.sosAlerts = newAlerts;
+                    if (data.resolved_alerts) {
+                        this.resolvedSos = data.resolved_alerts;
+                    }
 
                     if (this.hasInitialPollRun) {
                         if (hasNewAlert || newTriggered > prevTriggered) {
@@ -413,6 +437,29 @@ html, body {
                 }).catch(e => console.error(e));
         },
         updateSosStatus(alertId, newStatus) {
+            // Instantly move to resolved table optimistically
+            if (newStatus === 'resolved') {
+                const foundIdx = (this.sosAlerts || []).findIndex(a => a.id === alertId);
+                if (foundIdx !== -1) {
+                    const item = this.sosAlerts[foundIdx];
+                    this.sosAlerts.splice(foundIdx, 1);
+                    if (!this.resolvedSos) this.resolvedSos = [];
+                    this.resolvedSos.unshift({
+                        id: item.id,
+                        id_formatted: '#SOS-' + String(item.id).padStart(4, '0'),
+                        resident_name: item.resident_name,
+                        resident_contact: item.resident_contact,
+                        resident_address: item.resident_address,
+                        emergency_type: item.emergency_type,
+                        landmark: item.landmark,
+                        message: item.message,
+                        date_fmt: 'Today',
+                        time_fmt: 'Just now',
+                        status: 'resolved'
+                    });
+                }
+            }
+
             fetch('/peace/sos-alerts/' + alertId + '/status', {
                 method: 'POST',
                 headers: {
@@ -425,6 +472,7 @@ html, body {
                 this.pollSosAlerts();
             }).catch(err => {
                 alert('Error updating SOS status');
+                this.pollSosAlerts();
             });
         },
         peaceRep: {
@@ -941,7 +989,7 @@ html, body {
             <div class="card">
                 <div class="card-head">
                     <div class="card-title"><i class="fas fa-history"></i> Recent Resolved SOS Dispatches</div>
-                    <span class="cbadge cbadge-green">{{ count($recentResolvedSos) }} Recent</span>
+                    <span class="cbadge cbadge-green" x-text="(resolvedSos ? resolvedSos.length : 0) + ' Recent'"></span>
                 </div>
                 <div style="overflow-x:auto;">
                     <table class="tbl">
@@ -956,43 +1004,39 @@ html, body {
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($recentResolvedSos as $rsos)
-                            @php
-                                $rname = $rsos->resident_name ?? ($rsos->user ? $rsos->user->first_name . ' ' . $rsos->user->last_name : 'Barangay Resident');
-                                $rcontact = $rsos->resident_contact ?? ($rsos->user?->phone_number ?? 'N/A');
-                                $raddr = $rsos->resident_address ?? ($rsos->user?->resident?->address ?? ($rsos->user?->address ?? 'Barangay San Miguel II'));
-                            @endphp
-                            <tr>
-                                <td style="font-weight:900;color:var(--brand);">#SOS-{{ sprintf('%04d', $rsos->id) }}</td>
-                                <td style="font-weight:800;color:var(--text);">{{ $rname }}</td>
-                                <td>
-                                    <span style="font-size:8px;font-weight:900;background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:99px;text-transform:uppercase;">{{ $rsos->emergency_type ?? 'Emergency SOS' }}</span>
-                                    @if($rsos->landmark)
-                                        <div style="font-size:10px;font-weight:800;color:#991b1b;margin-top:3px;background:#fef2f2;padding:3px 7px;border-radius:4px;border-left:2.5px solid #dc2626;">
-                                            <span style="font-size:8.5px;font-weight:900;text-transform:uppercase;">📍 Landmark:</span> {{ \Illuminate\Support\Str::limit($rsos->landmark, 70) }}
-                                        </div>
-                                    @endif
-                                    @if($rsos->message)
-                                        <div style="font-size:9.5px;font-weight:600;color:#475569;margin-top:2px;">
-                                            <span style="font-weight:800;color:#b45309;">Reason:</span> {{ \Illuminate\Support\Str::limit($rsos->message, 70) }}
-                                        </div>
-                                    @endif
-                                </td>
-                                <td style="font-size:10.5px;color:#475569;font-weight:600;">
-                                    <div><i class="fas fa-phone-alt" style="font-size:9px;margin-right:2px;"></i> {{ $rcontact }}</div>
-                                    <div style="font-size:9.5px;color:var(--muted);">{{ $raddr }}</div>
-                                </td>
-                                <td style="font-size:10px;color:var(--muted);font-weight:700;">
-                                    <div>{{ $rsos->created_at->format('M d, Y') }}</div>
-                                    <div style="font-size:9px;color:var(--light);">{{ $rsos->created_at->format('h:i A') }}</div>
-                                </td>
-                                <td>
-                                    <span class="spill spill-settled"><i class="fas fa-check"></i> Resolved</span>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr><td colspan="6"><div class="tbl-empty"><i class="fas fa-clipboard-check"></i><p style="font-size:11px;font-weight:700;">No resolved SOS records found.</p></div></td></tr>
-                            @endforelse
+                            <template x-if="!resolvedSos || resolvedSos.length === 0">
+                                <tr><td colspan="6"><div class="tbl-empty"><i class="fas fa-clipboard-check"></i><p style="font-size:11px;font-weight:700;">No resolved SOS records found.</p></div></td></tr>
+                            </template>
+                            <template x-for="rsos in resolvedSos" :key="rsos.id">
+                                <tr>
+                                    <td style="font-weight:900;color:var(--brand);" x-text="rsos.id_formatted || ('#SOS-' + String(rsos.id).padStart(4, '0'))"></td>
+                                    <td style="font-weight:800;color:var(--text);" x-text="rsos.resident_name"></td>
+                                    <td>
+                                        <span style="font-size:8px;font-weight:900;background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:99px;text-transform:uppercase;" x-text="rsos.emergency_type"></span>
+                                        <template x-if="rsos.landmark">
+                                            <div style="font-size:10px;font-weight:800;color:#991b1b;margin-top:3px;background:#fef2f2;padding:3px 7px;border-radius:4px;border-left:2.5px solid #dc2626;">
+                                                <span style="font-size:8.5px;font-weight:900;text-transform:uppercase;">📍 Landmark:</span> <span x-text="rsos.landmark"></span>
+                                            </div>
+                                        </template>
+                                        <template x-if="rsos.message">
+                                            <div style="font-size:9.5px;font-weight:600;color:#475569;margin-top:2px;">
+                                                <span style="font-weight:800;color:#b45309;">Reason:</span> <span x-text="rsos.message"></span>
+                                            </div>
+                                        </template>
+                                    </td>
+                                    <td style="font-size:10.5px;color:#475569;font-weight:600;">
+                                        <div><i class="fas fa-phone-alt" style="font-size:9px;margin-right:2px;"></i> <span x-text="rsos.resident_contact"></span></div>
+                                        <div style="font-size:9.5px;color:var(--muted);" x-text="rsos.resident_address"></div>
+                                    </td>
+                                    <td style="font-size:10px;color:var(--muted);font-weight:700;">
+                                        <div x-text="rsos.date_fmt"></div>
+                                        <div style="font-size:9px;color:var(--light);" x-text="rsos.time_fmt"></div>
+                                    </td>
+                                    <td>
+                                        <span class="spill spill-settled"><i class="fas fa-check"></i> Resolved</span>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
