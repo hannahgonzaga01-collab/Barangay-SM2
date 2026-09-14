@@ -235,6 +235,7 @@ html, body {
     <div style="position:fixed;top:16px;right:16px;z-index:9999;background:#dc2626;color:#fff;padding:11px 18px;border-radius:11px;box-shadow:var(--card-shadow);font-weight:800;font-size:12px;">
         <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
     </div>
+    @endif
     <script>
         window.playBarangayEmergencySiren = async function() {
             try {
