@@ -235,7 +235,47 @@ html, body {
     <div style="position:fixed;top:16px;right:16px;z-index:9999;background:#dc2626;color:#fff;padding:11px 18px;border-radius:11px;box-shadow:var(--card-shadow);font-weight:800;font-size:12px;">
         <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
     </div>
-    @endif
+    <script>
+        window.playBarangayEmergencySiren = async function() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                let ctx = window._brgyAudioCtx;
+                if (!ctx || ctx.state === 'closed') {
+                    ctx = new AudioCtx();
+                    window._brgyAudioCtx = ctx;
+                }
+                if (ctx.state === 'suspended') {
+                    await ctx.resume();
+                }
+                const now = ctx.currentTime + 0.04;
+                const tones = [
+                    { f: 960, dur: 0.22 },
+                    { f: 720, dur: 0.22 },
+                    { f: 960, dur: 0.22 },
+                    { f: 720, dur: 0.22 },
+                    { f: 1040, dur: 0.30 },
+                    { f: 780, dur: 0.30 }
+                ];
+                let t = now;
+                tones.forEach(tone => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(tone.f, t);
+                    gain.gain.setValueAtTime(0.5, t);
+                    gain.gain.exponentialRampToValueAtTime(0.005, t + tone.dur);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + tone.dur);
+                    t += tone.dur;
+                });
+            } catch(e) {
+                console.warn('Emergency siren audio error:', e);
+            }
+        };
+    </script>
 
     <div class="portal-wrap" x-data="{
         activeTab: localStorage.getItem('brgy_peace_tab') || 'cases',
@@ -288,44 +328,8 @@ html, body {
         })) }},
         sosPollingInterval: null,
         playEmergencyChime() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                if (!window._brgyAudioCtx) {
-                    window._brgyAudioCtx = new AudioCtx();
-                }
-                const ctx = window._brgyAudioCtx;
-                if (ctx.state === 'suspended') {
-                    ctx.resume();
-                }
-
-                // High-urgency alternating two-tone emergency siren pulses (960Hz / 720Hz / 1040Hz)
-                const now = ctx.currentTime;
-                const tones = [
-                    { f: 960, dur: 0.25 },
-                    { f: 720, dur: 0.25 },
-                    { f: 960, dur: 0.25 },
-                    { f: 720, dur: 0.25 },
-                    { f: 1040, dur: 0.35 },
-                    { f: 780, dur: 0.35 }
-                ];
-
-                let t = now;
-                tones.forEach(tone => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(tone.f, t);
-                    gain.gain.setValueAtTime(0.35, t);
-                    gain.gain.exponentialRampToValueAtTime(0.01, t + tone.dur);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(t);
-                    osc.stop(t + tone.dur);
-                    t += tone.dur;
-                });
-            } catch(e) {
-                console.warn('Emergency siren audio error:', e);
+            if (typeof window.playBarangayEmergencySiren === 'function') {
+                return window.playBarangayEmergencySiren();
             }
         },
         pollSosAlerts() {
