@@ -594,6 +594,7 @@ html, body {
 
             tanodSchedules: @json($tanodSchedulesArray ?? []),
             sosModal: false,
+            sosConfirmStep: false,
             sosLoading: false,
             sosSuccess: false,
             sosError: null,
@@ -611,6 +612,7 @@ html, body {
                 }
 
                 this.sosModal = true;
+                this.sosConfirmStep = false;
                 this.sosSuccess = false;
                 this.sosError = null;
                 this.sosLoading = false;
@@ -635,6 +637,26 @@ html, body {
                 } else {
                     this.sosLocationStatus = 'fallback';
                 }
+            },
+
+            proceedToConfirm() {
+                if(!this.sosLandmark || this.sosLandmark.trim() === '') {
+                    this.sosError = 'Pakilagay po ang eksaktong landmark o lokasyon ng emergency bago mag-dispatch.';
+                    return;
+                }
+                this.sosError = null;
+                this.sosConfirmStep = true;
+            },
+
+            getEmergencyTypeLabel(type) {
+                const map = {
+                    'general': '🚨 General Emergency / Tanod Assistance',
+                    'security': '🛡️ Security Threat / Disturbance / Intruder',
+                    'medical': '🚑 Medical Emergency / First Responder',
+                    'fire': '🔥 Fire / Hazard Alert',
+                    'dispute': '⚠️ Neighborhood Incident / Domestic Disturbance'
+                };
+                return map[type] || 'Emergency Assistance';
             },
 
             sendSosAlert() {
@@ -2934,9 +2956,10 @@ html, body {
     <div x-show="sosModal" x-cloak class="modal-ov" x-transition style="z-index:10000;" @keydown.window.escape="if(!sosLoading) sosModal=false">
         <div class="modal-box" style="max-width:480px;border-top:5px solid #e11d48;border-radius:20px;" @click.away="if(!sosLoading) sosModal=false">
             <div class="modal-in">
-                <template x-if="!sosSuccess">
+                {{-- STEP 1: FILL OUT & DETAILS (with Serious Advisory Note before dispatch) --}}
+                <template x-if="!sosSuccess && !sosConfirmStep">
                     <div>
-                        <div class="modal-hd" style="margin-bottom:14px;">
+                        <div class="modal-hd" style="margin-bottom:12px;">
                             <div class="modal-ttl">
                                 <div class="modal-ico" style="background:rgba(225,29,72,0.12);color:#e11d48;"><i class="fas fa-truck-medical"></i></div>
                                 <div>
@@ -2947,8 +2970,17 @@ html, body {
                             <button type="button" @click="sosModal=false" class="modal-close" :disabled="sosLoading"><i class="fas fa-times-circle"></i></button>
                         </div>
 
+                        {{-- STRICT ADVISORY NOTE (BEFORE FILL-OUT) --}}
+                        <div style="background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #e11d48;border-radius:10px;padding:9px 12px;margin-bottom:13px;display:flex;align-items:flex-start;gap:9px;">
+                            <i class="fas fa-triangle-exclamation" style="color:#e11d48;font-size:14px;margin-top:2px;flex-shrink:0;"></i>
+                            <div style="font-size:10.5px;color:#881337;line-height:1.45;">
+                                <strong style="color:#9f1239;text-transform:uppercase;letter-spacing:0.3px;">⚠️ MAHALAGANG PAALALA:</strong><br>
+                                Ang Emergency SOS ay para lamang sa mga <strong>totoong emergency</strong> (medikal, sunog, krimen, o banta sa kaligtasan). Agad na tutungo ang mga Tanod sa inyong ibibigay na lokasyon. Ang prank o biruan ay <strong>mahigpit na ipinagbabawal</strong> at may karampatang parusa ayon sa batas.
+                            </div>
+                        </div>
+
                         {{-- Geolocation status banner --}}
-                        <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+                        <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
                             <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#be123c;">
                                 <i class="fas fa-location-crosshairs" :class="sosLocationStatus==='detecting' ? 'fa-spin' : ''"></i>
                                 <span>Location Dispatch Information:</span>
@@ -3000,14 +3032,64 @@ html, body {
                             <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-bottom:12px;" x-text="sosError"></div>
                         </template>
 
-                        <div style="display:flex;gap:10px;margin-top:18px;">
+                        <div style="display:flex;gap:10px;margin-top:16px;">
                             <button type="button" @click="sosModal=false" class="btn-plain btn-ghost" style="flex:1;" :disabled="sosLoading">Cancel</button>
-                            <button type="button" @click="sendSosAlert()" class="sos-btn" style="flex:2;justify-content:center;padding:12px;" :disabled="sosLoading">
+                            <button type="button" @click="proceedToConfirm()" class="sos-btn" style="flex:2;justify-content:center;padding:12px;" :disabled="sosLoading">
+                                <span><i class="fas fa-bullhorn"></i> DISPATCH NOW</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- STEP 2: CONFIRMATION PROMPT (AFTER CLICKING DISPATCH NOW) --}}
+                <template x-if="!sosSuccess && sosConfirmStep">
+                    <div style="text-align:center;padding:4px 2px;">
+                        <div style="width:58px;height:58px;background:#fee2e2;color:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;box-shadow:0 0 0 8px rgba(220,38,38,0.12);">
+                            <i class="fas fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 style="font-size:16px;font-weight:900;color:#991b1b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">
+                            KUMPIRMASYON SA PAG-DISPATCH
+                        </h3>
+                        <p style="font-size:11.5px;color:#475569;font-weight:600;line-height:1.5;margin-bottom:14px;">
+                            Sigurado ka bang nais mong magpadala ng Emergency Dispatch sa Barangay Peace & Order Patrol?
+                        </p>
+
+                        <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:12px 14px;text-align:left;margin-bottom:14px;font-size:11px;color:#1e293b;line-height:1.6;">
+                            <div style="margin-bottom:6px;">
+                                <span style="color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;">🚨 Uri ng Emergency:</span><br>
+                                <strong style="color:#dc2626;font-size:12px;" x-text="getEmergencyTypeLabel(sosEmergencyType)"></strong>
+                            </div>
+                            <div style="margin-bottom:6px;">
+                                <span style="color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;">📍 Pupuntahang Landmark / Lokasyon:</span><br>
+                                <strong style="color:#0f172a;font-size:12px;background:#fee2e2;padding:2px 6px;border-radius:4px;display:inline-block;" x-text="sosLandmark"></strong>
+                            </div>
+                            <template x-if="sosMessage">
+                                <div style="margin-bottom:6px;">
+                                    <span style="color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;">ℹ️ Karagdagang Detalye:</span><br>
+                                    <span style="color:#334155;font-weight:600;" x-text="sosMessage"></span>
+                                </div>
+                            </template>
+                            <hr style="border:0;border-top:1px dashed #fca5a5;margin:8px 0;">
+                            <div style="color:#991b1b;font-weight:800;font-size:10.5px;display:flex;align-items:flex-start;gap:6px;">
+                                <i class="fas fa-shield-alt" style="margin-top:2px;"></i>
+                                <span>HINDI ITO LARO O BIRO. Agad na tutungo ang mga rumespondeng Tanod sa nasabing lokasyon.</span>
+                            </div>
+                        </div>
+
+                        <template x-if="sosError">
+                            <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-bottom:12px;" x-text="sosError"></div>
+                        </template>
+
+                        <div style="display:flex;gap:10px;margin-top:14px;">
+                            <button type="button" @click="sosConfirmStep=false" class="btn-plain btn-ghost" style="flex:1;" :disabled="sosLoading">
+                                <i class="fas fa-arrow-left"></i> Bumalik
+                            </button>
+                            <button type="button" @click="sendSosAlert()" class="sos-btn" style="flex:2;justify-content:center;padding:12px;background:#dc2626;color:#fff;" :disabled="sosLoading">
                                 <template x-if="!sosLoading">
-                                    <span><i class="fas fa-bullhorn"></i> DISPATCH NOW</span>
+                                    <span><i class="fas fa-bullhorn"></i> OO, I-DISPATCH NA</span>
                                 </template>
                                 <template x-if="sosLoading">
-                                    <span><i class="fas fa-spinner fa-spin"></i> TRANSMITTING ALERT...</span>
+                                    <span><i class="fas fa-spinner fa-spin"></i> TRANSMITTING...</span>
                                 </template>
                             </button>
                         </div>
@@ -3017,7 +3099,7 @@ html, body {
                 {{-- Success State --}}
                 <template x-if="sosSuccess">
                     <div style="text-align:center;padding:10px 0;">
-                        <div style="width:64px;height:64px;background:#dcfce7;color:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;box-shadow:0 0 0 8px rgba(22,163,74,0.15);">
+                        <div style="width:64px;height:64px;background:#dcfce7;color:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;box-shadow:0 0 0 8px rgba(220,38,38,0.15);">
                             <i class="fas fa-check"></i>
                         </div>
                         <h3 style="font-size:16px;font-weight:900;color:#166534;margin-bottom:6px;">DISPATCH ALERT TRANSMITTED</h3>
@@ -3028,7 +3110,7 @@ html, body {
                             <div><i class="fas fa-shield-alt" style="color:var(--brand);margin-right:4px;"></i> On-duty patrol units are being notified.</div>
                             <div style="margin-top:4px;"><i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> Keep your line open for Tanod dispatch verification.</div>
                         </div>
-                        <button type="button" @click="sosModal=false; sosSuccess=false;" class="btn-grad" style="width:100%;justify-content:center;padding:10px;">
+                        <button type="button" @click="sosModal=false; sosSuccess=false; sosConfirmStep=false;" class="btn-grad" style="width:100%;justify-content:center;padding:10px;">
                             Understood & Close
                         </button>
                     </div>
