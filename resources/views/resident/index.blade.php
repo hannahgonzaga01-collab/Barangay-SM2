@@ -431,6 +431,8 @@ html, body {
             docuModal: false,
             issueModal: false,
             profileModal: false,
+            emailEditModal: false,
+            sosResidentEmail: '',
             familyModal: false,
             classification: '',
             age: 0,
@@ -702,6 +704,7 @@ html, body {
                     this.sosLoading = false;
                     if(data.success) {
                         this.sosSuccess = true;
+                        this.sosResidentEmail = data.resident_email || '';
                     } else {
                         this.sosError = data.message || 'Error sending SOS alert.';
                     }
@@ -1662,10 +1665,14 @@ html, body {
                             <div x-show="cType === 'self'">
                                 @if(!$isAuth)
                                 <div class="sblk">
-                                    <div class="sblk-ttl"><i class="fas fa-user"></i> Your Name</div>
+                                    <div class="sblk-ttl"><i class="fas fa-user"></i> Your Details</div>
                                     <div class="fgrid2 fgrp">
                                         <div><label class="flbl">First Name *</label><input type="text" name="guest_first_name" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="Juan"></div>
                                         <div><label class="flbl">Last Name *</label><input type="text" name="guest_last_name" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="Dela Cruz"></div>
+                                    </div>
+                                    <div class="fgrp" style="margin-top:8px;">
+                                        <label class="flbl">Email Address * (For pick-up updates & confirmation)</label>
+                                        <input type="email" name="guest_email" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="juan@example.com">
                                     </div>
                                 </div>
                                 @endif
@@ -1835,6 +1842,39 @@ html, body {
         </div>
     </div>
     {{-- END FAQs MODAL --}}
+
+    {{-- UPDATE EMAIL MODAL --}}
+    @if($isAuth)
+    <div x-show="emailEditModal" x-cloak class="modal-ov" x-transition style="z-index:99999;">
+        <div class="modal-box" style="max-width:420px;" @click.away="emailEditModal=false">
+            <div class="modal-in">
+                <div class="modal-hd">
+                    <div class="modal-ttl">
+                        <div class="modal-ico"><i class="fas fa-envelope"></i></div>
+                        <div>Update Registered Email</div>
+                    </div>
+                    <button @click="emailEditModal=false; profileModal=true;" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                </div>
+                <form action="{{ route('resident.email.update') }}" method="POST">
+                    @csrf
+                    <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
+                        Enter your active personal email address where you want to receive document pickup notices and emergency SOS dispatch receipts.
+                    </p>
+                    <div class="fgrp">
+                        <label class="flbl">New Email Address *</label>
+                        <input type="email" name="email" required class="finput" value="{{ $authUser?->email }}" placeholder="your-email@gmail.com">
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+                        <button type="button" @click="emailEditModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm">Cancel</button>
+                        <button type="submit" class="btn-grad btn-sm"><i class="fas fa-save"></i> Save Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- ADD PET MODAL --}}
 
     {{-- REPORT ISSUE MODAL --}}
     <div x-show="issueModal" x-cloak class="modal-ov" x-transition>
@@ -2279,6 +2319,15 @@ html, body {
                         <div class="profile-field-val">{{ $val }}</div>
                     </div>
                     @endforeach
+                    <div class="profile-field" style="grid-column:span 2;">
+                        <div class="profile-field-lbl">Registered Email Address (For Notifications & Receipts)</div>
+                        <div class="profile-field-val" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+                            <span style="word-break:break-all;">{{ $authUser?->email ?? 'No email set' }}</span>
+                            <button type="button" @click="profileModal=false; emailEditModal=true" class="btn-plain btn-sm" style="padding:4px 10px;font-size:9.5px;font-weight:800;color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;">
+                                <i class="fas fa-edit"></i> Change Email
+                            </button>
+                        </div>
+                    </div>
                     <div class="profile-field" style="grid-column:span 2;">
                         <div class="profile-field-lbl">Address</div>
                         <div class="profile-field-val">{{ $authUser?->address ?? 'N/A' }}</div>
@@ -3173,9 +3222,15 @@ html, body {
                             <i class="fas fa-check"></i>
                         </div>
                         <h3 style="font-size:16px;font-weight:900;color:#166534;margin-bottom:6px;">DISPATCH ALERT TRANSMITTED</h3>
-                        <p style="font-size:11px;color:#1e293b;font-weight:600;line-height:1.6;margin-bottom:18px;">
+                        <p style="font-size:11px;color:#1e293b;font-weight:600;line-height:1.6;margin-bottom:14px;">
                             Your emergency SOS has been received with <strong>HIGHEST PRIORITY</strong> by the on-duty Barangay Police (Tanod) & Peace and Order Command.
                         </p>
+                        <template x-if="sosResidentEmail || @json($authUser?->email)">
+                            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;font-weight:700;text-align:left;">
+                                <i class="fas fa-envelope-circle-check" style="color:var(--brand);margin-right:4px;"></i>
+                                Confirmation receipt sent to: <strong style="color:#0E5393;" x-text="sosResidentEmail || @json($authUser?->email)"></strong>
+                            </div>
+                        </template>
                         <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:10.5px;color:#475569;font-weight:700;margin-bottom:20px;text-align:left;">
                             <div><i class="fas fa-shield-alt" style="color:var(--brand);margin-right:4px;"></i> On-duty patrol units are being notified.</div>
                             <div style="margin-top:4px;"><i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> Keep your line open for Tanod dispatch verification.</div>

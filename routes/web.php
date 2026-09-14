@@ -63,6 +63,8 @@ Route::middleware(['verified_resident'])->group(function () {
     Route::get('/resident/profile-photo', fn() => redirect()->route('resident.index'));
     Route::post('/resident/family', [ResidentPortalController::class, 'storeFamilyMember'])->name('resident.family.store')->middleware('auth');
     Route::get('/resident/family', fn() => redirect()->route('resident.index'));
+    Route::post('/resident/email', [ResidentPortalController::class, 'updateResidentEmail'])->name('resident.email.update')->middleware('auth');
+    Route::get('/resident/email', fn() => redirect()->route('resident.index'));
 
     Route::post('/resident/digital-id', [ResidentPortalController::class, 'requestDigitalId'])
         ->middleware('auth')

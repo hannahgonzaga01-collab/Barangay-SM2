@@ -283,25 +283,26 @@ class ResidentPortalController extends Controller
         ]);
 
         // Send emergency alert email to Barangay Hall / Peace & Order team
-        try {
-            $adminEmail = config('mail.from.address') ?: 'brgysanmigueldos@gmail.com';
-            $mailData = [
-                'alert_id'        => $alert->id,
-                'resident_name'   => $name,
-                'contact_number'  => $contact,
-                'home_address'    => $address,
-                'landmark'        => $landmark,
-                'emergency_type'  => $emergencyType,
-                'message'         => $situationNote,
-                'latitude'        => $lat,
-                'longitude'       => $lng,
-                'accuracy'        => $request->accuracy,
-                'google_maps_url' => $mapsUrl,
-                'dispatched_at'   => now()->format('F d, Y h:i A'),
-            ];
+        $adminEmail = config('mail.from.address') ?: 'brgysanmigueldos@gmail.com';
+        $mailData = [
+            'alert_id'        => $alert->id,
+            'resident_name'   => $name,
+            'contact_number'  => $contact,
+            'home_address'    => $address,
+            'landmark'        => $landmark,
+            'emergency_type'  => $emergencyType,
+            'message'         => $situationNote,
+            'latitude'        => $lat,
+            'longitude'       => $lng,
+            'accuracy'        => $request->accuracy,
+            'google_maps_url' => $mapsUrl,
+            'dispatched_at'   => now()->format('F d, Y h:i A'),
+        ];
+        $residentEmail = $user?->email ?: $request->email;
 
-            // 1. Email Alert to Barangay Hall / Peace & Order Tanod On-Duty
-            \Illuminate\Support\Facades\Mail::send([], [], function ($m) use ($adminEmail, $mailData) {
+        // 1. Email Alert to Barangay Hall / Peace & Order Tanod On-Duty
+        try {
+            \Illuminate\Support\Facades\Mail::send([], [], function ($m) use ($adminEmail, $mailData, $residentEmail) {
                 $locationLine = ($mailData['latitude'] && $mailData['longitude'])
                     ? "<p><strong>📍 GPS Location:</strong> <a href=\"{$mailData['google_maps_url']}\" target=\"_blank\" style=\"color:#dc2626;font-weight:bold;\">View on Google Maps ({$mailData['latitude']}, {$mailData['longitude']})</a> (Accuracy: " . htmlspecialchars($mailData['accuracy'] ?? 'N/A') . ")</p>"
                     : "<p><strong>📍 GPS Location:</strong> Coordinates not provided.</p>";
@@ -314,19 +315,27 @@ class ResidentPortalController extends Controller
                     ? "<p style=\"background:#fffbeb;border-left:4px solid #f59e0b;padding:9px 12px;margin:10px 0;color:#92400e;font-size:13px;\"><strong>ℹ️ Situation Reason / Details:</strong> " . htmlspecialchars($mailData['message']) . "</p>"
                     : "";
 
+                $residentEmailLine = $residentEmail
+                    ? "<p><strong>📧 Resident Email:</strong> " . htmlspecialchars($residentEmail) . " <em>(Confirmation receipt sent)</em></p>"
+                    : "<p><strong>📧 Resident Email:</strong> <em>Not provided / unauthenticated</em></p>";
+
                 $body = "
                 <div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:2px solid #dc2626;border-radius:10px;overflow:hidden;\">
                     <div style=\"background:#dc2626;color:#fff;padding:16px 20px;text-align:center;\">
-                        <h2 style=\"margin:0;font-size:18px;text-transform:uppercase;letter-spacing:1px;\">🚨 [OFFICIAL DISPATCH ALERT] PEACE & ORDER COMMAND</h2>
+                        <h2 style=\"margin:0;font-size:18px;text-transform:uppercase;letter-spacing:1px;\">🚨 [TANOD DISPATCH ALERT] PEACE & ORDER COMMAND</h2>
                         <p style=\"margin:4px 0 0;font-size:12px;opacity:0.9;\">Barangay San Miguel II — Quick Response Tanod Division</p>
                     </div>
                     <div style=\"padding:20px;color:#1f2937;line-height:1.6;\">
-                        <div style=\"background:#fef2f2;border:1px solid #fecaca;padding:10px 14px;border-radius:6px;color:#991b1b;font-weight:bold;margin-bottom:15px;\">
-                            📢 NOTICE FOR BARANGAY ON-DUTY OFFICERS: A resident has triggered an emergency SOS. Please coordinate immediate dispatch.
+                        <div style=\"background:#fef2f2;border:1px solid #fecaca;padding:10px 14px;border-radius:6px;color:#991b1b;font-weight:bold;margin-bottom:12px;\">
+                            📢 OFFICIAL NOTICE FOR BARANGAY ON-DUTY OFFICERS: A resident has triggered an emergency SOS. Please coordinate immediate dispatch.
+                        </div>
+                        <div style=\"background:#eff6ff;border:1px solid #bfdbfe;padding:9px 12px;border-radius:6px;color:#1e40af;font-size:11.5px;margin-bottom:15px;\">
+                            ℹ️ <em>This alert was transmitted to the Barangay Command Center (<code>{$adminEmail}</code>) for patrol unit dispatch. A separate confirmation receipt has been sent to the resident's registered email.</em>
                         </div>
                         <p><strong>🚨 Emergency Nature:</strong> <span style=\"color:#dc2626;font-weight:bold;\">" . htmlspecialchars($mailData['emergency_type']) . "</span></p>
                         <p><strong>👤 Resident Name:</strong> " . htmlspecialchars($mailData['resident_name']) . "</p>
                         <p><strong>📞 Contact Number:</strong> " . htmlspecialchars($mailData['contact_number']) . "</p>
+                        {$residentEmailLine}
                         <p><strong>🏠 Registered Home Address:</strong> " . htmlspecialchars($mailData['home_address']) . "</p>
                         {$landmarkLine}
                         {$situationLine}
@@ -339,14 +348,21 @@ class ResidentPortalController extends Controller
                     </div>
                 </div>";
 
-                $m->to($adminEmail)
-                  ->subject("🚨 [TANOD DISPATCH ALERT] {$mailData['emergency_type']} — {$mailData['resident_name']}")
+                $m->to($adminEmail);
+                if (!empty($residentEmail) && filter_var($residentEmail, FILTER_VALIDATE_EMAIL)) {
+                    $m->replyTo($residentEmail, $mailData['resident_name']);
+                }
+                $m->subject("🚨 [TANOD DISPATCH ALERT] {$mailData['emergency_type']} — {$mailData['resident_name']}")
                   ->html($body);
             });
+            \Illuminate\Support\Facades\Log::info("SOS Admin alert sent to {$adminEmail}");
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SOS Admin Email failed: ' . $e->getMessage());
+        }
 
-            // 2. Email Confirmation Receipt directly to the Resident's personal email
-            $residentEmail = $user?->email ?: $request->email;
-            if (!empty($residentEmail) && filter_var($residentEmail, FILTER_VALIDATE_EMAIL)) {
+        // 2. Email Confirmation Receipt directly to the Resident's personal email
+        if (!empty($residentEmail) && filter_var($residentEmail, FILTER_VALIDATE_EMAIL)) {
+            try {
                 \Illuminate\Support\Facades\Mail::send([], [], function ($m) use ($residentEmail, $mailData) {
                     $landmarkLine = !empty($mailData['landmark'])
                         ? "<p style=\"background:#fef2f2;border-left:4px solid #dc2626;padding:10px 14px;margin:10px 0;color:#991b1b;font-size:13px;\"><strong>📍 Reported Landmark / Location:</strong> " . htmlspecialchars($mailData['landmark']) . "</p>"
@@ -407,9 +423,10 @@ class ResidentPortalController extends Controller
                       ->subject("🚨 [SOS CONFIRMATION] Emergency Assistance Received — Barangay San Miguel II")
                       ->html($body);
                 });
+                \Illuminate\Support\Facades\Log::info("SOS Resident confirmation email sent to {$residentEmail}");
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('SOS Resident Email failed for ' . $residentEmail . ': ' . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('SOS Email failed: ' . $e->getMessage());
         }
 
         // In-app notification for the resident themselves
@@ -464,6 +481,7 @@ class ResidentPortalController extends Controller
             'success' => true,
             'message' => 'Emergency SOS alert dispatched successfully to Barangay Peace & Order team!',
             'alert_id' => $alert->id,
+            'resident_email' => $residentEmail,
         ]);
     }
 
@@ -887,9 +905,10 @@ class ResidentPortalController extends Controller
             $this->notifyUser($docRequest);
         }
 
+        $destEmail = auth()->check() ? auth()->user()->email : $request->guest_email;
         $msg = auth()->check() 
-            ? '✅ Document request(s) submitted! The office will notify you when ready.'
-            : '✅ Guest request sent! Please personally go to the Barangay Hall and bring a Valid ID.';
+            ? ('✅ Document request(s) submitted! A confirmation receipt has been sent to ' . ($destEmail ?: 'your registered email') . '.')
+            : ('✅ Guest request sent! ' . ($destEmail ? 'A confirmation receipt has been sent to ' . $destEmail . '.' : 'Please personally go to the Barangay Hall and bring a Valid ID.'));
 
         return redirect()->route('resident.index')->with('success', $msg);
     }
@@ -899,9 +918,11 @@ class ResidentPortalController extends Controller
         try {
             if (auth()->check()) {
                 auth()->user()->notify(new \App\Notifications\DocumentRequestReceived($docRequest));
+                \Illuminate\Support\Facades\Log::info('DocumentRequestReceived sent to user ' . auth()->user()->email);
             } elseif (!empty($docRequest->guest_email)) {
                 \Illuminate\Support\Facades\Notification::route('mail', $docRequest->guest_email)
                     ->notify(new \App\Notifications\DocumentRequestReceived($docRequest));
+                \Illuminate\Support\Facades\Log::info('DocumentRequestReceived sent to guest ' . $docRequest->guest_email);
             }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Failed to notify user for document request: ' . $e->getMessage());
@@ -1348,5 +1369,19 @@ class ResidentPortalController extends Controller
         } catch (\Exception $e) {
             // Silently catch exceptions so portal never breaks
         }
+    }
+
+    public function updateResidentEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
+        ]);
+
+        $user = auth()->user();
+        $user->email = strtolower(trim($request->email));
+        $user->save();
+
+        return redirect()->route('resident.index')
+            ->with('success', '✅ Email address updated to ' . $user->email . '! All document notifications and emergency SOS receipts will now be sent here.');
     }
 }
