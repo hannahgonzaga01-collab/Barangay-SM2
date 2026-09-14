@@ -167,7 +167,7 @@
                                     setTimeout(() => this.saved = false, 2000);
                                 }
                             }" @update-office-settings.window="if(navIssuedBy !== $event.detail.issuedBy) navIssuedBy = $event.detail.issuedBy; if(navPosition !== $event.detail.position) navPosition = $event.detail.position;">
-                                <div class="text-[9px] font-black uppercase text-blue-800 mb-2 tracking-widest"><i class="fas fa-pen-nib mr-1"></i> Signatory Settings</div>
+                                <div class="text-[9px] font-black uppercase text-blue-800 mb-2 tracking-widest"><i class="fas fa-user-clock mr-1"></i> Duty Staff</div>
                                 <div class="mb-2">
                                     <label class="text-[9px] font-bold text-gray-500 block mb-1 uppercase tracking-wide">Staff Name</label>
                                     <input type="text" x-model="navIssuedBy" @keydown.enter="saveSettings()" class="w-full px-2 py-1.5 text-xs bg-white border border-gray-200 rounded-md outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm" placeholder="e.g. Juan Dela Cruz">
