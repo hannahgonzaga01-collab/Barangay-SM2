@@ -598,6 +598,8 @@ html, body {
             sosLoading: false,
             sosSuccess: false,
             sosError: null,
+            sosLandmarkError: false,
+            sosMessageError: false,
             sosEmergencyType: 'general',
             sosLandmark: '',
             sosMessage: '',
@@ -615,6 +617,8 @@ html, body {
                 this.sosConfirmStep = false;
                 this.sosSuccess = false;
                 this.sosError = null;
+                this.sosLandmarkError = false;
+                this.sosMessageError = false;
                 this.sosLoading = false;
                 this.sosLandmark = '';
                 this.sosMessage = '';
@@ -640,11 +644,32 @@ html, body {
             },
 
             proceedToConfirm() {
-                if(!this.sosLandmark || this.sosLandmark.trim() === '') {
-                    this.sosError = 'Pakilagay po ang eksaktong landmark o lokasyon ng emergency bago mag-dispatch.';
+                this.sosError = null;
+                this.sosLandmarkError = false;
+                this.sosMessageError = false;
+
+                const landmarkClean = (this.sosLandmark || '').trim();
+                const messageClean = (this.sosMessage || '').trim();
+
+                if (!landmarkClean && !messageClean) {
+                    this.sosError = '⚠️ Bawal i-submit nang walang info! Pakilagay po ang eksaktong landmark at sitwasyon ng emergency.';
+                    this.sosLandmarkError = true;
+                    this.sosMessageError = true;
                     return;
                 }
-                this.sosError = null;
+
+                if (!landmarkClean || landmarkClean.length < 3) {
+                    this.sosError = '⚠️ Bawal iwanang blangko ang landmark! Pakilagay po ang eksaktong landmark o lokasyon (hindi bababa sa 3 letra).';
+                    this.sosLandmarkError = true;
+                    return;
+                }
+
+                if (!messageClean || messageClean.length < 3) {
+                    this.sosError = '⚠️ Bawal iwanang blangko ang sitwasyon! Pakilagay po ang dahilan o detalye ng emergency para alam ng Tanod ang sitwasyon.';
+                    this.sosMessageError = true;
+                    return;
+                }
+
                 this.sosConfirmStep = true;
             },
 
@@ -660,6 +685,14 @@ html, body {
             },
 
             sendSosAlert() {
+                const landmarkClean = (this.sosLandmark || '').trim();
+                const messageClean = (this.sosMessage || '').trim();
+                if (!landmarkClean || !messageClean) {
+                    this.sosError = '⚠️ Bawal i-submit nang walang info! Kinakailangan ang landmark at sitwasyon.';
+                    this.sosConfirmStep = false;
+                    return;
+                }
+
                 this.sosLoading = true;
                 this.sosError = null;
 
@@ -3011,21 +3044,51 @@ html, body {
                             </select>
                         </div>
 
-                        {{-- Dedicated Incident Landmark / Location Input --}}
+                        {{-- Dedicated Incident Landmark / Location Input (REQUIRED) --}}
                         <div class="fgrp">
-                            <label class="flbl" style="color:#b91c1c;display:flex;align-items:center;gap:4px;">
-                                <i class="fas fa-map-marker-alt"></i> Exact Landmark / Incident Location *
+                            <label class="flbl" style="color:#b91c1c;display:flex;align-items:center;justify-content:space-between;font-weight:800;">
+                                <span style="display:inline-flex;align-items:center;gap:4px;">
+                                    <i class="fas fa-map-marker-alt"></i> Exact Landmark / Incident Location *
+                                </span>
+                                <span style="font-size:9px;background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:4px;font-weight:900;letter-spacing:0.3px;">REQUIRED</span>
                             </label>
-                            <input type="text" x-model="sosLandmark" class="finput" placeholder="e.g. Tapat ng Covered Court, Kanto ng Phase 2 sari-sari store..." style="font-weight:700;border:1.5px solid #f87171;background:#fff5f5;">
+                            <input type="text" x-model="sosLandmark" 
+                                   @input="if(sosLandmark.trim().length >= 3) { sosLandmarkError = false; if(!sosMessageError) sosError = null; }"
+                                   class="finput" 
+                                   placeholder="e.g. Tapat ng Covered Court, Kanto ng Phase 2 sari-sari store..." 
+                                   :style="sosLandmarkError ? 'font-weight:700;border:2px solid #dc2626 !important;background:#fff1f2 !important;' : 'font-weight:700;border:1.5px solid #f87171;background:#fff5f5;'">
                             <div style="font-size:9.5px;color:#64748b;margin-top:3px;">
-                                <i class="fas fa-info-circle" style="color:#ef4444;"></i> Saan mismong lugar nagaganap ang emergency? Ilagay ang landmark lalo na kung wala sa inyong bahay.
+                                <i class="fas fa-info-circle" style="color:#ef4444;"></i> Saan mismong lugar nagaganap ang emergency? Bawal iwanang blangko.
                             </div>
+                            <template x-if="sosLandmarkError">
+                                <div style="color:#dc2626;font-size:10px;font-weight:800;margin-top:2px;">
+                                    <i class="fas fa-exclamation-circle"></i> Kinakailangan ang eksaktong landmark (hindi bababa sa 3 letra).
+                                </div>
+                            </template>
                         </div>
 
-                        {{-- Situation Details / Notes --}}
+                        {{-- Situation Details / Notes (REQUIRED) --}}
                         <div class="fgrp">
-                            <label class="flbl">Situation Reason / Karagdagang Detalye (Optional)</label>
-                            <textarea x-model="sosMessage" rows="2" class="finput" placeholder="e.g. May sugatan kailangan ng first aid, may nagwawalang tao, etc..." style="resize:none;"></textarea>
+                            <label class="flbl" style="color:#b91c1c;display:flex;align-items:center;justify-content:space-between;font-weight:800;">
+                                <span style="display:inline-flex;align-items:center;gap:4px;">
+                                    <i class="fas fa-comment-medical"></i> Situation Reason / Detalye ng Emergency *
+                                </span>
+                                <span style="font-size:9px;background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:4px;font-weight:900;letter-spacing:0.3px;">REQUIRED</span>
+                            </label>
+                            <textarea x-model="sosMessage" 
+                                      @input="if(sosMessage.trim().length >= 3) { sosMessageError = false; if(!sosLandmarkError) sosError = null; }"
+                                      rows="2" 
+                                      class="finput" 
+                                      placeholder="e.g. May sugatan kailangan ng first aid, may nagwawalang tao, may sunog..." 
+                                      :style="sosMessageError ? 'resize:none;font-weight:600;border:2px solid #dc2626 !important;background:#fff1f2 !important;' : 'resize:none;font-weight:600;border:1.5px solid #cbd5e1;background:#ffffff;'"></textarea>
+                            <div style="font-size:9.5px;color:#64748b;margin-top:3px;">
+                                <i class="fas fa-info-circle" style="color:#ef4444;"></i> Ano ang nangyayari? Bawal iwanang blangko para alam ng Tanod ang sitwasyon.
+                            </div>
+                            <template x-if="sosMessageError">
+                                <div style="color:#dc2626;font-size:10px;font-weight:800;margin-top:2px;">
+                                    <i class="fas fa-exclamation-circle"></i> Kinakailangan ilarawan ang sitwasyon (hindi bababa sa 3 letra).
+                                </div>
+                            </template>
                         </div>
 
                         <template x-if="sosError">
