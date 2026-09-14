@@ -479,4 +479,81 @@ function printOfficeReportHelper() {
     printWindow.focus();
     setTimeout(() => { printWindow.print(); printWindow.close(); }, 400);
 }
+
+// ── Document Template Customization Helpers ──
+function insertTag(buttonEl, tag) {
+    const form = buttonEl.closest('form');
+    if (!form) return;
+    const textarea = form.querySelector('textarea[name="body_template"]');
+    if (!textarea) return;
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const text = textarea.value;
+    textarea.value = text.substring(0, start) + tag + text.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + tag.length, start + tag.length);
+}
+
+function renderTemplateBody(rawText, scope) {
+    if (!rawText) return '';
+    const dateFormatted = scope.formatDocDate ? scope.formatDocDate(scope.docDate) : (scope.docDate || '');
+    return rawText
+        .replace(/\{NAME\}/gi, `<strong>${scope.docOwnerName || '______________________________'}</strong>`)
+        .replace(/\{AGE\}/gi, `<strong>${scope.docOwnerAge || scope.docAge || '___'}</strong>`)
+        .replace(/\{ADDRESS\}/gi, `<strong>${scope.docOwnerAddress || 'Barangay San Miguel II, Dasmariñas City, Cavite'}</strong>`)
+        .replace(/\{PURPOSE\}/gi, `<strong>${scope.docPurpose || '______________________________'}</strong>`)
+        .replace(/\{DATE\}/gi, `<strong>${dateFormatted}</strong>`)
+        .replace(/\{BIRTHDAY\}/gi, `<strong>${scope.docOwnerBday || '__________________'}</strong>`)
+        .replace(/\{BIRTHPLACE\}/gi, `<strong>${scope.docOwnerBirthplace || '__________________'}</strong>`)
+        .replace(/\{DAY\}/gi, `<strong>${scope.docDayOrdinal || ''}</strong>`)
+        .replace(/\{MONTH\}/gi, `<strong>${scope.docMonth || ''}</strong>`)
+        .replace(/\{YEAR\}/gi, `<strong>${scope.docYear || ''}</strong>`);
+}
+
+async function saveTemplate(key, formEl) {
+    const btn = formEl.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    const formData = new FormData(formEl);
+    try {
+        const res = await fetch(`/office/document-templates/${key}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✓ Na-save at nailapat na ang bagong document template!');
+            window.location.reload();
+        } else {
+            alert('Hindi na-save ang template: ' + (data.message || 'May error na naganap.'));
+        }
+    } catch (err) {
+        alert('Error sa pag-save ng template: ' + err.message);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function resetTemplate(key) {
+    if (!confirm('Kumpirmahin: Ibalik sa default layout at wording ang template ng dokumentong ito?')) return;
+    try {
+        const res = await fetch(`/office/document-templates/${key}/reset`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✓ Naibalik na sa default barangay template.');
+            window.location.reload();
+        }
+    } catch (err) {
+        alert('Error sa pag-reset ng template: ' + err.message);
+    }
+}
 </script>

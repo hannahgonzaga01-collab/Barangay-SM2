@@ -140,9 +140,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/office/{id}/restore', [OfficeController::class, 'restore'])->name('office.restore');
     Route::get('/office/family/{id}', [OfficeController::class, 'getFamily'])->name('office.family');
 
-    // ── Office Document Requests ──
+    // ── Office Document Requests & Templates ──
     Route::patch('/office/document-request/{id}/status', [OfficeController::class, 'updateDocumentStatus'])->name('office.document.status');
     Route::get('/office/document-request/{id}/json', [OfficeController::class, 'getDocumentRequest'])->name('office.document.request.json');
+    Route::post('/office/document-requests/purge-archive', [OfficeController::class, 'purgeArchivedRequests'])->name('office.document.purge-archive');
+    Route::get('/office/document-templates', [\App\Http\Controllers\DocumentTemplateController::class, 'all'])->name('office.document.templates');
+    Route::post('/office/document-templates/{key}', [\App\Http\Controllers\DocumentTemplateController::class, 'update'])->name('office.document.templates.update');
+    Route::post('/office/document-templates/{key}/reset', [\App\Http\Controllers\DocumentTemplateController::class, 'reset'])->name('office.document.templates.reset');
 
     // ── Office Digital ID ──
     Route::post('/office/digital-id/{id}/generate', [OfficeController::class, 'generateDigitalId'])->name('office.digital.id.generate');

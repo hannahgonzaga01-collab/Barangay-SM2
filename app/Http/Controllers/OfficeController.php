@@ -134,6 +134,7 @@ class OfficeController extends Controller
 
         $totalPending = $pendingDocCount + $pendingIdCount + $pendingVotersCount + $pendingResidentsCount + $pendingVerificationsCount;
         $officeReports = \App\Models\DepartmentReport::where('department', 'Office')->latest()->get();
+        $documentTemplates = \App\Models\DocumentTemplate::getAllKeyed();
 
         return view('office.index', compact(
             'users',
@@ -156,6 +157,7 @@ class OfficeController extends Controller
             'digitalIdRequests',
 
             'documentRequests',
+            'documentTemplates',
             'pendingDocCount',
             'pendingIdCount',
             'pendingVoters',
@@ -490,6 +492,16 @@ class OfficeController extends Controller
         $msg = $newStatus === 'disapproved' ? 'Request disapproved. Reason sent to resident.' : 'Status updated to ' . ucfirst($newStatus) . '. Resident notified.';
 
         return redirect()->back()->with('success', $msg);
+    }
+
+    public function purgeArchivedRequests(Request $request)
+    {
+        $cutoff = now()->subDays(30);
+        $count = DocumentRequest::where('status', 'released')
+            ->where('updated_at', '<', $cutoff)
+            ->delete();
+
+        return redirect()->back()->with('success', "Na-clean up at nabura na ang {$count} released document request(s) na lampas 30 days na.");
     }
 
     public function store(Request $request)

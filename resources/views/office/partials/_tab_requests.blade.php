@@ -151,13 +151,24 @@
             <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                 {{-- Status Dropdown Filter --}}
                 <select x-model="docStatusFilter" class="fselect" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:8px; border:1.5px solid var(--border); background:#fff; color:var(--text); outline:none; cursor:pointer; width:auto;">
-                    <option value="all">🔍 All Statuses</option>
+                    <option value="all">🔍 Active Requests</option>
                     <option value="pending">⏳ Pending</option>
                     <option value="processing">🔄 Processing</option>
                     <option value="ready">✅ Ready for Pickup</option>
-                    <option value="released">📦 Released</option>
+                    <option value="released">📦 Released (Last 30 Days)</option>
+                    <option value="released_archive">📁 Released Archive (> 30 Days)</option>
                     <option value="disapproved">❌ Rejected / Disapproved</option>
                 </select>
+
+                {{-- Purge Archive Button (only visible when viewing archive) --}}
+                <form x-show="docStatusFilter === 'released_archive'" action="{{ route('office.document.purge-archive') }}" method="POST" style="display:inline;"
+                      onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang lahat ng released documents na higit 30 days na sa archive? Hindi na ito maibabalik.');">
+                    @csrf
+                    <button type="submit" class="btn-plain btn-sm" style="background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; padding:5px 10px; font-size:9.5px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;"
+                            title="Permanently remove released documents older than 30 days">
+                        <i class="fas fa-trash-alt"></i> Purge Archive (>30 Days)
+                    </button>
+                </form>
 
                 {{-- Date Filter Group --}}
                 <div class="filter-group" style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; flex-shrink:0;">
@@ -167,6 +178,14 @@
                 </div>
 
                 <span class="card-badge" style="background:#fee2e2; color:#dc2626; white-space:nowrap; flex-shrink:0;">{{ $pendingDocCount ?? 0 }} Pending</span>
+            </div>
+        </div>
+
+        {{-- Archive Notification Banner --}}
+        <div x-show="docStatusFilter === 'released_archive'" style="padding: 10px 16px; background: #eff6ff; border-bottom: 1px solid #bfdbfe; font-size: 11px; color: #1e40af; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-archive" style="font-size: 14px; color: #0E5393;"></i>
+                <span><strong>30-Day Retention Archive:</strong> Ang mga dokumentong na-released nang higit sa 30 araw ay awtomatikong inilalagay dito sa Archive upang mapanatiling mabilis at malinis ang inyong Active Requests view.</span>
             </div>
         </div>
 
@@ -191,9 +210,15 @@
                     @php
                         $isToday = $req->appointment_date === date('Y-m-d');
                         $isFuture = $req->appointment_date > date('Y-m-d');
+                        $isOldReleased = $req->status === 'released' && $req->updated_at && $req->updated_at < now()->subDays(30);
                     @endphp
                     <tr id="doc-req-{{ $req->id }}" 
-                        x-show="(docFilter==='all' || (docFilter==='today' && '{{ $isToday ? '1':'0' }}' === '1') || (docFilter==='future' && '{{ $isFuture ? '1':'0' }}' === '1')) && (docStatusFilter==='all' || docStatusFilter==='{{ $req->status }}')"
+                        x-show="(docFilter==='all' || (docFilter==='today' && '{{ $isToday ? '1':'0' }}' === '1') || (docFilter==='future' && '{{ $isFuture ? '1':'0' }}' === '1')) && (
+                            (docStatusFilter==='all' && '{{ $isOldReleased ? '1':'0' }}' === '0') ||
+                            (docStatusFilter==='released' && '{{ $req->status==='released' && !$isOldReleased ? '1':'0' }}' === '1') ||
+                            (docStatusFilter==='released_archive' && '{{ $isOldReleased ? '1':'0' }}' === '1') ||
+                            (docStatusFilter==='{{ $req->status }}' && docStatusFilter!=='released' && docStatusFilter!=='all' && docStatusFilter!=='released_archive')
+                        )"
                         style="transition: background-color 0.5s;">
                         <td data-label="Resident">
                             @php
@@ -300,6 +325,11 @@
                                 <span style="font-size:9.5px;font-weight:900;background:#dcfce7;color:#15803d;border:1.5px solid #86efac;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
                                     <i class="fas fa-box-open"></i> Released
                                 </span>
+                                @if($isOldReleased)
+                                    <div style="font-size:8px; font-weight:800; color:#64748b; margin-top:3px; text-align:center;">
+                                        <i class="fas fa-archive"></i> Archived (>30d)
+                                    </div>
+                                @endif
                             @elseif($req->status === 'disapproved')
                                 <span style="font-size:9.5px;font-weight:900;background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;" title="{{ $req->disapproval_reason ?? 'Request Disapproved' }}">
                                     <i class="fas fa-times-circle"></i> Disapproved

@@ -221,23 +221,156 @@ $docConfigs = [
                 </div>
             </div>
             @endif
-            <div id="print-{{ $doc['key'] }}" class="doc-preview">
-                <div style="text-align:center;margin-bottom:14px;">
-                    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:7px;">
-                        <img src="{{ asset('images/dasma.png') }}" style="width:52px;height:52px;object-fit:contain;" onerror="this.style.display='none'">
-                        <img src="{{ asset('images/Bagong_Pilipinas_logo.png') }}" style="width:52px;height:52px;object-fit:contain;" onerror="this.style.display='none'">
-                        <img src="{{ asset('images/brgysm2_logo.png') }}" style="width:52px;height:52px;object-fit:contain;" onerror="this.style.display='none'">
+            @php
+                $curTpl = $documentTemplates[$doc['key']] ?? null;
+                $hasCustomTpl = !empty($curTpl['is_custom']);
+            @endphp
+
+            {{-- Template Toolbar & Inline Editor --}}
+            <div style="margin-bottom:14px; padding:10px 14px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px;"
+                 x-data="{ showTplEditor: false, savingTpl: false }">
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:11px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                            <i class="fas fa-file-signature" style="color:#0E5393;"></i> Document Template:
+                        </span>
+                        @if($hasCustomTpl)
+                            <span style="font-size:9px; background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:900; padding:2px 8px; border-radius:99px;">
+                                <i class="fas fa-check-circle"></i> Custom Template Active
+                            </span>
+                        @else
+                            <span style="font-size:9px; background:#f1f5f9; color:#64748b; font-weight:800; padding:2px 8px; border-radius:99px;">
+                                Standard Barangay Default
+                            </span>
+                        @endif
                     </div>
-                    <p style="font-size:10.5px;font-weight:700;color:#333;margin:1px 0;">PROVINCE OF CAVITE</p>
-                    <p style="font-size:10.5px;font-weight:700;color:#333;margin:1px 0;">CITY OF DASMARI&Ntilde;AS</p>
-                    <p style="font-size:10.5px;font-weight:700;color:#333;margin:1px 0;">BARANGAY SAN MIGUEL 2</p>
-                    <p style="font-size:9.5px;color:#666;margin:1px 0;">OFFICE OF THE SANGGUNIANG BARANGAY</p>
-                    <div style="border-top:2px solid #000;border-bottom:2px solid #000;margin:8px 0;padding:4px 0;">
-                        <p style="font-size:13px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:.05em;margin:0;">{{ $doc['title'] }}</p>
+
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <button type="button" @click="showTplEditor = !showTplEditor" class="btn-plain btn-sm"
+                                style="background:#eff6ff; color:#1d4ed8; border:1.5px solid #bfdbfe; font-size:10px; font-weight:800; padding:5px 11px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;"
+                                title="Click to customize wording or upload official letterhead">
+                            <i class="fas fa-edit"></i> <span x-text="showTplEditor ? 'Close Editor' : 'Edit / Upload Template'"></span>
+                        </button>
+
+                        @if($hasCustomTpl)
+                        <button type="button" @click="resetTemplate('{{ $doc['key'] }}')" class="btn-plain btn-sm"
+                                style="background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; font-size:10px; font-weight:800; padding:5px 10px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;"
+                                title="Revert back to default barangay layout">
+                            <i class="fas fa-undo"></i> Reset Default
+                        </button>
+                        @endif
                     </div>
                 </div>
+
+                {{-- Template Editor Drawer --}}
+                <div x-show="showTplEditor" x-cloak style="margin-top:12px; padding:14px; background:#fff; border:1.5px solid #bfdbfe; border-radius:10px; box-shadow:0 4px 12px rgba(14,83,147,0.06);">
+                    <form @submit.prevent="saveTemplate('{{ $doc['key'] }}', $el)" enctype="multipart/form-data">
+                        <div style="font-size:11.5px; font-weight:900; color:#0E5393; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                            <i class="fas fa-sliders-h"></i> Customize {{ $doc['title'] }} Template
+                        </div>
+                        <p style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:12px; line-height:1.4;">
+                            Kapag may pagbabago sa opisyal na template o wording ng Barangay, i-edit ang fields o mag-upload ng scanned official letterhead/background. Awtomatikong mag-a-update ang document preview at printout.
+                        </p>
+
+                        <div class="fgrid2" style="gap:10px; margin-bottom:10px;">
+                            <div>
+                                <label class="flbl">Document Title</label>
+                                <input type="text" name="title" value="{{ $curTpl['title'] ?? $doc['title'] }}" class="finput">
+                            </div>
+                            <div>
+                                <label class="flbl">Punong Barangay Signatory</label>
+                                <input type="text" name="captain_name" value="{{ $curTpl['captain_name'] ?? 'MARVIN M. BENIS' }}" class="finput">
+                            </div>
+                        </div>
+
+                        <div class="fgrid2" style="gap:10px; margin-bottom:10px;">
+                            <div>
+                                <label class="flbl">Province / Line 1</label>
+                                <input type="text" name="header_line1" value="{{ $curTpl['header_line1'] ?? 'PROVINCE OF CAVITE' }}" class="finput">
+                            </div>
+                            <div>
+                                <label class="flbl">City / Line 2</label>
+                                <input type="text" name="header_line2" value="{{ $curTpl['header_line2'] ?? 'CITY OF DASMARIÑAS' }}" class="finput">
+                            </div>
+                            <div>
+                                <label class="flbl">Barangay / Line 3</label>
+                                <input type="text" name="header_line3" value="{{ $curTpl['header_line3'] ?? 'BARANGAY SAN MIGUEL 2' }}" class="finput">
+                            </div>
+                            <div>
+                                <label class="flbl">Office / Line 4</label>
+                                <input type="text" name="header_line4" value="{{ $curTpl['header_line4'] ?? 'OFFICE OF THE SANGGUNIANG BARANGAY' }}" class="finput">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:4px;">
+                                <label class="flbl" style="margin:0;">Custom Body Text / Wording (Optional override)</label>
+                                <div style="font-size:9px; color:#64748b; display:flex; align-items:center; gap:3px; flex-wrap:wrap;">
+                                    <span>Click tag:</span>
+                                    <button type="button" @click="insertTag($el, '{NAME}')" class="pill" style="cursor:pointer; border:1px solid #cbd5e1; background:#f8fafc; font-size:8.5px; padding:1px 6px;">{NAME}</button>
+                                    <button type="button" @click="insertTag($el, '{AGE}')" class="pill" style="cursor:pointer; border:1px solid #cbd5e1; background:#f8fafc; font-size:8.5px; padding:1px 6px;">{AGE}</button>
+                                    <button type="button" @click="insertTag($el, '{ADDRESS}')" class="pill" style="cursor:pointer; border:1px solid #cbd5e1; background:#f8fafc; font-size:8.5px; padding:1px 6px;">{ADDRESS}</button>
+                                    <button type="button" @click="insertTag($el, '{PURPOSE}')" class="pill" style="cursor:pointer; border:1px solid #cbd5e1; background:#f8fafc; font-size:8.5px; padding:1px 6px;">{PURPOSE}</button>
+                                    <button type="button" @click="insertTag($el, '{DATE}')" class="pill" style="cursor:pointer; border:1px solid #cbd5e1; background:#f8fafc; font-size:8.5px; padding:1px 6px;">{DATE}</button>
+                                </div>
+                            </div>
+                            <textarea name="body_template" class="finput" rows="4" style="font-family:'Times New Roman',serif; font-size:12px; line-height:1.5;" placeholder="Iwanang blangko upang gamitin ang standard barangay wording, o mag-type ng custom paragraphs na may tags tulad ng {NAME}, {AGE}, {ADDRESS}, {PURPOSE}.">{{ $curTpl['body_template'] ?? '' }}</textarea>
+                        </div>
+
+                        <div class="fgrid2" style="gap:10px; margin-bottom:12px;">
+                            <div>
+                                <label class="flbl"><i class="fas fa-image"></i> Upload Official Letterhead / Template Image (PNG/JPG)</label>
+                                <input type="file" name="custom_bg" accept="image/png,image/jpeg,image/jpg" class="finput" style="padding:5px;">
+                                @if(!empty($curTpl['custom_bg_path']))
+                                    <div style="font-size:9px; color:#15803d; margin-top:3px; display:flex; align-items:center; gap:4px;">
+                                        <i class="fas fa-check"></i> Uploaded header/background: <a href="{{ asset('storage/'.$curTpl['custom_bg_path']) }}" target="_blank" style="text-decoration:underline; font-weight:700;">View Letterhead</a>
+                                    </div>
+                                @endif
+                            </div>
+                            <div>
+                                <label class="flbl">Footer Dry Seal Note</label>
+                                <input type="text" name="footer_note" value="{{ $curTpl['footer_note'] ?? 'NOTE: THIS CERTIFICATION IS NOT VALID IF THERE ARE ERASURE AND WITHOUT DRY SEAL' }}" class="finput">
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; gap:8px;">
+                            <button type="button" @click="showTplEditor = false" class="btn-plain btn-ghost btn-sm">Cancel</button>
+                            <button type="submit" class="btn-grad btn-sm">
+                                <i class="fas fa-save"></i> Save &amp; Apply Template
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="print-{{ $doc['key'] }}" class="doc-preview">
+                @if(!empty($curTpl['custom_bg_path']))
+                    <div style="text-align:center; margin-bottom:12px;">
+                        <img src="{{ asset('storage/'.$curTpl['custom_bg_path']) }}" style="max-width:100%; max-height:130px; object-fit:contain; margin-bottom:8px;">
+                        <div style="border-top:2px solid #000;border-bottom:2px solid #000;margin:8px 0;padding:4px 0;">
+                            <p style="font-size:13px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:.05em;margin:0;">{{ $curTpl['title'] ?? $doc['title'] }}</p>
+                        </div>
+                    </div>
+                @else
+                    <div style="text-align:center;margin-bottom:14px;">
+                        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:7px;">
+                            <img src="{{ asset('images/dasma.png') }}" style="width:52px;height:52px;object-fit:contain;" onerror="this.style.display='none'">
+                            <img src="{{ asset('images/Bagong_Pilipinas_logo.png') }}" style="width:52px;height:52px;object-fit:contain;" onerror="this.style.display='none'">
+                            <img src="{{ asset('images/brgysm2_logo.png') }}" style="width:52px;height:52px;object-fit:contain;" onerror="this.style.display='none'">
+                        </div>
+                        <p style="font-size:10.5px;font-weight:700;color:#333;margin:1px 0;">{{ $curTpl['header_line1'] ?? 'PROVINCE OF CAVITE' }}</p>
+                        <p style="font-size:10.5px;font-weight:700;color:#333;margin:1px 0;">{{ $curTpl['header_line2'] ?? 'CITY OF DASMARIÑAS' }}</p>
+                        <p style="font-size:10.5px;font-weight:700;color:#333;margin:1px 0;">{{ $curTpl['header_line3'] ?? 'BARANGAY SAN MIGUEL 2' }}</p>
+                        <p style="font-size:9.5px;color:#666;margin:1px 0;">{{ $curTpl['header_line4'] ?? 'OFFICE OF THE SANGGUNIANG BARANGAY' }}</p>
+                        <div style="border-top:2px solid #000;border-bottom:2px solid #000;margin:8px 0;padding:4px 0;">
+                            <p style="font-size:13px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:.05em;margin:0;">{{ $curTpl['title'] ?? $doc['title'] }}</p>
+                        </div>
+                    </div>
+                @endif
                 <div style="color:#000;line-height:1.6;font-size:10.5px;">
-                    @if($doc['body']==='residency')
+                    @if(!empty($curTpl['body_template']))
+                        <div x-html="renderTemplateBody(`{!! addslashes($curTpl['body_template']) !!}`, $data)" style="white-space: pre-wrap; margin-bottom: 10px; line-height: 1.6;"></div>
+                    @elseif($doc['body']==='residency')
                     <p>To whom it may concern,</p>
                     <p style="text-indent:40px;margin-top:6px;">This is to certify that <strong><span x-text="docOwnerName||'______________________________'"></span></strong>, born on <strong><span x-text="docOwnerBday||'__________________'"></span></strong>, <strong><span x-text="docOwnerAge||'___'"></span></strong> years old, is a bona fide resident of <strong>Barangay San Miguel II, Dasmariñas City, Cavite.</strong></p>
                     <p style="text-indent:40px;margin-top:6px;">The undersigned has certified that after a reasonable inquiry, I have verified the authenticity of barangay residency showing that the applicant has been residing in the barangay for at least six (6) months prior to the application.</p>
@@ -281,7 +414,7 @@ $docConfigs = [
                     <p style="text-indent:40px;margin-top:6px;">Ang kanyang <strong><span x-text="docClaimantRelation||'______________'"></span></strong> na si <strong><span x-text="docOwnerName||'______________________________'"></span></strong> ay awtorisadong kumuha ng anumang benepisyo o dokumento sa ngalan ng namatay.</p>
                     <p style="text-indent:40px;margin-top:6px;">Pinagkakaloob ang sertipikasyong ito para sa lahat ng legal na layunin.</p>
                     @else
-                    <p style="text-indent:40px;">This is to certify that <strong><span x-text="docOwnerName||'______________________________'"></span></strong>, <strong><span x-text="docOwnerAge||'___'"></span></strong> years old, a bona fide resident of <strong>Barangay San Miguel II</strong>, is hereby issued this <strong>{{ $doc['title'] }}</strong> for <strong><span x-text="docPurpose||'______________________________'"></span></strong>.</p>
+                    <p style="text-indent:40px;">This is to certify that <strong><span x-text="docOwnerName||'______________________________'"></span></strong>, <strong><span x-text="docOwnerAge||'___'"></span></strong> years old, a bona fide resident of <strong>Barangay San Miguel II</strong>, is hereby issued this <strong>{{ $curTpl['title'] ?? $doc['title'] }}</strong> for <strong><span x-text="docPurpose||'______________________________'"></span></strong>.</p>
                     <p style="text-indent:40px;margin-top:6px;">This certification is being issued upon request of the above-named person for whatever legal purpose it may serve.</p>
                     @endif
                     <p style="margin-top:10px;">Issued this <strong><span x-text="docDayOrdinal"></span></strong> day of <strong><span x-text="docMonth"></span></strong>, year <strong><span x-text="docYear"></span></strong> at Barangay San Miguel II, Dasmariñas City, Cavite.</p>
@@ -290,8 +423,8 @@ $docConfigs = [
                     <div style="display:inline-block;text-align:center;min-width:195px;">
                         <div style="height:38px;"></div>
                         <div style="border-top:2px solid #000;padding-top:3px;">
-                            <p style="font-weight:900;text-transform:uppercase;margin:0;font-size:10.5px;">MARVIN M. BENIS</p>
-                            <p style="font-style:italic;margin:0;font-size:9.5px;">PUNONG BARANGAY</p>
+                            <p style="font-weight:900;text-transform:uppercase;margin:0;font-size:10.5px;">{{ $curTpl['captain_name'] ?? 'MARVIN M. BENIS' }}</p>
+                            <p style="font-style:italic;margin:0;font-size:9.5px;">{{ $curTpl['captain_title'] ?? 'PUNONG BARANGAY' }}</p>
                         </div>
                     </div>
                 </div>
@@ -300,7 +433,7 @@ $docConfigs = [
                     <p>Position: <span style="border-bottom:1px solid #aaa;display:inline-block;min-width:148px;" x-text="docPosition||''"></span></p>
                 </div>
                 <div style="margin-top:10px;border-top:1px solid #ccc;padding-top:7px;text-align:center;">
-                    <p style="font-size:8.5px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-style:italic;">NOTE: THIS CERTIFICATION IS NOT VALID IF THERE ARE ERASURE AND WITHOUT DRY SEAL</p>
+                    <p style="font-size:8.5px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-style:italic;">{{ $curTpl['footer_note'] ?? 'NOTE: THIS CERTIFICATION IS NOT VALID IF THERE ARE ERASURE AND WITHOUT DRY SEAL' }}</p>
                 </div>
             </div>
             <div style="display:flex;justify-content:flex-end;gap:9px;">

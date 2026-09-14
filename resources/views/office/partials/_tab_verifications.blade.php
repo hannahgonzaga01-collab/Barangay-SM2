@@ -30,14 +30,14 @@
             </div>
         @else
             <div style="overflow-x: auto;">
-                <table class="res-table" style="width: 100%; border-collapse: collapse;">
+                <table class="res-table" style="width: 100%; border-collapse: collapse; min-width: 820px;">
                     <thead>
                         <tr>
-                            <th style="padding: 12px 16px;">Registrant Input</th>
-                            <th style="padding: 12px 16px;">Matched Masterlist Record</th>
-                            <th style="padding: 12px 16px; text-align: center;">AI Confidence</th>
-                            <th style="padding: 12px 16px; text-align: center;">ID / Proof</th>
-                            <th style="padding: 12px 16px; text-align: right;">Action</th>
+                            <th style="padding: 12px 14px; width: 27%;">Registrant Input</th>
+                            <th style="padding: 12px 14px; width: 28%;">Matched Masterlist Record</th>
+                            <th style="padding: 12px 14px; width: 14%; text-align: center;">AI Confidence</th>
+                            <th style="padding: 12px 14px; width: 13%; text-align: center;">ID / Proof</th>
+                            <th style="padding: 12px 14px; width: 18%; text-align: right;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,7 +49,7 @@
                                 $matched = $pv->matched_resident;
                             @endphp
                             <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                <td style="padding: 14px 14px; vertical-align: middle;">
                                     <div style="font-size: 13px; font-weight: 800; color: #0f172a;">
                                         {{ $pv->first_name }} {{ $pv->middle_name ? $pv->middle_name . ' ' : '' }}{{ $pv->last_name }}
                                     </div>
@@ -73,7 +73,7 @@
                                     @endif
                                 </td>
 
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                <td style="padding: 14px 14px; vertical-align: middle;">
                                     @if($matched)
                                         <div style="font-size: 12.5px; font-weight: 800; color: #0E5393;">
                                             <i class="fas fa-address-book"></i> {{ $matched->first_name }} {{ $matched->middle_name ? $matched->middle_name . ' ' : '' }}{{ $matched->last_name }}
@@ -94,7 +94,7 @@
                                     @endif
                                 </td>
 
-                                <td style="padding: 14px 16px; text-align: center; vertical-align: middle;">
+                                <td style="padding: 14px 14px; text-align: center; vertical-align: middle;">
                                     <div style="display: inline-flex; flex-direction: column; align-items: center; gap: 3px;">
                                         <span style="font-size: 12px; font-weight: 900; padding: 3px 10px; border-radius: 99px; {{ $badgeColor }}">
                                             {{ $confScore }}% Match
@@ -105,7 +105,7 @@
                                     </div>
                                 </td>
 
-                                <td style="padding: 14px 16px; text-align: center; vertical-align: middle;">
+                                <td style="padding: 14px 14px; text-align: center; vertical-align: middle;">
                                     @if($pv->voter_id_photo)
                                         <div x-data="{ openImg: false }">
                                             <button type="button" @click="openImg = true" 
@@ -134,22 +134,69 @@
                                     @endif
                                 </td>
 
-                                <td style="padding: 14px 16px; text-align: right; vertical-align: middle;">
-                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;" x-data="{ rejectModal: false }">
-                                        <form method="POST" action="{{ route('office.verification.approve', $pv->id) }}" style="display: inline;"
-                                              onsubmit="return confirm('Approve {{ addslashes($pv->name) }} and update the Barangay Masterlist?')">
-                                            @csrf
-                                            @if($matched)
-                                                <input type="hidden" name="resident_id" value="{{ $matched->id }}">
-                                            @endif
-                                            <button type="submit" class="btn-grad btn-grad-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
-                                                <i class="fas fa-user-check"></i> APPROVE &amp; UPDATE MASTERLIST
-                                            </button>
-                                        </form>
-
-                                        <button type="button" @click="rejectModal = true" class="btn-plain btn-sm" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">
-                                            <i class="fas fa-times"></i> DISAPPROVE
+                                <td style="padding: 14px 14px; text-align: right; vertical-align: middle;">
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap;" x-data="{ rejectModal: false, approveModal: false }">
+                                        <button type="button" @click="approveModal = true" class="btn-grad btn-grad-sm" 
+                                                style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 6px 12px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;"
+                                                title="Approve registration and link to Barangay Masterlist">
+                                            <i class="fas fa-user-check"></i> Approve &amp; Link
                                         </button>
+
+                                        <button type="button" @click="rejectModal = true" class="btn-plain btn-sm" 
+                                                style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 10px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;"
+                                                title="Disapprove registration request">
+                                            <i class="fas fa-times"></i> Disapprove
+                                        </button>
+
+                                        {{-- Custom Styled Approve Modal --}}
+                                        <div x-show="approveModal" x-cloak class="modal-ov" style="text-align: left; z-index: 99999;" @click.self="approveModal = false">
+                                            <div class="modal-box" style="max-width: 480px; background: #fff; border-radius: 16px; overflow: hidden; border-top: 4px solid #059669; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+                                                <div class="modal-hd" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 14px 18px; color: #fff; display: flex; align-items: center; justify-content: space-between;">
+                                                    <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 8px;">
+                                                        <i class="fas fa-user-check"></i> Confirm Masterlist Approval
+                                                    </span>
+                                                    <button type="button" @click="approveModal = false" style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; line-height: 1;">&times;</button>
+                                                </div>
+                                                <form method="POST" action="{{ route('office.verification.approve', $pv->id) }}">
+                                                    @csrf
+                                                    @if($matched)
+                                                        <input type="hidden" name="resident_id" value="{{ $matched->id }}">
+                                                    @endif
+                                                    <div style="padding: 18px;">
+                                                        <p style="font-size: 12px; color: #334155; font-weight: 600; margin-bottom: 14px; line-height: 1.5;">
+                                                            Approve <strong>{{ $pv->first_name }} {{ $pv->last_name }}</strong>'s registration and update the Barangay Masterlist?
+                                                        </p>
+
+                                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+                                                            <div style="font-size: 9.5px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Target Masterlist Match</div>
+                                                            @if($matched)
+                                                                <div style="font-size: 13px; font-weight: 800; color: #0E5393;">
+                                                                    <i class="fas fa-address-book"></i> {{ $matched->first_name }} {{ $matched->middle_name ? $matched->middle_name . ' ' : '' }}{{ $matched->last_name }}
+                                                                </div>
+                                                                <div style="font-size: 10px; color: #64748b; font-weight: 600; margin-top: 3px;">
+                                                                    Code: <strong style="color: #0f172a;">{{ $matched->resident_code ?? 'NO-CODE' }}</strong> •
+                                                                    AI Match: <span style="font-weight: 900; color: {{ $confScore >= 85 ? '#15803d' : '#b45309' }};">{{ $confScore }}%</span>
+                                                                </div>
+                                                            @else
+                                                                <div style="font-size: 11px; font-weight: 700; color: #94a3b8; font-style: italic;">
+                                                                    No existing record selected — a verified entry will be created in the Masterlist.
+                                                                </div>
+                                                            @endif
+                                                        </div>
+
+                                                        <div style="background: #eff6ff; border-left: 3px solid #3b82f6; padding: 8px 12px; border-radius: 4px; font-size: 10.5px; color: #1e40af; font-weight: 600;">
+                                                            <i class="fas fa-info-circle"></i> Once confirmed, the resident's portal account will be fully activated.
+                                                        </div>
+                                                    </div>
+                                                    <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
+                                                        <button type="button" @click="approveModal = false" class="btn-plain btn-ghost btn-sm">Cancel</button>
+                                                        <button type="submit" class="btn-grad btn-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                                                            <i class="fas fa-check"></i> Yes, Approve &amp; Link
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
 
                                         {{-- Reject Prompt Modal --}}
                                         <div x-show="rejectModal" x-cloak class="modal-ov" style="text-align: left; z-index: 99999;" @click.self="rejectModal = false">
