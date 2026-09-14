@@ -230,31 +230,14 @@ class ResidentPortalController extends Controller
         ]);
 
         $landmark = trim($request->landmark ?: ($request->incident_landmark ?: ''));
-        $situationNote = trim($request->message ?: ($request->situation_note ?: ''));
 
         if (empty($landmark) || mb_strlen($landmark) < 3) {
             return response()->json([
                 'success' => false,
-                'message' => '⚠️ Bawal i-submit nang walang info! Pakilagay po ang eksaktong landmark o lokasyon ng emergency.',
+                'message' => '⚠️ Bawal i-submit nang walang landmark o lokasyon! Pakilagay po ang eksaktong lokasyon ng emergency.',
                 'errors'  => ['landmark' => ['Kinakailangan ang eksaktong landmark o lokasyon.']]
             ], 422);
         }
-
-        if (empty($situationNote) || mb_strlen($situationNote) < 3) {
-            return response()->json([
-                'success' => false,
-                'message' => '⚠️ Bawal i-submit nang walang info! Pakilagay po ang sitwasyon o dahilan ng emergency para alam ng Tanod ang sitwasyon.',
-                'errors'  => ['message' => ['Kinakailangan ang sitwasyon o dahilan ng emergency.']]
-            ], 422);
-        }
-
-        $user = auth()->user();
-        $name = $user ? trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) : ($request->name ?? 'Resident in Emergency');
-        if (empty($name) && $user) {
-            $name = $user->name;
-        }
-        $contact = $user ? ($user->contact_number ?? $user->email) : ($request->contact ?? 'N/A');
-        $address = $request->home_address ?: ($user ? ($user->address ?? 'Barangay San Miguel II') : 'Barangay San Miguel II');
 
         $typeLabels = [
             'general'  => 'General Emergency / Tanod Assistance',
@@ -265,6 +248,15 @@ class ResidentPortalController extends Controller
         ];
         $rawType = $request->emergency_type;
         $emergencyType = $typeLabels[$rawType] ?? ($rawType ?: 'General Emergency / Tanod Assistance');
+        $situationNote = trim($request->message ?: ($request->situation_note ?: $emergencyType));
+
+        $user = auth()->user();
+        $name = $user ? trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) : ($request->name ?? 'Resident in Emergency');
+        if (empty($name) && $user) {
+            $name = $user->name;
+        }
+        $contact = $user ? ($user->contact_number ?? $user->email) : ($request->contact ?? 'N/A');
+        $address = $request->home_address ?: ($user ? ($user->address ?? 'Barangay San Miguel II') : 'Barangay San Miguel II');
 
         $lat = $request->latitude;
         $lng = $request->longitude;

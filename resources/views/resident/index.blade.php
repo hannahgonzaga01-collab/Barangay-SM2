@@ -646,27 +646,12 @@ html, body {
             proceedToConfirm() {
                 this.sosError = null;
                 this.sosLandmarkError = false;
-                this.sosMessageError = false;
 
                 const landmarkClean = (this.sosLandmark || '').trim();
-                const messageClean = (this.sosMessage || '').trim();
-
-                if (!landmarkClean && !messageClean) {
-                    this.sosError = '⚠️ Bawal i-submit nang walang info! Pakilagay po ang eksaktong landmark at sitwasyon ng emergency.';
-                    this.sosLandmarkError = true;
-                    this.sosMessageError = true;
-                    return;
-                }
 
                 if (!landmarkClean || landmarkClean.length < 3) {
-                    this.sosError = '⚠️ Bawal iwanang blangko ang landmark! Pakilagay po ang eksaktong landmark o lokasyon (hindi bababa sa 3 letra).';
+                    this.sosError = '⚠️ Pakilagay po ang eksaktong landmark o lokasyon ng emergency bago mag-dispatch.';
                     this.sosLandmarkError = true;
-                    return;
-                }
-
-                if (!messageClean || messageClean.length < 3) {
-                    this.sosError = '⚠️ Bawal iwanang blangko ang sitwasyon! Pakilagay po ang dahilan o detalye ng emergency para alam ng Tanod ang sitwasyon.';
-                    this.sosMessageError = true;
                     return;
                 }
 
@@ -686,10 +671,10 @@ html, body {
 
             sendSosAlert() {
                 const landmarkClean = (this.sosLandmark || '').trim();
-                const messageClean = (this.sosMessage || '').trim();
-                if (!landmarkClean || !messageClean) {
-                    this.sosError = '⚠️ Bawal i-submit nang walang info! Kinakailangan ang landmark at sitwasyon.';
+                if (!landmarkClean || landmarkClean.length < 3) {
+                    this.sosError = '⚠️ Pakilagay po ang eksaktong landmark o lokasyon ng emergency.';
                     this.sosConfirmStep = false;
+                    this.sosLandmarkError = true;
                     return;
                 }
 
@@ -708,7 +693,7 @@ html, body {
                         longitude: this.sosLng,
                         emergency_type: this.sosEmergencyType,
                         landmark: this.sosLandmark,
-                        message: this.sosMessage,
+                        message: this.getEmergencyTypeLabel(this.sosEmergencyType),
                         home_address: @json($authUser?->resident?->address ?? ($authUser?->address ?? "Barangay San Miguel II")),
                     })
                 })
@@ -2992,41 +2977,41 @@ html, body {
                 {{-- STEP 1: FILL OUT & DETAILS (with Serious Advisory Note before dispatch) --}}
                 <template x-if="!sosSuccess && !sosConfirmStep">
                     <div>
-                        <div class="modal-hd" style="margin-bottom:12px;">
+                        <div class="modal-hd" style="margin-bottom:14px;">
                             <div class="modal-ttl">
-                                <div class="modal-ico" style="background:rgba(225,29,72,0.12);color:#e11d48;"><i class="fas fa-truck-medical"></i></div>
+                                <div class="modal-ico" style="background:rgba(225,29,72,0.1);color:#e11d48;"><i class="fas fa-truck-medical"></i></div>
                                 <div>
-                                    <div style="color:#991b1b;font-weight:900;font-size:15px;">EMERGENCY SOS ALERT</div>
-                                    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:none;">Direct Dispatch to Barangay Peace & Order Patrol</div>
+                                    <div style="color:var(--text);font-weight:900;font-size:15px;letter-spacing:-0.2px;">EMERGENCY SOS ALERT</div>
+                                    <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:none;">Direct Dispatch to Barangay Peace & Order Patrol</div>
                                 </div>
                             </div>
                             <button type="button" @click="sosModal=false" class="modal-close" :disabled="sosLoading"><i class="fas fa-times-circle"></i></button>
                         </div>
 
-                        {{-- STRICT ADVISORY NOTE (BEFORE FILL-OUT) --}}
-                        <div style="background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #e11d48;border-radius:10px;padding:9px 12px;margin-bottom:13px;display:flex;align-items:flex-start;gap:9px;">
+                        {{-- STRICT ADVISORY NOTE (THE ONLY RED ELEMENT) --}}
+                        <div style="background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #e11d48;border-radius:10px;padding:9px 13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:9px;">
                             <i class="fas fa-triangle-exclamation" style="color:#e11d48;font-size:14px;margin-top:2px;flex-shrink:0;"></i>
-                            <div style="font-size:10.5px;color:#881337;line-height:1.45;">
+                            <div style="font-size:11px;color:#881337;line-height:1.45;">
                                 <strong style="color:#9f1239;text-transform:uppercase;letter-spacing:0.3px;">⚠️ MAHALAGANG PAALALA:</strong><br>
-                                Ang Emergency SOS ay para lamang sa mga <strong>totoong emergency</strong> (medikal, sunog, krimen, o banta sa kaligtasan). Agad na tutungo ang mga Tanod sa inyong ibibigay na lokasyon. Ang prank o biruan ay <strong>mahigpit na ipinagbabawal</strong> at may karampatang parusa ayon sa batas.
+                                Ang Emergency SOS ay para lamang sa mga <strong>totoong emergency</strong>. Agad na tutungo ang mga Tanod sa inyong ibibigay na lokasyon. Ang prank o biruan ay <strong>mahigpit na ipinagbabawal</strong> at may karampatang parusa ayon sa batas.
                             </div>
                         </div>
 
-                        {{-- Geolocation status banner --}}
-                        <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
-                            <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#be123c;">
-                                <i class="fas fa-location-crosshairs" :class="sosLocationStatus==='detecting' ? 'fa-spin' : ''"></i>
+                        {{-- Geolocation status banner (Clean theme) --}}
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+                            <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text);">
+                                <i class="fas fa-location-crosshairs" style="color:var(--brand);" :class="sosLocationStatus==='detecting' ? 'fa-spin' : ''"></i>
                                 <span>Location Dispatch Information:</span>
                             </div>
-                            <div style="font-size:10.5px;color:#4c0519;font-weight:600;margin-top:4px;">
+                            <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">
                                 <template x-if="sosLat && sosLng">
-                                    <span style="display:inline-flex;align-items:center;gap:4px;color:#15803d;font-weight:800;">
+                                    <span style="display:inline-flex;align-items:center;gap:4px;color:#15803d;font-weight:700;">
                                         <i class="fas fa-check-circle"></i> GPS Pinpoint Acquired (<span x-text="sosLat.toFixed(5) + ', ' + sosLng.toFixed(5)"></span>)
                                     </span>
                                 </template>
                                 <template x-if="!sosLat">
-                                    <span style="display:inline-flex;align-items:center;gap:4px;color:#b45309;font-weight:700;">
-                                        <i class="fas fa-home"></i> Using Registered Address: <strong>{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
+                                    <span style="display:inline-flex;align-items:center;gap:4px;color:var(--text);font-weight:600;">
+                                        <i class="fas fa-home" style="color:var(--brand);"></i> Registered Address: <strong style="color:var(--text);">{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
                                     </span>
                                 </template>
                             </div>
@@ -3034,8 +3019,8 @@ html, body {
 
                         {{-- Emergency type selector --}}
                         <div class="fgrp">
-                            <label class="flbl">Emergency Nature / Reason *</label>
-                            <select x-model="sosEmergencyType" class="finput fselect" style="font-weight:800;">
+                            <label class="flbl">Emergency Nature / Reason <span style="color:#dc2626;">*</span></label>
+                            <select x-model="sosEmergencyType" class="finput fselect" style="font-weight:700;">
                                 <option value="general">🚨 General Emergency / Tanod Assistance</option>
                                 <option value="security">🛡️ Security Threat / Disturbance / Intruder</option>
                                 <option value="medical">🚑 Medical Emergency / First Responder</option>
@@ -3044,49 +3029,20 @@ html, body {
                             </select>
                         </div>
 
-                        {{-- Dedicated Incident Landmark / Location Input (REQUIRED) --}}
+                        {{-- Dedicated Incident Landmark / Location Input --}}
                         <div class="fgrp">
-                            <label class="flbl" style="color:#b91c1c;display:flex;align-items:center;justify-content:space-between;font-weight:800;">
-                                <span style="display:inline-flex;align-items:center;gap:4px;">
-                                    <i class="fas fa-map-marker-alt"></i> Exact Landmark / Incident Location *
-                                </span>
-                                <span style="font-size:9px;background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:4px;font-weight:900;letter-spacing:0.3px;">REQUIRED</span>
-                            </label>
+                            <label class="flbl">Exact Landmark / Incident Location <span style="color:#dc2626;">*</span></label>
                             <input type="text" x-model="sosLandmark" 
-                                   @input="if(sosLandmark.trim().length >= 3) { sosLandmarkError = false; if(!sosMessageError) sosError = null; }"
+                                   @input="if(sosLandmark.trim().length >= 3) { sosLandmarkError = false; sosError = null; }"
                                    class="finput" 
                                    placeholder="e.g. Tapat ng Covered Court, Kanto ng Phase 2 sari-sari store..." 
-                                   :style="sosLandmarkError ? 'font-weight:700;border:2px solid #dc2626 !important;background:#fff1f2 !important;' : 'font-weight:700;border:1.5px solid #f87171;background:#fff5f5;'">
-                            <div style="font-size:9.5px;color:#64748b;margin-top:3px;">
-                                <i class="fas fa-info-circle" style="color:#ef4444;"></i> Saan mismong lugar nagaganap ang emergency? Bawal iwanang blangko.
+                                   :style="sosLandmarkError ? 'border-color:#dc2626 !important; background:#fff1f2 !important;' : ''">
+                            <div style="font-size:10px;color:var(--muted);margin-top:3px;">
+                                Saan mismong lugar nagaganap ang emergency? Ilagay ang landmark lalo na kung wala sa inyong bahay.
                             </div>
                             <template x-if="sosLandmarkError">
-                                <div style="color:#dc2626;font-size:10px;font-weight:800;margin-top:2px;">
-                                    <i class="fas fa-exclamation-circle"></i> Kinakailangan ang eksaktong landmark (hindi bababa sa 3 letra).
-                                </div>
-                            </template>
-                        </div>
-
-                        {{-- Situation Details / Notes (REQUIRED) --}}
-                        <div class="fgrp">
-                            <label class="flbl" style="color:#b91c1c;display:flex;align-items:center;justify-content:space-between;font-weight:800;">
-                                <span style="display:inline-flex;align-items:center;gap:4px;">
-                                    <i class="fas fa-comment-medical"></i> Situation Reason / Detalye ng Emergency *
-                                </span>
-                                <span style="font-size:9px;background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:4px;font-weight:900;letter-spacing:0.3px;">REQUIRED</span>
-                            </label>
-                            <textarea x-model="sosMessage" 
-                                      @input="if(sosMessage.trim().length >= 3) { sosMessageError = false; if(!sosLandmarkError) sosError = null; }"
-                                      rows="2" 
-                                      class="finput" 
-                                      placeholder="e.g. May sugatan kailangan ng first aid, may nagwawalang tao, may sunog..." 
-                                      :style="sosMessageError ? 'resize:none;font-weight:600;border:2px solid #dc2626 !important;background:#fff1f2 !important;' : 'resize:none;font-weight:600;border:1.5px solid #cbd5e1;background:#ffffff;'"></textarea>
-                            <div style="font-size:9.5px;color:#64748b;margin-top:3px;">
-                                <i class="fas fa-info-circle" style="color:#ef4444;"></i> Ano ang nangyayari? Bawal iwanang blangko para alam ng Tanod ang sitwasyon.
-                            </div>
-                            <template x-if="sosMessageError">
-                                <div style="color:#dc2626;font-size:10px;font-weight:800;margin-top:2px;">
-                                    <i class="fas fa-exclamation-circle"></i> Kinakailangan ilarawan ang sitwasyon (hindi bababa sa 3 letra).
+                                <div style="color:#dc2626;font-size:10.5px;font-weight:700;margin-top:4px;">
+                                    <i class="fas fa-exclamation-circle"></i> Kinakailangan ilagay ang eksaktong landmark o lokasyon bago mag-dispatch.
                                 </div>
                             </template>
                         </div>
@@ -3106,34 +3062,28 @@ html, body {
 
                 {{-- STEP 2: CONFIRMATION PROMPT (AFTER CLICKING DISPATCH NOW) --}}
                 <template x-if="!sosSuccess && sosConfirmStep">
-                    <div style="text-align:center;padding:4px 2px;">
+                    <div style="text-align:center;padding:6px 2px;">
                         <div style="width:58px;height:58px;background:#fee2e2;color:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;box-shadow:0 0 0 8px rgba(220,38,38,0.12);">
                             <i class="fas fa-triangle-exclamation"></i>
                         </div>
-                        <h3 style="font-size:16px;font-weight:900;color:#991b1b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">
+                        <h3 style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">
                             KUMPIRMASYON SA PAG-DISPATCH
                         </h3>
-                        <p style="font-size:11.5px;color:#475569;font-weight:600;line-height:1.5;margin-bottom:14px;">
+                        <p style="font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.5;margin-bottom:14px;">
                             Sigurado ka bang nais mong magpadala ng Emergency Dispatch sa Barangay Peace & Order Patrol?
                         </p>
 
-                        <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:12px 14px;text-align:left;margin-bottom:14px;font-size:11px;color:#1e293b;line-height:1.6;">
-                            <div style="margin-bottom:6px;">
-                                <span style="color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;">🚨 Uri ng Emergency:</span><br>
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-align:left;margin-bottom:14px;font-size:11.5px;color:var(--text);line-height:1.6;">
+                            <div style="margin-bottom:8px;">
+                                <span style="color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;">🚨 Uri ng Emergency:</span><br>
                                 <strong style="color:#dc2626;font-size:12px;" x-text="getEmergencyTypeLabel(sosEmergencyType)"></strong>
                             </div>
-                            <div style="margin-bottom:6px;">
-                                <span style="color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;">📍 Pupuntahang Landmark / Lokasyon:</span><br>
-                                <strong style="color:#0f172a;font-size:12px;background:#fee2e2;padding:2px 6px;border-radius:4px;display:inline-block;" x-text="sosLandmark"></strong>
+                            <div style="margin-bottom:8px;">
+                                <span style="color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;">📍 Pupuntahang Landmark / Lokasyon:</span><br>
+                                <strong style="color:var(--text);font-size:12px;background:#e2e8f0;padding:2px 8px;border-radius:4px;display:inline-block;" x-text="sosLandmark"></strong>
                             </div>
-                            <template x-if="sosMessage">
-                                <div style="margin-bottom:6px;">
-                                    <span style="color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;">ℹ️ Karagdagang Detalye:</span><br>
-                                    <span style="color:#334155;font-weight:600;" x-text="sosMessage"></span>
-                                </div>
-                            </template>
-                            <hr style="border:0;border-top:1px dashed #fca5a5;margin:8px 0;">
-                            <div style="color:#991b1b;font-weight:800;font-size:10.5px;display:flex;align-items:flex-start;gap:6px;">
+                            <hr style="border:0;border-top:1px solid #e2e8f0;margin:8px 0;">
+                            <div style="color:#dc2626;font-weight:700;font-size:10.5px;display:flex;align-items:flex-start;gap:6px;">
                                 <i class="fas fa-shield-alt" style="margin-top:2px;"></i>
                                 <span>HINDI ITO LARO O BIRO. Agad na tutungo ang mga rumespondeng Tanod sa nasabing lokasyon.</span>
                             </div>
