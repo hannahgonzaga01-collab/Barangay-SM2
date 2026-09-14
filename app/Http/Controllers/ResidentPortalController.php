@@ -131,8 +131,12 @@ class ResidentPortalController extends Controller
 
             // Fetch issue reports (Justice/VAWC/Peace)
             $issueReports = IssueReport::where('user_id', $user->id)->latest()->get();
+
+            // Fetch emergency SOS dispatches
+            $sosHistory = \App\Models\EmergencySosAlert::where('user_id', $user->id)->latest()->get();
         } else {
             $issueReports = collect();
+            $sosHistory   = collect();
         }
 
         // Auto-archive expired dates so residents see fresh active lists
@@ -211,7 +215,7 @@ class ResidentPortalController extends Controller
         $projects = \App\Models\Project::where('is_active', true)->latest()->get();
 
         return view('resident.index', compact(
-            'requests', 'digitalId', 'resident', 'issueReports',
+            'requests', 'digitalId', 'resident', 'issueReports', 'sosHistory',
             'announcements', 'events', 'recentUpdates',
             'unreadNotifications', 'allNotifications',
             'carouselSlides', 'orgChartPath',

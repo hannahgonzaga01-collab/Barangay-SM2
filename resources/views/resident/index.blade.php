@@ -906,13 +906,13 @@ html, body {
                             @php 
                                 $isUnread = is_null($notif->read_at); 
                                 $type = $notif->data['type'] ?? '';
-                                $targetId = (str_contains($type, 'document') || str_contains($type, 'reminder') || str_contains($type, 'appointment')) ? 'application-history' : 'incident-reports';
+                                $targetId = (str_contains($type, 'sos')) ? 'sos-history' : ((str_contains($type, 'document') || str_contains($type, 'reminder') || str_contains($type, 'appointment')) ? 'application-history' : 'incident-reports');
                             @endphp
                             <div class="notif-item {{ $isUnread ? 'notif-item-unread' : '' }}" 
                                  style="cursor:pointer;"
                                  @click="notifOpen=false; document.getElementById('{{ $targetId }}')?.scrollIntoView({behavior:'smooth'})">
-                                <div class="notif-item-ico" style="background:{{ $isUnread ? '#dbeafe' : '#f1f5f9' }};">
-                                    <i class="fas {{ str_contains($type, 'reminder') || str_contains($type, 'appointment') ? 'fa-clock' : ($type === 'document_received' ? 'fa-file-alt' : 'fa-bell') }}" style="color:{{ $isUnread ? '#0E5393' : '#94a3b8' }};font-size:11px;"></i>
+                                <div class="notif-item-ico" style="background:{{ $isUnread ? (str_contains($type, 'sos') ? '#fee2e2' : '#dbeafe') : '#f1f5f9' }};">
+                                    <i class="fas {{ str_contains($type, 'sos') ? 'fa-ambulance' : (str_contains($type, 'reminder') || str_contains($type, 'appointment') ? 'fa-clock' : ($type === 'document_received' ? 'fa-file-alt' : 'fa-bell')) }}" style="color:{{ $isUnread ? (str_contains($type, 'sos') ? '#dc2626' : '#0E5393') : '#94a3b8' }};font-size:11px;"></i>
                                 </div>
                                 <div style="flex:1;min-width:0;">
                                     <div class="notif-item-ttl">{{ $notif->data['title'] ?? 'Notification' }}</div>
@@ -1061,6 +1061,63 @@ html, body {
         </div>
         @endif
         @if($isAuth)
+        <div class="wcard" id="sos-history">
+            <div class="wcard-head">
+                <div class="wcard-title"><i class="fas fa-bullhorn" style="color:#dc2626;"></i> Emergency SOS Dispatches</div>
+                <div class="wcard-badge" style="{{ $sosHistory->count() > 0 ? 'background:#fee2e2;color:#dc2626;' : '' }}">{{ $sosHistory->count() }} dispatches</div>
+            </div>
+            @foreach($sosHistory as $sos)
+            <div class="event-item">
+                <div style="background:{{ $sos->status === 'resolved' ? '#f0fdf4' : '#fef2f2' }};border:1px solid {{ $sos->status === 'resolved' ? '#bbf7d0' : '#fecaca' }};border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas {{ $sos->status === 'resolved' ? 'fa-check-circle' : 'fa-ambulance' }}" style="color:{{ $sos->status === 'resolved' ? '#16a34a' : '#dc2626' }};font-size:14px;"></i>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <span>{{ $sos->emergency_type ?? 'Emergency SOS' }}</span>
+                        <span style="font-size:10px;font-weight:700;color:var(--muted);">#SOS-{{ sprintf('%04d', $sos->id) }}</span>
+                    </div>
+                    <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;">
+                        @if($sos->landmark)
+                            <span><i class="fas fa-map-marker-alt" style="color:#dc2626;"></i> {{ $sos->landmark }}</span> • 
+                        @endif
+                        Status: 
+                        @if($sos->status === 'resolved')
+                            <span style="font-weight:900;text-transform:uppercase;color:#15803d;background:#dcfce7;padding:2px 8px;border-radius:99px;border:1px solid #bbf7d0;font-size:9px;"><i class="fas fa-check"></i> Resolved</span>
+                        @elseif($sos->status === 'responding')
+                            <span style="font-weight:900;text-transform:uppercase;color:#1d4ed8;background:#eff6ff;padding:2px 8px;border-radius:99px;border:1px solid #bfdbfe;font-size:9px;"><i class="fas fa-motorcycle"></i> Tanod Responding</span>
+                        @elseif($sos->status === 'acknowledged')
+                            <span style="font-weight:900;text-transform:uppercase;color:#7c3aed;background:#fdf4ff;padding:2px 8px;border-radius:99px;border:1px solid #e9d5ff;font-size:9px;"><i class="fas fa-check-double"></i> Acknowledged</span>
+                        @else
+                            <span style="font-weight:900;text-transform:uppercase;color:#be123c;background:#fff1f2;padding:2px 8px;border-radius:99px;border:1px solid #fecdd3;font-size:9px;"><i class="fas fa-satellite-dish"></i> Alert Dispatched</span>
+                        @endif
+                    </div>
+
+                    @if($sos->dispatched_units)
+                    <div style="font-size:9.5px;font-weight:800;color:#1e40af;background:#eff6ff;padding:3px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;margin-top:5px;border:1px solid #dbeafe;">
+                        <i class="fas fa-shield-alt"></i> Assigned Unit: {{ $sos->dispatched_units }}
+                    </div>
+                    @endif
+
+                    @if($sos->responder_notes)
+                    <div style="font-size:9.5px;font-weight:700;color:#475569;background:#f8fafc;padding:4px 9px;border-radius:6px;margin-top:4px;border:1px dashed #cbd5e1;">
+                        <i class="fas fa-clipboard-list" style="color:#64748b;"></i> Tanod Notes: {{ $sos->responder_notes }}
+                    </div>
+                    @endif
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                    <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;display:block;">{{ $sos->created_at->format('M d') }}</span>
+                    <span style="font-size:9px;color:var(--light);font-weight:600;">{{ $sos->created_at->format('h:i A') }}</span>
+                </div>
+            </div>
+            @endforeach
+
+            @if($sosHistory->isEmpty())
+            <div style="padding:30px;text-align:center;color:var(--light);">
+                <i class="fas fa-shield-heart" style="font-size:26px;display:block;margin-bottom:7px;opacity:.25;"></i>
+                <p style="font-size:11px;font-weight:700;">No emergency SOS dispatches recorded.</p>
+            </div>
+            @endif
+        </div>
         <div class="wcard" id="incident-reports">
             <div class="wcard-head">
                 <div class="wcard-title"><i class="fas fa-shield-alt"></i> Incident Reports History</div>
@@ -3123,7 +3180,7 @@ html, body {
                             <div><i class="fas fa-shield-alt" style="color:var(--brand);margin-right:4px;"></i> On-duty patrol units are being notified.</div>
                             <div style="margin-top:4px;"><i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> Keep your line open for Tanod dispatch verification.</div>
                         </div>
-                        <button type="button" @click="sosModal=false; sosSuccess=false; sosConfirmStep=false;" class="btn-grad" style="width:100%;justify-content:center;padding:10px;">
+                        <button type="button" @click="sosModal=false; sosSuccess=false; sosConfirmStep=false; window.location.href='#sos-history'; window.location.reload();" class="btn-grad" style="width:100%;justify-content:center;padding:10px;">
                             Understood & Close
                         </button>
                     </div>
