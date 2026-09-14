@@ -248,33 +248,71 @@ html, body {
                 if (ctx.state === 'suspended') {
                     await ctx.resume();
                 }
-                const now = ctx.currentTime + 0.04;
-                const tones = [
-                    { f: 960, dur: 0.22 },
-                    { f: 720, dur: 0.22 },
-                    { f: 960, dur: 0.22 },
-                    { f: 720, dur: 0.22 },
-                    { f: 1040, dur: 0.30 },
-                    { f: 780, dur: 0.30 }
-                ];
+
+                const now = ctx.currentTime + 0.03;
+
+                // Dual-horn oscillators for high-intensity "wang-wang" emergency siren
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc1.type = 'sawtooth'; // piercing siren horn
+                osc2.type = 'sine';     // deep acoustic siren resonance
+                osc2.detune.setValueAtTime(12, now); // slight chorus blare
+
+                // 4 complete wail cycles (Wang-wang-wang-wang)
+                const cycles = 4;
+                const upDur = 0.28;   // 0.28s rise
+                const downDur = 0.28; // 0.28s fall
                 let t = now;
-                tones.forEach(tone => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(tone.f, t);
-                    gain.gain.setValueAtTime(0.5, t);
-                    gain.gain.exponentialRampToValueAtTime(0.005, t + tone.dur);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(t);
-                    osc.stop(t + tone.dur);
-                    t += tone.dur;
-                });
+
+                osc1.frequency.setValueAtTime(620, t);
+                osc2.frequency.setValueAtTime(620, t);
+
+                for (let i = 0; i < cycles; i++) {
+                    // Wail UP (Waaang...)
+                    t += upDur;
+                    osc1.frequency.exponentialRampToValueAtTime(1380, t);
+                    osc2.frequency.exponentialRampToValueAtTime(1380, t);
+                    // Wail DOWN (...wang)
+                    t += downDur;
+                    osc1.frequency.exponentialRampToValueAtTime(620, t);
+                    osc2.frequency.exponentialRampToValueAtTime(620, t);
+                }
+
+                // Volume envelope (solid sustain throughout with no silent gaps)
+                gain.gain.setValueAtTime(0.01, now);
+                gain.gain.linearRampToValueAtTime(0.50, now + 0.06);
+                gain.gain.setValueAtTime(0.50, t - 0.12);
+                gain.gain.exponentialRampToValueAtTime(0.001, t);
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(t);
+                osc2.stop(t);
             } catch(e) {
-                console.warn('Emergency siren audio error:', e);
+                console.warn('Wang-wang siren audio error:', e);
             }
         };
+
+        // Warm up AudioContext on any user interaction so background alerts can play freely
+        ['click', 'keydown', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, () => {
+                try {
+                    if (!window._brgyAudioCtx || window._brgyAudioCtx.state === 'closed') {
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        if (AudioCtx) window._brgyAudioCtx = new AudioCtx();
+                    }
+                    if (window._brgyAudioCtx && window._brgyAudioCtx.state === 'suspended') {
+                        window._brgyAudioCtx.resume();
+                    }
+                } catch(e){}
+            }, { passive: true });
+        });
     </script>
 
     <div class="portal-wrap" x-data="{
@@ -327,6 +365,22 @@ html, body {
             ];
         })) }},
         sosPollingInterval: null,
+        hasInitialPollRun: false,
+        sosTitleInterval: null,
+        flashSosTabTitle() {
+            if (this.sosTitleInterval) return;
+            const originalTitle = document.title;
+            let count = 0;
+            this.sosTitleInterval = setInterval(() => {
+                document.title = (count % 2 === 0) ? '🚨 EMERGENCY SOS DISPATCH! - San Miguel II' : originalTitle;
+                count++;
+                if (count > 14) {
+                    clearInterval(this.sosTitleInterval);
+                    this.sosTitleInterval = null;
+                    document.title = originalTitle;
+                }
+            }, 800);
+        },
         playEmergencyChime() {
             if (typeof window.playBarangayEmergencySiren === 'function') {
                 return window.playBarangayEmergencySiren();
@@ -336,12 +390,24 @@ html, body {
             fetch('{{ route('peace.sos.alerts') }}')
                 .then(r => r.json())
                 .then(data => {
-                    const prevTriggered = this.sosAlerts ? this.sosAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length : 0;
                     const newAlerts = data.alerts || [];
+                    const prevAlerts = this.sosAlerts || [];
+                    const prevIds = new Set(prevAlerts.map(a => Number(a.id)));
+                    const prevTriggered = prevAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length;
                     const newTriggered = newAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length;
+
+                    // New alert detected if unseen ID arrives or active count increases
+                    const hasNewAlert = newAlerts.some(a => !prevIds.has(Number(a.id)));
+
                     this.sosAlerts = newAlerts;
-                    if (newTriggered > prevTriggered) {
-                        this.playEmergencyChime();
+
+                    if (this.hasInitialPollRun) {
+                        if (hasNewAlert || newTriggered > prevTriggered) {
+                            this.playEmergencyChime();
+                            this.flashSosTabTitle();
+                        }
+                    } else {
+                        this.hasInitialPollRun = true;
                     }
                 }).catch(e => console.error(e));
         },
@@ -399,17 +465,10 @@ html, body {
         openTransfer(id) { this.transferIssueId = id; this.transferModal = true; },
         init() {
             this.$watch('activeTab', value => localStorage.setItem('brgy_peace_tab', value));
-            window.addEventListener('click', () => {
-                try {
-                    if (window._brgyAudioCtx && window._brgyAudioCtx.state === 'suspended') {
-                        window._brgyAudioCtx.resume();
-                    }
-                } catch(e){}
-            }, { once: true });
             this.pollSosAlerts();
             this.sosPollingInterval = setInterval(() => {
                 this.pollSosAlerts();
-            }, 6000);
+            }, 4000);
         }
     }">
 
