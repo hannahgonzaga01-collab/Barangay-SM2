@@ -538,7 +538,7 @@ html, body {
                 <div class="hstat"><div class="hstat-n" style="color:#fca5a5;">{{ $newPeace }}</div><div class="hstat-l">New</div></div>
                 <div class="hstat"><div class="hstat-n" style="color:#7dd3fc;">{{ $activePeace }}</div><div class="hstat-l">Active</div></div>
                 <div class="hstat"><div class="hstat-n" style="color:#86efac;">{{ $settledPeace }}</div><div class="hstat-l">Settled</div></div>
-                <div class="hstat" @click="activeTab='sos'; playEmergencyChime();" style="cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(255,255,255,.08)'" title="Click to view Emergency SOS dispatches and sound alert">
+                <div class="hstat" @click="activeTab='sos'" style="cursor:pointer;" title="View Emergency SOS Dispatches">
                     <div class="hstat-n" style="display:flex;align-items:center;justify-content:center;gap:6px;color:#fca5a5;">
                         <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="font-size:14px;color:#fca5a5;"></i>
                         <span x-text="sosAlerts.length"></span>
@@ -560,8 +560,8 @@ html, body {
                 <div class="ac-name">Patrol Schedule</div>
                 <div class="ac-sub">Duty roster & proof</div>
             </div>
-            <div class="action-card" @click="activeTab='sos'; playEmergencyChime();" :class="activeTab==='sos'?'active':''" :style="sosAlerts.length > 0 ? 'border-color:#ef4444;' : ''" style="position:relative;" title="Click to sound siren and open SOS tab">
-                <div class="ac-ico" style="background:#fee2e2;" @click.stop="activeTab='sos'; playEmergencyChime();" title="Click icon to sound siren">
+            <div class="action-card" @click="activeTab='sos'" :class="activeTab==='sos'?'active':''">
+                <div class="ac-ico" style="background:#fee2e2;">
                     <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="color:#dc2626;font-size:20px;"></i>
                 </div>
                 <div class="ac-name">
@@ -908,7 +908,7 @@ html, body {
             <div class="card" style="margin-bottom:20px;">
                 <div class="card-head">
                     <div class="card-title" style="color:var(--text);display:flex;align-items:center;gap:8px;">
-                        <div style="width:30px;height:30px;border-radius:8px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:transform .15s;" @click="playEmergencyChime()" title="Click icon to sound siren" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width:30px;height:30px;border-radius:8px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:13px;">
                             <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''"></i>
                         </div>
                         <span>Active SOS Emergency Alerts</span>
