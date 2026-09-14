@@ -38,8 +38,11 @@ class AppServiceProvider extends ServiceProvider
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('emergency_sos_alerts')) {
                 \Illuminate\Support\Facades\Schema::table('emergency_sos_alerts', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('emergency_sos_alerts', 'landmark')) {
+                        $table->text('landmark')->nullable()->after('home_address');
+                    }
                     if (!\Illuminate\Support\Facades\Schema::hasColumn('emergency_sos_alerts', 'emergency_type')) {
-                        $table->string('emergency_type')->nullable()->after('home_address');
+                        $table->string('emergency_type')->nullable()->after('landmark');
                     }
                     if (!\Illuminate\Support\Facades\Schema::hasColumn('emergency_sos_alerts', 'message')) {
                         $table->text('message')->nullable()->after('emergency_type');

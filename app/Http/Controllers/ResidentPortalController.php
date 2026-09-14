@@ -247,6 +247,7 @@ class ResidentPortalController extends Controller
         ];
         $rawType = $request->emergency_type;
         $emergencyType = $typeLabels[$rawType] ?? ($rawType ?: 'General Emergency / Tanod Assistance');
+        $landmark = $request->landmark ?: $request->incident_landmark;
         $situationNote = $request->message ?: $request->situation_note;
 
         $lat = $request->latitude;
@@ -258,6 +259,7 @@ class ResidentPortalController extends Controller
             'resident_name'   => $name,
             'contact_number'  => $contact,
             'home_address'    => $address,
+            'landmark'        => $landmark,
             'emergency_type'  => $emergencyType,
             'message'         => $situationNote,
             'latitude'        => $lat,
@@ -276,6 +278,7 @@ class ResidentPortalController extends Controller
                 'resident_name'   => $name,
                 'contact_number'  => $contact,
                 'home_address'    => $address,
+                'landmark'        => $landmark,
                 'emergency_type'  => $emergencyType,
                 'message'         => $situationNote,
                 'latitude'        => $lat,
@@ -288,11 +291,15 @@ class ResidentPortalController extends Controller
             \Illuminate\Support\Facades\Mail::send([], [], function ($m) use ($adminEmail, $mailData) {
                 $locationLine = ($mailData['latitude'] && $mailData['longitude'])
                     ? "<p><strong>📍 GPS Location:</strong> <a href=\"{$mailData['google_maps_url']}\" target=\"_blank\" style=\"color:#dc2626;font-weight:bold;\">View on Google Maps ({$mailData['latitude']}, {$mailData['longitude']})</a> (Accuracy: " . htmlspecialchars($mailData['accuracy'] ?? 'N/A') . ")</p>"
-                    : "<p><strong>📍 Location:</strong> GPS coordinates not provided.</p>";
+                    : "<p><strong>📍 GPS Location:</strong> Coordinates not provided.</p>";
 
-                $landmarkLine = !empty($mailData['message'])
-                    ? "<p style=\"background:#fffbeb;border-left:4px solid #f59e0b;padding:8px 12px;margin:10px 0;color:#92400e;font-size:13px;\"><strong>📍 Situation / Landmarks:</strong> " . htmlspecialchars($mailData['message']) . "</p>"
-                    : "<p><strong>📍 Situation / Landmarks:</strong> None provided.</p>";
+                $landmarkLine = !empty($mailData['landmark'])
+                    ? "<p style=\"background:#fef2f2;border-left:4px solid #dc2626;padding:9px 12px;margin:10px 0;color:#991b1b;font-size:13px;\"><strong>📍 Incident Landmark / Location:</strong> " . htmlspecialchars($mailData['landmark']) . "</p>"
+                    : "<p><strong>📍 Incident Landmark:</strong> Same as registered address.</p>";
+
+                $situationLine = !empty($mailData['message'])
+                    ? "<p style=\"background:#fffbeb;border-left:4px solid #f59e0b;padding:9px 12px;margin:10px 0;color:#92400e;font-size:13px;\"><strong>ℹ️ Situation Reason / Details:</strong> " . htmlspecialchars($mailData['message']) . "</p>"
+                    : "";
 
                 $body = "
                 <div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:2px solid #dc2626;border-radius:10px;overflow:hidden;\">
@@ -306,8 +313,9 @@ class ResidentPortalController extends Controller
                         <p><strong>🚨 Emergency Nature:</strong> <span style=\"color:#dc2626;font-weight:bold;\">" . htmlspecialchars($mailData['emergency_type']) . "</span></p>
                         <p><strong>👤 Resident Name:</strong> " . htmlspecialchars($mailData['resident_name']) . "</p>
                         <p><strong>📞 Contact Number:</strong> " . htmlspecialchars($mailData['contact_number']) . "</p>
-                        <p><strong>🏠 Home Address:</strong> " . htmlspecialchars($mailData['home_address']) . "</p>
+                        <p><strong>🏠 Registered Home Address:</strong> " . htmlspecialchars($mailData['home_address']) . "</p>
                         {$landmarkLine}
+                        {$situationLine}
                         {$locationLine}
                         <p><strong>🕒 Time Dispatched:</strong> {$mailData['dispatched_at']}</p>
                         <hr style=\"border:0;border-top:1px solid #e5e7eb;margin:15px 0;\">
@@ -328,7 +336,7 @@ class ResidentPortalController extends Controller
         // In-app notifications to all Peace & Order and Admin users
         try {
             $officers = \App\Models\User::whereIn('role', ['peace', 'admin'])->get();
-            $notifDesc = "Resident {$name} triggered an SOS ({$emergencyType}) at {$address}." . ($situationNote ? " Landmark: {$situationNote}" : '');
+            $notifDesc = "Resident {$name} triggered an SOS ({$emergencyType})." . ($landmark ? " Landmark: {$landmark}." : " Address: {$address}.") . ($situationNote ? " Details: {$situationNote}" : '');
             foreach ($officers as $officer) {
                 $officer->notifications()->create([
                     'id' => (string) \Illuminate\Support\Str::uuid(),
@@ -338,6 +346,7 @@ class ResidentPortalController extends Controller
                         'title'          => "🚨 Emergency SOS: {$emergencyType}!",
                         'message'        => $notifDesc,
                         'emergency_type' => $emergencyType,
+                        'landmark'       => $landmark,
                         'situation_note' => $situationNote,
                         'alert_id'       => $alert->id,
                         'maps_url'       => $mapsUrl,

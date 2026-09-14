@@ -275,8 +275,9 @@ html, body {
                 'resident_name'    => $a->resident_name ?? ($a->user ? trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? '')) : 'Barangay Resident'),
                 'resident_contact' => $a->contact_number ?? $a->resident_contact ?? ($a->user?->contact_number ?? $a->user?->phone_number ?? 'N/A'),
                 'resident_address' => $a->home_address ?? $a->resident_address ?? ($a->user?->resident?->address ?? ($a->user?->address ?? 'Barangay San Miguel II')),
+                'landmark'         => !empty($a->landmark) ? $a->landmark : null,
                 'emergency_type'   => !empty($a->emergency_type) ? $a->emergency_type : 'Emergency SOS',
-                'message'          => !empty($a->message) ? $a->message : (!empty($a->responder_notes) ? $a->responder_notes : 'Emergency assistance requested via Resident Portal.'),
+                'message'          => !empty($a->message) ? $a->message : (!empty($a->responder_notes) ? $a->responder_notes : null),
                 'latitude'         => $a->latitude,
                 'longitude'        => $a->longitude,
                 'status'           => $a->status,
@@ -441,16 +442,26 @@ html, body {
                                 <div style="font-size:14px;font-weight:900;color:#fff;" x-text="alert.resident_name"></div>
                                 <div style="font-size:11px;color:#fecaca;font-weight:700;margin-top:2px;">
                                     <i class="fas fa-phone-alt"></i> <span x-text="alert.resident_contact"></span> &bull; 
-                                    <i class="fas fa-map-marker-alt"></i> <span x-text="alert.resident_address"></span>
+                                    <i class="fas fa-home"></i> <span x-text="'Registered Address: ' + alert.resident_address"></span>
                                 </div>
                                 
-                                {{-- Prominent Landmark / Situation Box in Live Banner --}}
-                                <div style="margin-top:9px;padding:9px 13px;background:rgba(0,0,0,0.4);border-left:4px solid #facc15;border-radius:8px;">
-                                    <div style="font-size:9.5px;font-weight:900;color:#fde047;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
-                                        <i class="fas fa-map-pin"></i> Situation Note / Landmarks:
+                                {{-- Prominent Incident Landmark / Location Box in Live Banner --}}
+                                <div style="margin-top:9px;padding:9px 13px;background:rgba(0,0,0,0.45);border-left:4px solid #ef4444;border-radius:8px;">
+                                    <div style="font-size:9.5px;font-weight:900;color:#fca5a5;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
+                                        <i class="fas fa-map-marker-alt"></i> EXACT INCIDENT LOCATION / LANDMARK:
                                     </div>
-                                    <div style="font-size:13px;color:#ffffff;font-weight:800;margin-top:3px;line-height:1.4;" x-text="alert.message ? alert.message : 'No specific landmark provided by resident.'"></div>
+                                    <div style="font-size:13px;color:#ffffff;font-weight:900;margin-top:3px;line-height:1.4;" x-text="alert.landmark ? alert.landmark : ('Same as registered home address: ' + alert.resident_address)"></div>
                                 </div>
+
+                                {{-- Situation Reason / Notes Box in Live Banner (Only shown if provided) --}}
+                                <template x-if="alert.message">
+                                    <div style="margin-top:6px;padding:8px 12px;background:rgba(255,255,255,0.12);border-left:4px solid #facc15;border-radius:8px;">
+                                        <div style="font-size:9px;font-weight:900;color:#fde047;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
+                                            <i class="fas fa-info-circle"></i> SITUATION DETAILS / REASON:
+                                        </div>
+                                        <div style="font-size:12px;color:#ffffff;font-weight:700;margin-top:2px;line-height:1.4;" x-text="alert.message"></div>
+                                    </div>
+                                </template>
                             </div>
 
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -892,16 +903,26 @@ html, body {
                                     <div style="font-size:15px;font-weight:900;color:var(--text);" x-text="alert.resident_name"></div>
                                     <div style="font-size:11px;color:#475569;font-weight:700;margin-top:4px;">
                                         <i class="fas fa-phone-alt" style="color:var(--brand);margin-right:3px;"></i> <span x-text="alert.resident_contact"></span> &bull; 
-                                        <i class="fas fa-map-marker-alt" style="color:var(--brand);margin-right:3px;"></i> <span x-text="alert.resident_address"></span>
+                                        <i class="fas fa-home" style="color:var(--brand);margin-right:3px;"></i> <span x-text="'Registered Address: ' + alert.resident_address"></span>
                                     </div>
                                     
-                                    {{-- Prominent Landmark / Situation Box in SOS Tab --}}
-                                    <div style="margin-top:9px;padding:10px 14px;background:#fffbeb;border:1.5px solid #fde68a;border-left:4px solid #d97706;border-radius:8px;">
-                                        <div style="font-size:9.5px;font-weight:900;color:#b45309;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
-                                            <i class="fas fa-map-pin"></i> Situation Note / Landmarks:
+                                    {{-- Prominent Incident Landmark / Location Box in SOS Tab --}}
+                                    <div style="margin-top:9px;padding:10px 14px;background:#fef2f2;border:1.5px solid #fca5a5;border-left:4px solid #dc2626;border-radius:8px;">
+                                        <div style="font-size:9.5px;font-weight:900;color:#991b1b;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
+                                            <i class="fas fa-map-marker-alt"></i> INCIDENT LANDMARK / LOCATION:
                                         </div>
-                                        <div style="font-size:12.5px;color:#78350f;font-weight:800;margin-top:3px;line-height:1.4;" x-text="alert.message ? alert.message : 'No specific landmark provided by resident.'"></div>
+                                        <div style="font-size:13px;color:#7f1d1d;font-weight:900;margin-top:3px;line-height:1.4;" x-text="alert.landmark ? alert.landmark : ('Same as registered address: ' + alert.resident_address)"></div>
                                     </div>
+
+                                    {{-- Situation Reason / Notes Box in SOS Tab (Only shown if provided) --}}
+                                    <template x-if="alert.message">
+                                        <div style="margin-top:6px;padding:9px 13px;background:#fffbeb;border:1.5px solid #fde68a;border-left:4px solid #d97706;border-radius:8px;">
+                                            <div style="font-size:9.5px;font-weight:900;color:#b45309;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
+                                                <i class="fas fa-info-circle"></i> SITUATION DETAILS / REASON:
+                                            </div>
+                                            <div style="font-size:12.5px;color:#78350f;font-weight:700;margin-top:2px;line-height:1.4;" x-text="alert.message"></div>
+                                        </div>
+                                    </template>
                                 </div>
 
                                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -955,9 +976,14 @@ html, body {
                                 <td style="font-weight:800;color:var(--text);">{{ $rname }}</td>
                                 <td>
                                     <span style="font-size:8px;font-weight:900;background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:99px;text-transform:uppercase;">{{ $rsos->emergency_type ?? 'Emergency SOS' }}</span>
+                                    @if($rsos->landmark)
+                                        <div style="font-size:10px;font-weight:800;color:#991b1b;margin-top:3px;background:#fef2f2;padding:3px 7px;border-radius:4px;border-left:2.5px solid #dc2626;">
+                                            <span style="font-size:8.5px;font-weight:900;text-transform:uppercase;">📍 Landmark:</span> {{ \Illuminate\Support\Str::limit($rsos->landmark, 70) }}
+                                        </div>
+                                    @endif
                                     @if($rsos->message)
-                                        <div style="font-size:10px;font-weight:700;color:#1e293b;margin-top:3px;background:#fffbeb;padding:3px 7px;border-radius:4px;border-left:2.5px solid #d97706;">
-                                            <span style="font-size:8.5px;font-weight:900;color:#b45309;text-transform:uppercase;">Landmark:</span> {{ \Illuminate\Support\Str::limit($rsos->message, 80) }}
+                                        <div style="font-size:9.5px;font-weight:600;color:#475569;margin-top:2px;">
+                                            <span style="font-weight:800;color:#b45309;">Reason:</span> {{ \Illuminate\Support\Str::limit($rsos->message, 70) }}
                                         </div>
                                     @endif
                                 </td>

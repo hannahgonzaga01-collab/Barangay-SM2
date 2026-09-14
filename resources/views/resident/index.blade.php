@@ -598,6 +598,7 @@ html, body {
             sosSuccess: false,
             sosError: null,
             sosEmergencyType: 'general',
+            sosLandmark: '',
             sosMessage: '',
             sosLat: null,
             sosLng: null,
@@ -613,6 +614,8 @@ html, body {
                 this.sosSuccess = false;
                 this.sosError = null;
                 this.sosLoading = false;
+                this.sosLandmark = '';
+                this.sosMessage = '';
                 this.sosLocationStatus = 'detecting';
                 this.sosLat = null;
                 this.sosLng = null;
@@ -649,6 +652,7 @@ html, body {
                         latitude: this.sosLat,
                         longitude: this.sosLng,
                         emergency_type: this.sosEmergencyType,
+                        landmark: this.sosLandmark,
                         message: this.sosMessage,
                         home_address: @json($authUser?->resident?->address ?? ($authUser?->address ?? "Barangay San Miguel II")),
                     })
@@ -2965,7 +2969,7 @@ html, body {
 
                         {{-- Emergency type selector --}}
                         <div class="fgrp">
-                            <label class="flbl">Emergency Nature *</label>
+                            <label class="flbl">Emergency Nature / Reason *</label>
                             <select x-model="sosEmergencyType" class="finput fselect" style="font-weight:800;">
                                 <option value="general">🚨 General Emergency / Tanod Assistance</option>
                                 <option value="security">🛡️ Security Threat / Disturbance / Intruder</option>
@@ -2975,10 +2979,21 @@ html, body {
                             </select>
                         </div>
 
-                        {{-- Optional notes --}}
+                        {{-- Dedicated Incident Landmark / Location Input --}}
                         <div class="fgrp">
-                            <label class="flbl">Brief Situation Note / Landmarks (Optional)</label>
-                            <textarea x-model="sosMessage" rows="2" class="finput" placeholder="e.g. Near corner sari-sari store, suspect in black shirt..." style="resize:none;"></textarea>
+                            <label class="flbl" style="color:#b91c1c;display:flex;align-items:center;gap:4px;">
+                                <i class="fas fa-map-marker-alt"></i> Exact Landmark / Incident Location *
+                            </label>
+                            <input type="text" x-model="sosLandmark" class="finput" placeholder="e.g. Tapat ng Covered Court, Kanto ng Phase 2 sari-sari store..." style="font-weight:700;border:1.5px solid #f87171;background:#fff5f5;">
+                            <div style="font-size:9.5px;color:#64748b;margin-top:3px;">
+                                <i class="fas fa-info-circle" style="color:#ef4444;"></i> Saan mismong lugar nagaganap ang emergency? Ilagay ang landmark lalo na kung wala sa inyong bahay.
+                            </div>
+                        </div>
+
+                        {{-- Situation Details / Notes --}}
+                        <div class="fgrp">
+                            <label class="flbl">Situation Reason / Karagdagang Detalye (Optional)</label>
+                            <textarea x-model="sosMessage" rows="2" class="finput" placeholder="e.g. May sugatan kailangan ng first aid, may nagwawalang tao, etc..." style="resize:none;"></textarea>
                         </div>
 
                         <template x-if="sosError">

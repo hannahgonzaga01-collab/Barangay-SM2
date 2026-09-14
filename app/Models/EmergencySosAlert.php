@@ -14,6 +14,7 @@ class EmergencySosAlert extends Model
         'resident_name',
         'contact_number',
         'home_address',
+        'landmark',
         'latitude',
         'longitude',
         'accuracy',
