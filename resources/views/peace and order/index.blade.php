@@ -409,84 +409,6 @@ html, body {
         }
     }">
 
-        {{-- 🚨 LIVE EMERGENCY SOS NOTIFICATION BANNER --}}
-        <template x-if="sosAlerts && sosAlerts.length > 0">
-            <div style="background:linear-gradient(135deg,#7f1d1d 0%,#991b1b 50%,#b91c1c 100%);border:2px solid #ef4444;border-radius:16px;padding:18px 20px;margin-bottom:20px;box-shadow:0 8px 30px rgba(220,38,38,0.4);animation:pulse-banner 2s infinite;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:12px;">
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <div style="width:44px;height:44px;border-radius:12px;background:#fff;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 10px rgba(0,0,0,0.2);">
-                            <i class="fas fa-bullhorn ringing-bell"></i>
-                        </div>
-                        <div>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <span style="font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;">🚨 HIGH-PRIORITY EMERGENCY SOS ALERT</span>
-                                <span class="siren-badge" style="font-size:10px;font-weight:900;background:#fff;color:#dc2626;padding:2px 8px;border-radius:99px;" x-text="sosAlerts.length + ' ACTIVE'"></span>
-                            </div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.85);font-weight:700;">Immediate Tanod Response Requested by Resident</div>
-                        </div>
-                    </div>
-                    <button type="button" @click="playEmergencyChime()" class="btn btn-sm" style="background:rgba(255,255,255,0.22);color:#fff;border:1.5px solid rgba(255,255,255,0.4);font-weight:900;">
-                        <i class="fas fa-bullhorn ringing-bell"></i> Sound Emergency Siren
-                    </button>
-                </div>
-
-                <div style="display:flex;flex-direction:column;gap:12px;">
-                    <template x-for="alert in sosAlerts" :key="alert.id">
-                        <div style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
-                            <div style="flex:1;min-width:280px;">
-                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                                    <span style="font-size:10px;font-weight:900;background:#fff;color:#991b1b;padding:2px 8px;border-radius:99px;text-transform:uppercase;" x-text="alert.emergency_type"></span>
-                                    <span style="font-size:10px;color:rgba(255,255,255,0.75);font-weight:700;" x-text="alert.time_ago"></span>
-                                    <span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:99px;" :style="alert.status==='responding'?'background:#fef3c7;color:#92400e;':'background:#fee2e2;color:#991b1b;'" x-text="alert.status.toUpperCase()"></span>
-                                </div>
-                                <div style="font-size:14px;font-weight:900;color:#fff;" x-text="alert.resident_name"></div>
-                                <div style="font-size:11px;color:#fecaca;font-weight:700;margin-top:2px;">
-                                    <i class="fas fa-phone-alt"></i> <span x-text="alert.resident_contact"></span> &bull; 
-                                    <i class="fas fa-home"></i> <span x-text="'Registered Address: ' + alert.resident_address"></span>
-                                </div>
-                                
-                                {{-- Prominent Incident Landmark / Location Box in Live Banner --}}
-                                <div style="margin-top:9px;padding:9px 13px;background:rgba(0,0,0,0.45);border-left:4px solid #ef4444;border-radius:8px;">
-                                    <div style="font-size:9.5px;font-weight:900;color:#fca5a5;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
-                                        <i class="fas fa-map-marker-alt"></i> EXACT INCIDENT LOCATION / LANDMARK:
-                                    </div>
-                                    <div style="font-size:13px;color:#ffffff;font-weight:900;margin-top:3px;line-height:1.4;" x-text="alert.landmark ? alert.landmark : ('Same as registered home address: ' + alert.resident_address)"></div>
-                                </div>
-
-                                {{-- Situation Reason / Notes Box in Live Banner (Only shown if provided) --}}
-                                <template x-if="alert.message">
-                                    <div style="margin-top:6px;padding:8px 12px;background:rgba(255,255,255,0.12);border-left:4px solid #facc15;border-radius:8px;">
-                                        <div style="font-size:9px;font-weight:900;color:#fde047;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
-                                            <i class="fas fa-info-circle"></i> SITUATION DETAILS / REASON:
-                                        </div>
-                                        <div style="font-size:12px;color:#ffffff;font-weight:700;margin-top:2px;line-height:1.4;" x-text="alert.message"></div>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                <template x-if="alert.google_maps_url">
-                                    <a :href="alert.google_maps_url" target="_blank" class="btn btn-sm" style="background:#0284c7;color:#fff;font-weight:900;text-decoration:none;">
-                                        <i class="fas fa-location-arrow"></i> Live GPS Map
-                                    </a>
-                                </template>
-
-                                <template x-if="alert.status !== 'responding'">
-                                    <button type="button" @click="updateSosStatus(alert.id, 'responding')" class="btn btn-sm" style="background:#eab308;color:#000;font-weight:900;">
-                                        <i class="fas fa-running"></i> DISPATCH / RESPONDING
-                                    </button>
-                                </template>
-
-                                <button type="button" @click="updateSosStatus(alert.id, 'resolved')" class="btn btn-sm" style="background:#22c55e;color:#fff;font-weight:900;">
-                                    <i class="fas fa-check-circle"></i> MARK RESOLVED
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </template>
-
         {{-- HERO --}}
         <div class="hero">
             <i class="fas fa-shield-alt hero-bg-ico"></i>
@@ -504,12 +426,12 @@ html, body {
                 <div class="hstat"><div class="hstat-n" style="color:#fca5a5;">{{ $newPeace }}</div><div class="hstat-l">New</div></div>
                 <div class="hstat"><div class="hstat-n" style="color:#7dd3fc;">{{ $activePeace }}</div><div class="hstat-l">Active</div></div>
                 <div class="hstat"><div class="hstat-n" style="color:#86efac;">{{ $settledPeace }}</div><div class="hstat-l">Settled</div></div>
-                <div class="hstat" :style="sosAlerts.length > 0 ? 'background:rgba(220,38,38,.35);border-color:#ef4444;box-shadow:0 0 16px rgba(239,68,68,0.5);' : ''" @click="activeTab='sos'" style="cursor:pointer;" title="Click to view SOS dispatches">
-                    <div class="hstat-n" style="display:flex;align-items:center;justify-content:center;gap:6px;" :style="sosAlerts.length > 0 ? 'color:#fecaca;' : ''">
-                        <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="font-size:16px;"></i>
+                <div class="hstat" @click="activeTab='sos'" style="cursor:pointer;" title="Click to view Emergency SOS dispatches">
+                    <div class="hstat-n" style="display:flex;align-items:center;justify-content:center;gap:6px;color:#fca5a5;">
+                        <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="font-size:14px;color:#fca5a5;"></i>
                         <span x-text="sosAlerts.length"></span>
                     </div>
-                    <div class="hstat-l" :style="sosAlerts.length > 0 ? 'color:#fee2e2;' : ''">Active SOS</div>
+                    <div class="hstat-l" style="color:#fca5a5;">Active SOS</div>
                 </div>
             </div>
         </div>
@@ -526,13 +448,13 @@ html, body {
                 <div class="ac-name">Patrol Schedule</div>
                 <div class="ac-sub">Duty roster & proof</div>
             </div>
-            <div class="action-card" @click="activeTab='sos'" :class="activeTab==='sos'?'active':''" :style="sosAlerts.length > 0 ? 'border-color:#e11d48;background:#fff1f2;' : ''" style="position:relative;">
-                <div class="ac-ico" :style="sosAlerts.length > 0 ? 'background:#fee2e2;' : 'background:#fef2f2;'">
-                    <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="color:#e11d48;font-size:22px;"></i>
+            <div class="action-card" @click="activeTab='sos'" :class="activeTab==='sos'?'active':''" :style="sosAlerts.length > 0 ? 'border-color:#ef4444;' : ''" style="position:relative;">
+                <div class="ac-ico" style="background:#fee2e2;">
+                    <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''" style="color:#dc2626;font-size:20px;"></i>
                 </div>
                 <div class="ac-name">
                     Emergency SOS
-                    <span x-show="sosAlerts.length > 0" class="cbadge cbadge-red siren-badge" style="font-size:8.5px;margin-left:4px;" x-text="sosAlerts.length + ' ACTIVE'"></span>
+                    <span x-show="sosAlerts.length > 0" class="cbadge cbadge-red" style="font-size:8px;margin-left:4px;" x-text="sosAlerts.length + ' ACTIVE'"></span>
                 </div>
                 <div class="ac-sub">Live alerts & dispatch log</div>
             </div>
@@ -873,8 +795,16 @@ html, body {
             {{-- Active Dispatches --}}
             <div class="card" style="margin-bottom:20px;">
                 <div class="card-head">
-                    <div class="card-title" style="color:#e11d48;"><i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''"></i> Active SOS Emergency Alerts</div>
+                    <div class="card-title" style="color:var(--text);display:flex;align-items:center;gap:8px;">
+                        <div style="width:30px;height:30px;border-radius:8px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:13px;">
+                            <i class="fas fa-bullhorn" :class="sosAlerts.length > 0 ? 'ringing-bell' : ''"></i>
+                        </div>
+                        <span>Active SOS Emergency Alerts</span>
+                    </div>
                     <div style="display:flex;align-items:center;gap:8px;">
+                        <button type="button" @click="playEmergencyChime()" class="btn btn-ghost btn-sm" style="color:#dc2626;border:1px solid #fecaca;background:#fff5f5;font-weight:800;">
+                            <i class="fas fa-volume-up"></i> Test Siren
+                        </button>
                         <button type="button" @click="pollSosAlerts()" class="btn btn-ghost btn-sm"><i class="fas fa-sync-alt"></i> Refresh</button>
                         <span class="cbadge" style="background:#fee2e2;color:#dc2626;" x-text="sosAlerts.length + ' Pending Dispatches'"></span>
                     </div>
@@ -891,23 +821,23 @@ html, body {
                 </template>
 
                 <template x-if="sosAlerts.length > 0">
-                    <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+                    <div style="padding:18px;display:flex;flex-direction:column;gap:14px;background:#fff;">
                         <template x-for="alert in sosAlerts" :key="alert.id">
-                            <div style="border:1.5px solid #fecaca;background:#fff5f5;border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;box-shadow:0 2px 10px rgba(225,29,72,0.06);">
+                            <div style="background:#ffffff;border:1.5px solid var(--border);border-left:5px solid #dc2626;border-radius:14px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;box-shadow:0 3px 14px rgba(4,25,45,0.06);">
                                 <div style="flex:1;min-width:280px;">
-                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                                        <span style="font-size:9px;font-weight:900;background:#e11d48;color:#fff;padding:2px 8px;border-radius:99px;text-transform:uppercase;" x-text="alert.emergency_type"></span>
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+                                        <span style="font-size:9px;font-weight:900;background:#dc2626;color:#fff;padding:2.5px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:0.04em;" x-text="alert.emergency_type"></span>
                                         <span style="font-size:10px;color:var(--muted);font-weight:700;" x-text="alert.created_at_fmt + ' (' + alert.time_ago + ')'"></span>
-                                        <span style="font-size:9px;font-weight:900;padding:2px 8px;border-radius:99px;" :style="alert.status==='responding'?'background:#fef3c7;color:#92400e;':'background:#fee2e2;color:#dc2626;'" x-text="alert.status.toUpperCase()"></span>
+                                        <span style="font-size:9px;font-weight:900;padding:2.5px 9px;border-radius:99px;" :style="alert.status==='responding'?'background:#fef3c7;color:#92400e;':'background:#fee2e2;color:#dc2626;'" x-text="alert.status.toUpperCase()"></span>
                                     </div>
-                                    <div style="font-size:15px;font-weight:900;color:var(--text);" x-text="alert.resident_name"></div>
+                                    <div style="font-size:16px;font-weight:900;color:var(--text);margin-top:2px;" x-text="alert.resident_name"></div>
                                     <div style="font-size:11px;color:#475569;font-weight:700;margin-top:4px;">
-                                        <i class="fas fa-phone-alt" style="color:var(--brand);margin-right:3px;"></i> <span x-text="alert.resident_contact"></span> &bull; 
-                                        <i class="fas fa-home" style="color:var(--brand);margin-right:3px;"></i> <span x-text="'Registered Address: ' + alert.resident_address"></span>
+                                        <i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> <span x-text="alert.resident_contact"></span> &bull; 
+                                        <i class="fas fa-home" style="color:var(--brand);margin-right:4px;"></i> <span x-text="'Registered Address: ' + alert.resident_address"></span>
                                     </div>
                                     
                                     {{-- Prominent Incident Landmark / Location Box in SOS Tab --}}
-                                    <div style="margin-top:9px;padding:10px 14px;background:#fef2f2;border:1.5px solid #fca5a5;border-left:4px solid #dc2626;border-radius:8px;">
+                                    <div style="margin-top:10px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:8px;">
                                         <div style="font-size:9.5px;font-weight:900;color:#991b1b;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
                                             <i class="fas fa-map-marker-alt"></i> INCIDENT LANDMARK / LOCATION:
                                         </div>
@@ -916,7 +846,7 @@ html, body {
 
                                     {{-- Situation Reason / Notes Box in SOS Tab (Only shown if provided) --}}
                                     <template x-if="alert.message">
-                                        <div style="margin-top:6px;padding:9px 13px;background:#fffbeb;border:1.5px solid #fde68a;border-left:4px solid #d97706;border-radius:8px;">
+                                        <div style="margin-top:7px;padding:9px 13px;background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:8px;">
                                             <div style="font-size:9.5px;font-weight:900;color:#b45309;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
                                                 <i class="fas fa-info-circle"></i> SITUATION DETAILS / REASON:
                                             </div>
@@ -927,16 +857,16 @@ html, body {
 
                                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                     <template x-if="alert.google_maps_url">
-                                        <a :href="alert.google_maps_url" target="_blank" class="btn btn-sm" style="background:#0284c7;color:#fff;text-decoration:none;">
+                                        <a :href="alert.google_maps_url" target="_blank" class="btn btn-sm" style="background:#0284c7;color:#fff;text-decoration:none;box-shadow:0 2px 6px rgba(2,132,199,0.25);">
                                             <i class="fas fa-map-marked-alt"></i> View GPS Map
                                         </a>
                                     </template>
                                     <template x-if="alert.status !== 'responding'">
-                                        <button type="button" @click="updateSosStatus(alert.id, 'responding')" class="btn btn-sm" style="background:#d97706;color:#fff;">
+                                        <button type="button" @click="updateSosStatus(alert.id, 'responding')" class="btn btn-sm" style="background:#d97706;color:#fff;box-shadow:0 2px 6px rgba(217,119,6,0.25);">
                                             <i class="fas fa-running"></i> Dispatch Tanod
                                         </button>
                                     </template>
-                                    <button type="button" @click="updateSosStatus(alert.id, 'resolved')" class="btn btn-sm btn-success">
+                                    <button type="button" @click="updateSosStatus(alert.id, 'resolved')" class="btn btn-sm btn-success" style="box-shadow:0 2px 6px rgba(5,150,105,0.25);">
                                         <i class="fas fa-check-circle"></i> Mark Resolved
                                     </button>
                                 </div>
