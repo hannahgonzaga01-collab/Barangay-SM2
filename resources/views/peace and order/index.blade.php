@@ -790,8 +790,8 @@ html, body {
                 <div class="card-head">
                     <div class="card-title"><i class="fas fa-calendar-alt"></i> Team Assignments & Roving Logs</div>
                     <div style="display:flex;gap:7px;">
-                        <button @click="patrolTeam='Team A'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#1d4ed8;"><i class="fas fa-plus"></i> Assign Team A (MWF)</button>
-                        <button @click="patrolTeam='Team B'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#0369a1;"><i class="fas fa-plus"></i> Assign Team B (T-S-TH)</button>
+                        <button @click="patrolTeam='Team A'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#1d4ed8;"><i class="fas fa-plus"></i> Assign Team A (Monday, Wednesday, Friday)</button>
+                        <button @click="patrolTeam='Team B'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#0369a1;"><i class="fas fa-plus"></i> Assign Team B (Tuesday, Thursday, Saturday, Sunday)</button>
                     </div>
                 </div>
 
@@ -1459,7 +1459,7 @@ html, body {
                             <div class="modal-ico" style="background:#eff6ff;"><i class="fas fa-user-plus" style="color:var(--brand);"></i></div>
                             <div>
                                 <div x-text="'Assign ' + patrolTeam"></div>
-                                <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:none;" x-text="patrolTeam==='Team A' ? 'Schedule: M W F' : 'Schedule: T, S, TH'"></div>
+                                <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:none;" x-text="patrolTeam==='Team A' ? 'Schedule: Monday, Wednesday, Friday' : 'Schedule: Tuesday, Thursday, Saturday, Sunday'"></div>
                             </div>
                         </div>
                         <button @click="patrolModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>

@@ -188,6 +188,50 @@ class ResidentPortalController extends Controller
 
         // Fetch Patrol Schedules for Tanod Duty Display
         $patrolSchedules = \App\Models\PatrolSchedule::latest()->get();
+
+        // Retrieve latest personnel per team (Team A / Team B)
+        $teamARecord = $patrolSchedules->firstWhere('team_name', 'Team A');
+        $teamBRecord = $patrolSchedules->firstWhere('team_name', 'Team B');
+
+        $teamAPersonnel = $teamARecord?->personnel_names ?: 'Kei, Inday, Kikay';
+        $teamBPersonnel = $teamBRecord?->personnel_names ?: 'Lily, Lolo, Lala';
+
+        $todayDate = now()->toDateString();
+        $todayDay  = now()->format('l');
+
+        // Team A: Monday, Wednesday, Friday | Team B: Tuesday, Thursday, Saturday, Sunday
+        $isTeamAToday = in_array($todayDay, ['Monday', 'Wednesday', 'Friday']);
+        $activeTanodTeamName = $isTeamAToday ? 'Team A' : 'Team B';
+        $activeTanodMembers  = $isTeamAToday ? $teamAPersonnel : $teamBPersonnel;
+        $activeTanodDays     = $isTeamAToday ? 'Monday, Wednesday, Friday' : 'Tuesday, Thursday, Saturday, Sunday';
+
+        $tanodTeams = [
+            [
+                'team_name'       => 'Team A',
+                'days_label'      => 'Monday, Wednesday, Friday',
+                'days'            => ['Monday', 'Wednesday', 'Friday'],
+                'personnel_names' => $teamAPersonnel,
+                'is_active_today' => $isTeamAToday,
+            ],
+            [
+                'team_name'       => 'Team B',
+                'days_label'      => 'Tuesday, Thursday, Saturday, Sunday',
+                'days'            => ['Tuesday', 'Thursday', 'Saturday', 'Sunday'],
+                'personnel_names' => $teamBPersonnel,
+                'is_active_today' => !$isTeamAToday,
+            ],
+        ];
+
+        $tanodWeeklySchedule = [
+            ['day' => 'Monday',    'team' => 'Team A', 'days_group' => 'Monday, Wednesday, Friday',          'personnel' => $teamAPersonnel, 'is_active' => ($todayDay === 'Monday')],
+            ['day' => 'Tuesday',   'team' => 'Team B', 'days_group' => 'Tuesday, Thursday, Saturday, Sunday', 'personnel' => $teamBPersonnel, 'is_active' => ($todayDay === 'Tuesday')],
+            ['day' => 'Wednesday', 'team' => 'Team A', 'days_group' => 'Monday, Wednesday, Friday',          'personnel' => $teamAPersonnel, 'is_active' => ($todayDay === 'Wednesday')],
+            ['day' => 'Thursday',  'team' => 'Team B', 'days_group' => 'Tuesday, Thursday, Saturday, Sunday', 'personnel' => $teamBPersonnel, 'is_active' => ($todayDay === 'Thursday')],
+            ['day' => 'Friday',    'team' => 'Team A', 'days_group' => 'Monday, Wednesday, Friday',          'personnel' => $teamAPersonnel, 'is_active' => ($todayDay === 'Friday')],
+            ['day' => 'Saturday',  'team' => 'Team B', 'days_group' => 'Tuesday, Thursday, Saturday, Sunday', 'personnel' => $teamBPersonnel, 'is_active' => ($todayDay === 'Saturday')],
+            ['day' => 'Sunday',    'team' => 'Team B', 'days_group' => 'Tuesday, Thursday, Saturday, Sunday', 'personnel' => $teamBPersonnel, 'is_active' => ($todayDay === 'Sunday')],
+        ];
+
         $tanodSchedulesArray = $patrolSchedules->map(function($p) {
             return [
                 'id' => $p->id,
@@ -200,9 +244,7 @@ class ResidentPortalController extends Controller
             ];
         })->values()->toArray();
 
-        // Determine Active Tanod for today
-        $todayDate = now()->toDateString();
-        $todayDay = now()->format('l');
+        // Determine Active Tanod for today (fallback compatible)
         $activeTanodToday = $patrolSchedules->first(function($p) use ($todayDate, $todayDay) {
             if (!empty($p->schedule_date)) {
                 $schedDate = \Carbon\Carbon::parse($p->schedule_date);
@@ -219,7 +261,8 @@ class ResidentPortalController extends Controller
             'announcements', 'events', 'recentUpdates',
             'unreadNotifications', 'allNotifications',
             'carouselSlides', 'orgChartPath',
-            'patrolSchedules', 'tanodSchedulesArray', 'activeTanodToday', 'projects'
+            'patrolSchedules', 'tanodSchedulesArray', 'activeTanodToday', 'projects',
+            'tanodTeams', 'tanodWeeklySchedule', 'activeTanodTeamName', 'activeTanodMembers', 'activeTanodDays'
         ));
     }
 
