@@ -170,6 +170,11 @@ html, body {
 .modal-box{background:#fff;width:100%;max-width:580px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,52,.35);border-bottom:5px solid var(--brand);max-height:94vh;overflow-y:auto;}
 .modal-box-red{border-bottom-color:#dc2626;}
 .modal-in{padding:20px;}
+.schedule-modal-scroll{overflow-y:auto !important;max-height:calc(88vh - 84px) !important;scrollbar-width:thin;scrollbar-color:#0284c7 #e2e8f0;}
+.schedule-modal-scroll::-webkit-scrollbar{width:8px;}
+.schedule-modal-scroll::-webkit-scrollbar-track{background:#f1f5f9;border-radius:8px;}
+.schedule-modal-scroll::-webkit-scrollbar-thumb{background:#0284c7;border-radius:8px;}
+.schedule-modal-scroll::-webkit-scrollbar-thumb:hover{background:#0369a1;}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:13px;border-bottom:1px solid var(--border);}
 .modal-ttl{font-size:13px;font-weight:900;color:var(--text);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
 .modal-ico{width:32px;height:32px;border-radius:8px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -853,7 +858,7 @@ html, body {
 
                     {{-- Column 2: On-Duty Tanod Patrol --}}
                     @php
-                        $tanodMembers = $activeTanodMembers ?? 'Kei, Inday, Kikay';
+                        $tanodMembers = $activeTanodMembers ?? 'Danilo Cruz, Ramon Santos, Ernesto Reyes';
                         $tanodTeamLabel = $activeTanodTeamName ?? 'Team A';
                         $tanodDaysLabel = $activeTanodDays ?? 'Monday, Wednesday, Friday';
                     @endphp
@@ -2014,10 +2019,10 @@ html, body {
 
     {{-- VIEW ALL SCHEDULES POP-UP MODAL --}}
     <div x-show="scheduleModal" x-cloak class="modal-ov" x-transition style="z-index:9999;" @keydown.window.escape="scheduleModal=false">
-        <div class="modal-box" style="max-width:640px; border-radius:20px; overflow:hidden; border-bottom:4px solid var(--brand); box-shadow:0 25px 60px rgba(0,0,52,0.4);" @click.away="scheduleModal=false">
+        <div class="modal-box" style="max-width:640px; border-radius:20px; border-bottom:4px solid var(--brand); box-shadow:0 25px 60px rgba(0,0,52,0.4); max-height:88vh; display:flex; flex-direction:column; overflow:hidden;" @click.away="scheduleModal=false">
             
             {{-- Header with Navy Gradient --}}
-            <div style="background:linear-gradient(135deg,#000052 0%,#04192D 60%,#0E5393 100%); padding:20px 24px; color:#fff; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1);">
+            <div style="background:linear-gradient(135deg,#000052 0%,#04192D 60%,#0E5393 100%); padding:20px 24px; color:#fff; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); flex-shrink:0;">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <div style="width:42px; height:42px; border-radius:12px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.2);">
                         <i class="fas fa-calendar-alt" style="color:#38bdf8; font-size:18px;"></i>
@@ -2036,7 +2041,7 @@ html, body {
                 </button>
             </div>
 
-            <div class="modal-in" style="padding:20px 24px;">
+            <div class="modal-in schedule-modal-scroll" style="padding:20px 24px; flex:1;">
                 {{-- Segmented Full-Width Rectangular Tabs --}}
                 <div style="display:grid; grid-template-columns:1fr 1fr; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:4px; margin-bottom:20px; gap:4px;">
                     <button type="button" @click="scheduleTab='kagawad'"

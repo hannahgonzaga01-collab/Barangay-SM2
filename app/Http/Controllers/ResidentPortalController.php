@@ -193,8 +193,16 @@ class ResidentPortalController extends Controller
         $teamARecord = $patrolSchedules->firstWhere('team_name', 'Team A');
         $teamBRecord = $patrolSchedules->firstWhere('team_name', 'Team B');
 
-        $teamAPersonnel = $teamARecord?->personnel_names ?: 'Kei, Inday, Kikay';
-        $teamBPersonnel = $teamBRecord?->personnel_names ?: 'Lily, Lolo, Lala';
+        $legacyA = ['kei, inday, kikay', 'kei,inday,kikay', ''];
+        $legacyB = ['lily, lolo, lala', 'lily,lolo,lala', ''];
+
+        $teamAPersonnel = ($teamARecord && !in_array(strtolower(trim($teamARecord->personnel_names)), $legacyA))
+            ? $teamARecord->personnel_names
+            : 'Danilo Cruz, Ramon Santos, Ernesto Reyes';
+
+        $teamBPersonnel = ($teamBRecord && !in_array(strtolower(trim($teamBRecord->personnel_names)), $legacyB))
+            ? $teamBRecord->personnel_names
+            : 'Eduardo Garcia, Rodrigo Ramos, Nestor Mendoza';
 
         $todayDate = now()->toDateString();
         $todayDay  = now()->format('l');
@@ -232,11 +240,17 @@ class ResidentPortalController extends Controller
             ['day' => 'Sunday',    'team' => 'Team B', 'days_group' => 'Tuesday, Thursday, Saturday, Sunday', 'personnel' => $teamBPersonnel, 'is_active' => ($todayDay === 'Sunday')],
         ];
 
-        $tanodSchedulesArray = $patrolSchedules->map(function($p) {
+        $tanodSchedulesArray = $patrolSchedules->map(function($p) use ($legacyA, $legacyB) {
+            $pNames = $p->personnel_names;
+            if (in_array(strtolower(trim($pNames)), $legacyA)) {
+                $pNames = 'Danilo Cruz, Ramon Santos, Ernesto Reyes';
+            } elseif (in_array(strtolower(trim($pNames)), $legacyB)) {
+                $pNames = 'Eduardo Garcia, Rodrigo Ramos, Nestor Mendoza';
+            }
             return [
                 'id' => $p->id,
                 'team_name' => $p->team_name,
-                'personnel_names' => $p->personnel_names,
+                'personnel_names' => $pNames,
                 'schedule_date' => $p->schedule_date ? \Carbon\Carbon::parse($p->schedule_date)->format('M d, Y') : 'Regular Duty',
                 'day_name' => $p->schedule_date ? \Carbon\Carbon::parse($p->schedule_date)->format('l') : 'Daily',
                 'patrol_time' => $p->patrol_time ?: '10:00 PM - 1:00 AM',

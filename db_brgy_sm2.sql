@@ -701,8 +701,8 @@ CREATE TABLE `patrol_schedules` (
 --
 
 INSERT INTO `patrol_schedules` (`id`, `title`, `team_name`, `personnel_names`, `schedule_date`, `patrol_time`, `status`, `image_path`, `created_at`, `updated_at`) VALUES
-(1, 'MONTHLY PATROLS SCHED', 'Team A', 'kei, inday, kikay', '2026-05-13', '10:00PM - 1:00AM', 'Completed', 'patrol_proofs/IrzjHNkeAQQCtckWKE7vr7uTtDYsumH6C9jh8zR0.png', '2026-05-04 07:38:06', '2026-05-04 07:38:27'),
-(2, 'MONTHLY PATROLS SCHED', 'Team B', 'lily, lolo, lala', '2026-05-21', '11:00PM - 12:00AM', 'Scheduled', NULL, '2026-05-04 07:44:07', '2026-05-04 07:44:07');
+(1, 'MONTHLY PATROLS SCHED', 'Team A', 'Danilo Cruz, Ramon Santos, Ernesto Reyes', '2026-05-13', '10:00PM - 1:00AM', 'Completed', 'patrol_proofs/IrzjHNkeAQQCtckWKE7vr7uTtDYsumH6C9jh8zR0.png', '2026-05-04 07:38:06', '2026-05-04 07:38:27'),
+(2, 'MONTHLY PATROLS SCHED', 'Team B', 'Eduardo Garcia, Rodrigo Ramos, Nestor Mendoza', '2026-05-21', '11:00PM - 12:00AM', 'Scheduled', NULL, '2026-05-04 07:44:07', '2026-05-04 07:44:07');
 
 -- --------------------------------------------------------
 
