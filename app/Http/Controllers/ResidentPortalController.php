@@ -73,7 +73,7 @@ class ResidentPortalController extends Controller
             }
 
             // ── 5. Auto-create resident profile if user still has none (only for active users) ──
-            if (!$resident && $user->role === 'resident' && $user->status !== 'pending_verification') {
+            if (!$resident && $user->role === 'resident' && !in_array($user->status, ['pending_verification', 'declined'])) {
                 $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
                 $random = strtoupper(substr(uniqid(), -6));
                 $resident = Resident::create([
@@ -734,9 +734,9 @@ class ResidentPortalController extends Controller
         ]);
 
         $user = auth()->user();
-        if ($user && $user->status === 'pending_verification') {
+        if ($user && in_array($user->status, ['pending_verification', 'declined'])) {
             return redirect()->route('resident.index')
-                ->with('error', '⚠️ Your account is currently pending Masterlist verification. Digital ID requests will be unlocked once your account has been verified by the Barangay Office.');
+                ->with('error', '⚠️ Your account is currently not verified by the Barangay Office. Digital ID requests will be unlocked once approved.');
         }
 
         $existing = DigitalId::where('user_id', $user->id)->first();
@@ -769,6 +769,8 @@ class ResidentPortalController extends Controller
             $user->update([
                 'voter_id_photo' => $photoPath,
                 'voter_status' => 'pending',
+                'status' => 'pending_verification',
+                'decline_reason' => null,
             ]);
 
             if ($user->resident) {
@@ -783,10 +785,10 @@ class ResidentPortalController extends Controller
 
     public function storeDocumentRequest(Request $request)
     {
-        if (auth()->check() && auth()->user()->status === 'pending_verification') {
+        if (auth()->check() && in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', '⚠️ Your account is currently pending Masterlist verification. Document requests will be unlocked once your account has been verified by the Barangay Office.');
+                ->with('error', '⚠️ Your account is currently not verified by the Barangay Office. Document requests will be unlocked once approved.');
         }
 
         if (!auth()->check()) {
@@ -999,10 +1001,10 @@ class ResidentPortalController extends Controller
     public function storeIssueReport(Request $request)
     {
         if (auth()->check()) {
-            if (auth()->user()->status === 'pending_verification') {
+            if (in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', '⚠️ Your account is currently pending Masterlist verification. Reporting issues/blotters will be unlocked once your account has been verified by the Barangay Office.');
+                    ->with('error', '⚠️ Your account is currently not verified by the Barangay Office. Reporting issues/blotters will be unlocked once approved.');
             }
 
             $activeReport = IssueReport::where('user_id', auth()->id())

@@ -23,21 +23,16 @@ class VerifiedResidentMiddleware
             return $next($request);
         }
 
-        // Check if resident is deactivated or explicitly declined
-        if (!$user->is_active || $user->status === 'declined' || $user->voter_status === 'declined') {
+        // Check if resident is deactivated by admin (allow declined residents to access dashboard to update profile/re-upload)
+        if (!$user->is_active && $user->status !== 'declined' && $user->voter_status !== 'declined') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            $message = 'Ang iyong account ay tinanggihan o hindi aktibo.';
-            if ($user->decline_reason) {
-                $message = 'Ang iyong registration ay tinanggihan ng Barangay Office. Dahilan: ' . $user->decline_reason;
-            }
-
-            return redirect()->route('login')->with('error', $message);
+            return redirect()->route('login')->with('error', 'Ang iyong account ay hindi aktibo.');
         }
 
-        // Both active and pending_verification residents are permitted through to view the dashboard!
+        // Active, pending_verification, and declined residents are permitted through to view the dashboard!
         return $next($request);
     }
 }

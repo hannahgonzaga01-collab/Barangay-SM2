@@ -482,7 +482,7 @@ html, body {
             activeReq: {},
             isAuth: {{ $isAuth ? 'true' : 'false' }},
             isVoter: {{ ($isAuth && $authUser?->is_voter) ? 'true' : 'false' }},
-            isPendingVerification: {{ ($isAuth && $authUser?->status === 'pending_verification') ? 'true' : 'false' }},
+            isPendingVerification: {{ ($isAuth && in_array($authUser?->status, ['pending_verification', 'declined'])) ? 'true' : 'false' }},
             pendingLockModal: false,
             annIdx: 0,
             annTotal: {{ $announcements->count() }},
@@ -549,11 +549,19 @@ html, body {
                         // Pending Masterlist Verification Warning Banner
                         pending_banner_title: 'Account Pending Masterlist Verification',
                         pending_banner_badge: 'FOR OFFICE VALIDATION',
-                        pending_banner_desc: 'Welcome to the Resident Portal! Your account is currently being reviewed and validated by Barangay Office Staff against our Official Masterlist using your submitted ID or proof of voter registration.',
-                        pending_banner_locked_label: 'Temporarily Locked:',
-                        pending_banner_locked_desc: 'Online Document Requests (Clearance, Indigency, Jobseeker, Residency), Blotter / Incident Reports, and Digital Barangay ID until your account has been validated by Barangay Staff. You may still browse Announcements, Events, Tanod Patrol Schedules, FAQs, and use Tanod Emergency SOS if needed.',
-                        pending_banner_btn: 'Review / Update Profile',
-                        pending_banner_footer: 'You will receive a confirmation email once your account has been approved by the Barangay Office.',
+                        pending_banner_desc: 'Your account is currently under review by Barangay Office Staff against the Official Masterlist. Document requests, blotter filing, and digital ID are temporarily locked until approved.',
+
+                        // Declined Banner
+                        declined_banner_title: 'Account Verification Declined',
+                        declined_banner_badge: 'ACTION REQUIRED',
+                        declined_banner_reason_lbl: 'Reason from Office:',
+                        declined_banner_action: 'Please review your profile details and re-upload a clear copy of your valid ID.',
+                        declined_banner_btn: 'Update Profile / Re-upload ID',
+
+                        // Verified Banner
+                        verified_banner_title: 'Verified Resident Account',
+                        verified_banner_desc: '• Full access granted to document requests and digital services.',
+                        verified_banner_btn: 'Update Profile',
 
                         // Feature Locked Modal
                         pending_modal_title: 'Feature Locked - Verification Pending',
@@ -675,13 +683,21 @@ html, body {
                         lp_login: 'Mag-log In',
 
                         // Pending Masterlist Verification Warning Banner
-                        pending_banner_title: 'Kasalukuyang Bine-beripika ang Account sa Masterlist',
-                        pending_banner_badge: 'PARA SA PAGSUSURI NG TANGGAPAN',
-                        pending_banner_desc: 'Maligayang pagdating sa Resident Portal! Ang inyong account ay kasalukuyang sinusuri at bine-beripika ng Kawani ng Tanggapan ng Barangay sa ating Opisyal na Masterlist gamit ang inyong na-upload na ID o katibayan ng pagpaparehistro bilang botante.',
-                        pending_banner_locked_label: 'Pansamantalang Naka-Lock:',
-                        pending_banner_locked_desc: 'Mga Online Kahilingan sa Dokumento (Clearance, Indigency, Jobseeker, Residency), Blotter / Ulat ng Insidente, at Digital Barangay ID hangga\'t hindi pa napatutunayan ng Kawani ng Barangay ang inyong account. Maaari pa rin kayong mag-browse ng mga Anunsyo, Programa, Skedyul ng Tanod Patrol, FAQs, at tumawag sa Tanod Emergency SOS kung kinakailangan.',
-                        pending_banner_btn: 'Suriin / I-update ang Profile',
-                        pending_banner_footer: 'Makakatanggap kayo ng kumpirmasyon sa email kapag na-aprubahan na ng Tanggapan ng Barangay ang inyong account.',
+                        pending_banner_title: 'Naghihintay ng Beripikasyon sa Masterlist',
+                        pending_banner_badge: 'KASALUKUYANG BINIBERIPIKA',
+                        pending_banner_desc: 'Kasalukuyang sinusuri ng Tanggapan ng Barangay ang inyong account batay sa Opisyal na Masterlist. Pansamantalang naka-lock ang mga dokumento, blotter, at digital ID hanggang ma-aprubahan.',
+
+                        // Declined Banner
+                        declined_banner_title: 'Tinanggihan ang Beripikasyon ng Account',
+                        declined_banner_badge: 'KAILANGAN NG AKSYON',
+                        declined_banner_reason_lbl: 'Dahilan mula sa Tanggapan:',
+                        declined_banner_action: 'Mangyaring suriin at i-update ang inyong profile at mag-upload muli ng malinaw na kopya ng inyong valid ID.',
+                        declined_banner_btn: 'I-update ang Profile / Mag-upload Muli',
+
+                        // Verified Banner
+                        verified_banner_title: 'Beripikadong Resident Account',
+                        verified_banner_desc: '• Ganap na access sa mga kahilingan ng dokumento at digital services.',
+                        verified_banner_btn: 'I-update ang Profile',
 
                         // Feature Locked Modal
                         pending_modal_title: 'Naka-Lock ang Serbisyo - Naghihintay ng Beripikasyon',
@@ -1163,32 +1179,69 @@ html, body {
                 @endif
             </div>
 
-            @if($isAuth && $authUser?->status === 'pending_verification')
-            {{-- AMBER WARNING BANNER FOR PENDING MASTERLIST VERIFICATION --}}
-            <div style="background:linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border:2px solid #f59e0b; border-radius:16px; padding:18px 20px; margin-bottom:20px; box-shadow:0 4px 15px rgba(245, 158, 11, 0.18);">
-                <div style="display:flex; align-items:flex-start; gap:14px;">
-                    <div style="width:42px; height:42px; border-radius:12px; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px; box-shadow:0 2px 8px rgba(245, 158, 11, 0.35);">
+            @if($isAuth && ($authUser?->status === 'declined' || $authUser?->voter_status === 'declined'))
+            {{-- CRIMSON/RED BANNER FOR DECLINED VERIFICATION (WITH UPDATE PROFILE / REUPLOAD BUTTON) --}}
+            <div style="background:linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border:1.5px solid #ef4444; border-radius:12px; padding:12px 16px; margin-bottom:18px; box-shadow:0 2px 10px rgba(239, 68, 68, 0.12);">
+                <div style="display:flex; align-items:flex-start; gap:12px;">
+                    <div style="width:34px; height:34px; border-radius:10px; background:#dc2626; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; box-shadow:0 2px 6px rgba(220, 38, 38, 0.3);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span style="font-size:12.5px; font-weight:900; color:#991b1b; letter-spacing:0.02em;">⚠️ <span x-text="t('declined_banner_title')">Account Verification Declined</span></span>
+                                <span style="font-size:9px; font-weight:800; background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:1px 7px; border-radius:99px;" x-text="t('declined_banner_badge')">ACTION REQUIRED</span>
+                            </div>
+                            <button type="button" @click="profileModal=true" class="btn-grad btn-sm" style="font-size:11px; padding:5px 12px; background:#dc2626; border-color:#b91c1c; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-user-edit"></i> <span x-text="t('declined_banner_btn')">Update Profile / Re-upload ID</span>
+                            </button>
+                        </div>
+                        <p style="font-size:11.5px; color:#7f1d1d; line-height:1.45; margin:0; font-weight:600;">
+                            <span x-text="t('declined_banner_reason_lbl')">Reason from Office:</span>
+                            <span style="font-weight:700; color:#991b1b;">"{{ $authUser->decline_reason ?? 'Your submitted details or valid ID did not match the Barangay Masterlist.' }}"</span>
+                            — <span x-text="t('declined_banner_action')">Please review your profile details and re-upload a clear copy of your valid ID.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @elseif($isAuth && $authUser?->status === 'pending_verification')
+            {{-- COMPACT AMBER BANNER FOR PENDING MASTERLIST VERIFICATION (SLIM, NO BUTTON, NO FOOTER) --}}
+            <div style="background:linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border:1.5px solid #f59e0b; border-radius:12px; padding:12px 16px; margin-bottom:18px; box-shadow:0 2px 10px rgba(245, 158, 11, 0.12);">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:34px; height:34px; border-radius:10px; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; box-shadow:0 2px 6px rgba(245, 158, 11, 0.3);">
                         <i class="fas fa-user-clock"></i>
                     </div>
-                    <div style="flex:1;">
-                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:5px;">
-                            <span style="font-size:13px; font-weight:900; color:#92400e; text-transform:uppercase; letter-spacing:0.04em;">⚠️ <span x-text="t('pending_banner_title')">Account Pending Masterlist Verification</span></span>
-                            <span style="font-size:9.5px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fcd34d; padding:2px 8px; border-radius:99px;" x-text="t('pending_banner_badge')">FOR OFFICE VALIDATION</span>
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:3px;">
+                            <span style="font-size:12.5px; font-weight:900; color:#92400e; letter-spacing:0.02em;">⏳ <span x-text="t('pending_banner_title')">Account Pending Masterlist Verification</span></span>
+                            <span style="font-size:9px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fcd34d; padding:1px 7px; border-radius:99px;" x-text="t('pending_banner_badge')">FOR OFFICE VALIDATION</span>
                         </div>
-                        <p style="font-size:12px; color:#78350f; line-height:1.55; margin:0 0 8px 0; font-weight:600;" x-text="t('pending_banner_desc')">
-                            Welcome to the Resident Portal! Your account is currently being reviewed and validated by Barangay Office Staff against our Official Masterlist using your submitted ID or proof of voter registration.
+                        <p style="font-size:11.5px; color:#78350f; line-height:1.45; margin:0; font-weight:600;" x-text="t('pending_banner_desc')">
+                            Your account is currently under review by Barangay Office Staff against the Official Masterlist. Document requests, blotter filing, and digital ID are temporarily locked until approved.
                         </p>
-                        <div style="background:rgba(255,255,255,0.75); border-left:3.5px solid #f59e0b; padding:8px 12px; border-radius:6px; font-size:11px; color:#92400e; font-weight:600; line-height:1.5;">
-                            🔒 <strong x-text="t('pending_banner_locked_label')">Temporarily Locked:</strong> <span x-text="t('pending_banner_locked_desc')">Online Document Requests (Clearance, Indigency, Jobseeker, Residency), Blotter / Incident Reports, and Digital Barangay ID until your account has been validated by Barangay Staff. You may still browse Announcements, Events, Tanod Patrol Schedules, FAQs, and use Tanod Emergency SOS if needed.</span>
+                    </div>
+                </div>
+            </div>
+            @elseif($isAuth && $authUser?->status === 'active')
+            {{-- SLEEK VERIFIED BANNER WITH UPDATE PROFILE BUTTON --}}
+            <div x-data="{ showVerified: true }" x-show="showVerified" style="background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border:1px solid #86efac; border-radius:12px; padding:10px 16px; margin-bottom:18px; box-shadow:0 2px 8px rgba(34, 197, 94, 0.08);">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:28px; height:28px; border-radius:50%; background:#16a34a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;">
+                            <i class="fas fa-check"></i>
                         </div>
-                        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                            <button type="button" @click="profileModal=true" class="btn-grad btn-sm" style="font-size:11px; padding:6px 14px; background:#b45309; border-color:#92400e; border-radius:8px;">
-                                <i class="fas fa-user-edit"></i> <span x-text="t('pending_banner_btn')">Review / Update Profile</span>
-                            </button>
-                            <span style="font-size:11px; color:#b45309; font-weight:600;">
-                                <i class="fas fa-envelope"></i> <span x-text="t('pending_banner_footer')">You will receive a confirmation email once your account has been approved by the Barangay Office.</span>
-                            </span>
+                        <div>
+                            <span style="font-size:12px; font-weight:800; color:#166534;" x-text="t('verified_banner_title')">Verified Resident Account</span>
+                            <span style="font-size:11px; color:#15803d; font-weight:600;" x-text="t('verified_banner_desc')">• Full access granted to document requests and digital services.</span>
                         </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" @click="profileModal=true" class="btn-grad btn-sm" style="font-size:11px; padding:5px 12px; background:#16a34a; border-color:#15803d; border-radius:8px; display:inline-flex; align-items:center; gap:5px;">
+                            <i class="fas fa-user-circle"></i> <span x-text="t('verified_banner_btn')">Update Profile</span>
+                        </button>
+                        <button type="button" @click="showVerified=false" style="background:none; border:none; color:#15803d; font-size:13px; cursor:pointer; padding:2px 6px;" title="Dismiss">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2666,10 +2719,10 @@ html, body {
                     </div>
                 </div>
 
-                {{-- VOTER ID UPLOAD LOGIC --}}
-                @if($authUser && $authUser->voter_status === 'declined')
+                {{-- VOTER / RESIDENT ID UPLOAD LOGIC --}}
+                @if($authUser && ($authUser->voter_status === 'declined' || $authUser->status === 'declined'))
                 <div style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:11px;padding:14px;margin-bottom:14px;" x-data="{ isDragging: false }">
-                    <div style="font-size:9px;font-weight:900;color:#dc2626;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i> Voter Verification Declined</div>
+                    <div style="font-size:9px;font-weight:900;color:#dc2626;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i> ID / Voter Verification Declined</div>
                     <p style="font-size:10px;color:#991b1b;font-weight:600;margin-bottom:10px;">Reason: {{ $authUser->decline_reason ?? 'Invalid ID.' }}</p>
                     <form action="{{ route('resident.voter.upload') }}" method="POST" enctype="multipart/form-data">
                         @csrf

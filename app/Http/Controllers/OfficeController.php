@@ -935,7 +935,7 @@ class OfficeController extends Controller
         $user = User::findOrFail($id);
         $user->update([
             'status' => 'declined',
-            'is_active' => 0,
+            'is_active' => 1,
             'voter_status' => 'declined',
             'decline_reason' => $request->rejection_reason,
         ]);

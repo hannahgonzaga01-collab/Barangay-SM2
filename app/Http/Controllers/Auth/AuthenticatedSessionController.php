@@ -30,22 +30,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Check kung active ang account
-        if (!$user->is_active) {
+        // Check kung active ang account (allow declined residents through so they can see decline reason and update profile)
+        if (!$user->is_active && $user->status !== 'declined' && $user->voter_status !== 'declined') {
             Auth::guard('web')->logout();
             return redirect()->route('login')->with('error', 'Your account is deactivated.');
-        }
-
-        // Check if resident registration was declined
-        if ($user->role === 'resident') {
-            if ($user->status === 'declined' || $user->voter_status === 'declined') {
-                Auth::guard('web')->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                $message = 'Your registration was declined. Reason: ' . ($user->decline_reason ?? 'Does not match masterlist.');
-                return redirect()->route('login')->with('error', $message);
-            }
         }
 
         $request->session()->flash('login_welcome', true);
