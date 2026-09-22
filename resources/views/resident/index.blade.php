@@ -502,7 +502,12 @@ html, body {
                         duty_today: 'BARANGAY DUTY TODAY',
                         tanod_patrol: 'On-Duty Tanod Patrol',
                         view_schedules: 'VIEW SCHEDULES',
+                        official_on_duty: 'Official on Duty',
+                        kagawad_of_day: 'Barangay Kagawad of the Day',
+                        peace_order_patrol: 'Peace & Order Patrol',
                         our_services: 'Our Services',
+                        notifications: 'Notifications',
+                        no_notifications: 'No notifications yet.',
                         emergency_sos: 'EMERGENCY / REQUEST TANOD',
                         emergency_sub: 'Immediate Tanod SOS Dispatch',
                         doc_services: 'Document Services',
@@ -514,7 +519,11 @@ html, body {
                         activities_title: 'Barangay Activities & Highlights',
                         announcements: 'Announcements & Updates',
                         events: 'Events & Programs',
+                        officials: 'Officials',
+                        projects: 'Projects',
                         about_us: 'About Barangay SM2',
+                        about_tab: 'About',
+                        past_updates_tab: 'Past Updates',
                         my_history: 'Your Application History',
                         requests: 'requests',
                         no_announcements: 'No active announcements at the moment.',
@@ -532,6 +541,87 @@ html, body {
                         purpose: 'Purpose',
                         select_purpose: '— Select Purpose —',
                         office_pickup_notice: 'After submitting, the barangay office will process your request and send your assigned pickup date, time window, and reference details via email.',
+                        lp_title: 'Resident Portal Access',
+                        lp_desc: 'Please log in or create an account to request barangay certificates, clearances, report blotter issues, or dispatch emergency SOS.',
+                        lp_create: 'Create Account',
+                        lp_login: 'Resident Login',
+
+                        // Pending Masterlist Verification Warning Banner
+                        pending_banner_title: 'Account Pending Masterlist Verification',
+                        pending_banner_badge: 'FOR OFFICE VALIDATION',
+                        pending_banner_desc: 'Welcome to the Resident Portal! Your account is currently being reviewed and validated by Barangay Office Staff against our Official Masterlist using your submitted ID or proof of voter registration.',
+                        pending_banner_locked_label: 'Temporarily Locked:',
+                        pending_banner_locked_desc: 'Online Document Requests (Clearance, Indigency, Jobseeker, Residency), Blotter / Incident Reports, and Digital Barangay ID until your account has been validated by Barangay Staff. You may still browse Announcements, Events, Tanod Patrol Schedules, FAQs, and use Tanod Emergency SOS if needed.',
+                        pending_banner_btn: 'Review / Update Profile',
+                        pending_banner_footer: 'You will receive a confirmation email once your account has been approved by the Barangay Office.',
+
+                        // Feature Locked Modal
+                        pending_modal_title: 'Feature Locked - Verification Pending',
+                        pending_modal_heading: 'Temporarily Locked',
+                        pending_modal_desc: 'This service requires official verification from Barangay Office Staff to confirm your identity against the Masterlist.',
+                        pending_modal_why_label: 'Why is this locked?',
+                        pending_modal_why_desc: 'In accordance with barangay policy, official documents, blotter records, and digital IDs are restricted to residents whose identity has been validated using valid ID or voter proof.',
+                        pending_modal_btn_profile: 'View My Profile',
+                        pending_modal_btn_understand: 'I Understand',
+
+                        // Emergency SOS Modal
+                        sos_modal_title: 'EMERGENCY SOS ALERT',
+                        sos_modal_sub: 'Direct Dispatch to Barangay Peace & Order Patrol',
+                        sos_advisory_title: '⚠️ IMPORTANT REMINDER:',
+                        sos_advisory_desc: 'Emergency SOS is strictly for genuine emergencies within the territorial jurisdiction of Barangay San Miguel II. On-duty Tanod patrols can only respond within our barangay. If an accident or emergency occurs in another barangay or city, please call 911, PNP, or the respective local emergency hotline immediately.',
+                        sos_advisory_penalty: 'Pranks or false alarms are strictly prohibited and punishable by law.',
+                        sos_loc_info: 'Location Dispatch Information:',
+                        sos_reg_addr: 'Registered Address:',
+                        sos_gps_acquired: 'GPS Pinpoint Acquired',
+                        sos_nature_label: 'Emergency Nature / Reason',
+                        sos_landmark_label: 'Exact Landmark / Incident Location',
+                        sos_landmark_ph: 'e.g. In front of Covered Court, Corner of Phase 2 store...',
+                        sos_landmark_hint: 'Where exactly is the emergency taking place? Please specify landmark especially if not at home.',
+                        sos_landmark_err: 'Please provide an exact landmark or location before dispatching.',
+                        sos_btn_dispatch: 'DISPATCH NOW',
+                        sos_confirm_title: 'DISPATCH CONFIRMATION',
+                        sos_confirm_desc: 'Are you sure you want to send an Emergency Dispatch to the Barangay Peace & Order Patrol?',
+                        sos_confirm_nature: '🚨 Emergency Nature:',
+                        sos_confirm_landmark: '📍 Target Landmark / Location:',
+                        sos_confirm_warning: 'THIS IS NOT A GAME OR PRANK. On-duty Tanods can only respond within the territorial jurisdiction of Barangay San Miguel II. Responding officers will proceed immediately to the specified location.',
+                        sos_btn_back: 'Back',
+                        sos_btn_confirm: 'YES, DISPATCH NOW',
+                        sos_transmitting: 'TRANSMITTING...',
+                        sos_success_title: 'DISPATCH ALERT TRANSMITTED',
+                        sos_success_desc: 'Your emergency SOS has been received with HIGHEST PRIORITY by the on-duty Barangay Police (Tanod) & Peace and Order Command.',
+                        sos_email_sent_to: 'Confirmation receipt sent to:',
+                        sos_notice_1: 'On-duty patrol units are being notified.',
+                        sos_notice_2: 'Keep your line open for Tanod dispatch verification.',
+                        sos_btn_close: 'Understood & Close',
+
+                        // Schedules Modal
+                        sched_title: 'Barangay Duty & Patrol Schedules',
+                        sched_sub: 'Official Weekly Kagawad Assignments & Tanod Security Patrol Timetable',
+                        sched_tab_kagawad: 'Officer on Duty (Kagawad)',
+                        sched_tab_tanod: 'Tanod Patrol Schedule',
+                        sched_kagawad_head: 'Weekly Officer Schedule',
+                        sched_rotation: 'Monday – Sunday Rotation',
+                        sched_col_day: 'Day',
+                        sched_col_official: 'Barangay Official',
+                        sched_col_status: 'Duty Status',
+                        sched_active_today: 'Active Today',
+                        sched_scheduled: 'Scheduled',
+                        sched_tanod_head: 'Peace & Order Patrol Teams',
+                        sched_security_rotation: 'Official Security Rotation',
+                        sched_assigned_days: 'Assigned Days:',
+                        sched_personnel: 'Personnel:',
+
+                        // FAQs Modal
+                        faq_title: 'Frequently Asked Questions',
+                        faq_subtitle: 'Find answers to common inquiries below',
+                        faq_hours_title: 'Office Hours:',
+                        faq_hours_desc: 'Monday to Friday, 8:00 AM to 5:00 PM. We are closed on weekends and regular holidays.',
+                        faq_limits_title: 'Document Limits:',
+                        faq_limits_rep: '• Authorized Reps: Max 2 active requests at a time.',
+                        faq_limits_job: '• Job Seeker Cert: Can only be requested ONCE per person for their lifetime.',
+                        faq_reports_title: 'Incident Reports:',
+                        faq_reports_desc: 'Only one (1) active blotter/report is allowed per resident. You must wait for your current report to be resolved or closed before filing a new one.',
+                        faq_close: 'Close Guide',
                     },
                     fil: {
                         welcome: 'Maligayang Pagdating',
@@ -540,7 +630,12 @@ html, body {
                         duty_today: 'NAGTATRABAHO NGAYONG ARAW',
                         tanod_patrol: 'Naka-Duty na Patrol ng Tanod',
                         view_schedules: 'TINGNAN ANG MGA SKEDYUL',
+                        official_on_duty: 'Opisyal na Naka-Duty',
+                        kagawad_of_day: 'Barangay Kagawad ng Araw',
+                        peace_order_patrol: 'Patrol ng Kapayapaan at Kaayusan',
                         our_services: 'Aming Mga Serbisyo',
+                        notifications: 'Mga Notipikasyon',
+                        no_notifications: 'Walang mga notipikasyon sa ngayon.',
                         emergency_sos: 'EMERGENCY / HUMINGI NG TANOD',
                         emergency_sub: 'Agad na Pagresponde ng Tanod',
                         doc_services: 'Serbisyo sa Dokumento',
@@ -552,7 +647,11 @@ html, body {
                         activities_title: 'Mga Aktibidad at Kaganapan sa Barangay',
                         announcements: 'Mga Anunsyo at Balita',
                         events: 'Mga Kaganapan at Programa',
+                        officials: 'Mga Opisyal',
+                        projects: 'Mga Proyekto',
                         about_us: 'Tungkol sa Barangay SM2',
+                        about_tab: 'Tungkol sa Barangay',
+                        past_updates_tab: 'Mga Nakaraang Update',
                         my_history: 'Kasaysayan ng Aplikasyon',
                         requests: 'mga kahilingan',
                         no_announcements: 'Walang aktibong anunsyo sa ngayon.',
@@ -570,6 +669,87 @@ html, body {
                         purpose: 'Layunin / Dahilan',
                         select_purpose: '— Pumili ng Layunin —',
                         office_pickup_notice: 'Pagkatapos isumite, ipoproseso ng tanggapan ng barangay ang iyong kahilingan at ipapadala ang itinalagang petsa, oras ng pagkuha, at detalye ng sanggunian sa pamamagitan ng email.',
+                        lp_title: 'Akses sa Resident Portal',
+                        lp_desc: 'Mangyaring mag-log in o gumawa ng account upang humiling ng mga sertipiko ng barangay, clearance, mag-ulat ng blotter, o magpadala ng emergency SOS.',
+                        lp_create: 'Gumawa ng Account',
+                        lp_login: 'Mag-log In',
+
+                        // Pending Masterlist Verification Warning Banner
+                        pending_banner_title: 'Kasalukuyang Bine-beripika ang Account sa Masterlist',
+                        pending_banner_badge: 'PARA SA PAGSUSURI NG TANGGAPAN',
+                        pending_banner_desc: 'Maligayang pagdating sa Resident Portal! Ang inyong account ay kasalukuyang sinusuri at bine-beripika ng Kawani ng Tanggapan ng Barangay sa ating Opisyal na Masterlist gamit ang inyong na-upload na ID o katibayan ng pagpaparehistro bilang botante.',
+                        pending_banner_locked_label: 'Pansamantalang Naka-Lock:',
+                        pending_banner_locked_desc: 'Mga Online Kahilingan sa Dokumento (Clearance, Indigency, Jobseeker, Residency), Blotter / Ulat ng Insidente, at Digital Barangay ID hangga\'t hindi pa napatutunayan ng Kawani ng Barangay ang inyong account. Maaari pa rin kayong mag-browse ng mga Anunsyo, Programa, Skedyul ng Tanod Patrol, FAQs, at tumawag sa Tanod Emergency SOS kung kinakailangan.',
+                        pending_banner_btn: 'Suriin / I-update ang Profile',
+                        pending_banner_footer: 'Makakatanggap kayo ng kumpirmasyon sa email kapag na-aprubahan na ng Tanggapan ng Barangay ang inyong account.',
+
+                        // Feature Locked Modal
+                        pending_modal_title: 'Naka-Lock ang Serbisyo - Naghihintay ng Beripikasyon',
+                        pending_modal_heading: 'Pansamantalang Naka-Lock',
+                        pending_modal_desc: 'Ang serbisyong ito ay nangangailangan ng opisyal na beripikasyon mula sa Kawani ng Tanggapan ng Barangay upang matiyak ang inyong pagkakakilanlan sa Masterlist.',
+                        pending_modal_why_label: 'Bakit ito naka-lock?',
+                        pending_modal_why_desc: 'Alinsunod sa patakaran ng barangay, ang pag-isyu ng mga opisyal na dokumento, talaan ng blotter, at digital ID ay limitado lamang sa mga residenteng napatunayan na ang pagkakakilanlan gamit ang valid ID o katibayan ng botante.',
+                        pending_modal_btn_profile: 'Tingnan ang Aking Profile',
+                        pending_modal_btn_understand: 'Naiintindihan Ko',
+
+                        // Emergency SOS Modal
+                        sos_modal_title: 'ALERTO NG EMERGENCY SOS',
+                        sos_modal_sub: 'Direktang Pagresponde ng Barangay Peace & Order Patrol',
+                        sos_advisory_title: '⚠️ MAHALAGANG PAALALA:',
+                        sos_advisory_desc: 'Ang Emergency SOS ay para lamang sa mga totoong emergency sa loob ng nasasakupan ng Barangay San Miguel II. Tanging sa loob lamang ng ating barangay makaka-responde ang ating mga Tanod on-duty. Kung naganap ang aksidente o emergency sa ibang barangay o bayan, mangyaring tumawag agad sa 911, PNP, o sa hotline ng kaukulang barangay.',
+                        sos_advisory_penalty: 'Ang prank o biruan ay mahigpit na ipinagbabawal at may karampatang parusa ayon sa batas.',
+                        sos_loc_info: 'Impormasyon sa Lokasyon ng Dispatch:',
+                        sos_reg_addr: 'Nakarehistrong Tirahan:',
+                        sos_gps_acquired: 'Nakuha ang GPS Pinpoint',
+                        sos_nature_label: 'Uri o Dahilan ng Emergency',
+                        sos_landmark_label: 'Eksaktong Landmark / Lokasyon ng Insidente',
+                        sos_landmark_ph: 'hal. Tapat ng Covered Court, Kanto ng Phase 2 sari-sari store...',
+                        sos_landmark_hint: 'Saan mismong lugar nagaganap ang emergency? Ilagay ang landmark lalo na kung wala sa inyong bahay.',
+                        sos_landmark_err: 'Kinakailangan ilagay ang eksaktong landmark o lokasyon bago mag-dispatch.',
+                        sos_btn_dispatch: 'I-DISPATCH NA',
+                        sos_confirm_title: 'KUMPIRMASYON SA PAG-DISPATCH',
+                        sos_confirm_desc: 'Sigurado ka bang nais mong magpadala ng Emergency Dispatch sa Barangay Peace & Order Patrol?',
+                        sos_confirm_nature: '🚨 Uri ng Emergency:',
+                        sos_confirm_landmark: '📍 Pupuntahang Landmark / Lokasyon:',
+                        sos_confirm_warning: 'HINDI ITO LARO O BIRO. Tanging sa nasasakupan lamang ng Barangay San Miguel II makaka-responde ang ating mga Tanod on-duty. Agad na tutungo ang mga rumespondeng Tanod sa nasabing lokasyon.',
+                        sos_btn_back: 'Bumalik',
+                        sos_btn_confirm: 'OO, I-DISPATCH NA',
+                        sos_transmitting: 'IPINAPADALA...',
+                        sos_success_title: 'NAIPADALA NA ANG ALERTO NG DISPATCH',
+                        sos_success_desc: 'Ang inyong emergency SOS ay natanggap na nang may PINAKAMATAAS NA PRIYORIDAD ng mga naka-duty na Tanod ng Barangay at Peace and Order Command.',
+                        sos_email_sent_to: 'Kumpirmasyon ay ipinadala sa:',
+                        sos_notice_1: 'Inaabisuhan na ang mga naka-duty na patrol unit.',
+                        sos_notice_2: 'Panatilihing bukas ang inyong linya para sa beripikasyon ng Tanod.',
+                        sos_btn_close: 'Naiintindihan at Isara',
+
+                        // Schedules Modal
+                        sched_title: 'Mga Skedyul ng Trabaho at Patrol ng Barangay',
+                        sched_sub: 'Opisyal na Lingguhang Pagtatalaga ng Kagawad at Skedyul ng Tanod Patrol',
+                        sched_tab_kagawad: 'Opisyal na Naka-Duty (Kagawad)',
+                        sched_tab_tanod: 'Skedyul ng Patrol ng Tanod',
+                        sched_kagawad_head: 'Lingguhang Skedyul ng mga Opisyal',
+                        sched_rotation: 'Pagpapalitan Lunes Hanggang Linggo',
+                        sched_col_day: 'Araw',
+                        sched_col_official: 'Opisyal ng Barangay',
+                        sched_col_status: 'Katayuan sa Trabaho',
+                        sched_active_today: 'Naka-Duty Ngayong Araw',
+                        sched_scheduled: 'Nakatakda',
+                        sched_tanod_head: 'Mga Pangkat ng Patrol sa Kapayapaan at Kaayusan',
+                        sched_security_rotation: 'Opisyal na Pagpapalitan sa Seguridad',
+                        sched_assigned_days: 'Mga Nakatakdang Araw:',
+                        sched_personnel: 'Mga Tauhan:',
+
+                        // FAQs Modal
+                        faq_title: 'Mga Madalas Itanong (FAQs)',
+                        faq_subtitle: 'Alamin ang mga kasagutan sa mga karaniwang katanungan sa ibaba',
+                        faq_hours_title: 'Oras ng Tanggapan:',
+                        faq_hours_desc: 'Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM. Sarado tuwing Sabado, Linggo, at mga opisyal na pista opisyal.',
+                        faq_limits_title: 'Limitasyon sa Dokumento:',
+                        faq_limits_rep: '• Awtorisadong Kinatawan: Hanggang 2 aktibong kahilingan lamang sa bawat pagkakataon.',
+                        faq_limits_job: '• Job Seeker Cert: Maaari lamang hingin nang ISANG BESES sa buong buhay ng bawat residente.',
+                        faq_reports_title: 'Mga Ulat ng Insidente:',
+                        faq_reports_desc: 'Isang (1) aktibong blotter o ulat lamang ang pinapayagan sa bawat residente. Kailangang maresolba o maisara muna ang kasalukuyang ulat bago makapag-file ng bago.',
+                        faq_close: 'Isara ang Gabay',
                     }
                 };
                 return (dict[this.lang] && dict[this.lang][key]) ? dict[this.lang][key] : (dict['en'][key] || key);
@@ -598,11 +778,18 @@ html, body {
                 { day:'Saturday',  name:'Hon. Edgardo M. Gutierrez' },
                 { day:'Sunday',    name:'Hon. Renato V. Calawin' },
             ],
-            get todayDay(){ return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()]; },
-            get dutyToday(){ const d=this.dutySchedule.find(x=>x.day===this.todayDay); return d?d.name:'N/A'; },
+            get todayDayKey(){ return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()]; },
+            get todayDay(){ 
+                if (this.lang === 'fil') {
+                    const filDays = ['Linggo','Lunes','Martes','Miyerkules','Huwebes','Biyernes','Sabado'];
+                    return filDays[new Date().getDay()];
+                }
+                return this.todayDayKey;
+            },
+            get dutyToday(){ const d=this.dutySchedule.find(x=>x.day===this.todayDayKey); return d?d.name:'N/A'; },
             tanodTeams: @json($tanodTeams ?? []),
             tanodWeeklySchedule: @json($tanodWeeklySchedule ?? []),
-            isTeamActiveToday(days) { return Array.isArray(days) && days.includes(this.todayDay); },
+            isTeamActiveToday(days) { return Array.isArray(days) && days.includes(this.todayDayKey); },
             tanodSchedules: @json($tanodSchedulesArray ?? []),
             sosModal: false,
             sosConfirmStep: false,
@@ -661,7 +848,9 @@ html, body {
                 const landmarkClean = (this.sosLandmark || '').trim();
 
                 if (!landmarkClean || landmarkClean.length < 3) {
-                    this.sosError = '⚠️ Pakilagay po ang eksaktong landmark o lokasyon ng emergency bago mag-dispatch.';
+                    this.sosError = this.lang === 'fil' 
+                        ? '⚠️ Pakilagay po ang eksaktong landmark o lokasyon ng emergency bago mag-dispatch.' 
+                        : '⚠️ Please provide an exact landmark or emergency location before dispatching.';
                     this.sosLandmarkError = true;
                     return;
                 }
@@ -670,20 +859,30 @@ html, body {
             },
 
             getEmergencyTypeLabel(type) {
-                const map = {
+                const mapEn = {
                     'general': '🚨 General Emergency / Tanod Assistance',
                     'security': '🛡️ Security Threat / Disturbance / Intruder',
                     'medical': '🚑 Medical Emergency / First Responder',
                     'fire': '🔥 Fire / Hazard Alert',
                     'dispute': '⚠️ Neighborhood Incident / Domestic Disturbance'
                 };
-                return map[type] || 'Emergency Assistance';
+                const mapFil = {
+                    'general': '🚨 Pangkalahatang Emergency / Saklolo ng Tanod',
+                    'security': '🛡️ Banta sa Seguridad / Kaguluhan / Estranghero',
+                    'medical': '🚑 Serbisyong Medikal / Unang Lunas',
+                    'fire': '🔥 Sunog / Alerto sa Panganib',
+                    'dispute': '⚠️ Alitan sa Kapitbahay / Kaguluhan sa Tahanan'
+                };
+                const map = this.lang === 'fil' ? mapFil : mapEn;
+                return map[type] || (this.lang === 'fil' ? 'Saklolo sa Emergency' : 'Emergency Assistance');
             },
 
             sendSosAlert() {
                 const landmarkClean = (this.sosLandmark || '').trim();
                 if (!landmarkClean || landmarkClean.length < 3) {
-                    this.sosError = '⚠️ Pakilagay po ang eksaktong landmark o lokasyon ng emergency.';
+                    this.sosError = this.lang === 'fil' 
+                        ? '⚠️ Pakilagay po ang eksaktong landmark o lokasyon ng emergency.' 
+                        : '⚠️ Please provide an exact landmark or emergency location.';
                     this.sosConfirmStep = false;
                     this.sosLandmarkError = true;
                     return;
@@ -715,12 +914,14 @@ html, body {
                         this.sosSuccess = true;
                         this.sosResidentEmail = data.resident_email || '';
                     } else {
-                        this.sosError = data.message || 'Error sending SOS alert.';
+                        this.sosError = data.message || (this.lang === 'fil' ? 'May error sa pagpapadala ng alerto.' : 'Error sending SOS alert.');
                     }
                 })
                 .catch(err => {
                     this.sosLoading = false;
-                    this.sosError = 'Network error transmitting SOS dispatch. Please call emergency hotline directly.';
+                    this.sosError = this.lang === 'fil'
+                        ? 'Nagkaroon ng problema sa network. Tumawag agad sa emergency hotline.'
+                        : 'Network error transmitting SOS dispatch. Please call emergency hotline directly.';
                 });
             },
 
@@ -743,6 +944,30 @@ html, body {
                 {key:'oath',         name:'Oath',         icon:'fa-hand-holding-heart'},
             ],
             get selDocObj(){ return this.docs.find(d=>d.key===this.selectedDoc)||{}; },
+            getDocName(doc){
+                if(this.lang === 'fil') {
+                    const filNames = {
+                        'indigency': 'Katunayan ng Kahirapan (Indigency)',
+                        'clearance': 'Barangay Clearance',
+                        'jobseeker': 'First Time Job Seeker',
+                        'business': 'Permiso sa Negosyo (Business)',
+                        'residency': 'Katunayan ng Paninirahan (Residency)',
+                        'endorsement': 'Endorsement',
+                        'moveout': 'Paglipat Palabas (Move-Out)',
+                        'movein': 'Paglipat Papasok (Move-In)',
+                        'closure': 'Pagsasara ng Negosyo',
+                        'latereg': 'Huling Pagpaparehistro (Late Reg)',
+                        'guardianship': 'Sertipiko ng Tagapangalaga',
+                        'cohabitation': 'Katibayan ng Pagsasama',
+                        'katibayan': 'Katibayan',
+                        'cashgift': 'Cash Gift / Ayuda',
+                        'yumao': 'Sertipiko para sa Yumao',
+                        'oath': 'Panunumpa (Oath)',
+                    };
+                    return filNames[doc.key] || doc.name;
+                }
+                return doc.name;
+            },
 
             offenses: [
                 'Physical Assault','Oral Defamation / Slander','Trespassing',
@@ -801,7 +1026,7 @@ html, body {
     }
     </script>
 
-    <div x-data="residentPortalApp()">
+    <div x-data="residentPortalApp()" @lang-changed.window="lang = $event.detail">
 
     {{-- HERO CAROUSEL --}}
     <div class="hero-section">
@@ -847,14 +1072,14 @@ html, body {
                         <div>
                             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
                                 <span style="font-size:9.5px; font-weight:900; color:#93c5fd; text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:5px;">
-                                    <i class="fas fa-user-tie"></i> Official on Duty
+                                    <i class="fas fa-user-tie"></i> <span x-text="t('official_on_duty')">Official on Duty</span>
                                 </span>
                                 <span class="duty-day-txt" style="margin-top:0;" x-text="todayDay"></span>
                             </div>
                             <div class="duty-name" style="font-size:16px; font-weight:900; color:#fff;" x-text="dutyToday"></div>
                         </div>
                         <div style="font-size:10.5px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:8px;">
-                            Barangay Kagawad of the Day
+                            <span x-text="t('kagawad_of_day')">Barangay Kagawad of the Day</span>
                         </div>
                     </div>
 
@@ -877,7 +1102,7 @@ html, body {
                             </div>
                         </div>
                         <div style="font-size:10.5px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:8px;">
-                            Peace & Order Patrol — {{ $tanodTeamLabel }} ({{ $tanodDaysLabel }})
+                            <span x-text="t('peace_order_patrol')">Peace & Order Patrol</span> — {{ $tanodTeamLabel }} ({{ $tanodDaysLabel }})
                         </div>
                     </div>
 
@@ -914,7 +1139,7 @@ html, body {
                             <div class="notif-item {{ $isUnread ? 'notif-item-unread' : '' }}" 
                                  style="cursor:pointer;"
                                  @click="notifOpen=false; document.getElementById('{{ $targetId }}')?.scrollIntoView({behavior:'smooth'})">
-                                <div class="notif-item-ico" style="background:{{ $isUnread ? (str_contains($type, 'sos') ? '#fee2e2' : '#dbeafe') : '#f1f5f9' }};">
+                                 <div class="notif-item-ico" style="background:{{ $isUnread ? (str_contains($type, 'sos') ? '#fee2e2' : '#dbeafe') : '#f1f5f9' }};">
                                     <i class="fas {{ str_contains($type, 'sos') ? 'fa-ambulance' : (str_contains($type, 'reminder') || str_contains($type, 'appointment') ? 'fa-clock' : ($type === 'document_received' ? 'fa-file-alt' : 'fa-bell')) }}" style="color:{{ $isUnread ? (str_contains($type, 'sos') ? '#dc2626' : '#0E5393') : '#94a3b8' }};font-size:11px;"></i>
                                 </div>
                                 <div style="flex:1;min-width:0;">
@@ -926,7 +1151,7 @@ html, body {
                             @empty
                             <div style="padding:30px;text-align:center;color:var(--light);">
                                 <i class="fas fa-bell" style="font-size:24px;display:block;margin-bottom:7px;opacity:.2;"></i>
-                                <p style="font-size:11px;font-weight:700;">No notifications yet.</p>
+                                <p style="font-size:11px;font-weight:700;" x-text="t('no_notifications')">No notifications yet.</p>
                             </div>
                             @endforelse
                         </div>
@@ -947,21 +1172,21 @@ html, body {
                     </div>
                     <div style="flex:1;">
                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:5px;">
-                            <span style="font-size:13px; font-weight:900; color:#92400e; text-transform:uppercase; letter-spacing:0.04em;">⚠️ Account Pending Masterlist Verification</span>
-                            <span style="font-size:9.5px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fcd34d; padding:2px 8px; border-radius:99px;">FOR OFFICE VALIDATION</span>
+                            <span style="font-size:13px; font-weight:900; color:#92400e; text-transform:uppercase; letter-spacing:0.04em;">⚠️ <span x-text="t('pending_banner_title')">Account Pending Masterlist Verification</span></span>
+                            <span style="font-size:9.5px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fcd34d; padding:2px 8px; border-radius:99px;" x-text="t('pending_banner_badge')">FOR OFFICE VALIDATION</span>
                         </div>
-                        <p style="font-size:12px; color:#78350f; line-height:1.55; margin:0 0 8px 0; font-weight:600;">
-                            Welcome to the Resident Portal! Ang inyong account ay <strong>kasalukuyang sinusuri at bine-verify ng Barangay Office Staff</strong> sa ating Official Masterlist gamit ang inyong na-upload na ID o proof of voter registration.
+                        <p style="font-size:12px; color:#78350f; line-height:1.55; margin:0 0 8px 0; font-weight:600;" x-text="t('pending_banner_desc')">
+                            Welcome to the Resident Portal! Your account is currently being reviewed and validated by Barangay Office Staff against our Official Masterlist using your submitted ID or proof of voter registration.
                         </p>
                         <div style="background:rgba(255,255,255,0.75); border-left:3.5px solid #f59e0b; padding:8px 12px; border-radius:6px; font-size:11px; color:#92400e; font-weight:600; line-height:1.5;">
-                            🔒 <strong>Pansamantalang Naka-Lock:</strong> Online Document Requests (Clearance, Indigency, Jobseeker, Residency), Blotter / Incident Reports, at Digital Barangay ID hangga't hindi pa naba-validate ng Barangay Staff ang inyong account. Maaari pa rin kayong mag-browse ng mga Announcements, Events, Tanod Schedules, FAQs, at tumawag sa Tanod Emergency SOS kung kinakailangan.
+                            🔒 <strong x-text="t('pending_banner_locked_label')">Temporarily Locked:</strong> <span x-text="t('pending_banner_locked_desc')">Online Document Requests (Clearance, Indigency, Jobseeker, Residency), Blotter / Incident Reports, and Digital Barangay ID until your account has been validated by Barangay Staff. You may still browse Announcements, Events, Tanod Patrol Schedules, FAQs, and use Tanod Emergency SOS if needed.</span>
                         </div>
                         <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                             <button type="button" @click="profileModal=true" class="btn-grad btn-sm" style="font-size:11px; padding:6px 14px; background:#b45309; border-color:#92400e; border-radius:8px;">
-                                <i class="fas fa-user-edit"></i> Suriin / I-update ang Profile
+                                <i class="fas fa-user-edit"></i> <span x-text="t('pending_banner_btn')">Review / Update Profile</span>
                             </button>
                             <span style="font-size:11px; color:#b45309; font-weight:600;">
-                                <i class="fas fa-envelope"></i> Makakatanggap kayo ng confirmation email kapag na-aprubahan na ng Barangay Office ang inyong account.
+                                <i class="fas fa-envelope"></i> <span x-text="t('pending_banner_footer')">You will receive a confirmation email once your account has been approved by the Barangay Office.</span>
                             </span>
                         </div>
                     </div>
@@ -1029,11 +1254,11 @@ html, body {
         @if(!$isAuth)
         <div class="login-prompt">
             <div class="lp-icon"><i class="fas fa-home"></i></div>
-            <h3 style="font-size:14px;font-weight:900;color:#1e3a5f;margin-bottom:5px;">Resident Portal Access</h3>
-            <p style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:14px;line-height:1.5;">Please log in or create an account to request barangay certificates, clearances, report blotter issues, or dispatch emergency SOS.</p>
+            <h3 style="font-size:14px;font-weight:900;color:#1e3a5f;margin-bottom:5px;" x-text="t('lp_title')">Resident Portal Access</h3>
+            <p style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:14px;line-height:1.5;" x-text="t('lp_desc')">Please log in or create an account to request barangay certificates, clearances, report blotter issues, or dispatch emergency SOS.</p>
             <div class="lp-btns">
-                <a href="{{ route('register') }}" class="btn-grad btn-sm"><i class="fas fa-user-plus"></i> Create Account</a>
-                <a href="{{ route('login') }}" class="btn-plain btn-outline btn-sm"><i class="fas fa-sign-in-alt"></i> Resident Login</a>
+                <a href="{{ route('register') }}" class="btn-grad btn-sm"><i class="fas fa-user-plus"></i> <span x-text="t('lp_create')">Create Account</span></a>
+                <a href="{{ route('login') }}" class="btn-plain btn-outline btn-sm"><i class="fas fa-sign-in-alt"></i> <span x-text="t('lp_login')">Resident Login</span></a>
             </div>
         </div>
         @endif
@@ -1222,10 +1447,10 @@ html, body {
                     <i class="fas fa-bullhorn"></i> <span x-text="t('announcements')">Announcements</span>
                 </button>
                 <button class="about-tab" :class="eventTab==='officials'?'active':''" @click="eventTab='officials'">
-                    <i class="fas fa-users"></i> Officials
+                    <i class="fas fa-users"></i> <span x-text="t('officials')">Officials</span>
                 </button>
                 <button class="about-tab" :class="eventTab==='projects'?'active':''" @click="eventTab='projects'">
-                    <i class="fas fa-project-diagram"></i> Projects
+                    <i class="fas fa-project-diagram"></i> <span x-text="t('projects')">Projects</span>
                 </button>
             </div>
 
@@ -1375,10 +1600,10 @@ html, body {
         <div class="wcard">
             <div class="about-tabs">
                 <button class="about-tab" :class="aboutTab==='about'?'active':''" @click="aboutTab='about'">
-                    <i class="fas fa-info-circle"></i> About
+                    <i class="fas fa-info-circle"></i> <span x-text="t('about_tab')">About</span>
                 </button>
                 <button class="about-tab" :class="aboutTab==='announcements'?'active':''" @click="aboutTab='announcements'">
-                    <i class="fas fa-clock"></i> Past Updates
+                    <i class="fas fa-clock"></i> <span x-text="t('past_updates_tab')">Past Updates</span>
                 </button>
             </div>
 
@@ -1468,7 +1693,7 @@ html, body {
                     <div class="modal-ttl">
                         <div class="modal-ico"><i class="fas fa-file-alt"></i></div>
                         <div>
-                            <div x-text="selectedDoc ? selDocObj.name+' — Request Form' : 'Online Document Services'"></div>
+                            <div x-text="selectedDoc ? (getDocName(selDocObj)+' — '+(lang==='fil'?'Form ng Kahilingan':'Request Form')) : (lang==='fil'?'Mga Serbisyo sa Dokumento Online':'Online Document Services')"></div>
                             <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;">Barangay San Miguel II</div>
                         </div>
                     </div>
@@ -1477,26 +1702,26 @@ html, body {
 
                 @if($isAuth)
                 <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:9px 13px;margin-bottom:12px;">
-                    <span style="font-size:11px;font-weight:700;color:var(--muted);"><i class="fas fa-user-check" style="margin-right:4px;"></i>Your Status:</span>
-                    <span x-show="isVoter" class="voter-free"><i class="fas fa-check-circle"></i> Registered Voter</span>
-                    <span x-show="!isVoter" class="voter-pay"><i class="fas fa-user"></i> Non-Voter</span>
+                    <span style="font-size:11px;font-weight:700;color:var(--muted);"><i class="fas fa-user-check" style="margin-right:4px;"></i><span x-text="lang==='fil'?'Inyong Katayuan:':'Your Status:'">Your Status:</span></span>
+                    <span x-show="isVoter" class="voter-free"><i class="fas fa-check-circle"></i> <span x-text="lang==='fil'?'Rehistradong Botante':'Registered Voter'">Registered Voter</span></span>
+                    <span x-show="!isVoter" class="voter-pay"><i class="fas fa-user"></i> <span x-text="lang==='fil'?'Hindi Botante':'Non-Voter'">Non-Voter</span></span>
                 </div>
                 @endif
 
                 <div x-show="!selectedDoc">
-                    <p style="font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;">Select Document Type</p>
+                    <p style="font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;" x-text="t('select_doc')">Select Document Type</p>
                     <div class="docu-grid">
                         <template x-for="doc in docs" :key="doc.key">
                             <div class="docu-pick" @click="selectedDoc=doc.key" :class="selectedDoc===doc.key?'sel':''">
                                 <div class="docu-pick-ico"><i class="fas" :class="doc.icon"></i></div>
-                                <div class="docu-pick-lbl" x-text="doc.name"></div>
+                                <div class="docu-pick-lbl" x-text="getDocName(doc)"></div>
                             </div>
                         </template>
                     </div>
                 </div>
 
                 <div x-show="selectedDoc" x-transition>
-                    <button @click="selectedDoc=''" class="btn-plain btn-ghost btn-sm" style="margin-bottom:12px;"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button @click="selectedDoc=''" class="btn-plain btn-ghost btn-sm" style="margin-bottom:12px;"><i class="fas fa-arrow-left"></i> <span x-text="lang==='fil'?'Bumalik':'Back'">Back</span></button>
                         <form action="{{ route('resident.document.request') }}" method="POST" enctype="multipart/form-data" 
                               x-data="{ 
                                 cType: 'self', 
@@ -1858,8 +2083,8 @@ html, body {
                     <div class="modal-ttl">
                         <div class="modal-ico"><i class="fas fa-question-circle"></i></div>
                         <div>
-                            <div>Frequently Asked Questions</div>
-                            <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;">Find answers to common inquiries below</div>
+                            <div x-text="t('faq_title')">Frequently Asked Questions</div>
+                            <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;" x-text="t('faq_subtitle')">Find answers to common inquiries below</div>
                         </div>
                     </div>
                     <button @click="faqModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
@@ -1867,22 +2092,22 @@ html, body {
 
                 <div style="font-size:12px; color:#334155; line-height:1.6; padding:10px 0;">
                     <div style="margin-bottom:14px; padding: 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
-                        <div style="font-weight:800; color:#0f172a; margin-bottom: 4px;"><i class="fas fa-clock" style="margin-right:4px; color:#0E5393;"></i> Office Hours:</div>
-                        Monday to Friday, 8:00 AM to 5:00 PM. We are closed on weekends and regular holidays.
+                        <div style="font-weight:800; color:#0f172a; margin-bottom: 4px;"><i class="fas fa-clock" style="margin-right:4px; color:#0E5393;"></i> <span x-text="t('faq_hours_title')">Office Hours:</span></div>
+                        <span x-text="t('faq_hours_desc')">Monday to Friday, 8:00 AM to 5:00 PM. We are closed on weekends and regular holidays.</span>
                     </div>
                     <div style="margin-bottom:14px; padding: 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
-                        <div style="font-weight:800; color:#0f172a; margin-bottom: 4px;"><i class="fas fa-file-alt" style="margin-right:4px; color:#0E5393;"></i> Document Limits:</div>
-                        <p style="margin-bottom: 4px;">• <strong>Authorized Reps:</strong> Max 2 active requests at a time.</p>
-                        <p>• <strong>Job Seeker Cert:</strong> Can only be requested <strong>ONCE</strong> per person for their lifetime.</p>
+                        <div style="font-weight:800; color:#0f172a; margin-bottom: 4px;"><i class="fas fa-file-alt" style="margin-right:4px; color:#0E5393;"></i> <span x-text="t('faq_limits_title')">Document Limits:</span></div>
+                        <p style="margin-bottom: 4px;" x-text="t('faq_limits_rep')">• Authorized Reps: Max 2 active requests at a time.</p>
+                        <p x-text="t('faq_limits_job')">• Job Seeker Cert: Can only be requested ONCE per person for their lifetime.</p>
                     </div>
                     <div style="margin-bottom:14px; padding: 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px;">
-                        <div style="font-weight:800; color:#9f1239; margin-bottom: 4px;"><i class="fas fa-exclamation-circle" style="margin-right:4px; color:#be123c;"></i> Incident Reports:</div>
-                        Only <strong>one (1) active blotter/report</strong> is allowed per resident. You must wait for your current report to be resolved or closed before filing a new one.
+                        <div style="font-weight:800; color:#9f1239; margin-bottom: 4px;"><i class="fas fa-exclamation-circle" style="margin-right:4px; color:#be123c;"></i> <span x-text="t('faq_reports_title')">Incident Reports:</span></div>
+                        <span x-text="t('faq_reports_desc')">Only one (1) active blotter/report is allowed per resident. You must wait for your current report to be resolved or closed before filing a new one.</span>
                     </div>
                 </div>
 
                 <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-                    <button type="button" @click="faqModal=false" class="btn-plain btn-ghost">Close Guide</button>
+                    <button type="button" @click="faqModal=false" class="btn-plain btn-ghost" x-text="t('faq_close')">Close Guide</button>
                 </div>
             </div>
         </div>
@@ -2061,10 +2286,10 @@ html, body {
                         <i class="fas fa-calendar-alt" style="color:#38bdf8; font-size:18px;"></i>
                     </div>
                     <div>
-                        <h3 style="font-size:15px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:0.04em; margin:0;">
+                        <h3 style="font-size:15px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:0.04em; margin:0;" x-text="t('sched_title')">
                             Barangay Duty & Patrol Schedules
                         </h3>
-                        <p style="font-size:11px; color:rgba(255,255,255,0.75); font-weight:600; margin:3px 0 0 0;">
+                        <p style="font-size:11px; color:rgba(255,255,255,0.75); font-weight:600; margin:3px 0 0 0;" x-text="t('sched_sub')">
                             Official Weekly Kagawad Assignments & Tanod Security Patrol Timetable
                         </p>
                     </div>
@@ -2083,7 +2308,7 @@ html, body {
                                 : 'background:transparent; color:#64748b; border:1.5px solid transparent; font-weight:700;'"
                             style="width:100%; padding:11px 14px; border-radius:8px; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;">
                         <i class="fas fa-user-tie" :style="scheduleTab==='kagawad' ? 'color:#0284c7;' : 'color:#94a3b8;'"></i>
-                        <span>Officer on Duty (Kagawad)</span>
+                        <span x-text="t('sched_tab_kagawad')">Officer on Duty (Kagawad)</span>
                     </button>
                     <button type="button" @click="scheduleTab='tanod'"
                             :style="scheduleTab==='tanod' 
@@ -2091,50 +2316,50 @@ html, body {
                                 : 'background:transparent; color:#64748b; border:1.5px solid transparent; font-weight:700;'"
                             style="width:100%; padding:11px 14px; border-radius:8px; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;">
                         <i class="fas fa-shield-alt" :style="scheduleTab==='tanod' ? 'color:#0284c7;' : 'color:#94a3b8;'"></i>
-                        <span>Tanod Patrol Schedule</span>
+                        <span x-text="t('sched_tab_tanod')">Tanod Patrol Schedule</span>
                     </button>
                 </div>
 
                 {{-- TAB 1: Kagawad Schedule --}}
                 <div x-show="scheduleTab==='kagawad'" x-transition>
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                        <div style="font-size:11px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:.06em;">
+                        <div style="font-size:11px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:.06em;" x-text="t('sched_kagawad_head')">
                             Weekly Officer Schedule
                         </div>
-                        <div style="font-size:10px; font-weight:700; color:#64748b;">
+                        <div style="font-size:10px; font-weight:700; color:#64748b;" x-text="t('sched_rotation')">
                             Monday – Sunday Rotation
                         </div>
                     </div>
 
                     <div class="duty-table-card">
                         <div class="duty-table-header">
-                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em;">Day</div>
-                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em;">Barangay Official</div>
-                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em; text-align:right;">Duty Status</div>
+                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em;" x-text="t('sched_col_day')">Day</div>
+                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em;" x-text="t('sched_col_official')">Barangay Official</div>
+                            <div style="font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:.06em; text-align:right;" x-text="t('sched_col_status')">Duty Status</div>
                         </div>
 
                         <template x-for="d in dutySchedule" :key="d.day">
                             <div class="duty-table-row"
-                                 :style="d.day === todayDay 
+                                 :style="d.day === todayDayKey 
                                     ? 'background:#eff6ff; border-left-color:#0284c7;' 
                                     : 'background:#ffffff;'">
                                 <div>
                                     <span style="font-size:11.5px; font-weight:900; text-transform:uppercase; letter-spacing:.05em;"
-                                          :style="d.day === todayDay ? 'color:#0284c7;' : 'color:#334155;'"
-                                          x-text="d.day"></span>
+                                          :style="d.day === todayDayKey ? 'color:#0284c7;' : 'color:#334155;'"
+                                          x-text="lang==='fil' ? ({'Sunday':'Linggo','Monday':'Lunes','Tuesday':'Martes','Wednesday':'Miyerkules','Thursday':'Huwebes','Friday':'Biyernes','Saturday':'Sabado'}[d.day] || d.day) : d.day"></span>
                                 </div>
                                 <div style="min-width:0;">
                                     <div style="font-size:13px; font-weight:800; color:#0f172a; line-height:1.25;" x-text="d.name"></div>
-                                    <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:2px;">Barangay Kagawad of the Day</div>
+                                    <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:2px;" x-text="t('kagawad_of_day')">Barangay Kagawad of the Day</div>
                                 </div>
                                 <div style="text-align:right; display:flex; align-items:center; justify-content:flex-end;">
-                                    <template x-if="d.day === todayDay">
+                                    <template x-if="d.day === todayDayKey">
                                         <span style="font-size:9.5px; font-weight:900; background:#0284c7; color:#fff; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(2,132,199,0.25); white-space:nowrap;">
-                                            <i class="fas fa-check-circle" style="font-size:9px;"></i> Active Today
+                                            <i class="fas fa-check-circle" style="font-size:9px;"></i> <span x-text="t('sched_active_today')">Active Today</span>
                                         </span>
                                     </template>
-                                    <template x-if="d.day !== todayDay">
-                                        <span style="font-size:9px; font-weight:700; background:#f1f5f9; color:#94a3b8; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;">
+                                    <template x-if="d.day !== todayDayKey">
+                                        <span style="font-size:9px; font-weight:700; background:#f1f5f9; color:#94a3b8; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;" x-text="t('sched_scheduled')">
                                             Scheduled
                                         </span>
                                     </template>
@@ -2147,10 +2372,10 @@ html, body {
                 {{-- TAB 2: Tanod Patrol Schedule --}}
                 <div x-show="scheduleTab==='tanod'" x-transition>
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                        <div style="font-size:11px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:.06em;">
+                        <div style="font-size:11px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:.06em;" x-text="t('sched_tanod_head')">
                             Peace &amp; Order Patrol Teams
                         </div>
-                        <div style="font-size:10px; font-weight:700; color:#64748b;">
+                        <div style="font-size:10px; font-weight:700; color:#64748b;" x-text="t('sched_security_rotation')">
                             Official Security Rotation
                         </div>
                     </div>
@@ -2171,7 +2396,7 @@ html, body {
                                             </span>
                                         </div>
                                         <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-                                            <span style="font-size:10.5px; font-weight:700; color:#64748b;">Assigned Days:</span>
+                                            <span style="font-size:10.5px; font-weight:700; color:#64748b;" x-text="t('sched_assigned_days')">Assigned Days:</span>
                                             <span style="font-size:11.5px; font-weight:900; color:#0f172a;" x-text="team.days_label"></span>
                                         </div>
                                         <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
@@ -2179,7 +2404,7 @@ html, body {
                                                 <i class="fas fa-users"></i>
                                             </div>
                                             <div style="font-size:12.5px; font-weight:800; color:#0f172a;">
-                                                <span style="color:#64748b; font-size:10.5px; font-weight:700;">Personnel: </span>
+                                                <span style="color:#64748b; font-size:10.5px; font-weight:700;" x-text="t('sched_personnel')">Personnel: </span>
                                                 <span x-text="team.personnel_names"></span>
                                             </div>
                                         </div>
@@ -2187,11 +2412,11 @@ html, body {
                                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
                                         <template x-if="isTeamActiveToday(team.days)">
                                             <span style="font-size:9.5px; font-weight:900; background:#0284c7; color:#fff; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(2,132,199,0.25); white-space:nowrap;">
-                                                <i class="fas fa-check-circle" style="font-size:9px;"></i> Active Today
+                                                <i class="fas fa-check-circle" style="font-size:9px;"></i> <span x-text="t('sched_active_today')">Active Today</span>
                                             </span>
                                         </template>
                                         <template x-if="!isTeamActiveToday(team.days)">
-                                            <span style="font-size:9px; font-weight:700; background:#f1f5f9; color:#94a3b8; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;">
+                                            <span style="font-size:9px; font-weight:700; background:#f1f5f9; color:#94a3b8; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;" x-text="t('sched_scheduled')">
                                                 Scheduled
                                             </span>
                                         </template>
@@ -3190,7 +3415,7 @@ html, body {
                 <div class="modal-hd" style="border-bottom-color:#fef3c7; margin-bottom:14px;">
                     <div class="modal-ttl">
                         <div class="modal-ico" style="background:#fef3c7; color:#d97706;"><i class="fas fa-lock"></i></div>
-                        <div style="color:#92400e; font-size:14px; font-weight:900;">Feature Locked - Verification Pending</div>
+                        <div style="color:#92400e; font-size:14px; font-weight:900;" x-text="t('pending_modal_title')">Feature Locked - Verification Pending</div>
                     </div>
                     <button type="button" @click="pendingLockModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
                 </div>
@@ -3198,22 +3423,22 @@ html, body {
                     <div style="width:62px; height:62px; border-radius:50%; background:#fef3c7; color:#d97706; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:26px; box-shadow:0 4px 14px rgba(245, 158, 11, 0.25);">
                         <i class="fas fa-user-clock"></i>
                     </div>
-                    <h3 style="font-size:16px; font-weight:900; color:#1e293b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.02em;">
-                        Pansamantalang Naka-Lock
+                    <h3 style="font-size:16px; font-weight:900; color:#1e293b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.02em;" x-text="t('pending_modal_heading')">
+                        Temporarily Locked
                     </h3>
-                    <p style="font-size:12.5px; color:#64748b; line-height:1.6; margin-bottom:14px; font-weight:500;">
-                        Ang serbisyong ito ay nangangailangan ng opisyal na beripikasyon mula sa <strong>Barangay Office Staff</strong> upang matiyak ang inyong pagkakakilanlan sa Masterlist.
+                    <p style="font-size:12.5px; color:#64748b; line-height:1.6; margin-bottom:14px; font-weight:500;" x-text="t('pending_modal_desc')">
+                        This service requires official verification from Barangay Office Staff to confirm your identity against the Masterlist.
                     </p>
                     <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:12px 14px; font-size:11.5px; color:#92400e; text-align:left; margin-bottom:16px; line-height:1.55;">
                         <i class="fas fa-shield-halved" style="color:#d97706; margin-right:4px;"></i>
-                        <strong>Bakit ito naka-lock?</strong> Alinsunod sa patakaran ng barangay, ang pag-isyu ng mga opisyal na dokumento, blotter records, at digital IDs ay limitado lamang sa mga residenteng napatunayan na ang pagkakakilanlan gamit ang valid ID o voter proof.
+                        <strong x-text="t('pending_modal_why_label')">Why is this locked?</strong> <span x-text="t('pending_modal_why_desc')">In accordance with barangay policy, official documents, blotter records, and digital IDs are restricted to residents whose identity has been validated using valid ID or voter proof.</span>
                     </div>
                     <div style="display:flex; gap:10px; justify-content:center;">
                         <button type="button" @click="pendingLockModal=false; profileModal=true;" class="btn-grad" style="padding:10px 18px; font-size:12px;">
-                            <i class="fas fa-user-edit"></i> Tingnan ang Aking Profile
+                            <i class="fas fa-user-edit"></i> <span x-text="t('pending_modal_btn_profile')">View My Profile</span>
                         </button>
-                        <button type="button" @click="pendingLockModal=false" class="btn-plain btn-ghost" style="padding:10px 18px; font-size:12px;">
-                            Naiintindihan Ko
+                        <button type="button" @click="pendingLockModal=false" class="btn-plain btn-ghost" style="padding:10px 18px; font-size:12px;" x-text="t('pending_modal_btn_understand')">
+                            I Understand
                         </button>
                     </div>
                 </div>
@@ -3232,8 +3457,8 @@ html, body {
                             <div class="modal-ttl">
                                 <div class="modal-ico" style="background:rgba(225,29,72,0.1);color:#e11d48;"><i class="fas fa-truck-medical"></i></div>
                                 <div>
-                                    <div style="color:var(--text);font-weight:900;font-size:15px;letter-spacing:-0.2px;">EMERGENCY SOS ALERT</div>
-                                    <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:none;">Direct Dispatch to Barangay Peace & Order Patrol</div>
+                                    <div style="color:var(--text);font-weight:900;font-size:15px;letter-spacing:-0.2px;" x-text="t('sos_modal_title')">EMERGENCY SOS ALERT</div>
+                                    <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:none;" x-text="t('sos_modal_sub')">Direct Dispatch to Barangay Peace & Order Patrol</div>
                                 </div>
                             </div>
                             <button type="button" @click="sosModal=false" class="modal-close" :disabled="sosLoading"><i class="fas fa-times-circle"></i></button>
@@ -3243,9 +3468,9 @@ html, body {
                         <div style="background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #e11d48;border-radius:10px;padding:9px 13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:9px;">
                             <i class="fas fa-triangle-exclamation" style="color:#e11d48;font-size:14px;margin-top:2px;flex-shrink:0;"></i>
                             <div style="font-size:11px;color:#881337;line-height:1.45;">
-                                <strong style="color:#9f1239;text-transform:uppercase;letter-spacing:0.3px;">⚠️ MAHALAGANG PAALALA:</strong><br>
-                                Ang Emergency SOS ay para lamang sa mga <strong>totoong emergency sa loob ng nasasakupan ng Barangay San Miguel II</strong>. Tanging sa loob lamang ng ating barangay makaka-responde ang ating mga Tanod on-duty. Kung naganap ang aksidente o emergency sa ibang barangay o bayan, mangyaring tumawag agad sa <strong>911, PNP, o sa hotline ng kaukulang barangay</strong>.<br>
-                                <span style="font-size:10px;color:#be123c;display:block;margin-top:3px;">Ang prank o biruan ay <strong>mahigpit na ipinagbabawal</strong> at may karampatang parusa ayon sa batas.</span>
+                                <strong style="color:#9f1239;text-transform:uppercase;letter-spacing:0.3px;" x-text="t('sos_advisory_title')">⚠️ IMPORTANT REMINDER:</strong><br>
+                                <span x-text="t('sos_advisory_desc')">Emergency SOS is strictly for genuine emergencies within the territorial jurisdiction of Barangay San Miguel II. On-duty Tanod patrols can only respond within our barangay. If an accident or emergency occurs in another barangay or city, please call 911, PNP, or the respective local emergency hotline immediately.</span><br>
+                                <span style="font-size:10px;color:#be123c;display:block;margin-top:3px;" x-text="t('sos_advisory_penalty')">Pranks or false alarms are strictly prohibited and punishable by law.</span>
                             </div>
                         </div>
 
@@ -3253,17 +3478,17 @@ html, body {
                         <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
                             <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text);">
                                 <i class="fas fa-location-crosshairs" style="color:var(--brand);" :class="sosLocationStatus==='detecting' ? 'fa-spin' : ''"></i>
-                                <span>Location Dispatch Information:</span>
+                                <span x-text="t('sos_loc_info')">Location Dispatch Information:</span>
                             </div>
                             <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">
                                 <template x-if="sosLat && sosLng">
                                     <span style="display:inline-flex;align-items:center;gap:4px;color:#15803d;font-weight:700;">
-                                        <i class="fas fa-check-circle"></i> GPS Pinpoint Acquired (<span x-text="sosLat.toFixed(5) + ', ' + sosLng.toFixed(5)"></span>)
+                                        <i class="fas fa-check-circle"></i> <span x-text="t('sos_gps_acquired')">GPS Pinpoint Acquired</span> (<span x-text="sosLat.toFixed(5) + ', ' + sosLng.toFixed(5)"></span>)
                                     </span>
                                 </template>
                                 <template x-if="!sosLat">
                                     <span style="display:inline-flex;align-items:center;gap:4px;color:var(--text);font-weight:600;">
-                                        <i class="fas fa-home" style="color:var(--brand);"></i> Registered Address: <strong style="color:var(--text);">{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
+                                        <i class="fas fa-home" style="color:var(--brand);"></i> <span x-text="t('sos_reg_addr')">Registered Address:</span> <strong style="color:var(--text);margin-left:4px;">{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
                                     </span>
                                 </template>
                             </div>
@@ -3271,30 +3496,30 @@ html, body {
 
                         {{-- Emergency type selector --}}
                         <div class="fgrp">
-                            <label class="flbl">Emergency Nature / Reason <span style="color:#dc2626;">*</span></label>
+                            <label class="flbl"><span x-text="t('sos_nature_label')">Emergency Nature / Reason</span> <span style="color:#dc2626;">*</span></label>
                             <select x-model="sosEmergencyType" class="finput fselect" style="font-weight:700;">
-                                <option value="general">🚨 General Emergency / Tanod Assistance</option>
-                                <option value="security">🛡️ Security Threat / Disturbance / Intruder</option>
-                                <option value="medical">🚑 Medical Emergency / First Responder</option>
-                                <option value="fire">🔥 Fire / Hazard Alert</option>
-                                <option value="dispute">⚠️ Neighborhood Incident / Domestic Disturbance</option>
+                                <option value="general" x-text="lang==='fil' ? '🚨 Pangkalahatang Emergency / Saklolo ng Tanod' : '🚨 General Emergency / Tanod Assistance'"></option>
+                                <option value="security" x-text="lang==='fil' ? '🛡️ Banta sa Seguridad / Kaguluhan / Estranghero' : '🛡️ Security Threat / Disturbance / Intruder'"></option>
+                                <option value="medical" x-text="lang==='fil' ? '🚑 Serbisyong Medikal / Unang Lunas' : '🚑 Medical Emergency / First Responder'"></option>
+                                <option value="fire" x-text="lang==='fil' ? '🔥 Sunog / Alerto sa Panganib' : '🔥 Fire / Hazard Alert'"></option>
+                                <option value="dispute" x-text="lang==='fil' ? '⚠️ Alitan sa Kapitbahay / Kaguluhan sa Tahanan' : '⚠️ Neighborhood Incident / Domestic Disturbance'"></option>
                             </select>
                         </div>
 
                         {{-- Dedicated Incident Landmark / Location Input --}}
                         <div class="fgrp">
-                            <label class="flbl">Exact Landmark / Incident Location <span style="color:#dc2626;">*</span></label>
+                            <label class="flbl"><span x-text="t('sos_landmark_label')">Exact Landmark / Incident Location</span> <span style="color:#dc2626;">*</span></label>
                             <input type="text" x-model="sosLandmark" 
                                    @input="if(sosLandmark.trim().length >= 3) { sosLandmarkError = false; sosError = null; }"
                                    class="finput" 
-                                   placeholder="e.g. Tapat ng Covered Court, Kanto ng Phase 2 sari-sari store..." 
+                                   :placeholder="t('sos_landmark_ph')" 
                                    :style="sosLandmarkError ? 'border-color:#dc2626 !important; background:#fff1f2 !important;' : ''">
-                            <div style="font-size:10px;color:var(--muted);margin-top:3px;">
+                            <div style="font-size:10px;color:var(--muted);margin-top:3px;" x-text="t('sos_landmark_hint')">
                                 Saan mismong lugar nagaganap ang emergency? Ilagay ang landmark lalo na kung wala sa inyong bahay.
                             </div>
                             <template x-if="sosLandmarkError">
                                 <div style="color:#dc2626;font-size:10.5px;font-weight:700;margin-top:4px;">
-                                    <i class="fas fa-exclamation-circle"></i> Kinakailangan ilagay ang eksaktong landmark o lokasyon bago mag-dispatch.
+                                    <i class="fas fa-exclamation-circle"></i> <span x-text="t('sos_landmark_err')">Kinakailangan ilagay ang eksaktong landmark o lokasyon bago mag-dispatch.</span>
                                 </div>
                             </template>
                         </div>
@@ -3304,9 +3529,9 @@ html, body {
                         </template>
 
                         <div style="display:flex;gap:10px;margin-top:16px;">
-                            <button type="button" @click="sosModal=false" class="btn-plain btn-ghost" style="flex:1;" :disabled="sosLoading">Cancel</button>
+                            <button type="button" @click="sosModal=false" class="btn-plain btn-ghost" style="flex:1;" :disabled="sosLoading" x-text="t('cancel')">Cancel</button>
                             <button type="button" @click="proceedToConfirm()" class="sos-btn" style="flex:2;justify-content:center;padding:12px;" :disabled="sosLoading">
-                                <span><i class="fas fa-bullhorn"></i> DISPATCH NOW</span>
+                                <span><i class="fas fa-bullhorn"></i> <span x-text="t('sos_btn_dispatch')">DISPATCH NOW</span></span>
                             </button>
                         </div>
                     </div>
@@ -3318,26 +3543,26 @@ html, body {
                         <div style="width:58px;height:58px;background:#fee2e2;color:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;box-shadow:0 0 0 8px rgba(220,38,38,0.12);">
                             <i class="fas fa-triangle-exclamation"></i>
                         </div>
-                        <h3 style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">
+                        <h3 style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;" x-text="t('sos_confirm_title')">
                             KUMPIRMASYON SA PAG-DISPATCH
                         </h3>
-                        <p style="font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.5;margin-bottom:14px;">
+                        <p style="font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.5;margin-bottom:14px;" x-text="t('sos_confirm_desc')">
                             Sigurado ka bang nais mong magpadala ng Emergency Dispatch sa Barangay Peace & Order Patrol?
                         </p>
 
                         <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-align:left;margin-bottom:14px;font-size:11.5px;color:var(--text);line-height:1.6;">
                             <div style="margin-bottom:8px;">
-                                <span style="color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;">🚨 Uri ng Emergency:</span><br>
+                                <span style="color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;" x-text="t('sos_confirm_nature')">🚨 Uri ng Emergency:</span><br>
                                 <strong style="color:#dc2626;font-size:12px;" x-text="getEmergencyTypeLabel(sosEmergencyType)"></strong>
                             </div>
                             <div style="margin-bottom:8px;">
-                                <span style="color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;">📍 Pupuntahang Landmark / Lokasyon:</span><br>
+                                <span style="color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;" x-text="t('sos_confirm_landmark')">📍 Pupuntahang Landmark / Lokasyon:</span><br>
                                 <strong style="color:var(--text);font-size:12px;background:#e2e8f0;padding:2px 8px;border-radius:4px;display:inline-block;" x-text="sosLandmark"></strong>
                             </div>
                             <hr style="border:0;border-top:1px solid #e2e8f0;margin:8px 0;">
                             <div style="color:#dc2626;font-weight:700;font-size:10.5px;display:flex;align-items:flex-start;gap:6px;">
                                 <i class="fas fa-shield-alt" style="margin-top:2px;"></i>
-                                <span>HINDI ITO LARO O BIRO. Tanging sa nasasakupan lamang ng Barangay San Miguel II makaka-responde ang ating mga Tanod on-duty. Agad na tutungo ang mga rumespondeng Tanod sa nasabing lokasyon.</span>
+                                <span x-text="t('sos_confirm_warning')">HINDI ITO LARO O BIRO. Tanging sa nasasakupan lamang ng Barangay San Miguel II makaka-responde ang ating mga Tanod on-duty. Agad na tutungo ang mga rumespondeng Tanod sa nasabing lokasyon.</span>
                             </div>
                         </div>
 
@@ -3347,14 +3572,14 @@ html, body {
 
                         <div style="display:flex;gap:10px;margin-top:14px;">
                             <button type="button" @click="sosConfirmStep=false" class="btn-plain btn-ghost" style="flex:1;" :disabled="sosLoading">
-                                <i class="fas fa-arrow-left"></i> Bumalik
+                                <i class="fas fa-arrow-left"></i> <span x-text="t('sos_btn_back')">Bumalik</span>
                             </button>
                             <button type="button" @click="sendSosAlert()" class="sos-btn" style="flex:2;justify-content:center;padding:12px;background:#dc2626;color:#fff;" :disabled="sosLoading">
                                 <template x-if="!sosLoading">
-                                    <span><i class="fas fa-bullhorn"></i> OO, I-DISPATCH NA</span>
+                                    <span><i class="fas fa-bullhorn"></i> <span x-text="t('sos_btn_confirm')">OO, I-DISPATCH NA</span></span>
                                 </template>
                                 <template x-if="sosLoading">
-                                    <span><i class="fas fa-spinner fa-spin"></i> TRANSMITTING...</span>
+                                    <span><i class="fas fa-spinner fa-spin"></i> <span x-text="t('sos_transmitting')">TRANSMITTING...</span></span>
                                 </template>
                             </button>
                         </div>
@@ -3367,21 +3592,21 @@ html, body {
                         <div style="width:64px;height:64px;background:#dcfce7;color:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;box-shadow:0 0 0 8px rgba(220,38,38,0.15);">
                             <i class="fas fa-check"></i>
                         </div>
-                        <h3 style="font-size:16px;font-weight:900;color:#166534;margin-bottom:6px;">DISPATCH ALERT TRANSMITTED</h3>
-                        <p style="font-size:11px;color:#1e293b;font-weight:600;line-height:1.6;margin-bottom:14px;">
+                        <h3 style="font-size:16px;font-weight:900;color:#166534;margin-bottom:6px;" x-text="t('sos_success_title')">DISPATCH ALERT TRANSMITTED</h3>
+                        <p style="font-size:11px;color:#1e293b;font-weight:600;line-height:1.6;margin-bottom:14px;" x-text="t('sos_success_desc')">
                             Your emergency SOS has been received with <strong>HIGHEST PRIORITY</strong> by the on-duty Barangay Police (Tanod) & Peace and Order Command.
                         </p>
                         <template x-if="sosResidentEmail || @json($authUser?->email)">
                             <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;font-weight:700;text-align:left;">
                                 <i class="fas fa-envelope-circle-check" style="color:var(--brand);margin-right:4px;"></i>
-                                Confirmation receipt sent to: <strong style="color:#0E5393;" x-text="sosResidentEmail || @json($authUser?->email)"></strong>
+                                <span x-text="t('sos_email_sent_to')">Confirmation receipt sent to:</span> <strong style="color:#0E5393;margin-left:4px;" x-text="sosResidentEmail || @json($authUser?->email)"></strong>
                             </div>
                         </template>
                         <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:10.5px;color:#475569;font-weight:700;margin-bottom:20px;text-align:left;">
-                            <div><i class="fas fa-shield-alt" style="color:var(--brand);margin-right:4px;"></i> On-duty patrol units are being notified.</div>
-                            <div style="margin-top:4px;"><i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> Keep your line open for Tanod dispatch verification.</div>
+                            <div><i class="fas fa-shield-alt" style="color:var(--brand);margin-right:4px;"></i> <span x-text="t('sos_notice_1')">On-duty patrol units are being notified.</span></div>
+                            <div style="margin-top:4px;"><i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> <span x-text="t('sos_notice_2')">Keep your line open for Tanod dispatch verification.</span></div>
                         </div>
-                        <button type="button" @click="sosModal=false; sosSuccess=false; sosConfirmStep=false; window.location.href='#sos-history'; window.location.reload();" class="btn-grad" style="width:100%;justify-content:center;padding:10px;">
+                        <button type="button" @click="sosModal=false; sosSuccess=false; sosConfirmStep=false; window.location.href='#sos-history'; window.location.reload();" class="btn-grad" style="width:100%;justify-content:center;padding:10px;" x-text="t('sos_btn_close')">
                             Understood & Close
                         </button>
                     </div>
