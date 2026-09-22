@@ -737,6 +737,27 @@
                 </div>
             @endif
 
+            {{-- ✦ Validation Errors Banner --}}
+            @if($errors->any())
+                <div class="notif-banner notif-error" x-data="{ show: true }" x-show="show">
+                    <i class="fas fa-exclamation-triangle notif-icon"></i>
+                    <div class="notif-content">
+                        <div class="notif-title">Registration Incomplete / Please Review:</div>
+                        <div class="notif-msg">
+                            <ul style="margin: 4px 0 0 16px; padding: 0;">
+                                @foreach ($errors->all() as $error)
+                                    <li style="margin-bottom: 2px;">{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                    <button class="notif-close" @click="show = false" type="button" title="Dismiss">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="notif-progress"></div>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
                 @csrf
 

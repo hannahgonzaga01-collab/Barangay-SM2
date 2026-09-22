@@ -72,8 +72,8 @@ class ResidentPortalController extends Controller
                 }
             }
 
-            // ── 5. Auto-create resident profile if user still has none ──
-            if (!$resident && $user->role === 'resident') {
+            // ── 5. Auto-create resident profile if user still has none (only for active users) ──
+            if (!$resident && $user->role === 'resident' && $user->status !== 'pending_verification') {
                 $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
                 $random = strtoupper(substr(uniqid(), -6));
                 $resident = Resident::create([

@@ -23,25 +23,21 @@ class VerifiedResidentMiddleware
             return $next($request);
         }
 
-        // Check if resident is linked to verified masterlist record or approved
-        $isLegitimate = \App\Models\Resident::where('user_id', $user->id)->exists();
-
-        if (!$isLegitimate && $user->voter_status !== 'approved' && $user->status !== 'active') {
+        // Check if resident is deactivated or explicitly declined
+        if (!$user->is_active || $user->status === 'declined' || $user->voter_status === 'declined') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            $message = 'Non-legitimate residents cannot access the portal. You can use the public homepage to request documents or file complaint reports. If you are a resident and cannot log in, please visit the Barangay Office.';
-            
-            if ($user->status === 'pending_verification' || $user->voter_status === 'pending') {
-                $message = 'Your account registration is currently pending Masterlist verification by the Barangay Office Admin. You will be able to access the portal once verified.';
-            } elseif ($user->voter_status === 'declined' || $user->status === 'declined') {
-                $message = 'Ang iyong registration ay tinanggihan. Dahilan: ' . ($user->decline_reason ?? 'Hindi tumutugma sa masterlist.');
+            $message = 'Ang iyong account ay tinanggihan o hindi aktibo.';
+            if ($user->decline_reason) {
+                $message = 'Ang iyong registration ay tinanggihan ng Barangay Office. Dahilan: ' . $user->decline_reason;
             }
 
             return redirect()->route('login')->with('error', $message);
         }
 
+        // Both active and pending_verification residents are permitted through to view the dashboard!
         return $next($request);
     }
 }
