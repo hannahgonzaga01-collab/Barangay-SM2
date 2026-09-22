@@ -53,7 +53,7 @@
                 {{-- Language Toggle EN | FIL --}}
                 <div class="flex items-center rounded-lg p-0.5 border" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);"
                      x-data="{ currentLang: localStorage.getItem('resident_lang') || 'en' }"
-                     @lang-changed.window="currentLang = $event.detail">
+                     x-on:lang-changed.window="currentLang = $event.detail">
                     <button type="button" 
                             @click="currentLang = 'en'; localStorage.setItem('resident_lang', 'en'); window.dispatchEvent(new CustomEvent('lang-changed', {detail: 'en'}));"
                             :class="currentLang === 'en' ? 'bg-white text-blue-950 font-black shadow-sm' : 'text-white/80 font-bold hover:text-white'"

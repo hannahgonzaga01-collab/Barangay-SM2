@@ -1042,7 +1042,7 @@ html, body {
     }
     </script>
 
-    <div x-data="residentPortalApp()" @lang-changed.window="lang = $event.detail">
+    <div x-data="residentPortalApp()" x-on:lang-changed.window="lang = $event.detail">
 
     {{-- HERO CAROUSEL --}}
     <div class="hero-section">
