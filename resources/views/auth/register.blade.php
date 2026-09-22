@@ -4,15 +4,19 @@
             display: none !important;
         }
 
+        .auth-wrap {
+            max-width: 580px !important;
+        }
+
         .rp-outer {
-            margin: -8px;
+            margin: 0;
             border-radius: 20px;
             overflow: hidden;
         }
 
         .rp-head {
             background: linear-gradient(135deg, #000052 0%, #0E5393 100%);
-            padding: 20px 24px 18px;
+            padding: 22px 24px 20px;
         }
 
         .rp-head h2 {
@@ -103,7 +107,44 @@
         .fgrid2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .fgrid-bday-row {
+            display: grid;
+            grid-template-columns: 1.8fr 1.2fr;
             gap: 10px;
+        }
+
+        @media (max-width: 540px) {
+            .rp-outer {
+                border-radius: 16px;
+            }
+            .rp-head {
+                padding: 18px 18px 16px !important;
+            }
+            .rp-body {
+                padding: 18px 16px !important;
+            }
+            .fgrid2 {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            .fgrid-bday-row {
+                grid-template-columns: 2fr 1fr !important;
+                gap: 10px !important;
+            }
+            .fgrid-action-btns {
+                flex-direction: column-reverse !important;
+                gap: 8px !important;
+            }
+            .fgrid-action-btns .btn-back-portal,
+            .fgrid-action-btns .btn-prev,
+            .fgrid-action-btns .btn-sub {
+                width: 100% !important;
+                text-align: center;
+                justify-content: center;
+            }
         }
 
         .btn-sub {
@@ -758,13 +799,14 @@
                                     placeholder="Optional" x-model="middleName" autocomplete="additional-name">
                             </div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 10px;">
+                        <div class="fgrid-bday-row" style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 10px;">
                             <div style="min-width: 0;">
                                 <label class="flbl" for="birthday">Birthday *</label>
                                 <div class="fwrap" :style="step1Errors.birthday ? 'border-color:#ef4444;background:#fef2f2;' : ''">
                                     <input id="birthday" type="date" name="birthday" class="finput" x-model="birthday"
                                         @input="calculateAge()" @change="calculateAge()"
-                                        max="{{ date('Y-m-d', strtotime('-15 years')) }}">
+                                        max="{{ date('Y-m-d', strtotime('-15 years')) }}"
+                                        style="min-width:0; padding-right:4px;">
                                 </div>
                                 <template x-if="step1Errors.birthday">
                                     <div class="ferr"><i class="fas fa-exclamation-circle"></i> <span x-text="step1Errors.birthday"></span></div>
@@ -854,7 +896,6 @@
                                 @enderror
                             </div>
                         </div>
-                    </div>
 
                     {{-- Terms & Conditions Checkbox --}}
                     <div>
@@ -942,7 +983,7 @@
                     </div>
 
                     {{-- Step 1 Action Buttons --}}
-                    <div style="display:flex; align-items:center; gap:10px; margin-top:14px; margin-bottom:14px;">
+                    <div class="fgrid-action-btns" style="display:flex; align-items:center; gap:10px; margin-top:16px; margin-bottom:14px;">
                         <a href="{{ route('resident.index') }}" class="btn-back-portal" style="white-space:nowrap;">
                             <i class="fas fa-arrow-left"></i> Back to Portal
                         </a>
@@ -1048,7 +1089,7 @@
                     </div>
 
                     {{-- Step 2 Action Buttons --}}
-                    <div style="display:flex; align-items:center; gap:10px; margin-top:14px; margin-bottom:14px;">
+                    <div class="fgrid-action-btns" style="display:flex; align-items:center; gap:10px; margin-top:16px; margin-bottom:14px;">
                         <button type="button" class="btn-prev" @click.prevent="step = 1">
                             <i class="fas fa-arrow-left"></i> Back
                         </button>
