@@ -915,7 +915,15 @@ class OfficeController extends Controller
             'resident_code' => $resident->resident_code ?? $user->resident_code,
         ]);
 
-        return redirect()->back()->with('success', "Registrant {$user->name} approved, masterlist updated, and account activated!");
+        if (!empty($user->email)) {
+            try {
+                Mail::to($user->email)->send(new VoterVerificationMail($user, 'approved'));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send approve verification email: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->back()->with('success', "Registrant {$user->name} approved, masterlist updated, account activated, and confirmation email sent!");
     }
 
     public function rejectVerification(Request $request, $id)
@@ -932,7 +940,15 @@ class OfficeController extends Controller
             'decline_reason' => $request->rejection_reason,
         ]);
 
-        return redirect()->back()->with('success', "Verification for {$user->name} was disapproved.");
+        if (!empty($user->email)) {
+            try {
+                Mail::to($user->email)->send(new VoterVerificationMail($user, 'declined', $request->rejection_reason));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send decline verification email: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->back()->with('success', "Verification for {$user->name} was disapproved and notification email sent.");
     }
 
     public function getFamily($id)

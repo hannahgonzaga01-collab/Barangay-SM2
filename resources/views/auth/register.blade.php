@@ -641,14 +641,10 @@
             if (!this.birthday) this.step1Errors.birthday = 'Birthday is required.';
             if (!this.isVoter) this.step1Errors.isVoter = 'Please indicate voter status.';
             if (this.isVoter == '1') {
-                if (!this.precinctNo || !this.precinctNo.trim() || this.precinctNo.trim() === '0') {
-                    this.step1Errors.precinctNo = 'Please enter your complete Precinct Number (e.g. 0123A).';
-                }
                 if (!this.fileName && (!this.$refs.voterInput || !this.$refs.voterInput.files.length)) {
                     this.step1Errors.file = 'Please upload a photo of your Valid ID / Voter\'s Proof.';
                 }
             } else {
-                delete this.step1Errors.precinctNo;
                 delete this.step1Errors.file;
             }
             if (!this.agreed) {
@@ -795,11 +791,11 @@
                         <label class="flbl">Are you a registered voter in this Barangay? *</label>
                         <div class="fwrap" style="padding:12px 13px;gap:20px;">
                             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#334155;">
-                                <input type="radio" name="is_voter" value="1" x-model="isVoter" @change="isVoter = '1'; if (!precinctNo || precinctNo === '') precinctNo = '0';"
+                                <input type="radio" name="is_voter" value="1" x-model="isVoter" @change="isVoter = '1';"
                                     style="accent-color:#0E5393;width:15px;height:15px;"> Yes, I am
                             </label>
                             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#334155;">
-                                <input type="radio" name="is_voter" value="0" x-model="isVoter" @change="isVoter = '0'; precinctNo = ''; fileName = ''; filePreview = null; delete step1Errors.precinctNo; delete step1Errors.file;"
+                                <input type="radio" name="is_voter" value="0" x-model="isVoter" @change="isVoter = '0'; fileName = ''; filePreview = null; delete step1Errors.file;"
                                     style="accent-color:#0E5393;width:15px;height:15px;"> No, I am not
                             </label>
                         </div>
@@ -816,52 +812,28 @@
 
                     {{-- Registered Voter Fields (Shows ONLY when Yes, I am is selected) --}}
                     <div x-show="isVoter == '1'" x-cloak style="margin-bottom:14px;">
-                        {{-- Precinct Number & ID Type side-by-side --}}
-                        <div class="fgrid2" style="margin-bottom:6px;">
-                            <div>
-                                <label class="flbl" for="precinct_no">Precinct Number *</label>
-                                <div class="fwrap" :style="step1Errors.precinctNo ? 'border-color:#ef4444;background:#fef2f2;' : ''">
-                                    <i class="fas fa-vote-yea ficon" style="color:#0E5393;"></i>
-                                    <input id="precinct_no" type="text" name="precinct_no" class="finput"
-                                        placeholder="0123A" x-model="precinctNo"
-                                        @input="precinctNo = formatPrecinct(precinctNo)"
-                                        @focus="if(!precinctNo || precinctNo === '') precinctNo = '0'"
-                                        maxlength="5"
-                                        style="text-transform: uppercase; font-weight:700; letter-spacing:0.04em;">
-                                </div>
-                                <template x-if="step1Errors.precinctNo">
-                                    <div class="ferr"><i class="fas fa-exclamation-circle"></i> <span x-text="step1Errors.precinctNo"></span></div>
-                                </template>
-                                @error('precinct_no')
-                                    <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
-                                @enderror
-                                <p style="font-size:8.5px;color:#64748b;margin-top:4px;font-weight:600;">
-                                    Nagsisimula sa 0 (max 4 digits + letter, hal. 0123A).
-                                </p>
+                        <div style="margin-bottom:6px;">
+                            <label class="flbl" for="id_type">Valid ID / Proof of Voter Registration *</label>
+                            <div class="fwrap" :style="step1Errors.file ? 'border-color:#ef4444;background:#fef2f2;' : ''">
+                                <i class="fas fa-id-card ficon" style="color:#0E5393;"></i>
+                                <select id="id_type" name="id_type" class="finput" x-model="idType" @change="triggerUpload()" style="cursor:pointer; appearance:none;">
+                                    <option value="National ID (PhilSys)">National ID (PhilSys)</option>
+                                    <option value="TIN ID (BIR)">TIN ID (BIR)</option>
+                                    <option value="Voter's ID / Certificate">Voter's ID / Certificate</option>
+                                    <option value="Driver's License">Driver's License</option>
+                                    <option value="Philippine Passport">Philippine Passport</option>
+                                    <option value="UMID / SSS ID">UMID / SSS ID</option>
+                                    <option value="PhilHealth ID">PhilHealth ID</option>
+                                    <option value="Postal ID">Postal ID</option>
+                                    <option value="PRC ID">PRC ID</option>
+                                    <option value="Student / School ID">Student / School ID</option>
+                                    <option value="Company / Employee ID">Company / Employee ID</option>
+                                    <option value="Senior Citizen / PWD ID">Senior Citizen / PWD ID</option>
+                                    <option value="Barangay Certificate / Proof">Barangay Certificate / Proof</option>
+                                    <option value="Other Valid ID">Other Valid ID</option>
+                                </select>
+                                <i class="fas fa-chevron-down" style="color:#94a3b8; font-size:10px; margin-left:6px; pointer-events:none;"></i>
                             </div>
-
-                            <div>
-                                <label class="flbl" for="id_type">Valid ID / Proof Type *</label>
-                                <div class="fwrap" :style="step1Errors.file ? 'border-color:#ef4444;background:#fef2f2;' : ''">
-                                    <i class="fas fa-id-card ficon" style="color:#0E5393;"></i>
-                                    <select id="id_type" name="id_type" class="finput" x-model="idType" @change="triggerUpload()" style="cursor:pointer; appearance:none;">
-                                        <option value="National ID (PhilSys)">National ID (PhilSys)</option>
-                                        <option value="TIN ID (BIR)">TIN ID (BIR)</option>
-                                        <option value="Voter's ID / Certificate">Voter's ID / Certificate</option>
-                                        <option value="Driver's License">Driver's License</option>
-                                        <option value="Philippine Passport">Philippine Passport</option>
-                                        <option value="UMID / SSS ID">UMID / SSS ID</option>
-                                        <option value="PhilHealth ID">PhilHealth ID</option>
-                                        <option value="Postal ID">Postal ID</option>
-                                        <option value="PRC ID">PRC ID</option>
-                                        <option value="Student / School ID">Student / School ID</option>
-                                        <option value="Company / Employee ID">Company / Employee ID</option>
-                                        <option value="Senior Citizen / PWD ID">Senior Citizen / PWD ID</option>
-                                        <option value="Barangay Certificate / Proof">Barangay Certificate / Proof</option>
-                                        <option value="Other Valid ID">Other Valid ID</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down" style="color:#94a3b8; font-size:10px; margin-left:6px; pointer-events:none;"></i>
-                                </div>
 
                                 {{-- Inline Photo Status directly under ID selector --}}
                                 <div x-show="fileName" style="margin-top:5px; font-size:10px; font-weight:700; color:#16a34a; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">

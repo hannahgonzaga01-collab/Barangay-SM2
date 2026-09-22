@@ -64,7 +64,7 @@ class RegisteredUserController extends Controller
             'middle_name' => ['nullable', 'string', 'max:255'],
             'birthday' => ['required', 'date', 'before_or_equal:' . now()->subYears(15)->toDateString()],
             'is_voter' => ['required', 'in:0,1'],
-            'precinct_no' => ['required_if:is_voter,1', 'nullable', 'string', 'max:50'],
+            'precinct_no' => ['nullable', 'string', 'max:50'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'voter_id_photo' => ['nullable', 'image', 'max:5120'], // Max 5MB Proof/ID upload
@@ -90,8 +90,8 @@ class RegisteredUserController extends Controller
         $isExactMatch = $matchResult['is_exact'] && $matchedResident && !$matchedResident->user_id;
 
         $userStatus = $isExactMatch ? 'active' : 'pending_verification';
-        $voterStatus = $isExactMatch ? ($request->boolean('is_voter') ? 'approved' : 'approved') : 'pending';
-        $isActive = $isExactMatch ? 1 : 0;
+        $voterStatus = $isExactMatch ? 'approved' : 'pending';
+        $isActive = 1; // Allow login so user can access dashboard with pending verification banner
 
         $user = User::create([
             'name' => $fullName,
@@ -104,7 +104,7 @@ class RegisteredUserController extends Controller
             'status' => $userStatus,
             'is_active' => $isActive,
             'is_voter' => $request->boolean('is_voter'),
-            'precinct_no' => $request->boolean('is_voter') ? strtoupper(trim($request->precinct_no)) : null,
+            'precinct_no' => $request->filled('precinct_no') ? strtoupper(trim($request->precinct_no)) : null,
             'voter_id_photo' => $photoPath,
             'voter_status' => $voterStatus,
             'birthday' => $request->birthday,
@@ -117,7 +117,7 @@ class RegisteredUserController extends Controller
             $matchedResident->update([
                 'user_id' => $user->id,
                 'is_voter' => $request->boolean('is_voter'),
-                'precinct_no' => $request->boolean('is_voter') ? strtoupper(trim($request->precinct_no)) : null,
+                'precinct_no' => $request->filled('precinct_no') ? strtoupper(trim($request->precinct_no)) : null,
                 'voter_status' => 'approved',
                 'verification_status' => 'approved',
             ]);
@@ -128,8 +128,9 @@ class RegisteredUserController extends Controller
         }
 
         event(new Registered($user));
+        Auth::login($user);
 
-        // For pending verification, inform user and redirect to login with status notice
-        return redirect()->route('login')->with('status', 'Your registration has been submitted for Masterlist verification. The Office Admin will review your account shortly.');
+        // For pending verification, log in and display pending masterlist warning on dashboard
+        return redirect()->route('resident.index')->with('warning', 'Welcome! Your account is currently Pending Masterlist Verification. You can explore the portal, but document requests, blotter filing, and Digital ID are temporarily locked until verified by the Barangay Office.');
     }
 }

@@ -482,6 +482,8 @@ html, body {
             activeReq: {},
             isAuth: {{ $isAuth ? 'true' : 'false' }},
             isVoter: {{ ($isAuth && $authUser?->is_voter) ? 'true' : 'false' }},
+            isPendingVerification: {{ ($isAuth && $authUser?->status === 'pending_verification') ? 'true' : 'false' }},
+            pendingLockModal: false,
             annIdx: 0,
             annTotal: {{ $announcements->count() }},
 
@@ -936,13 +938,44 @@ html, body {
                 @endif
             </div>
 
+            @if($isAuth && $authUser?->status === 'pending_verification')
+            {{-- AMBER WARNING BANNER FOR PENDING MASTERLIST VERIFICATION --}}
+            <div style="background:linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border:2px solid #f59e0b; border-radius:16px; padding:18px 20px; margin-bottom:20px; box-shadow:0 4px 15px rgba(245, 158, 11, 0.18);">
+                <div style="display:flex; align-items:flex-start; gap:14px;">
+                    <div style="width:42px; height:42px; border-radius:12px; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px; box-shadow:0 2px 8px rgba(245, 158, 11, 0.35);">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:5px;">
+                            <span style="font-size:13px; font-weight:900; color:#92400e; text-transform:uppercase; letter-spacing:0.04em;">⚠️ Account Pending Masterlist Verification</span>
+                            <span style="font-size:9.5px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fcd34d; padding:2px 8px; border-radius:99px;">FOR OFFICE VALIDATION</span>
+                        </div>
+                        <p style="font-size:12px; color:#78350f; line-height:1.55; margin:0 0 8px 0; font-weight:600;">
+                            Welcome to the Resident Portal! Ang inyong account ay <strong>kasalukuyang sinusuri at bine-verify ng Barangay Office Staff</strong> sa ating Official Masterlist gamit ang inyong na-upload na ID o proof of voter registration.
+                        </p>
+                        <div style="background:rgba(255,255,255,0.75); border-left:3.5px solid #f59e0b; padding:8px 12px; border-radius:6px; font-size:11px; color:#92400e; font-weight:600; line-height:1.5;">
+                            🔒 <strong>Pansamantalang Naka-Lock:</strong> Online Document Requests (Clearance, Indigency, Jobseeker, Residency), Blotter / Incident Reports, at Digital Barangay ID hangga't hindi pa naba-validate ng Barangay Staff ang inyong account. Maaari pa rin kayong mag-browse ng mga Announcements, Events, Tanod Schedules, FAQs, at tumawag sa Tanod Emergency SOS kung kinakailangan.
+                        </div>
+                        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                            <button type="button" @click="profileModal=true" class="btn-grad btn-sm" style="font-size:11px; padding:6px 14px; background:#b45309; border-color:#92400e; border-radius:8px;">
+                                <i class="fas fa-user-edit"></i> Suriin / I-update ang Profile
+                            </button>
+                            <span style="font-size:11px; color:#b45309; font-weight:600;">
+                                <i class="fas fa-envelope"></i> Makakatanggap kayo ng confirmation email kapag na-aprubahan na ng Barangay Office ang inyong account.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="service-grid">
                 <div class="service-card service-card-sos" @click="isAuth ? triggerEmergencySos() : window.location.href='{{ route('login') }}'">
                     <div class="service-ico" style="background: rgba(220, 38, 38, 0.4);"><i class="fas fa-truck-medical" style="color:#fff; font-size: 20px;"></i></div>
                     <div class="service-name" style="color:#fff;" x-text="t('emergency_sos')">EMERGENCY / REQUEST TANOD</div>
                     <div class="service-sub" style="color:rgba(255,255,255,0.95); font-weight:700;" x-text="t('emergency_sub')">Immediate Tanod SOS Dispatch</div>
                 </div>
-                <div class="service-card" @click="isAuth ? (docuModal=true, selectedDoc='') : window.location.href='{{ route('login') }}'">
+                <div class="service-card" @click="isAuth ? (isPendingVerification ? pendingLockModal=true : (docuModal=true, selectedDoc='')) : window.location.href='{{ route('login') }}'">
                     <div class="service-ico"><i class="fas fa-file-alt"></i></div>
                     <div class="service-name" x-text="t('doc_services')">Document Services</div>
                     <div class="service-sub" x-text="t('doc_services_sub')">Request certificates online</div>
@@ -952,7 +985,7 @@ html, body {
                     <div class="service-name" x-text="t('faqs')">FAQs</div>
                     <div class="service-sub" x-text="t('faqs_sub')">How to use & portal guide</div>
                 </div>
-                <div class="service-card" @click="isAuth ? issueModal=true : window.location.href='{{ route('login') }}'">
+                <div class="service-card" @click="isAuth ? (isPendingVerification ? pendingLockModal=true : issueModal=true) : window.location.href='{{ route('login') }}'">
                     <div class="service-ico"><i class="fas fa-flag"></i></div>
                     <div class="service-name" x-text="t('report_issue')">Report an Issue</div>
                     <div class="service-sub" x-text="t('report_sub')">Blotter, VAWC & more</div>
@@ -3150,6 +3183,44 @@ html, body {
         </div>
     </div>
 
+    {{-- PENDING VERIFICATION LOCK MODAL --}}
+    <div x-show="pendingLockModal" x-cloak class="modal-ov" x-transition style="z-index:99999;" @keydown.window.escape="pendingLockModal=false">
+        <div class="modal-box" style="max-width:480px; border-top:5px solid #f59e0b; border-bottom:none; border-radius:20px;" @click.away="pendingLockModal=false">
+            <div class="modal-in">
+                <div class="modal-hd" style="border-bottom-color:#fef3c7; margin-bottom:14px;">
+                    <div class="modal-ttl">
+                        <div class="modal-ico" style="background:#fef3c7; color:#d97706;"><i class="fas fa-lock"></i></div>
+                        <div style="color:#92400e; font-size:14px; font-weight:900;">Feature Locked - Verification Pending</div>
+                    </div>
+                    <button type="button" @click="pendingLockModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                </div>
+                <div style="text-align:center; padding:8px 4px 14px;">
+                    <div style="width:62px; height:62px; border-radius:50%; background:#fef3c7; color:#d97706; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:26px; box-shadow:0 4px 14px rgba(245, 158, 11, 0.25);">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <h3 style="font-size:16px; font-weight:900; color:#1e293b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.02em;">
+                        Pansamantalang Naka-Lock
+                    </h3>
+                    <p style="font-size:12.5px; color:#64748b; line-height:1.6; margin-bottom:14px; font-weight:500;">
+                        Ang serbisyong ito ay nangangailangan ng opisyal na beripikasyon mula sa <strong>Barangay Office Staff</strong> upang matiyak ang inyong pagkakakilanlan sa Masterlist.
+                    </p>
+                    <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:12px 14px; font-size:11.5px; color:#92400e; text-align:left; margin-bottom:16px; line-height:1.55;">
+                        <i class="fas fa-shield-halved" style="color:#d97706; margin-right:4px;"></i>
+                        <strong>Bakit ito naka-lock?</strong> Alinsunod sa patakaran ng barangay, ang pag-isyu ng mga opisyal na dokumento, blotter records, at digital IDs ay limitado lamang sa mga residenteng napatunayan na ang pagkakakilanlan gamit ang valid ID o voter proof.
+                    </div>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button type="button" @click="pendingLockModal=false; profileModal=true;" class="btn-grad" style="padding:10px 18px; font-size:12px;">
+                            <i class="fas fa-user-edit"></i> Tingnan ang Aking Profile
+                        </button>
+                        <button type="button" @click="pendingLockModal=false" class="btn-plain btn-ghost" style="padding:10px 18px; font-size:12px;">
+                            Naiintindihan Ko
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- EMERGENCY SOS MODAL --}}
     <div x-show="sosModal" x-cloak class="modal-ov" x-transition style="z-index:10000;" @keydown.window.escape="if(!sosLoading) sosModal=false">
         <div class="modal-box" style="max-width:480px;border-top:5px solid #e11d48;border-radius:20px;" @click.away="if(!sosLoading) sosModal=false">
@@ -3173,7 +3244,8 @@ html, body {
                             <i class="fas fa-triangle-exclamation" style="color:#e11d48;font-size:14px;margin-top:2px;flex-shrink:0;"></i>
                             <div style="font-size:11px;color:#881337;line-height:1.45;">
                                 <strong style="color:#9f1239;text-transform:uppercase;letter-spacing:0.3px;">⚠️ MAHALAGANG PAALALA:</strong><br>
-                                Ang Emergency SOS ay para lamang sa mga <strong>totoong emergency</strong>. Agad na tutungo ang mga Tanod sa inyong ibibigay na lokasyon. Ang prank o biruan ay <strong>mahigpit na ipinagbabawal</strong> at may karampatang parusa ayon sa batas.
+                                Ang Emergency SOS ay para lamang sa mga <strong>totoong emergency sa loob ng nasasakupan ng Barangay San Miguel II</strong>. Tanging sa loob lamang ng ating barangay makaka-responde ang ating mga Tanod on-duty. Kung naganap ang aksidente o emergency sa ibang barangay o bayan, mangyaring tumawag agad sa <strong>911, PNP, o sa hotline ng kaukulang barangay</strong>.<br>
+                                <span style="font-size:10px;color:#be123c;display:block;margin-top:3px;">Ang prank o biruan ay <strong>mahigpit na ipinagbabawal</strong> at may karampatang parusa ayon sa batas.</span>
                             </div>
                         </div>
 
@@ -3265,7 +3337,7 @@ html, body {
                             <hr style="border:0;border-top:1px solid #e2e8f0;margin:8px 0;">
                             <div style="color:#dc2626;font-weight:700;font-size:10.5px;display:flex;align-items:flex-start;gap:6px;">
                                 <i class="fas fa-shield-alt" style="margin-top:2px;"></i>
-                                <span>HINDI ITO LARO O BIRO. Agad na tutungo ang mga rumespondeng Tanod sa nasabing lokasyon.</span>
+                                <span>HINDI ITO LARO O BIRO. Tanging sa nasasakupan lamang ng Barangay San Miguel II makaka-responde ang ating mga Tanod on-duty. Agad na tutungo ang mga rumespondeng Tanod sa nasabing lokasyon.</span>
                             </div>
                         </div>
 

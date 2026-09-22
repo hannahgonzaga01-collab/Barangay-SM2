@@ -36,19 +36,14 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('login')->with('error', 'Your account is deactivated.');
         }
 
-        // Check if resident is approved
+        // Check if resident registration was declined
         if ($user->role === 'resident') {
-            $isLegitimate = \App\Models\Resident::where('user_id', $user->id)->exists();
-
-            if (!$isLegitimate && $user->voter_status !== 'approved') {
+            if ($user->status === 'declined' || $user->voter_status === 'declined') {
                 Auth::guard('web')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                $message = 'Non-legitimate residents cannot access the portal. You can use the public homepage to request documents or file complaint reports. If you are a resident and cannot log in, please visit the Barangay Office.';
-                if ($user->voter_status === 'declined') {
-                    $message = 'Your registration was declined. Reason: ' . ($user->decline_reason ?? 'Does not match masterlist.');
-                }
+                $message = 'Your registration was declined. Reason: ' . ($user->decline_reason ?? 'Does not match masterlist.');
                 return redirect()->route('login')->with('error', $message);
             }
         }

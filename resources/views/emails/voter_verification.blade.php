@@ -20,13 +20,13 @@
         @if($status === 'approved')
             <div class="status-box status-approved">
                 <strong><i class="fas fa-check-circle"></i> Verification Approved!</strong>
-                <p style="color: inherit; margin: 5px 0 0;">Your uploaded Voter ID has been verified successfully. Your status is now updated to registered voter.</p>
+                <p style="color: inherit; margin: 5px 0 0;">Your resident account and submitted identification documents have been verified and approved by the Barangay Office. Your account is now fully active with complete access to all online services (Certificate requests, Blotter/Incident reporting, and Digital Barangay ID).</p>
             </div>
-            <p>Thank you for ensuring your records in our Barangay system are accurate.</p>
+            <p>Thank you for ensuring your official records with Barangay San Miguel II are accurate.</p>
         @else
             <div class="status-box status-declined">
                 <strong><i class="fas fa-exclamation-circle"></i> Verification Declined</strong>
-                <p style="color: inherit; margin: 5px 0 0;">Unfortunately, we could not verify the Voter ID you uploaded.</p>
+                <p style="color: inherit; margin: 5px 0 0;">Unfortunately, the Barangay Office could not verify the identification documents or information provided for your account.</p>
             </div>
             
             <p><strong>Reason provided by the Office:</strong></p>
@@ -34,7 +34,7 @@
                 {{ $reason }}
             </blockquote>
             
-            <p>Please log in to your resident portal account to upload a valid ID or document.</p>
+            <p>If you believe this was in error, you may register again with valid documents or visit the Barangay San Miguel II Hall with your valid government ID.</p>
         @endif
         
         <p>Best regards,<br><strong>Barangay Office Administration</strong></p>
