@@ -1615,7 +1615,7 @@ html, body {
                     ];
                     $sb = $statBadges[$proj->status] ?? ['bg'=>'#f1f5f9','color'=>'#475569','label'=>ucfirst($proj->status)];
                 @endphp
-                <div class="event-item" style="cursor:pointer;transition:background .15s" @click="activeItem={type:'Project',title:{{ json_encode($proj->title) }},description:{{ json_encode($proj->description) }},image:{{ $proj->image_path?json_encode(asset('storage/'.$proj->image_path)):json_encode(null) }},images:{{ json_encode($proj->images_list) }},tag:{{ json_encode($proj->category ?? 'Barangay Project') }},date:{{ json_encode(($proj->start_date ? \Carbon\Carbon::parse($proj->start_date)->format('M d, Y') : 'Ongoing') . ($proj->completion_date ? ' - ' . \Carbon\Carbon::parse($proj->completion_date)->format('M d, Y') : '')) }}}; activeImgIndex=0; itemModal=true" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                <div class="event-item" style="cursor:pointer;transition:background .15s" @click="activeItem={type:'Project',title:{{ json_encode($proj->title) }},description:{{ json_encode($proj->description) }},image:{{ json_encode($proj->cover_image_url) }},images:{{ json_encode($proj->images_list) }},tag:{{ json_encode($proj->category ?? 'Barangay Project') }},date:{{ json_encode(($proj->start_date ? \Carbon\Carbon::parse($proj->start_date)->format('M d, Y') : 'Ongoing') . ($proj->completion_date ? ' - ' . \Carbon\Carbon::parse($proj->completion_date)->format('M d, Y') : '')) }}}; activeImgIndex=0; itemModal=true" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
                     <div class="event-day-box" style="background:#eff6ff;color:#1d4ed8;">
                         <i class="fas fa-hammer" style="font-size:18px;"></i>
                     </div>
@@ -2551,7 +2551,8 @@ html, body {
                     <div style="width:100%;height:380px;display:flex;align-items:center;justify-content:center;position:relative;user-select:none;">
                         <img :src="activeItem.images && activeItem.images.length > 0 ? activeItem.images[activeImgIndex] : activeItem.image" 
                              style="max-width:100%;max-height:100%;object-fit:contain;transition:all .2s ease-in-out;" 
-                             alt="Item Image">
+                             alt="Item Image"
+                             onerror="this.onerror=null; this.src='{{ asset('images/canal.jpg') }}';">
                         
                         {{-- Counter Pill (e.g. 1 / 4) --}}
                         <template x-if="activeItem.images && activeItem.images.length > 1">

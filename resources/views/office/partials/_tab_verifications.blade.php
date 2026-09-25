@@ -35,7 +35,7 @@
                         <tr>
                             <th style="padding: 12px 14px; width: 27%;">Registrant Input</th>
                             <th style="padding: 12px 14px; width: 28%;">Matched Masterlist Record</th>
-                            <th style="padding: 12px 14px; width: 14%; text-align: center;">AI Confidence</th>
+                            <th style="padding: 12px 14px; width: 14%; text-align: center;">Match Accuracy</th>
                             <th style="padding: 12px 14px; width: 13%; text-align: center;">ID / Proof</th>
                             <th style="padding: 12px 14px; width: 18%; text-align: right;">Action</th>
                         </tr>

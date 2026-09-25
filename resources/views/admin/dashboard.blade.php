@@ -3020,9 +3020,9 @@
                                      x-show="'{{ strtolower(addslashes($proj->title . ' ' . $proj->category . ' ' . $proj->description . ' ' . $proj->contractor_lead)) }}'.includes(searchProj.toLowerCase())">
                                     
                                     <div style="display:flex;gap:10px;align-items:flex-start;">
-                                        @if($proj->image_path)
+                                        @if($proj->image_path || !empty($proj->images_list))
                                             <div style="width:65px;height:65px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);position:relative;">
-                                                <img src="{{ asset('storage/' . $proj->image_path) }}" style="width:100%;height:100%;object-fit:cover;">
+                                                <img src="{{ $proj->cover_image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/canal.jpg') }}';">
                                                 @if(count($proj->images_list) > 1)
                                                     <span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.75);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;">+{{ count($proj->images_list) }}</span>
                                                 @endif
@@ -3106,7 +3106,7 @@
                                                                         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                                                             <template x-for="(p, idx) in photos" :key="idx">
                                                                                 <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;">
-                                                                                    <img :src="p.url" style="width:100%;height:100%;object-fit:cover;">
+                                                                                    <img :src="p.url" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/canal.jpg') }}';">
                                                                                     <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                                                                     <button type="button" @click.stop="removePhoto(idx)"
                                                                                             style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;">
