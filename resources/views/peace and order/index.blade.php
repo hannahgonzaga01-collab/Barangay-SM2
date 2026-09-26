@@ -477,6 +477,30 @@ html, body {
                 }).catch(e => console.error(e));
         },
         updateSosStatus(alertId, newStatus) {
+            if (newStatus === 'resolved') {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Mark as Resolved?',
+                        text: "Sigurado ka bang ligtas at ganap nang naasikaso ang emergency na ito? Hindi na ito mababawi kapag minarkahang resolved.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#059669',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: '<i class="fas fa-check-circle"></i> Yes, Mark Resolved',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.performUpdateSosStatus(alertId, newStatus);
+                        }
+                    });
+                    return;
+                } else if (!confirm("Mark as Resolved? Sigurado ka bang naasikaso na ang emergency na ito? This action cannot be undone.")) {
+                    return;
+                }
+            }
+            this.performUpdateSosStatus(alertId, newStatus);
+        },
+        performUpdateSosStatus(alertId, newStatus) {
             // Instantly silence siren and stop tab flash if resolving
             if (newStatus === 'resolved') {
                 this.stopEmergencyChime();
@@ -516,9 +540,18 @@ html, body {
                 },
                 body: JSON.stringify({ status: newStatus })
             }).then(r => r.json()).then(res => {
+                if (newStatus === 'resolved' && typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Emergency Resolved',
+                        text: 'Minarkahang resolved ang insidente at tinapos ang alarma.',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        timerProgressBar: true
+                    });
+                }
                 this.pollSosAlerts();
             }).catch(err => {
-                alert('Error updating SOS status');
                 this.pollSosAlerts();
             });
         },
@@ -836,7 +869,7 @@ html, body {
                                         @else
                                             <form :id="'status-form-{{ $issue->id }}'" action="{{ url('/peace/issues/'.$issue->id.'/status') }}" method="POST" style="display:inline-block;margin:0;padding:0;flex-shrink:0;">
                                                 @csrf @method('PATCH')
-                                                <select name="status" @change="if($el.value === 'rejected') { openReject({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else if($el.value === 'escalate_kp') { openEscalate({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else { document.getElementById('status-form-{{ $issue->id }}').submit(); }"
+                                                <select name="status" @change="if($el.value === 'rejected') { openReject({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else if($el.value === 'escalate_kp') { openEscalate({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else if($el.value === 'settled' || $el.value === 'resolved') { const chosenVal = $el.value; $el.value='{{ $issue->status }}'; if(typeof Swal !== 'undefined') { Swal.fire({ title: 'Mark as Resolved?', text: 'Sigurado ka bang naasikaso at naresolba na ang insidenteng ito? Hindi na ito mababawi kapag minarkahang resolved.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#059669', cancelButtonColor: '#64748b', confirmButtonText: 'Yes, Mark Resolved', cancelButtonText: 'Cancel' }).then((res) => { if(res.isConfirmed) { $el.value = chosenVal; document.getElementById('status-form-{{ $issue->id }}').submit(); } }); } else if(confirm('Mark as Resolved? This action cannot be undone.')) { $el.value = chosenVal; document.getElementById('status-form-{{ $issue->id }}').submit(); } } else { document.getElementById('status-form-{{ $issue->id }}').submit(); }"
                                                         style="width:120px;height:30px;box-sizing:border-box;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:7px;padding:4px 8px;background:#f8fafc;cursor:pointer;outline:none;font-family:inherit;text-align:left;">
                                                     @if($curPeaceRank <= 1)
                                                         <option value="submitted"    {{ $issue->status==='submitted'    ? 'selected' : '' }}>Submitted</option>
