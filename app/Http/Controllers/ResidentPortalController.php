@@ -282,6 +282,13 @@ class ResidentPortalController extends Controller
 
     public function storeEmergencySos(Request $request)
     {
+        if (auth()->check() && in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
+            return response()->json([
+                'success' => false,
+                'message' => '⚠️ Ang Emergency SOS ay para lamang sa mga opisyal at beripikadong residente ng Barangay San Miguel II.',
+            ], 403);
+        }
+
         $request->validate([
             'latitude'       => 'nullable|numeric',
             'longitude'      => 'nullable|numeric',
@@ -581,6 +588,10 @@ class ResidentPortalController extends Controller
 
     public function storeFamilyMember(Request $request)
     {
+        if (auth()->check() && in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
+            return redirect()->back()->with('error', '⚠️ Ang pagdaragdag ng miyembro ng pamilya sa Masterlist ay para lamang sa mga beripikadong residente. Pakilagay ang mga kasamang lilipat sa inyong Move-In certificate request.');
+        }
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -786,9 +797,11 @@ class ResidentPortalController extends Controller
     public function storeDocumentRequest(Request $request)
     {
         if (auth()->check() && in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', '⚠️ Your account is currently not verified by the Barangay Office. Document requests will be unlocked once approved.');
+            if ($request->document_type !== 'movein') {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', '⚠️ Ang inyong account ay kasalukuyang hindi pa beripikado ng Barangay Office. Tanging Move-In certificate request lamang ang maaaring hilingin ng mga bagong residente.');
+            }
         }
 
         if (!auth()->check()) {
@@ -930,13 +943,22 @@ class ResidentPortalController extends Controller
             $birthday = $request->birthday;
 
             // If registered resident, auto-fill age/birthday from profile if empty
-            if (auth()->check() && auth()->user()->resident) {
-                $res = auth()->user()->resident;
-                if (!$age) {
-                    $age = $res->birthday ? \Carbon\Carbon::parse($res->birthday)->age : null;
-                }
-                if (!$birthday) {
-                    $birthday = $res->birthday;
+            if (auth()->check()) {
+                if (auth()->user()->resident) {
+                    $res = auth()->user()->resident;
+                    if (!$age) {
+                        $age = $res->birthday ? \Carbon\Carbon::parse($res->birthday)->age : null;
+                    }
+                    if (!$birthday) {
+                        $birthday = $res->birthday;
+                    }
+                } elseif (auth()->user()->birthday) {
+                    if (!$birthday) {
+                        $birthday = auth()->user()->birthday;
+                    }
+                    if (!$age) {
+                        $age = \Carbon\Carbon::parse(auth()->user()->birthday)->age;
+                    }
                 }
             }
 

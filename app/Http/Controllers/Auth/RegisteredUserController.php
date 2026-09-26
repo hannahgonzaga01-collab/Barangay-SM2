@@ -135,6 +135,6 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         // For pending verification, log in and display pending masterlist warning on dashboard
-        return redirect()->route('resident.index')->with('warning', 'Welcome! Your account is currently Pending Masterlist Verification. You can explore the portal, but document requests, blotter filing, and Digital ID are temporarily locked until verified by the Barangay Office.');
+        return redirect()->route('resident.index')->with('warning', 'Welcome! Your account is currently Pending Masterlist Verification. If you are newly moving into the barangay, you may submit a Move-In Certificate Request. Other services remain locked until approved by the Barangay Office.');
     }
 }

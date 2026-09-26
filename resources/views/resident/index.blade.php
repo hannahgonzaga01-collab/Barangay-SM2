@@ -549,7 +549,7 @@ html, body {
                         // Pending Masterlist Verification Warning Banner
                         pending_banner_title: 'Account Pending Masterlist Verification',
                         pending_banner_badge: 'FOR OFFICE VALIDATION',
-                        pending_banner_desc: 'Your account is currently under review by Barangay Office Staff against the Official Masterlist. Document requests, blotter filing, and digital ID are temporarily locked until approved.',
+                        pending_banner_desc: 'Your account is currently under review by Barangay Office Staff against the Official Masterlist. If you are newly moving into the barangay, you may submit a Certification of Move-In request. Other document services, blotters, and digital IDs are temporarily locked until approved.',
 
                         // Declined Banner
                         declined_banner_title: 'Account Verification Declined',
@@ -568,7 +568,7 @@ html, body {
                         pending_modal_heading: 'Temporarily Locked',
                         pending_modal_desc: 'This service requires official verification from Barangay Office Staff to confirm your identity against the Masterlist.',
                         pending_modal_why_label: 'Why is this locked?',
-                        pending_modal_why_desc: 'In accordance with barangay policy, official documents, blotter records, and digital IDs are restricted to residents whose identity has been validated using valid ID or voter proof.',
+                        pending_modal_why_desc: 'In accordance with barangay policy, official documents, blotter records, and digital IDs are restricted to verified residents. If you are newly moving into Barangay San Miguel II, please use the Move-In Certificate Request.',
                         pending_modal_btn_profile: 'View My Profile',
                         pending_modal_btn_understand: 'I Understand',
 
@@ -685,7 +685,7 @@ html, body {
                         // Pending Masterlist Verification Warning Banner
                         pending_banner_title: 'Naghihintay ng Beripikasyon sa Masterlist',
                         pending_banner_badge: 'KASALUKUYANG BINIBERIPIKA',
-                        pending_banner_desc: 'Kasalukuyang sinusuri ng Tanggapan ng Barangay ang inyong account batay sa Opisyal na Masterlist. Pansamantalang naka-lock ang mga dokumento, blotter, at digital ID hanggang ma-aprubahan.',
+                        pending_banner_desc: 'Kasalukuyang sinusuri ng Tanggapan ng Barangay ang inyong account batay sa Opisyal na Masterlist. Kung kayo ay bagong lipat sa barangay, maaari kayong magsumite ng Certification of Move-In. Pansamantalang naka-lock ang iba pang serbisyo hanggang ma-aprubahan.',
 
                         // Declined Banner
                         declined_banner_title: 'Tinanggihan ang Beripikasyon ng Account',
@@ -704,7 +704,7 @@ html, body {
                         pending_modal_heading: 'Pansamantalang Naka-Lock',
                         pending_modal_desc: 'Ang serbisyong ito ay nangangailangan ng opisyal na beripikasyon mula sa Kawani ng Tanggapan ng Barangay upang matiyak ang inyong pagkakakilanlan sa Masterlist.',
                         pending_modal_why_label: 'Bakit ito naka-lock?',
-                        pending_modal_why_desc: 'Alinsunod sa patakaran ng barangay, ang pag-isyu ng mga opisyal na dokumento, talaan ng blotter, at digital ID ay limitado lamang sa mga residenteng napatunayan na ang pagkakakilanlan gamit ang valid ID o katibayan ng botante.',
+                        pending_modal_why_desc: 'Alinsunod sa patakaran ng barangay, ang iba pang opisyal na dokumento, blotter, at digital ID ay limitado lamang sa mga beripikadong residente. Kung kayo ay bagong lipat sa Barangay San Miguel II, gamitin ang Move-In Certificate Request.',
                         pending_modal_btn_profile: 'Tingnan ang Aking Profile',
                         pending_modal_btn_understand: 'Naiintindihan Ko',
 
@@ -1205,7 +1205,7 @@ html, body {
                 </div>
             </div>
             @elseif($isAuth && $authUser?->status === 'pending_verification')
-            {{-- COMPACT AMBER BANNER FOR PENDING MASTERLIST VERIFICATION (SLIM, NO BUTTON, NO FOOTER) --}}
+            {{-- COMPACT AMBER BANNER FOR PENDING MASTERLIST VERIFICATION --}}
             <div style="background:linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border:1.5px solid #f59e0b; border-radius:12px; padding:12px 16px; margin-bottom:18px; box-shadow:0 2px 10px rgba(245, 158, 11, 0.12);">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <div style="width:34px; height:34px; border-radius:10px; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; box-shadow:0 2px 6px rgba(245, 158, 11, 0.3);">
@@ -1217,23 +1217,28 @@ html, body {
                             <span style="font-size:9px; font-weight:800; background:#fef3c7; color:#b45309; border:1px solid #fcd34d; padding:1px 7px; border-radius:99px;" x-text="t('pending_banner_badge')">FOR OFFICE VALIDATION</span>
                         </div>
                         <p style="font-size:11.5px; color:#78350f; line-height:1.45; margin:0; font-weight:600;" x-text="t('pending_banner_desc')">
-                            Your account is currently under review by Barangay Office Staff against the Official Masterlist. Document requests, blotter filing, and digital ID are temporarily locked until approved.
+                            Your account is currently under review by Barangay Office Staff against the Official Masterlist. If you are newly moving into the barangay, you may submit a Certification of Move-In request. Other document services, blotters, and digital IDs are temporarily locked until approved.
                         </p>
+                        <div style="margin-top:8px;">
+                            <button type="button" @click="docuModal=true; selectedDoc='movein'" class="btn-grad btn-sm" style="background:linear-gradient(135deg,#059669 0%,#047857 100%); font-size:10px; font-weight:800; padding:6px 14px; border-radius:8px; border:none; cursor:pointer; color:#fff; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(5,150,105,0.3);">
+                                <i class="fas fa-sign-in-alt"></i> <span x-text="lang==='fil'?'Mag-request ng Move-In Certificate':'Request Move-In Certificate'">Request Move-In Certificate</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             @endif
 
             <div class="service-grid">
-                <div class="service-card service-card-sos" @click="isAuth ? triggerEmergencySos() : window.location.href='{{ route('login') }}'">
+                <div class="service-card service-card-sos" @click="isAuth ? (isPendingVerification ? pendingLockModal=true : triggerEmergencySos()) : window.location.href='{{ route('login') }}'">
                     <div class="service-ico" style="background: rgba(220, 38, 38, 0.4);"><i class="fas fa-truck-medical" style="color:#fff; font-size: 20px;"></i></div>
                     <div class="service-name" style="color:#fff;" x-text="t('emergency_sos')">EMERGENCY / REQUEST TANOD</div>
                     <div class="service-sub" style="color:rgba(255,255,255,0.95); font-weight:700;" x-text="t('emergency_sub')">Immediate Tanod SOS Dispatch</div>
                 </div>
-                <div class="service-card" @click="isAuth ? (isPendingVerification ? pendingLockModal=true : (docuModal=true, selectedDoc='')) : window.location.href='{{ route('login') }}'">
+                <div class="service-card" @click="isAuth ? (docuModal=true, selectedDoc='') : window.location.href='{{ route('login') }}'">
                     <div class="service-ico"><i class="fas fa-file-alt"></i></div>
                     <div class="service-name" x-text="t('doc_services')">Document Services</div>
-                    <div class="service-sub" x-text="t('doc_services_sub')">Request certificates online</div>
+                    <div class="service-sub" x-text="isPendingVerification ? (lang==='fil'?'Move-In bukas para sa bagong lipat':'Move-In open for new residents') : t('doc_services_sub')">Request certificates online</div>
                 </div>
                 <div class="service-card" @click="faqModal=true">
                     <div class="service-ico"><i class="fas fa-question-circle"></i></div>
@@ -1733,18 +1738,46 @@ html, body {
                 @if($isAuth)
                 <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:9px 13px;margin-bottom:12px;">
                     <span style="font-size:11px;font-weight:700;color:var(--muted);"><i class="fas fa-user-check" style="margin-right:4px;"></i><span x-text="lang==='fil'?'Inyong Katayuan:':'Your Status:'">Your Status:</span></span>
-                    <span x-show="isVoter" class="voter-free"><i class="fas fa-check-circle"></i> <span x-text="lang==='fil'?'Rehistradong Botante':'Registered Voter'">Registered Voter</span></span>
-                    <span x-show="!isVoter" class="voter-pay"><i class="fas fa-user"></i> <span x-text="lang==='fil'?'Hindi Botante':'Non-Voter'">Non-Voter</span></span>
+                    <span x-show="isPendingVerification" class="card-badge" style="background:#fef3c7; color:#b45309; font-weight:800; font-size:9.5px; padding:3px 9px; border-radius:99px;"><i class="fas fa-user-clock"></i> <span x-text="lang==='fil'?'Bago / Pending Verification':'New / Pending Verification'">New / Pending Verification</span></span>
+                    <span x-show="!isPendingVerification && isVoter" class="voter-free"><i class="fas fa-check-circle"></i> <span x-text="lang==='fil'?'Rehistradong Botante':'Registered Voter'">Registered Voter</span></span>
+                    <span x-show="!isPendingVerification && !isVoter" class="voter-pay"><i class="fas fa-user"></i> <span x-text="lang==='fil'?'Hindi Botante':'Non-Voter'">Non-Voter</span></span>
                 </div>
                 @endif
 
                 <div x-show="!selectedDoc">
                     <p style="font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;" x-text="t('select_doc')">Select Document Type</p>
+
+                    {{-- Notice for Pending Verification Accounts --}}
+                    <div x-show="isPendingVerification" style="background:linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border:1.5px solid #93c5fd; border-radius:10px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; gap:10px;">
+                        <div style="width:30px; height:30px; border-radius:8px; background:#0E5393; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; box-shadow:0 2px 6px rgba(14,83,147,0.3);">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div style="flex:1; min-width:0; font-size:11px; color:#1e40af; line-height:1.45;">
+                            <span x-show="lang==='fil'"><strong>Bukas para sa Bagong Lipat (Move-In):</strong> Habang ang inyong account ay hindi pa beripikado sa Masterlist, tanging ang <strong>Certification of Move-In</strong> lamang ang bukas na request. Ang iba pang sertipiko ay magagamit kapag na-aprubahan na ang inyong paninirahan.</span>
+                            <span x-show="lang!=='fil'"><strong>Open for New Residents (Move-In):</strong> While your account is pending masterlist verification, only the <strong>Certification of Move-In</strong> request is open. Other certificates will unlock once your residency is verified by the Barangay Office.</span>
+                        </div>
+                    </div>
+
                     <div class="docu-grid">
                         <template x-for="doc in docs" :key="doc.key">
-                            <div class="docu-pick" @click="selectedDoc=doc.key" :class="selectedDoc===doc.key?'sel':''">
-                                <div class="docu-pick-ico"><i class="fas" :class="doc.icon"></i></div>
-                                <div class="docu-pick-lbl" x-text="getDocName(doc)"></div>
+                            <div class="docu-pick" 
+                                 @click="(isPendingVerification && doc.key !== 'movein') ? pendingLockModal=true : selectedDoc=doc.key" 
+                                 :class="[
+                                     selectedDoc===doc.key ? 'sel' : '',
+                                     (isPendingVerification && doc.key !== 'movein') ? 'docu-pick-locked' : '',
+                                     (isPendingVerification && doc.key === 'movein') ? 'docu-pick-open' : ''
+                                 ]"
+                                 :style="(isPendingVerification && doc.key !== 'movein') ? 'opacity:0.55; position:relative;' : ((isPendingVerification && doc.key === 'movein') ? 'border:2px solid #059669; background:#ecfdf5; position:relative;' : '')">
+                                <template x-if="isPendingVerification && doc.key !== 'movein'">
+                                    <div style="position:absolute; top:4px; right:4px; font-size:8px; color:#94a3b8;"><i class="fas fa-lock"></i></div>
+                                </template>
+                                <template x-if="isPendingVerification && doc.key === 'movein'">
+                                    <div style="position:absolute; top:3px; right:3px; background:#059669; color:#fff; font-size:7px; font-weight:900; padding:1px 5px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;">Open</div>
+                                </template>
+                                <div class="docu-pick-ico" :style="(isPendingVerification && doc.key === 'movein') ? 'background:#d1fae5;' : ''">
+                                    <i class="fas" :class="doc.icon" :style="(isPendingVerification && doc.key === 'movein') ? 'color:#059669;' : ''"></i>
+                                </div>
+                                <div class="docu-pick-lbl" :style="(isPendingVerification && doc.key === 'movein') ? 'color:#065f46; font-weight:900;' : ''" x-text="getDocName(doc)"></div>
                             </div>
                         </template>
                     </div>
@@ -1758,8 +1791,8 @@ html, body {
                                 selfPurpose: '',
                                 selfPurposeSelect: '',
                                 selfPurposeCustom: '',
-                                age: '{{ $isAuth ? ($resident->age ?? "") : "" }}',
-                                birthday: '{{ $isAuth ? ($resident->birthday ?? "") : "" }}',
+                                age: '{{ $isAuth ? ($resident->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : "")) : "" }}',
+                                birthday: '{{ $isAuth ? ($resident->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format("Y-m-d") : "")) : "" }}',
                                 authLetterName: '',
                                 authIdName: '',
                                 authId2Name: '',
@@ -1787,6 +1820,18 @@ html, body {
                                      const m = today.getMonth() - bd.getMonth();
                                      if(m < 0 || (m === 0 && today.getDate() < bd.getDate())) a--;
                                      return a;
+                                 },
+                                 init() {
+                                     if (selectedDoc === 'movein') {
+                                         this.selfPurposeSelect = 'New Resident / Move-In';
+                                         this.selfPurpose = 'New Resident / Move-In';
+                                     }
+                                     this.$watch('selectedDoc', val => {
+                                         if (val === 'movein' && !this.selfPurposeSelect) {
+                                             this.selfPurposeSelect = 'New Resident / Move-In';
+                                             this.selfPurpose = 'New Resident / Move-In';
+                                         }
+                                     });
                                  }
                               }">
                         @csrf
@@ -1929,6 +1974,7 @@ html, body {
                                                 <label class="flbl">Purpose *</label>
                                                 <select class="finput fselect" x-model="app.purposeSelect" @change="if(app.purposeSelect !== 'Others') app.purpose = app.purposeSelect; else app.purpose = app.purposeCustom;" :required="cType === 'authorized'">
                                                     <option value="">— Select Purpose —</option>
+                                                    <option value="New Resident / Move-In">New Resident / Move-In</option>
                                                     <option value="Employment">Employment</option>
                                                     <option value="Scholarship / School Requirement">Scholarship / School Requirement</option>
                                                     <option value="Financial / Medical Assistance">Financial / Medical Assistance</option>
@@ -1980,12 +2026,13 @@ html, body {
                                 <div class="sblk">
                                     <div class="sblk-ttl"><i class="fas fa-info"></i> Request Details</div>
                                     <div class="fgrid2 fgrp" style="margin-bottom: 15px;">
-                                        <div class="fspan2"><label class="flbl">Complete Address</label><input type="text" name="address" placeholder="Blk/Lot, Street, Brgy. SM2..." class="finput" value="{{ $isAuth ? $authUser?->address : old('address') }}" {{ $isAuth ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}></div>
-                                        <div><label class="flbl">Contact Number</label><input type="text" name="contact" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}" {{ $isAuth ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}></div>
+                                        <div class="fspan2"><label class="flbl">Complete Address</label><input type="text" name="address" placeholder="Blk/Lot, Street, Brgy. SM2..." class="finput" value="{{ $isAuth ? $authUser?->address : old('address') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}></div>
+                                        <div><label class="flbl">Contact Number</label><input type="text" name="contact" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}></div>
                                         <div>
                                             <label class="flbl">Purpose *</label>
                                             <select class="finput fselect" x-model="selfPurposeSelect" @change="if(selfPurposeSelect !== 'Others') selfPurpose = selfPurposeSelect; else selfPurpose = selfPurposeCustom;" :required="cType === 'self'">
                                                 <option value="">— Select Purpose —</option>
+                                                <option value="New Resident / Move-In">New Resident / Move-In</option>
                                                 <option value="Employment">Employment</option>
                                                 <option value="Scholarship / School Requirement">Scholarship / School Requirement</option>
                                                 <option value="Financial / Medical Assistance">Financial / Medical Assistance</option>
@@ -2810,7 +2857,7 @@ html, body {
                             <span style="font-size:10px;color:var(--light);font-weight:600;">No family members added.</span>
                             @endforelse
                         </div>
-                        <button type="button" @click="profileModal=false; familyModal=true"
+                        <button type="button" @click="isPendingVerification ? (profileModal=false, pendingLockModal=true) : (profileModal=false, familyModal=true)"
                                 style="margin-top:9px;background:none;border:1.5px dashed var(--brand);color:var(--brand);font-size:10px;font-weight:800;padding:5px 12px;border-radius:99px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;" onmouseover="this.style.background='var(--brand)';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='var(--brand)'">
                             <i class="fas fa-user-plus" style="font-size:8px;"></i> Add Family Member
                         </button>
@@ -2855,7 +2902,7 @@ html, body {
                             <span style="font-size:10px;color:var(--light);font-weight:600;">No pets registered yet.</span>
                             @endforelse
                         </div>
-                        <button @click="profileModal=false;petModal=true"
+                        <button @click="isPendingVerification ? (profileModal=false, pendingLockModal=true) : (profileModal=false, petModal=true)"
                                 style="margin-top:9px;background:none;border:1.5px dashed var(--brand);color:var(--brand);font-size:10px;font-weight:800;padding:5px 12px;border-radius:99px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;" onmouseover="this.style.background='var(--brand)';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='var(--brand)'">
                             <i class="fas fa-plus" style="font-size:8px;"></i> Add Pet
                         </button>
@@ -3464,8 +3511,11 @@ html, body {
                         <i class="fas fa-shield-halved" style="color:#d97706; margin-right:4px;"></i>
                         <strong x-text="t('pending_modal_why_label')">Why is this locked?</strong> <span x-text="t('pending_modal_why_desc')">In accordance with barangay policy, official documents, blotter records, and digital IDs are restricted to residents whose identity has been validated using valid ID or voter proof.</span>
                     </div>
-                    <div style="display:flex; gap:10px; justify-content:center;">
-                        <button type="button" @click="pendingLockModal=false; profileModal=true;" class="btn-grad" style="padding:10px 18px; font-size:12px;">
+                    <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+                        <button type="button" @click="pendingLockModal=false; docuModal=true; selectedDoc='movein';" class="btn-grad" style="padding:10px 18px; font-size:12px; background:linear-gradient(135deg,#059669 0%,#047857 100%); box-shadow:0 2px 6px rgba(5,150,105,0.3);">
+                            <i class="fas fa-sign-in-alt"></i> <span x-text="lang==='fil'?'Humiling ng Move-In Certificate':'Request Move-In Certificate'">Request Move-In Certificate</span>
+                        </button>
+                        <button type="button" @click="pendingLockModal=false; profileModal=true;" class="btn-plain btn-outline" style="padding:10px 18px; font-size:12px;">
                             <i class="fas fa-user-edit"></i> <span x-text="t('pending_modal_btn_profile')">View My Profile</span>
                         </button>
                         <button type="button" @click="pendingLockModal=false" class="btn-plain btn-ghost" style="padding:10px 18px; font-size:12px;" x-text="t('pending_modal_btn_understand')">

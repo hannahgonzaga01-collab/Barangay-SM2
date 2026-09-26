@@ -951,6 +951,10 @@ class OfficeController extends Controller
 
     public function storePet(Request $request)
     {
+        if (auth()->check() && in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
+            return redirect()->back()->with('error', '⚠️ Ang pagpaparehistro ng alagang hayop ay para lamang sa mga opisyal at beripikadong residente.');
+        }
+
         $request->validate([
             'resident_id' => 'required|exists:residents,id',
             'pet_name' => 'required|string|max:255',
