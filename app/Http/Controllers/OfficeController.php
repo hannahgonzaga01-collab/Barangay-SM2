@@ -478,6 +478,16 @@ class OfficeController extends Controller
             $docRequest->user->notifications()->where('data->document_request_id', $docRequest->id)->delete();
         }
 
+        if ($newStatus === 'released') {
+            $docTypeKey = strtolower(str_replace(['-', '_', ' '], '', (string)$docRequest->document_type));
+
+            if ($docTypeKey === 'movein') {
+                $this->handleMoveInRelease($docRequest);
+            } elseif ($docTypeKey === 'moveout') {
+                $this->handleMoveOutRelease($docRequest);
+            }
+        }
+
         if ($docRequest->user) {
             try {
                 $docRequest->user->notify(new DocumentRequestStatusUpdated($docRequest));
@@ -489,9 +499,245 @@ class OfficeController extends Controller
             } catch (\Exception $e) { }
         }
 
-        $msg = $newStatus === 'disapproved' ? 'Request disapproved. Reason sent to resident.' : 'Status updated to ' . ucfirst($newStatus) . '. Resident notified.';
+        $docTypeKey = strtolower(str_replace(['-', '_', ' '], '', (string)$docRequest->document_type));
+        $msg = $newStatus === 'disapproved' 
+            ? 'Request disapproved. Reason sent to resident.' 
+            : (($newStatus === 'released' && in_array($docTypeKey, ['movein', 'moveout']))
+                ? ($docTypeKey === 'movein'
+                    ? 'Status updated to Released. Resident has been automatically added to the Masterlist!'
+                    : 'Status updated to Released. Resident has been transferred to Archived Residents!')
+                : 'Status updated to ' . ucfirst($newStatus) . '. Resident notified.');
 
         return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Automatically add or activate resident in Masterlist when Move-In is released.
+     */
+    protected function handleMoveInRelease(DocumentRequest $docRequest): void
+    {
+        try {
+            $addrParts = [];
+            if (!empty($docRequest->blk)) {
+                $addrParts[] = 'Blk ' . trim($docRequest->blk);
+            }
+            if (!empty($docRequest->lot)) {
+                $addrParts[] = 'Lot ' . trim($docRequest->lot);
+            }
+            if (!empty($docRequest->address)) {
+                $addrParts[] = trim($docRequest->address);
+            }
+            $fullAddress = !empty($addrParts)
+                ? implode(', ', $addrParts)
+                : 'Barangay San Miguel II, Dasmariñas City, Cavite';
+
+            $user = $docRequest->user;
+            $resident = null;
+
+            // 1. Try to find existing resident record
+            if ($user) {
+                if ($user->resident) {
+                    $resident = $user->resident;
+                } elseif ($user->resident_code) {
+                    $resident = Resident::where('resident_code', $user->resident_code)->first();
+                } else {
+                    $resident = Resident::where('user_id', $user->id)->first();
+                }
+
+                if (!$resident && $user->first_name && $user->last_name) {
+                    $resident = Resident::where('first_name', $user->first_name)
+                        ->where('last_name', $user->last_name)
+                        ->first();
+                }
+            }
+
+            if (!$resident) {
+                $fName = $docRequest->guest_first_name ?: $docRequest->claimant_first_name;
+                $lName = $docRequest->guest_last_name ?: $docRequest->claimant_last_name;
+                if ($fName && $lName) {
+                    $resident = Resident::where('first_name', $fName)
+                        ->where('last_name', $lName)
+                        ->first();
+                }
+            }
+
+            // 2. If resident exists, unarchive & update address
+            if ($resident) {
+                $resident->update([
+                    'archived_at' => null,
+                    'archive_reason' => null,
+                    'address' => $fullAddress ?: $resident->address,
+                    'user_id' => $user ? $user->id : $resident->user_id,
+                    'voter_status' => $resident->voter_status === 'Transferred / Moved Out' ? 'approved' : $resident->voter_status,
+                ]);
+
+                if ($user) {
+                    $user->update([
+                        'status' => 'active',
+                        'is_active' => 1,
+                        'resident_code' => $resident->resident_code ?: $user->resident_code,
+                        'voter_status' => 'approved',
+                    ]);
+                }
+            } else {
+                // 3. Create new resident entry in Masterlist
+                $code = 'RES-' . strtoupper(Str::random(8));
+                $firstName = $user ? ($user->first_name ?: $user->name) : ($docRequest->guest_first_name ?: $docRequest->claimant_first_name ?: 'Resident');
+                $lastName = $user ? ($user->last_name ?: '') : ($docRequest->guest_last_name ?: $docRequest->claimant_last_name ?: '');
+                $middleName = $user ? $user->middle_name : $docRequest->claimant_middle_name;
+                $bday = $docRequest->birthday ?: ($user?->birthday ?? '2000-01-01');
+                $age = $docRequest->age ?: ($bday ? \Carbon\Carbon::parse($bday)->age : null);
+                $contact = $docRequest->contact ?: $user?->contact_number;
+
+                $resident = Resident::create([
+                    'resident_code' => $code,
+                    'user_id' => $user?->id,
+                    'first_name' => $firstName,
+                    'middle_name' => $middleName,
+                    'last_name' => $lastName ?: 'Resident',
+                    'birthday' => $bday,
+                    'age' => $age,
+                    'birthplace' => 'N/A',
+                    'gender' => $user?->gender ?? 'Prefer not to say',
+                    'civil_status' => 'Single',
+                    'contact_number' => $contact,
+                    'address' => $fullAddress,
+                    'is_voter' => $user?->is_voter ? 1 : 0,
+                    'is_non_voter' => $user?->is_non_voter ? 1 : 0,
+                    'voter_status' => $user?->voter_status ?: 'approved',
+                    'archived_at' => null,
+                    'is_household_head' => !empty($docRequest->family_members),
+                ]);
+
+                if ($user) {
+                    $user->update([
+                        'resident_code' => $code,
+                        'status' => 'active',
+                        'is_active' => 1,
+                        'voter_status' => 'approved',
+                    ]);
+                }
+            }
+
+            // 4. Handle family members if supplied
+            if (!empty($docRequest->family_members) && $resident) {
+                $members = array_filter(array_map('trim', explode(',', $docRequest->family_members)));
+                foreach ($members as $mName) {
+                    if (empty($mName) || in_array(strtolower($mName), ['n/a', 'none', 'wala'])) continue;
+                    $parts = preg_split('/\s+/', $mName);
+                    $mLast = count($parts) > 1 ? array_pop($parts) : ($resident->last_name ?: '');
+                    $mFirst = implode(' ', $parts);
+                    if (!$mFirst) { $mFirst = $mLast; }
+
+                    $exists = Resident::where('first_name', $mFirst)
+                        ->where('last_name', $mLast)
+                        ->where('household_head_id', $resident->id)
+                        ->exists();
+
+                    if (!$exists) {
+                        Resident::create([
+                            'resident_code' => 'RES-' . strtoupper(Str::random(8)),
+                            'first_name' => $mFirst,
+                            'last_name' => $mLast,
+                            'birthday' => '2000-01-01',
+                            'gender' => 'Prefer not to say',
+                            'civil_status' => 'Single',
+                            'birthplace' => 'N/A',
+                            'address' => $fullAddress,
+                            'household_head_id' => $resident->id,
+                            'is_household_head' => false,
+                            'archived_at' => null,
+                        ]);
+                    }
+                }
+                $resident->update(['is_household_head' => true]);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error handling Move-In release: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Automatically archive resident when Move-Out is released.
+     */
+    protected function handleMoveOutRelease(DocumentRequest $docRequest): void
+    {
+        try {
+            $user = $docRequest->user;
+            $resident = null;
+
+            // 1. Find resident record
+            if ($user) {
+                if ($user->resident) {
+                    $resident = $user->resident;
+                } elseif ($user->resident_code) {
+                    $resident = Resident::where('resident_code', $user->resident_code)->first();
+                } else {
+                    $resident = Resident::where('user_id', $user->id)->first();
+                }
+
+                if (!$resident && $user->first_name && $user->last_name) {
+                    $resident = Resident::where('first_name', $user->first_name)
+                        ->where('last_name', $user->last_name)
+                        ->first();
+                }
+            }
+
+            if (!$resident) {
+                $fName = $docRequest->guest_first_name ?: $docRequest->claimant_first_name;
+                $lName = $docRequest->guest_last_name ?: $docRequest->claimant_last_name;
+                if ($fName && $lName) {
+                    $resident = Resident::where('first_name', $fName)
+                        ->where('last_name', $lName)
+                        ->first();
+                }
+            }
+
+            // 2. Archive the resident
+            if ($resident) {
+                $resident->update([
+                    'archived_at' => now(),
+                    'archive_reason' => 'Move-Out Certificate Released (Transfer of Residence)',
+                    'voter_status' => 'Transferred / Moved Out',
+                ]);
+
+                // Archive household members if household head
+                if ($resident->is_household_head) {
+                    Resident::where('household_head_id', $resident->id)->update([
+                        'archived_at' => now(),
+                        'archive_reason' => 'Move-Out Certificate Released (Household Transfer)',
+                        'voter_status' => 'Transferred / Moved Out',
+                    ]);
+                }
+
+                // Archive any pets associated with resident
+                if (method_exists($resident, 'pets')) {
+                    $resident->pets()->update(['is_archived' => true]);
+                }
+            }
+
+            // Also check if specific family members are listed in request
+            if (!empty($docRequest->family_members)) {
+                $members = array_filter(array_map('trim', explode(',', $docRequest->family_members)));
+                foreach ($members as $mName) {
+                    if (empty($mName) || in_array(strtolower($mName), ['n/a', 'none', 'wala'])) continue;
+                    $parts = preg_split('/\s+/', $mName);
+                    $mLast = count($parts) > 1 ? array_pop($parts) : '';
+                    $mFirst = implode(' ', $parts);
+                    if ($mFirst) {
+                        $q = Resident::where('first_name', $mFirst);
+                        if ($mLast) { $q->where('last_name', $mLast); }
+                        $q->whereNull('archived_at')->update([
+                            'archived_at' => now(),
+                            'archive_reason' => 'Move-Out Certificate Released (Transfer of Residence)',
+                            'voter_status' => 'Transferred / Moved Out',
+                        ]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error handling Move-Out release: ' . $e->getMessage());
+        }
     }
 
     public function purgeArchivedRequests(Request $request)

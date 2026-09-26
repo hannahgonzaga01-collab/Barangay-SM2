@@ -312,7 +312,7 @@
                                 </button>
                             @elseif($req->status === 'ready')
                                 <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;"
-                                      onsubmit="return confirm('Kumpirmahin: I-release na po ba ang dokumentong ito kay {{ addslashes($displayName) }}? Ang aksyong ito ay pinal.');">
+                                      onsubmit="return confirm('Kumpirmahin: I-release na po ba ang dokumentong ito kay {{ addslashes($displayName) }}?{{ in_array(strtolower(str_replace(['-','_',' '],'',$req->document_type)), ['movein']) ? ' (Awtomatikong maidaragdag ang residente sa Masterlist).' : (in_array(strtolower(str_replace(['-','_',' '],'',$req->document_type)), ['moveout']) ? ' (Awtomatikong ililipat ang residente sa Archived Residents).' : '') }} Ang aksyong ito ay pinal.');">
                                     @csrf @method('PATCH')
                                     <input type="hidden" name="status" value="released">
                                     <button type="submit" 

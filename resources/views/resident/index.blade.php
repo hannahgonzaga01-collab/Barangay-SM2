@@ -1222,29 +1222,6 @@ html, body {
                     </div>
                 </div>
             </div>
-            @elseif($isAuth && $authUser?->status === 'active')
-            {{-- SLEEK VERIFIED BANNER WITH UPDATE PROFILE BUTTON --}}
-            <div x-data="{ showVerified: true }" x-show="showVerified" style="background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border:1px solid #86efac; border-radius:12px; padding:10px 16px; margin-bottom:18px; box-shadow:0 2px 8px rgba(34, 197, 94, 0.08);">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:28px; height:28px; border-radius:50%; background:#16a34a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div>
-                            <span style="font-size:12px; font-weight:800; color:#166534;" x-text="t('verified_banner_title')">Verified Resident Account</span>
-                            <span style="font-size:11px; color:#15803d; font-weight:600;" x-text="t('verified_banner_desc')">• Full access granted to document requests and digital services.</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <button type="button" @click="profileModal=true" class="btn-grad btn-sm" style="font-size:11px; padding:5px 12px; background:#16a34a; border-color:#15803d; border-radius:8px; display:inline-flex; align-items:center; gap:5px;">
-                            <i class="fas fa-user-circle"></i> <span x-text="t('verified_banner_btn')">Update Profile</span>
-                        </button>
-                        <button type="button" @click="showVerified=false" style="background:none; border:none; color:#15803d; font-size:13px; cursor:pointer; padding:2px 6px;" title="Dismiss">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
             @endif
 
             <div class="service-grid">
