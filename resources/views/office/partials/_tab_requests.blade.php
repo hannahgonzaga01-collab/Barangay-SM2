@@ -150,7 +150,7 @@
             <div class="card-title" style="white-space:nowrap; flex-shrink:0;"><i class="fas fa-file-alt"></i> All Document Requests</div>
             <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                 {{-- Status Dropdown Filter --}}
-                <select x-model="docStatusFilter" class="fselect" style="font-size:10px; font-weight:800; height:28px; padding:0 8px; border-radius:8px; border:1.5px solid var(--border); background:#fff; color:var(--text); outline:none; cursor:pointer; width:auto;">
+                <select x-model="docStatusFilter" class="fselect" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:8px; border:1.5px solid var(--border); background:#fff; color:var(--text); outline:none; cursor:pointer; width:auto;">
                     <option value="all">🔍 Active Requests</option>
                     <option value="pending">⏳ Pending</option>
                     <option value="processing">🔄 Processing</option>
@@ -160,20 +160,21 @@
                 </select>
 
                 {{-- Date Filter Group --}}
-                <div class="filter-group" style="display:flex; background:#f1f5f9; padding:2px; border-radius:8px; flex-shrink:0; height:28px; align-items:center;">
-                    <button @click="docFilter='all'" :class="docFilter==='all' ? 'active-filter' : 'plain-filter'">All</button>
-                    <button @click="docFilter='today'" :class="docFilter==='today' ? 'active-filter' : 'plain-filter'">Today</button>
+                <div class="filter-group" style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; flex-shrink:0; align-items:center;">
+                    <button type="button" @click="docFilter='all'; if(docStatusFilter==='released_archive') docStatusFilter='all';" :class="(docStatusFilter!=='released_archive' && docFilter==='all') ? 'active-filter' : 'plain-filter'">All</button>
+                    <button type="button" @click="docFilter='today'; if(docStatusFilter==='released_archive') docStatusFilter='all';" :class="(docStatusFilter!=='released_archive' && docFilter==='today') ? 'active-filter' : 'plain-filter'">Today</button>
                 </div>
 
                 {{-- Dedicated Archive Button --}}
-                <button type="button" @click="docStatusFilter = (docStatusFilter === 'released_archive' ? 'all' : 'released_archive')"
-                        style="height:28px; padding:0 12px; font-family:inherit; font-size:9px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:all 0.15s; white-space:nowrap; flex-shrink:0; border:none;"
-                        :style="docStatusFilter === 'released_archive' ? 'background:#0E5393; color:#fff; box-shadow:0 1px 3px rgba(14,83,147,0.3);' : 'background:#f1f5f9; color:#64748b;'"
-                        title="Archived">
-                    Archived
-                </button>
+                <div class="filter-group" style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; flex-shrink:0; align-items:center;">
+                    <button type="button" @click="docStatusFilter = (docStatusFilter === 'released_archive' ? 'all' : 'released_archive'); if(docStatusFilter === 'released_archive') docFilter = 'all';"
+                            :class="docStatusFilter === 'released_archive' ? 'active-filter' : 'plain-filter'"
+                            title="Archived">
+                        Archived
+                    </button>
+                </div>
 
-                <span class="card-badge" style="background:#fee2e2; color:#dc2626; white-space:nowrap; flex-shrink:0; height:28px; display:inline-flex; align-items:center; padding:0 10px; font-size:9.5px; font-weight:800; border-radius:8px;">{{ $pendingDocCount ?? 0 }} Pending</span>
+                <span class="card-badge" style="background:#fee2e2; color:#dc2626; white-space:nowrap; flex-shrink:0;">{{ $pendingDocCount ?? 0 }} Pending</span>
             </div>
         </div>
 
@@ -187,22 +188,22 @@
                 <form action="{{ route('office.document.purge-archive') }}" method="POST" style="display:inline;"
                       onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang lahat ng released documents na higit 30 days na sa archive? Hindi na ito maibabalik.');">
                     @csrf
-                    <button type="submit" class="btn-plain btn-sm" style="background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; padding:5px 10px; font-size:9.5px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;"
+                    <button type="submit" class="btn-plain btn-sm" style="background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; padding:5px 10px; font-size:9.5px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-family:inherit;"
                             title="Permanently remove released documents older than 30 days">
                         <i class="fas fa-trash-alt"></i> Purge Archive
                     </button>
                 </form>
                 @endif
-                <button type="button" @click="docStatusFilter = 'all'"
-                        style="padding:5px 10px; font-size:9.5px; font-weight:800; background:#fff; border:1.5px solid #cbd5e1; color:#0E5393; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                <button type="button" @click="docStatusFilter = 'all'; docFilter = 'all';"
+                        style="padding:5px 10px; font-size:9.5px; font-weight:800; background:#fff; border:1.5px solid #cbd5e1; color:#0E5393; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; font-family:inherit;">
                     ← Back
                 </button>
             </div>
         </div>
 
         <style>
-            .active-filter { background:#fff; color:#0E5393; font-size:9px; font-weight:800; padding:4px 12px; border-radius:6px; border:none; box-shadow:0 1px 3px rgba(0,0,0,0.1); cursor:pointer; }
-            .plain-filter { background:transparent; color:#64748b; font-size:9px; font-weight:700; padding:4px 12px; border-radius:6px; border:none; cursor:pointer; }
+            .active-filter { background:#fff; color:#0E5393; font-family:inherit; font-size:9px; font-weight:800; padding:4px 12px; border-radius:6px; border:none; box-shadow:0 1px 3px rgba(0,0,0,0.1); cursor:pointer; }
+            .plain-filter { background:transparent; color:#64748b; font-family:inherit; font-size:9px; font-weight:700; padding:4px 12px; border-radius:6px; border:none; cursor:pointer; }
         </style>
 
         <div style="overflow-x:auto;">
