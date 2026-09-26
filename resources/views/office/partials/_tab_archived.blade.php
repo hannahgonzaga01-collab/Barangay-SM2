@@ -65,7 +65,11 @@
                                 (!filterArchivedResClass || '{{ $ar->is_senior ? 'is_senior' : ($ar->is_pwd ? 'is_pwd' : ($ar->is_single_parent ? 'is_single_parent' : ($ar->is_non_voter ? 'is_non_voter' : ($ar->is_bedridden ? 'is_bedridden' : '')))) }}' === filterArchivedResClass)"
                         style="transition:all .15s;">
                         <td style="text-align:center;">
-                            <img src="{{ $ar->photo ? asset('storage/' . $ar->photo) : 'https://ui-avatars.com/api/?name='.urlencode($arName).'&background=64748B&color=fff&bold=true&rounded=true' }}"
+                            @php
+                                $arFallback = 'https://ui-avatars.com/api/?name='.urlencode($arName).'&background=64748B&color=fff&bold=true&rounded=true';
+                            @endphp
+                            <img src="{{ $ar->profile_photo_url ?? $arFallback }}"
+                                 onerror="this.onerror=null; this.src='{{ $arFallback }}';"
                                  style="width:36px;height:36px;border-radius:9px;object-fit:cover;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.1);display:block;margin:0 auto;filter:grayscale(60%);">
                         </td>
                         <td>

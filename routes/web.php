@@ -240,6 +240,10 @@ Route::get('/storage/{path}', function ($path) {
     if (file_exists($fullPath)) {
         return response()->file($fullPath);
     }
+    // If it is a user, resident, or voter photo, fall back to clean avatar instead of cleanup photo
+    if (str_contains($path, 'photos') || str_contains($path, 'avatar') || str_contains($path, 'residents') || str_contains($path, 'users') || str_contains($path, 'voter')) {
+        return redirect('https://ui-avatars.com/api/?name=Resident&background=0E5393&color=fff&size=128&bold=true');
+    }
     $imgFallback = public_path('images/cleanup.jpg');
     if (file_exists($imgFallback)) {
         return response()->file($imgFallback);

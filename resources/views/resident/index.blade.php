@@ -2648,10 +2648,15 @@ html, body {
                             $nextPhotoUpdate = $authUser->photo_updated_at->copy()->addMonths(6)->format('M d, Y');
                         }
                     @endphp
+                    @php
+                        $authProfName = trim(($authUser?->first_name??'') . ' ' . ($authUser?->last_name??'')) ?: 'Resident';
+                        $authProfFallback = 'https://ui-avatars.com/api/?name=' . urlencode($authProfName) . '&background=0E5393&color=fff&size=128&bold=true';
+                    @endphp
                     <div style="position:relative; width:80px; height:80px; flex-shrink:0;" x-data="{ isDragging: false }">
                         <div style="width:100%;height:100%;border-radius:12px;overflow:hidden;border:2px solid #fff;box-shadow:var(--card-shadow);"
                              @if(!$canUpdatePhoto) title="You can update your photo again on {{ $nextPhotoUpdate }}" @endif>
-                            <img src="{{ $authUser?->photo ? asset('storage/'.$authUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode(($authUser?->first_name??'').' '.($authUser?->last_name??'')).'&background=0E5393&color=fff&size=128&bold=true' }}"
+                            <img src="{{ $authUser?->profile_photo_url ?? $authProfFallback }}"
+                                 onerror="this.onerror=null; this.src='{{ $authProfFallback }}';"
                                  style="width:100%;height:100%;object-fit:cover;aspect-ratio:1/1;"
                                  @if($canUpdatePhoto)
                                  :style="isDragging ? 'transform:scale(1.1); transition:.2s;' : ''"
@@ -3132,7 +3137,8 @@ html, body {
         $idFullName = strtoupper(($idUser?->first_name??'').' '.($idUser?->middle_name ? $idUser->middle_name.' ' : '').($idUser?->last_name??''));
         $idAddress = $idUser?->address ?? 'BARANGAY SAN MIGUEL II DASMARIÑAS CAVITE';
         $idBirthday = $idUser?->birthday ? \Carbon\Carbon::parse($idUser->birthday)->format('F j, Y') : 'N/A';
-        $idPhoto = $idUser?->photo ? asset('storage/'.$idUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode(($idUser?->first_name??'R').' '.($idUser?->last_name??'')).'&background=0E5393&color=fff&size=128&bold=true';
+        $idPhotoFallback = 'https://ui-avatars.com/api/?name='.urlencode(($idUser?->first_name??'R').' '.($idUser?->last_name??'')).'&background=0E5393&color=fff&size=128&bold=true';
+        $idPhoto = $idUser?->profile_photo_url ?? $idPhotoFallback;
         $idCode = $idUser?->resident_code ?? $digitalId->id_number;
         $idIssued = \Carbon\Carbon::parse($digitalId->created_at)->format('m/d/Y');
         $idValid = \Carbon\Carbon::parse($digitalId->created_at)->addYears(3)->format('m/d/Y');
@@ -3171,7 +3177,7 @@ html, body {
                     <div style="display:flex;gap:12px;align-items:flex-start;margin-top:2px;">
                         <div style="width:85px;flex-shrink:0;text-align:center;padding-top:11px;">
                             <div style="width:80px;height:80px;aspect-ratio:1/1;border:1px solid #000;border-radius:0;overflow:hidden;background:#e8e8e8;position:relative;display:flex;align-items:center;justify-content:center;margin:0 auto;">
-                                <img src="{{ $idPhoto }}" style="width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;">
+                                <img src="{{ $idPhoto }}" onerror="this.onerror=null; this.src='{{ $idPhotoFallback }}';" style="width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;">
                             </div>
                             <div style="font-size:6.5px;font-weight:900;color:#000;text-transform:uppercase;margin-top:2px;letter-spacing:0.03em;">BARANGAY ID NO.</div>
                             <div style="font-size:7.5px;font-weight:900;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:85px;margin:1px auto 0;">{{ $idCode }}</div>

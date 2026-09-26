@@ -2548,7 +2548,8 @@
                                     <div class="off-photo-wrap"
                                         :style="offViewMode==='list'?'width:44px;height:44px;margin:0;flex-shrink:0;':''">
                                         <img src="{{ $off->photo ? asset('storage/' . $off->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($off->name) . '&background=0E5393&color=fff&size=128&bold=true' }}"
-                                            class="off-photo">
+                                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($off->name) }}&background=0E5393&color=fff&size=128&bold=true';"
+                                             class="off-photo">
                                     </div>
                                     <div :style="offViewMode==='list'?'flex:1;':''">
                                         <div class="off-name">{{ $off->name }}</div>
@@ -2656,7 +2657,8 @@
                                             <td style="padding:11px 14px;">
                                                 <div style="display:flex;align-items:center;gap:10px;">
                                                     <img src="{{ $off->photo ? asset('storage/' . $off->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($off->name) . '&background=94a3b8&color=fff&size=64&bold=true' }}"
-                                                        style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
+                                                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($off->name) }}&background=94a3b8&color=fff&size=64&bold=true';"
+                                                         style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
                                                     <div style="font-size:12px;font-weight:800;color:var(--muted);">
                                                         {{ $off->name }}</div>
                                                 </div>
@@ -2719,7 +2721,9 @@
                                         </div>
                                         @if($evt->image_path)
                                             <div style="width:50px;height:50px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);position:relative;">
-                                                <img src="{{ asset('storage/' . $evt->image_path) }}" style="width:100%;height:100%;object-fit:cover;">
+                                                <img src="{{ asset('storage/' . $evt->image_path) }}" 
+                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                     style="width:100%;height:100%;object-fit:cover;">
                                                 @if(count($evt->images_list) > 1)
                                                     <span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#fff;font-size:8px;font-weight:900;padding:1px 3px;border-radius:3px;">+{{ count($evt->images_list) }}</span>
                                                 @endif
@@ -2888,7 +2892,9 @@
                                     <div class="ann-item" x-show="'{{ strtolower(addslashes($ann->title . ' ' . $ann->content)) }}'.includes(searchAnn.toLowerCase())">
                                         @if($ann->image_path)
                                             <div style="width:60px;height:60px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);position:relative;">
-                                                <img src="{{ asset('storage/' . $ann->image_path) }}" style="width:100%;height:100%;object-fit:cover;">
+                                                <img src="{{ asset('storage/' . $ann->image_path) }}" 
+                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                     style="width:100%;height:100%;object-fit:cover;">
                                                 @if(count($ann->images_list) > 1)
                                                     <span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;">+{{ count($ann->images_list) }}</span>
                                                 @endif
@@ -3549,7 +3555,9 @@
                                         @foreach($carouselSlides as $slide)
                                             <div style="display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px;">
                                                 <div style="width:80px;height:50px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);">
-                                                    <img src="{{ asset('storage/' . $slide->image_path) }}" style="width:100%;height:100%;object-fit:cover;">
+                                                    <img src="{{ asset('storage/' . $slide->image_path) }}" 
+                                                         onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                         style="width:100%;height:100%;object-fit:cover;">
                                                 </div>
                                                 <div style="flex:1;min-width:0;">
                                                     <div style="font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $slide->title ?? 'Untitled Slide' }}</div>
@@ -3673,7 +3681,9 @@
                                     @if($evt->image_path)
                                         <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;">
                                             <div style="width:60px;height:40px;border-radius:6px;overflow:hidden;flex-shrink:0;">
-                                                <img src="{{ asset('storage/' . $evt->image_path) }}" style="width:100%;height:100%;object-fit:cover;">
+                                                <img src="{{ asset('storage/' . $evt->image_path) }}" 
+                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                     style="width:100%;height:100%;object-fit:cover;">
                                             </div>
                                             <div style="flex:1;min-width:0;">
                                                 <div style="font-size:11px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $evt->title }}</div>
@@ -3692,7 +3702,9 @@
                                     @if($ann->image_path)
                                         <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;">
                                             <div style="width:60px;height:40px;border-radius:6px;overflow:hidden;flex-shrink:0;">
-                                                <img src="{{ asset('storage/' . $ann->image_path) }}" style="width:100%;height:100%;object-fit:cover;">
+                                                <img src="{{ asset('storage/' . $ann->image_path) }}" 
+                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                     style="width:100%;height:100%;object-fit:cover;">
                                             </div>
                                             <div style="flex:1;min-width:0;">
                                                 <div style="font-size:11px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $ann->title }}</div>

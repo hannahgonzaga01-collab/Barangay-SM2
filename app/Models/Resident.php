@@ -69,4 +69,20 @@ class Resident extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        $name = trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? '')) ?: 'Resident';
+        $fallback = 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=0E5393&color=fff&size=128&bold=true';
+
+        if (!empty($this->photo)) {
+            $storageFile = storage_path('app/public/' . ltrim($this->photo, '/'));
+            $publicFile  = public_path('storage/' . ltrim($this->photo, '/'));
+            if (file_exists($storageFile) || file_exists($publicFile)) {
+                return asset('storage/' . ltrim($this->photo, '/'));
+            }
+        }
+
+        return $fallback;
+    }
 }

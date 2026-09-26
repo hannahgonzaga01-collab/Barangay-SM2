@@ -35,7 +35,11 @@
                     <tr id="id-req-{{ $idReq->id }}" style="transition: background-color 0.5s;">
                         <td data-label="Resident">
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <img src="{{ $idUser?->photo ? asset('storage/'.$idUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode($idName).'&background=0E5393&color=fff&size=64&bold=true' }}"
+                                @php
+                                    $idAvatarFallback = 'https://ui-avatars.com/api/?name='.urlencode($idName).'&background=0E5393&color=fff&size=64&bold=true';
+                                @endphp
+                                <img src="{{ $idUser?->profile_photo_url ?? $idAvatarFallback }}"
+                                     onerror="this.onerror=null; this.src='{{ $idAvatarFallback }}';"
                                      style="width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0;">
                                 <div>
                                     <div style="font-size:12px;font-weight:800;color:#0f172a;">{{ $idName }}</div>
@@ -85,7 +89,11 @@
                     <tr x-data="{ openDecline: false, reasonSelect: '', reasonCustom: '' }" id="voter-req-{{ $pv->id }}" style="transition: background-color 0.5s;">
                         <td data-label="Resident">
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <img src="{{ $pv->photo ? asset('storage/'.$pv->photo) : 'https://ui-avatars.com/api/?name='.urlencode($pv->first_name.' '.$pv->last_name).'&background=0E5393&color=fff&size=64&bold=true' }}"
+                                @php
+                                    $pvAvatarFallback = 'https://ui-avatars.com/api/?name='.urlencode($pv->first_name.' '.$pv->last_name).'&background=0E5393&color=fff&size=64&bold=true';
+                                @endphp
+                                <img src="{{ $pv->profile_photo_url ?? $pvAvatarFallback }}"
+                                     onerror="this.onerror=null; this.src='{{ $pvAvatarFallback }}';"
                                      style="width:36px;height:36px;border-radius:99px;object-fit:cover;flex-shrink:0;">
                                 <div>
                                     <div style="font-size:12px;font-weight:800;color:#0f172a;">{{ $pv->first_name }} {{ $pv->last_name }}</div>

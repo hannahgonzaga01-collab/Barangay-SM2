@@ -76,7 +76,12 @@
                             class="flex items-center gap-2 rounded-lg transition px-2 py-1.5"
                             style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);"
                             title="Profile">
-                        <img src="{{ $navUser?->photo ? asset('storage/'.$navUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode($navUser?->name ?? 'User').'&background=0E5393&color=fff&size=64&bold=true' }}"
+                        @php
+                            $navUserName = trim(($navUser?->first_name ?? '') . ' ' . ($navUser?->last_name ?? '')) ?: ($navUser?->name ?? 'User');
+                            $navAvatarFallback = 'https://ui-avatars.com/api/?name=' . urlencode($navUserName) . '&background=0E5393&color=fff&size=128&bold=true';
+                        @endphp
+                        <img src="{{ $navUser?->profile_photo_url ?? $navAvatarFallback }}"
+                             onerror="this.onerror=null; this.src='{{ $navAvatarFallback }}';"
                              class="w-7 h-7 rounded-full object-cover border"
                              style="border-color:rgba(255,255,255,.4);">
                         <span class="text-white font-bold text-xs hidden sm:block max-w-[120px] truncate">
@@ -92,7 +97,8 @@
 
                         <div class="px-4 py-3" style="background:linear-gradient(135deg,#000052 0%,#0E5393 100%);">
                             <div class="flex items-center gap-3">
-                                <img src="{{ $navUser?->photo ? asset('storage/'.$navUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode($navUser?->name ?? 'User').'&background=ffffff&color=0E5393&size=64&bold=true' }}"
+                                <img src="{{ $navUser?->profile_photo_url ?? $navAvatarFallback }}"
+                                     onerror="this.onerror=null; this.src='{{ $navAvatarFallback }}';"
                                      class="w-10 h-10 rounded-xl object-cover" style="border:2px solid rgba(255,255,255,.4);">
                                 <div>
                                     <div class="text-white font-black text-sm leading-tight">
