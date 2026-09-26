@@ -73,6 +73,10 @@ function officePortal() {
         selectedReq: { id: null, type: '', name: '', date: '', time: '08:00' },
         docFilter: 'all',
         docStatusFilter: 'all',
+        masterlistSubView: 'active',
+        searchArchivedRes: '',
+        filterArchivedResGender: '',
+        filterArchivedResClass: '',
 
         // Document Specifics
         openDoc: '',

@@ -555,7 +555,6 @@ html, body {
             @include('office.partials._tab_masterlist')
             @include('office.partials._tab_requests')
             @include('office.partials._tab_verifications')
-            @include('office.partials._tab_archived')
             @include('office.partials._tab_reports')
 
         </div>{{-- /page-wrap --}}
