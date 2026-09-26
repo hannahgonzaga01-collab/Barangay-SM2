@@ -2013,7 +2013,7 @@ html, body {
 
                     <div style="background:#f8fafc;border:1.5px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;box-shadow:inset 0 2px 6px rgba(0,0,0,0.03);">
                         <img :src="previewPhotoSrc" 
-                             @error="$event.target.src='{{ asset('images/cleanup.jpg') }}'"
+                             onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
                              style="max-width:100%;max-height:360px;width:auto;height:auto;object-fit:contain;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.08);display:block;margin:0 auto;">
                     </div>
 
