@@ -131,11 +131,32 @@ class ResidentPortalController extends Controller
             // Fetch digital ID
             $digitalId = DigitalId::where('user_id', $user->id)->latest()->first();
 
-            // Fetch issue reports (Justice/VAWC/Peace)
-            $issueReports = IssueReport::where('user_id', $user->id)->latest()->get();
+            // Fetch issue reports (Justice/VAWC/Peace) — hide resolved older than 30 days
+            $issueReports = IssueReport::where('user_id', $user->id)
+                ->where(function ($query) {
+                    $query->whereNotIn('status', ['resolved', 'closed'])
+                          ->orWhere('updated_at', '>=', now()->subDays(30));
+                })
+                ->latest()
+                ->get();
 
-            // Fetch emergency SOS dispatches
-            $sosHistory = \App\Models\EmergencySosAlert::where('user_id', $user->id)->latest()->get();
+            // Fetch emergency SOS dispatches — hide resolved alerts older than 30 days so resident portal stays clean
+            $sosHistory = \App\Models\EmergencySosAlert::where('user_id', $user->id)
+                ->where(function ($query) {
+                    $query->where('status', '!=', 'resolved')
+                          ->orWhere(function ($q) {
+                              $q->where('status', 'resolved')
+                                ->where(function ($sub) {
+                                    $sub->where('resolved_at', '>=', now()->subDays(30))
+                                        ->orWhere(function ($sub2) {
+                                            $sub2->whereNull('resolved_at')
+                                                 ->where('updated_at', '>=', now()->subDays(30));
+                                        });
+                                });
+                          });
+                })
+                ->latest()
+                ->get();
         } else {
             $issueReports = collect();
             $sosHistory   = collect();

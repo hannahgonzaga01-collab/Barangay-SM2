@@ -1359,6 +1359,9 @@ html, body {
 
             {{-- 1. SOS DISPATCHES TAB CONTENT --}}
             <div x-show="reportHistoryTab === 'sos'" id="sos-history">
+                <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:5px;">
+                    <i class="fas fa-history" style="color:var(--brand);"></i> <span>Resolved dispatches are automatically cleared from your history after 30 days.</span>
+                </div>
                 @foreach($sosHistory as $sos)
                 <div class="event-item">
                     <div style="background:{{ $sos->status === 'resolved' ? '#f0fdf4' : '#fef2f2' }};border:1px solid {{ $sos->status === 'resolved' ? '#bbf7d0' : '#fecaca' }};border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
