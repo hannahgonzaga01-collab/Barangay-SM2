@@ -478,7 +478,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
             const original = this.originalTitle || document.title;
             let count = 0;
             this.sosTitleInterval = setInterval(() => {
-                document.title = (count % 2 === 0) ? '🚨 EMERGENCY SOS DISPATCH! - San Miguel II' : original;
+                document.title = (count % 2 === 0) ? 'EMERGENCY SOS DISPATCH! - San Miguel II' : original;
                 count++;
                 if (count > 14) {
                     clearInterval(this.sosTitleInterval);
@@ -1059,7 +1059,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                                         <option value="approved"     {{ $issue->status==='approved'     ? 'selected' : '' }}>Approved</option>
                                                     @endif
                                                     <option value="settled"      {{ $issue->status==='settled'      ? 'selected' : '' }}>Settled</option>
-                                                    <option value="escalate_kp"  style="color:#b45309;font-weight:800;">⚖️ Escalate to KP</option>
+                                                    <option value="escalate_kp"  style="color:#b45309;font-weight:800;">Escalate to KP</option>
                                                     <option value="rejected"     {{ $issue->status==='rejected'     ? 'selected' : '' }}>Rejected</option>
                                                 </select>
                                             </form>
@@ -1259,12 +1259,11 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                             <span x-text="alert.created_at_fmt + ' (' + alert.time_ago + ')'"></span>
                                         </span>
                                     </div>
-                                    <div>
-                                        <span style="font-size:10px;font-weight:900;padding:4px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:0.05em;display:inline-flex;align-items:center;gap:5px;"
-                                              :style="alert.status==='responding'?'background:#fef3c7;color:#92400e;border:1px solid #fde68a;':'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;'"
-                                              x-text="alert.status === 'responding' ? '⚡ TANOD ON THE WAY' : '🚨 ACTION REQUIRED'">
+                                    <template x-if="alert.status === 'responding'">
+                                        <span style="font-size:10px;font-weight:900;padding:3.5px 11px;border-radius:99px;text-transform:uppercase;letter-spacing:0.04em;display:inline-flex;align-items:center;gap:5px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;">
+                                            <i class="fas fa-motorcycle" style="font-size:10px;"></i> Tanod Dispatched
                                         </span>
-                                    </div>
+                                    </template>
                                 </div>
 
                                 {{-- Main Body: Resident Info & Actions --}}
