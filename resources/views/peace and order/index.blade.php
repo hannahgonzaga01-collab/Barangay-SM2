@@ -544,6 +544,8 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                 }).catch(e => console.error(e));
         },
         updateSosStatus(alertId, newStatus) {
+            this.stopEmergencyChime();
+            this.stopSosTabTitle();
             if (newStatus === 'resolved') {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
@@ -781,30 +783,8 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         openTransfer(id) { this.transferIssueId = id; this.transferModal = true; },
         init() {
             this.$watch('activeTab', value => localStorage.setItem('brgy_peace_tab', value));
-            
-            // Check if active/triggered SOS dispatches exist when opening or logging in
-            if (this.hasActiveSosAlerts()) {
-                this.flashSosTabTitle();
-                try {
-                    const p = this.playEmergencyChime();
-                    if (p && typeof p.catch === 'function') p.catch(() => {});
-                } catch(e){}
-
-                // If browser autoplay suspended the audio context, sound the siren on the very first staff interaction anywhere on the page
-                let gestureFired = false;
-                const gestureTrigger = () => {
-                    if (gestureFired) return;
-                    if (this.hasActiveSosAlerts()) {
-                        gestureFired = true;
-                        this.playEmergencyChime();
-                    }
-                };
-                window.addEventListener('click', gestureTrigger, { once: true });
-                window.addEventListener('keydown', gestureTrigger, { once: true });
-                window.addEventListener('touchstart', gestureTrigger, { once: true });
-                window.addEventListener('pointerdown', gestureTrigger, { once: true });
-            }
-
+            this.stopEmergencyChime();
+            this.stopSosTabTitle();
             this.pollSosAlerts();
             this.sosPollingInterval = setInterval(() => {
                 this.pollSosAlerts();
