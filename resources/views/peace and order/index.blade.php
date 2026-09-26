@@ -942,14 +942,27 @@ html, body {
                                         $images = is_string($patrol->image_path) && str_starts_with($patrol->image_path, '[') ? json_decode($patrol->image_path, true) : [$patrol->image_path];
                                         $firstImg = $images[0] ?? '';
                                         $imgCount = count($images);
+                                        if (str_starts_with($firstImg, 'http://') || str_starts_with($firstImg, 'https://')) {
+                                            $firstImgUrl = $firstImg;
+                                        } elseif (str_starts_with($firstImg, 'storage/')) {
+                                            $firstImgUrl = asset($firstImg);
+                                        } elseif (str_starts_with($firstImg, '/storage/')) {
+                                            $firstImgUrl = asset(ltrim($firstImg, '/'));
+                                        } elseif (str_starts_with($firstImg, 'images/')) {
+                                            $firstImgUrl = asset($firstImg);
+                                        } else {
+                                            $firstImgUrl = asset('storage/' . ltrim($firstImg, '/'));
+                                        }
                                     @endphp
                                     <div style="display:flex;align-items:center;gap:6px;">
-                                        <div @click="openProofPreview('{{ asset('storage/'.$firstImg) }}', '{{ addslashes($patrol->team_name) }} — Patrol Proof', '{{ \Carbon\Carbon::parse($patrol->schedule_date)->format('M d, Y') }} • {{ addslashes($patrol->personnel_names) }}')" 
+                                        <div @click="openProofPreview('{{ $firstImgUrl }}', '{{ addslashes($patrol->team_name) }} — Patrol Proof', '{{ \Carbon\Carbon::parse($patrol->schedule_date)->format('M d, Y') }} • {{ addslashes($patrol->personnel_names) }}')" 
                                              style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;"
                                              onmouseover="this.style.borderColor='var(--brand)';this.style.background='#eff6ff';"
                                              onmouseout="this.style.borderColor='var(--border)';this.style.background='#f8fafc';"
                                              title="Click to preview proof">
-                                            <img src="{{ asset('storage/'.$firstImg) }}" style="width:26px;height:26px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0;flex-shrink:0;">
+                                            <img src="{{ $firstImgUrl }}" 
+                                                 onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                 style="width:26px;height:26px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0;flex-shrink:0;">
                                             <span style="font-size:10px;font-weight:800;color:var(--brand);display:flex;align-items:center;gap:4px;">
                                                 <i class="fas fa-eye" style="font-size:9px;"></i> View Proof
                                                 @if($imgCount > 1)
@@ -1999,7 +2012,9 @@ html, body {
                     </div>
 
                     <div style="background:#f8fafc;border:1.5px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;box-shadow:inset 0 2px 6px rgba(0,0,0,0.03);">
-                        <img :src="previewPhotoSrc" style="max-width:100%;max-height:360px;width:auto;height:auto;object-fit:contain;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.08);display:block;margin:0 auto;">
+                        <img :src="previewPhotoSrc" 
+                             @error="$event.target.src='{{ asset('images/cleanup.jpg') }}'"
+                             style="max-width:100%;max-height:360px;width:auto;height:auto;object-fit:contain;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.08);display:block;margin:0 auto;">
                     </div>
 
                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">

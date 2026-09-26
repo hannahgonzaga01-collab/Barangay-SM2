@@ -10,7 +10,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        window.alert = function(msg) {
+            if (typeof Swal !== 'undefined') {
+                const text = String(msg || '');
+                const isSuccess = text.includes('✓') || text.toLowerCase().includes('success') || text.toLowerCase().includes('tagumpay') || text.toLowerCase().includes('saved');
+                Swal.fire({
+                    title: isSuccess ? 'Tagumpay' : 'Paalala',
+                    text: text.replace(/^✓\s*/, ''),
+                    icon: isSuccess ? 'success' : 'info',
+                    confirmButtonColor: '#0E5393',
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'rounded-2xl font-sans' }
+                });
+            }
+        };
+    </script>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;}
         html, body{font-family:'Plus Jakarta Sans', sans-serif !important;min-height:100vh;background-color:#000052 !important;background-image:none !important;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;width:100%;}

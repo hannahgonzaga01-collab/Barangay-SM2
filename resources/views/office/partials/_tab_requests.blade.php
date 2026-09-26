@@ -341,11 +341,6 @@
                                 <span style="font-size:9.5px;font-weight:900;background:#dcfce7;color:#15803d;border:1.5px solid #86efac;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
                                     <i class="fas fa-box-open"></i> Released
                                 </span>
-                                @if($isOldReleased)
-                                    <div style="font-size:8px; font-weight:800; color:#64748b; margin-top:3px; text-align:center;">
-                                        <i class="fas fa-archive"></i> Archived
-                                    </div>
-                                @endif
                             @elseif($req->status === 'disapproved')
                                 <span style="font-size:9.5px;font-weight:900;background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;" title="{{ $req->disapproval_reason ?? 'Request Disapproved' }}">
                                     <i class="fas fa-times-circle"></i> Disapproved

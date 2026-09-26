@@ -232,4 +232,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/admin/backups/delete/{filename}', [\App\Http\Controllers\BackupController::class, 'destroy']);
 });
 
+// ── GRACEFUL STORAGE ASSET FALLBACK ROUTE ──
+// Ensures uploaded images or lost ephemeral files never show broken image icons
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (file_exists($fullPath)) {
+        return response()->file($fullPath);
+    }
+    $imgFallback = public_path('images/cleanup.jpg');
+    if (file_exists($imgFallback)) {
+        return response()->file($imgFallback);
+    }
+    abort(404);
+})->where('path', '.*');
+
 require __DIR__ . '/auth.php';

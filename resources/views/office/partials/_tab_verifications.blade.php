@@ -45,7 +45,13 @@
                             @php
                                 $confScore = $pv->confidence_score ?? 0;
                                 $confLevel = $pv->confidence_level ?? 'Low';
-                                $badgeColor = $confScore >= 85 ? 'background:#dcfce7;color:#15803d;border:1px solid #86efac;' : ($confScore >= 65 ? 'background:#fef3c7;color:#b45309;border:1px solid #fde68a;' : 'background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;');
+                                $badgeColor = $confScore >= 85 
+                                    ? 'background:#dcfce7;color:#15803d;border:1px solid #86efac;' 
+                                    : ($confScore >= 65 
+                                        ? 'background:#fef3c7;color:#b45309;border:1px solid #fde68a;' 
+                                        : ($confScore >= 50 
+                                            ? 'background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;' 
+                                            : 'background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;'));
                                 $matched = $pv->matched_resident;
                             @endphp
                             <tr style="border-bottom: 1px solid #e2e8f0;">
@@ -100,7 +106,7 @@
                                             {{ $confScore }}% Match
                                         </span>
                                         <span style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; color: #64748b;">
-                                            {{ $confLevel }} Confidence
+                                            {{ $confScore >= 50 ? ($confLevel . ' Confidence') : 'No Match' }}
                                         </span>
                                     </div>
                                 </td>
@@ -139,7 +145,7 @@
                                         <button type="button" @click="approveModal = true" class="btn-grad btn-grad-sm" 
                                                 style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 6px 12px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;"
                                                 title="Approve registration and link to Barangay Masterlist">
-                                            <i class="fas fa-user-check"></i> Approve &amp; Link
+                                            <i class="fas fa-user-check"></i> {{ $matched ? 'Approve & Link' : 'Approve (New Resident)' }}
                                         </button>
 
                                         <button type="button" @click="rejectModal = true" class="btn-plain btn-sm" 
