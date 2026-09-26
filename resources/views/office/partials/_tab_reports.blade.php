@@ -7,8 +7,11 @@
                 <button type="button" @click="templateUploadModal=true" class="btn-plain btn-edit" style="display:inline-flex;align-items:center;gap:6px;font-size:10px;">
                     <i class="fas fa-cloud-upload-alt"></i> Format / Template
                 </button>
+                <button type="button" @click="exportOfficeReportPdf()" class="btn-plain btn-edit" style="display:inline-flex;align-items:center;gap:6px;font-size:10px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-weight:800;">
+                    <i class="fas fa-file-download"></i> Export PDF
+                </button>
                 <button type="button" @click="printOfficeReport()" class="btn-plain btn-edit" style="display:inline-flex;align-items:center;gap:6px;font-size:10px;">
-                    <i class="fas fa-print"></i> Export / Print PDF
+                    <i class="fas fa-print"></i> Print
                 </button>
                 <form action="{{ route('department.reports.submit') }}" method="POST" style="margin:0;">
                     @csrf

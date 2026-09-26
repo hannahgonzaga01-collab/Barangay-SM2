@@ -555,6 +555,22 @@ html, body {
         printPeaceReport() {
             printPeaceReportHelper();
         },
+        exportPeaceReportPdf() {
+            const el = document.getElementById('peace-printable-report');
+            if (!el) return;
+            if (typeof html2pdf !== 'undefined') {
+                const opt = {
+                    margin: [6, 6, 6, 6],
+                    filename: 'Peace_and_Order_Monthly_Report_' + (this.peaceRep?.monthYear || 'Accomplishment').replace(/[^a-zA-Z0-9_-]/g, '_') + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+                html2pdf().set(opt).from(el).save();
+            } else {
+                this.printPeaceReport();
+            }
+        },
         openView(issue) { this.activeIssue = issue; this.viewModal = true; },
         openReject(id) { this.rejectFormData.id = id; this.rejectFormData.reason = ''; this.rejectModal = true; },
         openEscalate(id) { this.escalateIssueId = id; this.escalateModal = true; },
@@ -1119,8 +1135,11 @@ html, body {
                         <button type="button" @click="templateUploadModal=true" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
                             <i class="fas fa-cloud-upload-alt"></i> Format / Template
                         </button>
+                        <button type="button" @click="exportPeaceReportPdf()" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-weight:800;">
+                            <i class="fas fa-file-download"></i> Export PDF
+                        </button>
                         <button type="button" @click="printPeaceReport()" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
-                            <i class="fas fa-print"></i> Export / Print PDF
+                            <i class="fas fa-print"></i> Print
                         </button>
                         <form action="{{ route('department.reports.submit') }}" method="POST" style="margin:0;">
                             @csrf
@@ -1993,8 +2012,10 @@ html, body {
                     </div>
                 </div>
             </div>
+        </div>
+
         {{-- ══ UPLOAD CUSTOM TEMPLATE / FORMAT MODAL ══ --}}
-        <div x-show="templateUploadModal" x-cloak class="modal-ov" x-transition>
+        <div x-show="templateUploadModal" x-cloak class="modal-ov" x-transition style="z-index:9999;">
             <div class="modal-box" style="max-width:520px;" @click.away="templateUploadModal=false">
                 <div class="modal-in" style="padding:22px 24px;">
                     <div class="modal-hd">

@@ -45,6 +45,22 @@ function officePortal() {
         printOfficeReport() {
             printOfficeReportHelper();
         },
+        exportOfficeReportPdf() {
+            const el = document.getElementById('office-printable-report');
+            if (!el) return;
+            if (typeof html2pdf !== 'undefined') {
+                const opt = {
+                    margin: [6, 6, 6, 6],
+                    filename: 'Office_Registry_Report_' + (this.officeRep?.monthYear || 'Report').replace(/[^a-zA-Z0-9_-]/g, '_') + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+                html2pdf().set(opt).from(el).save();
+            } else {
+                this.printOfficeReport();
+            }
+        },
         searchArchivedPets: '',
         petTypeSelection: '',
         petPhotoPreview: null,

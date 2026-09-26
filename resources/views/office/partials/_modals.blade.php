@@ -1629,8 +1629,10 @@ $docConfigs = [
             </div>
         </div>
     </div>
+</div>
+
 {{-- ══ UPLOAD CUSTOM TEMPLATE / FORMAT MODAL ══ --}}
-<div x-show="templateUploadModal" x-cloak class="modal-ov" x-transition>
+<div x-show="templateUploadModal" x-cloak class="modal-ov" x-transition style="z-index:9999;">
     <div class="modal-box" style="max-width:520px;" @click.away="templateUploadModal=false">
         <div class="modal-in" style="padding:22px 24px;">
             <div class="modal-hd">
