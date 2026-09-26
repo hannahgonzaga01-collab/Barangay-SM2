@@ -4,7 +4,7 @@
         <div class="card-head" style="background: linear-gradient(135deg, #0E5393 0%, #04192D 100%); padding: 16px 20px;">
             <div class="card-title" style="color: #fff; font-size: 11px; letter-spacing: .08em; display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-user-check" style="color: #38bdf8;"></i> 
-                <span>SMART MASTERLIST VERIFICATION & TYPO RESOLUTION QUEUE</span>
+                <span>MASTERLIST VERIFICATION & RESIDENT MATCHING QUEUE</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
                 <span class="card-badge" style="background: rgba(56, 189, 248, 0.2); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4);">
@@ -14,11 +14,11 @@
         </div>
 
         <div style="padding: 16px 20px 10px; background: #eff6ff; border-bottom: 1px solid #bfdbfe; display: flex; align-items: flex-start; gap: 10px;">
-            <i class="fas fa-robot" style="color: #0E5393; font-size: 16px; margin-top: 2px;"></i>
+            <i class="fas fa-search-plus" style="color: #0E5393; font-size: 16px; margin-top: 2px;"></i>
             <div style="font-size: 11px; color: #1e3a8a; line-height: 1.5; font-weight: 600;">
-                <strong>AI-Assisted Fuzzy Match:</strong> Registrations are matched against the Barangay Masterlist. 
-                Scores above <strong>85%</strong> indicate strong candidate matches with possible minor typos in spelling or birthdate. 
-                Clicking <strong>[APPROVE & UPDATE MASTERLIST]</strong> will link or update the masterlist record with verified data and activate the resident's account.
+                <strong>Masterlist Cross-Matching:</strong> Sinusuri ng system ang impormasyon ng nagparehistro laban sa Barangay Masterlist. 
+                Ang mga record na may <strong>85% pataas</strong> ay may mataas na pagkakatugma na maaaring may kaunting typo sa baybay (spelling) o birthday. 
+                I-click ang <strong>[Approve]</strong> upang i-activate ang account ng residente at i-link o i-update sa masterlist.
             </div>
         </div>
 
@@ -75,6 +75,20 @@
                                             <span style="font-size: 8.5px; font-weight: 800; background: #f1f5f9; color: #64748b; padding: 2px 7px; border-radius: 99px;">
                                                 Non-Voter Registrant
                                             </span>
+                                        </div>
+                                    @endif
+
+                                    @if(!empty($pv->move_in_request))
+                                        <div style="margin-top: 6px; background: #e0f2fe; border: 1.5px solid #7dd3fc; border-radius: 8px; padding: 6px 10px;">
+                                            <div style="font-size: 9.5px; font-weight: 900; color: #0369a1; display: flex; align-items: center; gap: 5px;">
+                                                <i class="fas fa-truck-moving"></i> <span>May Move-In Application</span>
+                                            </div>
+                                            <div style="font-size: 9px; color: #0284c7; margin-top: 2px; line-height: 1.35; font-weight: 600;">
+                                                <span>Lilipatan: <strong>{{ ($pv->move_in_request->blk ? 'Blk ' . $pv->move_in_request->blk . ' ' : '') . ($pv->move_in_request->lot ? 'Lot ' . $pv->move_in_request->lot : '') ?: 'San Miguel II' }}</strong></span>
+                                                @if($pv->move_in_request->move_date)
+                                                    <span>• Petsa: <strong>{{ \Carbon\Carbon::parse($pv->move_in_request->move_date)->format('M d, Y') }}</strong></span>
+                                                @endif
+                                            </div>
                                         </div>
                                     @endif
                                 </td>
@@ -143,9 +157,9 @@
                                 <td style="padding: 14px 14px; text-align: right; vertical-align: middle;">
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap;" x-data="{ rejectModal: false, approveModal: false }">
                                         <button type="button" @click="approveModal = true" class="btn-grad btn-grad-sm" 
-                                                style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 6px 12px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;"
-                                                title="Approve registration and link to Barangay Masterlist">
-                                            <i class="fas fa-user-check"></i> {{ $matched ? 'Approve & Link' : 'Approve (New Resident)' }}
+                                                style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 6px 14px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;"
+                                                title="Approve registration">
+                                            <i class="fas fa-check"></i> Approve
                                         </button>
 
                                         <button type="button" @click="rejectModal = true" class="btn-plain btn-sm" 
@@ -173,6 +187,20 @@
                                                             Approve <strong>{{ $pv->first_name }} {{ $pv->last_name }}</strong>'s registration and update the Barangay Masterlist?
                                                         </p>
 
+                                                        @if(!empty($pv->move_in_request))
+                                                            <div style="background: #e0f2fe; border: 1.5px solid #38bdf8; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;">
+                                                                <div style="font-size: 10px; font-weight: 800; color: #0369a1; text-transform: uppercase; margin-bottom: 3px; display: flex; align-items: center; gap: 5px;">
+                                                                    <i class="fas fa-truck-moving"></i> Move-In Application Detected
+                                                                </div>
+                                                                <div style="font-size: 11px; color: #0c4a6e; font-weight: 700;">
+                                                                    Bagong Lipat sa Barangay: {{ ($pv->move_in_request->blk ? 'Blk ' . $pv->move_in_request->blk . ' ' : '') . ($pv->move_in_request->lot ? 'Lot ' . $pv->move_in_request->lot : '') ?: 'San Miguel II' }}
+                                                                </div>
+                                                                <div style="font-size: 9.5px; color: #0284c7; margin-top: 2px;">
+                                                                    Awtomatikong mai-activate ang account, mailalapat ang bagong tirahan sa Masterlist, at mamarkahang opisyal ang kanyang Move-In form.
+                                                                </div>
+                                                            </div>
+                                                        @endif
+
                                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 14px;">
                                                             <div style="font-size: 9.5px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Target Masterlist Match</div>
                                                             @if($matched)
@@ -181,7 +209,7 @@
                                                                 </div>
                                                                 <div style="font-size: 10px; color: #64748b; font-weight: 600; margin-top: 3px;">
                                                                     Code: <strong style="color: #0f172a;">{{ $matched->resident_code ?? 'NO-CODE' }}</strong> •
-                                                                    AI Match: <span style="font-weight: 900; color: {{ $confScore >= 85 ? '#15803d' : '#b45309' }};">{{ $confScore }}%</span>
+                                                                    Match Score: <span style="font-weight: 900; color: {{ $confScore >= 85 ? '#15803d' : '#b45309' }};">{{ $confScore }}%</span>
                                                                 </div>
                                                             @else
                                                                 <div style="font-size: 11px; font-weight: 700; color: #94a3b8; font-style: italic;">
@@ -197,7 +225,7 @@
                                                     <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
                                                         <button type="button" @click="approveModal = false" class="btn-plain btn-ghost btn-sm">Cancel</button>
                                                         <button type="submit" class="btn-grad btn-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
-                                                            <i class="fas fa-check"></i> Yes, Approve &amp; Link
+                                                            <i class="fas fa-check"></i> Yes, Approve
                                                         </button>
                                                     </div>
                                                 </form>

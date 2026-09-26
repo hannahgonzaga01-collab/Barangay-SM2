@@ -131,6 +131,10 @@ class OfficeController extends Controller
                 $u->matched_resident = $match['matched_resident'];
                 $u->confidence_score = $match['confidence_score'];
                 $u->confidence_level = $match['confidence_level'];
+                $u->move_in_request = \App\Models\DocumentRequest::where('user_id', $u->id)
+                    ->whereIn('document_type', ['move_in', 'move-in', 'Move In', 'Move-In'])
+                    ->latest()
+                    ->first();
                 return $u;
             });
         $pendingVerificationsCount = $pendingVerifications->count();
@@ -1138,6 +1142,23 @@ class OfficeController extends Controller
             $resident = $match['matched_resident'];
         }
 
+        // Check if registrant has an active Move-In application
+        $moveIn = \App\Models\DocumentRequest::where('user_id', $user->id)
+            ->whereIn('document_type', ['move_in', 'move-in', 'Move In', 'Move-In'])
+            ->latest()
+            ->first();
+
+        $moveInAddress = null;
+        if ($moveIn) {
+            $parts = [];
+            if (!empty($moveIn->blk)) $parts[] = 'Blk ' . $moveIn->blk;
+            if (!empty($moveIn->lot)) $parts[] = 'Lot ' . $moveIn->lot;
+            $parts[] = 'Barangay San Miguel II';
+            $moveInAddress = implode(' ', $parts);
+            // Mark Move-In application released upon verification approval
+            $moveIn->update(['status' => 'released']);
+        }
+
         if ($resident) {
             // Update matched masterlist record with verified details and link user
             $resident->update([
@@ -1146,6 +1167,7 @@ class OfficeController extends Controller
                 'last_name' => $user->last_name ?: $resident->last_name,
                 'middle_name' => $user->middle_name ?: $resident->middle_name,
                 'birthday' => $user->birthday ?: $resident->birthday,
+                'address' => $moveInAddress ?: ($user->address ?: $resident->address),
                 'is_voter' => $user->is_voter ?? $resident->is_voter,
                 'precinct_no' => $user->precinct_no ?? $resident->precinct_no,
                 'voter_status' => 'approved',
@@ -1164,6 +1186,7 @@ class OfficeController extends Controller
                 'last_name' => $user->last_name ?: '',
                 'middle_name' => $user->middle_name,
                 'birthday' => $user->birthday,
+                'address' => $moveInAddress ?: ($user->address ?: 'Barangay San Miguel II'),
                 'is_voter' => $user->is_voter,
                 'precinct_no' => $user->precinct_no,
                 'voter_status' => 'approved',
@@ -1176,6 +1199,7 @@ class OfficeController extends Controller
             'status' => 'active',
             'is_active' => 1,
             'voter_status' => 'approved',
+            'address' => $moveInAddress ?: $user->address,
             'resident_code' => $resident->resident_code ?? $user->resident_code,
         ]);
 
