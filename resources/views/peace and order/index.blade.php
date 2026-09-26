@@ -336,7 +336,7 @@ html, body {
 
         function peacePortalData() {
             return {
-        activeTab: localStorage.getItem('brgy_peace_tab') || 'cases',
+        activeTab: (['cases', 'patrol', 'sos', 'reports'].includes(localStorage.getItem('brgy_peace_tab')) ? localStorage.getItem('brgy_peace_tab') : 'cases'),
         viewModal: false,
         addBlotterModal: false,
         addPatrolModal: false,
@@ -367,7 +367,7 @@ html, body {
         searchQuery: '',
         filterStatus: '',
         filterType: '',
-        sosAlerts: {{ json_encode($sosAlerts->map(function($a) {
+        sosAlerts: {!! json_encode($sosAlerts->map(function($a) {
             return [
                 'id'               => $a->id,
                 'resident_name'    => $a->resident_name ?? ($a->user ? trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? '')) : 'Barangay Resident'),
@@ -383,8 +383,8 @@ html, body {
                 'time_ago'         => $a->created_at ? $a->created_at->diffForHumans() : 'Just now',
                 'google_maps_url'  => $a->google_maps_url ?: (($a->latitude && $a->longitude) ? 'https://www.google.com/maps?q=' . $a->latitude . ',' . $a->longitude : null),
             ];
-        })) }},
-        resolvedSos: {{ json_encode($recentResolvedSos->map(function($a) {
+        })) !!},
+        resolvedSos: {!! json_encode($recentResolvedSos->map(function($a) {
             $name = $a->resident_name;
             if (!$name && $a->user) {
                 $name = trim(($a->user->first_name ?? '') . ' ' . ($a->user->last_name ?? ''));
@@ -404,11 +404,11 @@ html, body {
                 'time_fmt'         => $a->created_at ? $a->created_at->format('h:i A') : '—',
                 'status'           => 'resolved',
             ];
-        })) }},
+        })) !!},
         sosPollingInterval: null,
         hasInitialPollRun: false,
-        knownSosIds: new Set({{ json_encode($sosAlerts->pluck('id')->map(fn($id) => (int)$id)->all()) }}),
-        resolvedSosIds: new Set(),
+        knownSosIds: {!! json_encode($sosAlerts->pluck('id')->map(fn($id) => (int)$id)->all()) !!},
+        resolvedSosIds: [],
         originalTitle: document.title,
         sosTitleInterval: null,
         flashSosTabTitle() {
@@ -443,7 +443,7 @@ html, body {
             }
         },
         hasActiveSosAlerts() {
-            return (this.sosAlerts || []).some(a => (a.status === 'active' || a.status === 'triggered') && !this.resolvedSosIds.has(Number(a.id)));
+            return (this.sosAlerts || []).some(a => (a.status === 'active' || a.status === 'triggered') && !this.resolvedSosIds.includes(Number(a.id)));
         },
         pollSosAlerts() {
             fetch('{{ route('peace.sos.alerts') }}')
@@ -452,16 +452,21 @@ html, body {
                     const rawAlerts = data.alerts || [];
 
                     // Filter out any alert already resolved in this session
-                    const currentAlerts = rawAlerts.filter(a => !this.resolvedSosIds.has(Number(a.id)));
+                    const currentAlerts = rawAlerts.filter(a => !this.resolvedSosIds.includes(Number(a.id)));
 
                     // Brand new alert is an active/triggered alert not seen before in this tab session
                     const brandNewAlerts = currentAlerts.filter(a => 
-                        !this.knownSosIds.has(Number(a.id)) && 
+                        !this.knownSosIds.includes(Number(a.id)) && 
                         (a.status === 'active' || a.status === 'triggered')
                     );
 
                     // Add all current alerts to knownSosIds
-                    currentAlerts.forEach(a => this.knownSosIds.add(Number(a.id)));
+                    currentAlerts.forEach(a => {
+                        const nid = Number(a.id);
+                        if (!this.knownSosIds.includes(nid)) {
+                            this.knownSosIds.push(nid);
+                        }
+                    });
 
                     this.sosAlerts = currentAlerts;
                     if (data.resolved_alerts) {
@@ -505,8 +510,9 @@ html, body {
             if (newStatus === 'resolved') {
                 this.stopEmergencyChime();
                 this.stopSosTabTitle();
-                this.resolvedSosIds.add(Number(alertId));
-                this.knownSosIds.add(Number(alertId));
+                const numId = Number(alertId);
+                if (!this.resolvedSosIds.includes(numId)) this.resolvedSosIds.push(numId);
+                if (!this.knownSosIds.includes(numId)) this.knownSosIds.push(numId);
 
                 const foundIdx = (this.sosAlerts || []).findIndex(a => a.id === alertId);
                 if (foundIdx !== -1) {
@@ -528,7 +534,8 @@ html, body {
                     });
                 }
             } else if (newStatus === 'responding') {
-                this.knownSosIds.add(Number(alertId));
+                const numId = Number(alertId);
+                if (!this.knownSosIds.includes(numId)) this.knownSosIds.push(numId);
             }
 
             fetch('/peace/sos-alerts/' + alertId + '/status', {
