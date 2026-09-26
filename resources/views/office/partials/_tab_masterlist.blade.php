@@ -3,8 +3,18 @@
     <div class="card">
         <div class="card-head">
             <div class="card-title"><i class="fas fa-users"></i> Resident Masterlist</div>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <div class="card-badge" x-text="filteredResidents.length+' Residents'"></div>
+                
+                {{-- Archived Residents Button (Moved beside Export CSV) --}}
+                <button type="button" @click="activeTab='archived'"
+                   class="btn-grad btn-grad-sm"
+                   style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%); box-shadow:0 2px 6px rgba(217,119,6,.3); padding:6px 13px; font-weight:800; font-size:10px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:#fff; border-radius:var(--r-btn);"
+                   title="View Archived Residents">
+                    <i class="fas fa-archive"></i> <span>Archived Residents</span>
+                    <span style="background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:99px; font-size:9px;">{{ $archivedResidentsCount ?? 0 }}</span>
+                </button>
+
                 <a :href="'/office/export?filter=' + encodeURIComponent(activeFilter) + '&search=' + encodeURIComponent(searchQuery)"
                    class="btn-grad btn-grad-sm"
                    style="background:linear-gradient(135deg,#059669 0%,#047857 100%); box-shadow:0 2px 8px rgba(5,150,105,.3); padding:6px 13px; font-weight:800; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:#fff; border-radius:var(--r-btn);"

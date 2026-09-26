@@ -544,10 +544,6 @@ html, body {
                             <i class="fas fa-user-check"></i> Verification Requests
                             <span class="pill-cnt">{{ $pendingVerificationsCount ?? 0 }}</span>
                         </button>
-                        <button @click="activeTab='archived'" :class="activeTab==='archived' ? 'tab-pill tab-pill-active' : 'tab-pill'" class="tab-pill">
-                            <i class="fas fa-archive"></i> Archived Residents
-                            <span class="pill-cnt">{{ $archivedResidentsCount ?? 0 }}</span>
-                        </button>
                         <button @click="activeTab='reports'" :class="activeTab==='reports' ? 'tab-pill tab-pill-active' : 'tab-pill'" class="tab-pill">
                             <i class="fas fa-file-invoice"></i> Reports & Transmittals
                         </button>

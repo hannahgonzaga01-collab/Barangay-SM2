@@ -5,8 +5,14 @@
             <div class="card-title">
                 <i class="fas fa-archive" style="color:#d97706;"></i> Archived Residents Masterlist
             </div>
-            <div style="display:flex;gap:8px;align-items:center;">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <span class="card-badge" style="background:#fef3c7;color:#d97706;">{{ $archivedResidentsCount ?? 0 }} Archived</span>
+                <button type="button" @click="activeTab='masterlist'"
+                        class="btn-plain btn-sm"
+                        style="padding:6px 12px; font-size:10px; font-weight:800; background:#fff; border:1.5px solid var(--border); color:#0E5393; border-radius:var(--r-btn); cursor:pointer; display:inline-flex; align-items:center; gap:5px;"
+                        title="Return to Active Resident Masterlist">
+                    <i class="fas fa-arrow-left"></i> <span>Back to Masterlist</span>
+                </button>
                 <a href="/office/export?filter=archived"
                    class="btn-grad btn-grad-sm"
                    style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%); box-shadow:0 2px 6px rgba(217,119,6,.3); padding:6px 13px; font-weight:800; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:#fff; border-radius:var(--r-btn);"
