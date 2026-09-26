@@ -165,17 +165,12 @@
                     <button @click="docFilter='today'" :class="docFilter==='today' ? 'active-filter' : 'plain-filter'">Today</button>
                 </div>
 
-                {{-- Dedicated Archive Quick Button --}}
+                {{-- Dedicated Archive Button --}}
                 <button type="button" @click="docStatusFilter = (docStatusFilter === 'released_archive' ? 'all' : 'released_archive')"
-                        :style="docStatusFilter === 'released_archive' ? 'background:#0E5393; color:#fff; border-color:#0E5393;' : 'background:#fff; color:#475569; border-color:#cbd5e1;'"
-                        style="height:28px; padding:0 10px; font-size:9.5px; font-weight:800; border-radius:8px; border:1.5px solid; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.15s; white-space:nowrap; flex-shrink:0;"
-                        title="Archived Documents">
-                    <i class="fas fa-archive" style="font-size:10px;"></i>
-                    <span x-text="docStatusFilter === 'released_archive' ? 'Active' : 'Archived'"></span>
-                    <span style="padding:1px 5px; border-radius:99px; font-size:8.5px; font-weight:900;"
-                          :style="docStatusFilter === 'released_archive' ? 'background:rgba(255,255,255,0.25); color:#fff;' : 'background:#f1f5f9; color:#475569;'">
-                        {{ $archivedDocCount ?? 0 }}
-                    </span>
+                        style="height:28px; padding:0 12px; font-family:inherit; font-size:9px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:all 0.15s; white-space:nowrap; flex-shrink:0; border:none;"
+                        :style="docStatusFilter === 'released_archive' ? 'background:#0E5393; color:#fff; box-shadow:0 1px 3px rgba(14,83,147,0.3);' : 'background:#f1f5f9; color:#64748b;'"
+                        title="Archived">
+                    Archived
                 </button>
 
                 <span class="card-badge" style="background:#fee2e2; color:#dc2626; white-space:nowrap; flex-shrink:0; height:28px; display:inline-flex; align-items:center; padding:0 10px; font-size:9.5px; font-weight:800; border-radius:8px;">{{ $pendingDocCount ?? 0 }} Pending</span>
@@ -184,9 +179,8 @@
 
         {{-- Archive Notification Banner & Purge Controls --}}
         <div x-show="docStatusFilter === 'released_archive'" style="padding: 10px 16px; background: #eff6ff; border-bottom: 1.5px solid #bfdbfe; font-size: 11px; color: #1e40af; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <i class="fas fa-archive" style="font-size: 14px; color: #0E5393;"></i>
-                <span><strong>Archived Documents ({{ $archivedDocCount ?? 0 }}):</strong> Ang mga dokumentong ito ay na-release nang higit 30 araw na.</span>
+            <div>
+                <span><strong>Archived:</strong> Ang mga dokumentong ito ay na-release nang higit 30 araw na.</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
                 @if(($archivedDocCount ?? 0) > 0)

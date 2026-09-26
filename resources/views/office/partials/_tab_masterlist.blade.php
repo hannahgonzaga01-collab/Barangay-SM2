@@ -9,10 +9,9 @@
                 {{-- Archived Button (Moved beside Export CSV) --}}
                 <button type="button" @click="masterlistSubView='archived'"
                    class="btn-grad btn-grad-sm"
-                   style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%); box-shadow:0 2px 6px rgba(217,119,6,.3); padding:6px 13px; font-weight:800; font-size:10px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:#fff; border-radius:var(--r-btn);"
+                   style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%); box-shadow:0 2px 6px rgba(217,119,6,.3); padding:6px 14px; font-weight:800; font-size:10px; border:none; cursor:pointer; display:inline-flex; align-items:center; color:#fff; border-radius:var(--r-btn);"
                    title="Archived">
-                    <i class="fas fa-archive"></i> <span>Archived</span>
-                    <span style="background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:99px; font-size:9px;">{{ $archivedResidentsCount ?? 0 }}</span>
+                    <span>Archived</span>
                 </button>
 
                 <a :href="'/office/export?filter=' + encodeURIComponent(activeFilter) + '&search=' + encodeURIComponent(searchQuery)"
@@ -146,9 +145,9 @@
                 <span class="card-badge" style="background:#fef3c7;color:#d97706;">{{ $archivedResidentsCount ?? 0 }} Archived</span>
                 <button type="button" @click="masterlistSubView='active'"
                         class="btn-plain btn-sm"
-                        style="padding:6px 12px; font-size:10px; font-weight:800; background:#fff; border:1.5px solid var(--border); color:#0E5393; border-radius:var(--r-btn); cursor:pointer; display:inline-flex; align-items:center; gap:5px;"
+                        style="padding:6px 12px; font-size:10px; font-weight:800; background:#fff; border:1.5px solid var(--border); color:#0E5393; border-radius:var(--r-btn); cursor:pointer; display:inline-flex; align-items:center;"
                         title="Back to Active Masterlist">
-                    <i class="fas fa-arrow-left"></i> <span>Back</span>
+                    <span>Back</span>
                 </button>
                 <a href="/office/export?filter=archived"
                    class="btn-grad btn-grad-sm"
