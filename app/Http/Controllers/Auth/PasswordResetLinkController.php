@@ -30,9 +30,9 @@ class PasswordResetLinkController extends Controller
         ]);
 
         // If user is an administrative official/staff with a security question,
-        // we intercept the standard email sending process.
+        // we intercept the standard email sending process UNLESS they requested an email reset link.
         $user = \App\Models\User::where('email', $request->email)->first();
-        if ($user && $user->role !== 'resident' && !empty($user->security_question)) {
+        if ($user && $user->role !== 'resident' && !empty($user->security_question) && !$request->boolean('force_email')) {
             return redirect()->route('password.security-question')->with('reset_email', $user->email);
         }
 
@@ -42,6 +42,13 @@ class PasswordResetLinkController extends Controller
         $status = Password::sendResetLink(
             $request->only('email')
         );
+
+        if ($request->boolean('force_email')) {
+            return $status == Password::RESET_LINK_SENT
+                ? redirect()->route('password.request')->with('status', __($status))
+                : redirect()->route('password.request')->withInput($request->only('email'))
+                    ->withErrors(['email' => __($status)]);
+        }
 
         return $status == Password::RESET_LINK_SENT
                     ? back()->with('status', __($status))

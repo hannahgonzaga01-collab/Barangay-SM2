@@ -659,11 +659,13 @@ class AdminController extends Controller
         return redirect()->back();
     }
 
-    // ── Staff Portal Security & Password Recovery Q&A ──
+    // ── Staff & Department Portal Accounts & Security ──
     public function updateStaffSecurity(Request $request)
     {
         $request->validate([
             'user_id'           => 'required|exists:users,id',
+            'name'              => 'required|string|max:255',
+            'email'             => 'required|email|max:255|unique:users,email,' . $request->user_id,
             'security_question' => 'required|string|max:255',
             'security_answer'   => 'required|string|max:255',
         ]);
@@ -675,10 +677,12 @@ class AdminController extends Controller
         }
 
         $user->update([
+            'name'              => trim($request->name),
+            'email'             => trim(strtolower($request->email)),
             'security_question' => trim($request->security_question),
             'security_answer'   => trim($request->security_answer),
         ]);
 
-        return redirect()->back()->with('success', "Security Question & Answer updated successfully for {$user->name} (" . ucfirst($user->role) . " portal).");
+        return redirect()->back()->with('success', "Account & Security settings updated successfully for {$user->name} (" . ucfirst($user->role) . " portal).");
     }
 }

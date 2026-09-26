@@ -135,6 +135,23 @@
             </button>
         </form>
 
+        {{-- Alternate option: Send Reset Link to Registered Email --}}
+        <div style="text-align:center;margin:18px 0 14px;position:relative;">
+            <hr style="border:none;border-top:1.5px solid #e2e8f0;margin:0;">
+            <span style="position:relative;top:-9px;background:#fff;padding:0 10px;font-size:9.5px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;">OR RECOVER VIA EMAIL</span>
+        </div>
+
+        <form method="POST" action="{{ route('password.email') }}" style="margin-bottom:12px;">
+            @csrf
+            <input type="hidden" name="email" value="{{ $email }}">
+            <input type="hidden" name="force_email" value="1">
+            <button type="submit" style="width:100%;padding:11px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;font-family:inherit;font-size:11px;font-weight:800;color:#166534;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;box-shadow:0 2px 6px rgba(22,101,52,0.06);"
+                    onmouseover="this.style.background='#dcfce7';this.style.borderColor='#86efac';"
+                    onmouseout="this.style.background='#f0fdf4';this.style.borderColor='#bbf7d0';">
+                <i class="fas fa-paper-plane" style="font-size:10.5px;"></i> Send Reset Link to Registered Email
+            </button>
+        </form>
+
         {{-- Back to login inside the card --}}
         <a href="{{ route('password.request') }}" class="back-btn">
             <i class="fas fa-arrow-left" style="font-size:10px;"></i> Cancel Reset

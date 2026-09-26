@@ -3813,8 +3813,8 @@
                                 <i class="fas fa-user-shield"></i>
                             </div>
                             <div>
-                                <span style="font-weight:900;color:var(--text);font-size:14px;">Staff Portal Security & Password Recovery Q&A</span>
-                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;">Manage authentication questions & answers for department staff and official accounts</div>
+                                <span style="font-weight:900;color:var(--text);font-size:14px;">Staff & Department Portal Accounts Management</span>
+                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;">Manage assigned officer names, registered official emails, and password recovery security questions per department portal</div>
                             </div>
                         </div>
                         <span class="cbadge" style="background:#eff6ff;color:#0E5393;border:1px solid #bfdbfe;font-weight:800;font-size:10px;">
@@ -3904,7 +3904,7 @@
                                             </td>
                                             <td style="padding:14px 16px;vertical-align:middle;text-align:right;">
                                                 <button type="button" @click="openStaffSecurityModal(@js($acc))" class="btn btn-sm" style="background:#0E5393;color:#fff;font-weight:800;border-radius:8px;padding:7px 14px;box-shadow:0 2px 6px rgba(14,83,147,0.2);display:inline-flex;align-items:center;gap:6px;">
-                                                    <i class="fas fa-edit"></i> Edit Q&A
+                                                    <i class="fas fa-user-edit"></i> Edit Account & Security
                                                 </button>
                                             </td>
                                         </tr>
@@ -5106,8 +5106,8 @@
                                 <i class="fas fa-user-shield"></i>
                             </div>
                             <div>
-                                <span style="font-size:14px;font-weight:900;">Update Security Q&A</span>
-                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;" x-text="staffSecurityData.name + ' (' + staffSecurityData.email + ')'"></div>
+                                <span style="font-size:14px;font-weight:900;">Update Account & Security</span>
+                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;" x-text="'Managing ' + (staffSecurityData.role || '').toUpperCase() + ' Portal Access'"></div>
                             </div>
                         </div>
                         <button type="button" @click="editStaffSecurityModal=false" class="mclose"><i class="fas fa-times-circle"></i></button>
@@ -5116,6 +5116,17 @@
                     <form action="{{ route('admin.staff-security.update') }}" method="POST" style="margin-top:14px;">
                         @csrf
                         <input type="hidden" name="user_id" :value="staffSecurityData.user_id">
+
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:16px;">
+                            <div>
+                                <label class="flbl">Officer In-Charge / Name *</label>
+                                <input type="text" name="name" x-model="staffSecurityData.name" required class="finput" style="width:100%;font-weight:700;" placeholder="e.g. Maria Teresa Ramos">
+                            </div>
+                            <div>
+                                <label class="flbl">Registered Official Email (Gmail) *</label>
+                                <input type="email" name="email" x-model="staffSecurityData.email" required class="finput" style="width:100%;font-weight:700;" placeholder="e.g. brgy.sm2.office@gmail.com">
+                            </div>
+                        </div>
 
                         <div class="fgrp" style="margin-bottom:16px;">
                             <label class="flbl">Security Question Preset</label>
@@ -5161,7 +5172,7 @@
                         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:14px;border-top:1px solid var(--border);">
                             <button type="button" @click="editStaffSecurityModal=false" class="btn btn-ghost" style="padding:10px 16px;">Cancel</button>
                             <button type="submit" class="btn btn-primary" style="background:var(--btn-grad);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:800;">
-                                <i class="fas fa-check-circle"></i> Save Security Credentials
+                                <i class="fas fa-check-circle"></i> Save Account & Security Settings
                             </button>
                         </div>
                     </form>
