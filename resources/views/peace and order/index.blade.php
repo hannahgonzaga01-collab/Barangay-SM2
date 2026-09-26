@@ -333,9 +333,9 @@ html, body {
                 } catch(e){}
             }, { passive: true });
         });
-    </script>
 
-    <div class="portal-wrap" x-data="{
+        function peacePortalData() {
+            return {
         activeTab: localStorage.getItem('brgy_peace_tab') || 'cases',
         viewModal: false,
         addBlotterModal: false,
@@ -639,7 +639,11 @@ html, body {
                 this.pollSosAlerts();
             }, 4000);
         }
-    }">
+    };
+}
+</script>
+
+<div class="portal-wrap" x-data="peacePortalData()">
 
 
         {{-- HERO --}}
