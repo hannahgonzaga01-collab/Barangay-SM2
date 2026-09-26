@@ -206,6 +206,68 @@ html, body {
     70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
     100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
+
+/* Custom Modern SweetAlert2 Design */
+div:where(.swal2-container).swal2-backdrop-show {
+    backdrop-filter: blur(4px) !important;
+    background: rgba(4, 25, 45, 0.6) !important;
+}
+div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal {
+    border-radius: 20px !important;
+    padding: 24px 24px 20px !important;
+    box-shadow: 0 25px 50px -12px rgba(4, 25, 45, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+    background: #ffffff !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    max-width: 490px !important;
+    width: 92% !important;
+}
+div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-html-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    text-align: left !important;
+}
+div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actions {
+    margin-top: 18px !important;
+    gap: 10px !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+}
+.brgy-swal-confirm-btn {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.03em !important;
+    padding: 10px 18px !important;
+    border-radius: 10px !important;
+    border: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 3px 10px rgba(5, 150, 105, 0.3) !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+.brgy-swal-confirm-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 5px 14px rgba(5, 150, 105, 0.4) !important;
+}
+.brgy-swal-cancel-btn {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    padding: 10px 16px !important;
+    border-radius: 10px !important;
+    border: 1px solid #cbd5e1 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+.brgy-swal-cancel-btn:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+}
 </style>
 
     <x-slot name="header">
@@ -485,14 +547,40 @@ html, body {
             if (newStatus === 'resolved') {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: 'Mark as Resolved?',
-                        text: "Sigurado ka bang ligtas at ganap nang naasikaso ang emergency na ito? Hindi na ito mababawi kapag minarkahang resolved.",
-                        icon: 'warning',
+                        html: `
+                            <div style="text-align:left;">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                                    <div style="width:46px;height:46px;border-radius:14px;background:#dcfce7;border:1.5px solid #bbf7d0;display:flex;align-items:center;justify-content:center;color:#059669;font-size:22px;flex-shrink:0;">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </div>
+                                    <div>
+                                        <span style="display:inline-block;font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:#059669;background:#dcfce7;padding:2px 8px;border-radius:99px;margin-bottom:3px;">
+                                            Emergency Dispatch Action
+                                        </span>
+                                        <div style="font-size:17px;font-weight:900;color:#0f172a;line-height:1.2;">Mark as Resolved?</div>
+                                    </div>
+                                </div>
+                                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;font-size:12px;color:#334155;line-height:1.5;margin-bottom:10px;">
+                                    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">
+                                        <i class="fas fa-shield-alt" style="color:#0E5393;font-size:13px;margin-top:2px;flex-shrink:0;"></i>
+                                        <span>Sigurado ka bang <strong>ligtas at tapos nang maasikaso</strong> ang emergency dispatch na ito?</span>
+                                    </div>
+                                    <div style="display:flex;align-items:flex-start;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;font-size:11px;color:#991b1b;font-weight:600;line-height:1.4;">
+                                        <i class="fas fa-exclamation-triangle" style="font-size:12px;margin-top:2px;flex-shrink:0;color:#dc2626;"></i>
+                                        <span><strong>Permanent Action:</strong> Hindi na ito mababawi o maibabalik sa active dispatch list.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `,
                         showCancelButton: true,
-                        confirmButtonColor: '#059669',
-                        cancelButtonColor: '#64748b',
-                        confirmButtonText: '<i class="fas fa-check-circle"></i> Yes, Mark Resolved',
-                        cancelButtonText: 'Cancel'
+                        confirmButtonText: '<i class="fas fa-check-circle" style="margin-right:5px;"></i> Yes, Mark Resolved',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            popup: 'brgy-swal-modal',
+                            confirmButton: 'brgy-swal-confirm-btn',
+                            cancelButton: 'brgy-swal-cancel-btn'
+                        },
+                        buttonsStyling: false
                     }).then((result) => {
                         if (result.isConfirmed) {
                             this.performUpdateSosStatus(alertId, newStatus);
@@ -504,6 +592,73 @@ html, body {
                 }
             }
             this.performUpdateSosStatus(alertId, newStatus);
+        },
+        confirmAndSubmitBlotterStatus(event, issueId, formId, currentStatus) {
+            const el = event.target;
+            const chosenVal = el.value;
+            if (chosenVal === 'rejected') {
+                this.openReject(issueId);
+                el.value = currentStatus;
+                return;
+            }
+            if (chosenVal === 'escalate_kp') {
+                this.openEscalate(issueId);
+                el.value = currentStatus;
+                return;
+            }
+            if (chosenVal === 'settled' || chosenVal === 'resolved') {
+                el.value = currentStatus;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        html: `
+                            <div style="text-align:left;">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                                    <div style="width:46px;height:46px;border-radius:14px;background:#dcfce7;border:1.5px solid #bbf7d0;display:flex;align-items:center;justify-content:center;color:#059669;font-size:22px;flex-shrink:0;">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div>
+                                        <span style="display:inline-block;font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:#059669;background:#dcfce7;padding:2px 8px;border-radius:99px;margin-bottom:3px;">
+                                            Blotter Case Resolution
+                                        </span>
+                                        <div style="font-size:17px;font-weight:900;color:#0f172a;line-height:1.2;">Mark Case as Settled?</div>
+                                    </div>
+                                </div>
+                                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;font-size:12px;color:#334155;line-height:1.5;margin-bottom:10px;">
+                                    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">
+                                        <i class="fas fa-check-circle" style="color:#0E5393;font-size:13px;margin-top:2px;flex-shrink:0;"></i>
+                                        <span>Sigurado ka bang <strong>naasikaso at naresolba na</strong> sa desk ang blotter case na ito?</span>
+                                    </div>
+                                    <div style="display:flex;align-items:flex-start;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;font-size:11px;color:#991b1b;font-weight:600;line-height:1.4;">
+                                        <i class="fas fa-exclamation-triangle" style="font-size:12px;margin-top:2px;flex-shrink:0;color:#dc2626;"></i>
+                                        <span><strong>Permanent Action:</strong> Hindi na maaaring ibalik sa dating status ang kasong ito kapag minarkahang settled.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fas fa-check-circle" style="margin-right:5px;"></i> Yes, Mark Settled',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            popup: 'brgy-swal-modal',
+                            confirmButton: 'brgy-swal-confirm-btn',
+                            cancelButton: 'brgy-swal-cancel-btn'
+                        },
+                        buttonsStyling: false
+                    }).then((res) => {
+                        if (res.isConfirmed) {
+                            el.value = chosenVal;
+                            document.getElementById(formId).submit();
+                        }
+                    });
+                    return;
+                } else if (confirm('Mark as Settled? This action cannot be undone.')) {
+                    el.value = chosenVal;
+                    document.getElementById(formId).submit();
+                    return;
+                }
+                return;
+            }
+            document.getElementById(formId).submit();
         },
         performUpdateSosStatus(alertId, newStatus) {
             // Instantly silence siren and stop tab flash if resolving
@@ -549,12 +704,21 @@ html, body {
             }).then(r => r.json()).then(res => {
                 if (newStatus === 'resolved' && typeof Swal !== 'undefined') {
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Emergency Resolved',
-                        text: 'Minarkahang resolved ang insidente at tinapos ang alarma.',
+                        html: `
+                            <div style="text-align:center;padding:12px 6px;">
+                                <div style="width:48px;height:48px;border-radius:50%;background:#dcfce7;color:#059669;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:22px;">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div style="font-size:16px;font-weight:900;color:#0f172a;margin-bottom:3px;">Emergency Resolved</div>
+                                <div style="font-size:12px;color:#64748b;font-weight:600;">Minarkahang resolved ang insidente at tinapos ang alarma.</div>
+                            </div>
+                        `,
                         timer: 2000,
                         showConfirmButton: false,
-                        timerProgressBar: true
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'brgy-swal-modal'
+                        }
                     });
                 }
                 this.pollSosAlerts();
@@ -880,7 +1044,7 @@ html, body {
                                         @else
                                             <form :id="'status-form-{{ $issue->id }}'" action="{{ url('/peace/issues/'.$issue->id.'/status') }}" method="POST" style="display:inline-block;margin:0;padding:0;flex-shrink:0;">
                                                 @csrf @method('PATCH')
-                                                <select name="status" @change="if($el.value === 'rejected') { openReject({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else if($el.value === 'escalate_kp') { openEscalate({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else if($el.value === 'settled' || $el.value === 'resolved') { const chosenVal = $el.value; $el.value='{{ $issue->status }}'; if(typeof Swal !== 'undefined') { Swal.fire({ title: 'Mark as Resolved?', text: 'Sigurado ka bang naasikaso at naresolba na ang insidenteng ito? Hindi na ito mababawi kapag minarkahang resolved.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#059669', cancelButtonColor: '#64748b', confirmButtonText: 'Yes, Mark Resolved', cancelButtonText: 'Cancel' }).then((res) => { if(res.isConfirmed) { $el.value = chosenVal; document.getElementById('status-form-{{ $issue->id }}').submit(); } }); } else if(confirm('Mark as Resolved? This action cannot be undone.')) { $el.value = chosenVal; document.getElementById('status-form-{{ $issue->id }}').submit(); } } else { document.getElementById('status-form-{{ $issue->id }}').submit(); }"
+                                                <select name="status" @change="confirmAndSubmitBlotterStatus($event, {{ $issue->id }}, 'status-form-{{ $issue->id }}', '{{ $issue->status }}')"
                                                         style="width:120px;height:30px;box-sizing:border-box;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:7px;padding:4px 8px;background:#f8fafc;cursor:pointer;outline:none;font-family:inherit;text-align:left;">
                                                     @if($curPeaceRank <= 1)
                                                         <option value="submitted"    {{ $issue->status==='submitted'    ? 'selected' : '' }}>Submitted</option>
@@ -1075,50 +1239,95 @@ html, body {
                 </template>
 
                 <template x-if="sosAlerts.length > 0">
-                    <div style="padding:18px;display:flex;flex-direction:column;gap:14px;background:#fff;">
+                    <div style="padding:18px 20px;display:flex;flex-direction:column;gap:16px;background:#f8fafc;">
                         <template x-for="alert in sosAlerts" :key="alert.id">
-                            <div style="background:#ffffff;border:1.5px solid var(--border);border-left:5px solid #dc2626;border-radius:14px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;box-shadow:0 3px 14px rgba(4,25,45,0.06);">
-                                <div style="flex:1;min-width:280px;">
-                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-                                        <span style="font-size:9px;font-weight:900;background:#dc2626;color:#fff;padding:2.5px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:0.04em;" x-text="alert.emergency_type"></span>
-                                        <span style="font-size:10px;color:var(--muted);font-weight:700;" x-text="alert.created_at_fmt + ' (' + alert.time_ago + ')'"></span>
-                                        <span style="font-size:9px;font-weight:900;padding:2.5px 9px;border-radius:99px;" :style="alert.status==='responding'?'background:#fef3c7;color:#92400e;':'background:#fee2e2;color:#dc2626;'" x-text="alert.status.toUpperCase()"></span>
+                            <div style="background:#ffffff;border:1.5px solid #fee2e2;border-left:5px solid #dc2626;border-radius:16px;padding:20px 22px;box-shadow:0 10px 25px -5px rgba(220,38,38,0.10), 0 4px 6px -2px rgba(0,0,0,0.03);display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;">
+                                
+                                {{-- Card Header: Type, Live Pill, and Dispatch Status --}}
+                                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:1px solid #f1f5f9;padding-bottom:12px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:10px;font-weight:900;background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:4px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:0.05em;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(220,38,38,0.25);">
+                                            <i class="fas fa-bullhorn" style="font-size:10px;"></i>
+                                            <span x-text="alert.emergency_type"></span>
+                                        </span>
+                                        <span style="font-size:10px;font-weight:800;background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:5px;border:1px solid #fecaca;">
+                                            <span style="width:7px;height:7px;border-radius:50%;background:#dc2626;display:inline-block;box-shadow:0 0 0 3px rgba(220,38,38,0.2);"></span>
+                                            LIVE DISPATCH
+                                        </span>
+                                        <span style="font-size:11px;color:#64748b;font-weight:700;display:inline-flex;align-items:center;gap:4px;">
+                                            <i class="far fa-clock"></i>
+                                            <span x-text="alert.created_at_fmt + ' (' + alert.time_ago + ')'"></span>
+                                        </span>
                                     </div>
-                                    <div style="font-size:16px;font-weight:900;color:var(--text);margin-top:2px;" x-text="alert.resident_name"></div>
-                                    <div style="font-size:11px;color:#475569;font-weight:700;margin-top:4px;">
-                                        <i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> <span x-text="alert.resident_contact"></span> &bull; 
-                                        <i class="fas fa-home" style="color:var(--brand);margin-right:4px;"></i> <span x-text="'Registered Address: ' + alert.resident_address"></span>
+                                    <div>
+                                        <span style="font-size:10px;font-weight:900;padding:4px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:0.05em;display:inline-flex;align-items:center;gap:5px;"
+                                              :style="alert.status==='responding'?'background:#fef3c7;color:#92400e;border:1px solid #fde68a;':'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;'"
+                                              x-text="alert.status === 'responding' ? '⚡ TANOD ON THE WAY' : '🚨 ACTION REQUIRED'">
+                                        </span>
                                     </div>
-                                    
-                                    {{-- Prominent Incident Landmark / Location Box in SOS Tab --}}
-                                    <div style="margin-top:10px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:8px;">
-                                        <div style="font-size:9.5px;font-weight:900;color:#991b1b;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
-                                            <i class="fas fa-map-marker-alt"></i> INCIDENT LANDMARK / LOCATION:
-                                        </div>
-                                        <div style="font-size:13px;color:#7f1d1d;font-weight:900;margin-top:3px;line-height:1.4;" x-text="alert.landmark ? alert.landmark : ('Same as registered address: ' + alert.resident_address)"></div>
-                                    </div>
+                                </div>
 
-                                    {{-- Situation Reason / Notes Box in SOS Tab (Only shown if provided) --}}
-                                    <template x-if="alert.message">
-                                        <div style="margin-top:7px;padding:9px 13px;background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:8px;">
-                                            <div style="font-size:9.5px;font-weight:900;color:#b45309;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">
-                                                <i class="fas fa-info-circle"></i> SITUATION DETAILS / REASON:
+                                {{-- Main Body: Resident Info & Actions --}}
+                                <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                                    <div style="flex:1;min-width:280px;">
+                                        <div style="font-size:18px;font-weight:900;color:#0f172a;letter-spacing:-0.01em;display:flex;align-items:center;gap:8px;">
+                                            <div style="width:34px;height:34px;border-radius:10px;background:#eff6ff;color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">
+                                                <i class="fas fa-user-shield"></i>
                                             </div>
-                                            <div style="font-size:12.5px;color:#78350f;font-weight:700;margin-top:2px;line-height:1.4;" x-text="alert.message"></div>
+                                            <span x-text="alert.resident_name"></span>
+                                        </div>
+
+                                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                                            <a :href="'tel:' + alert.resident_contact" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:11px;font-weight:800;color:#166534;text-decoration:none;" title="Click to call resident directly">
+                                                <i class="fas fa-phone-alt"></i> <span x-text="alert.resident_contact"></span>
+                                            </a>
+                                            <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:11px;font-weight:700;color:#475569;">
+                                                <i class="fas fa-home" style="color:var(--brand);"></i> <span x-text="'Address: ' + alert.resident_address"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Right Action Buttons --}}
+                                    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+                                        <template x-if="alert.status !== 'responding'">
+                                            <button type="button" @click="updateSosStatus(alert.id, 'responding')" class="btn" style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%);color:#fff;box-shadow:0 3px 10px rgba(217,119,6,0.3);padding:9px 16px;border-radius:10px;font-size:11px;font-weight:900;">
+                                                <i class="fas fa-running"></i> Dispatch Tanod
+                                            </button>
+                                        </template>
+                                        <button type="button" @click="updateSosStatus(alert.id, 'resolved')" class="btn btn-success" style="box-shadow:0 3px 10px rgba(5,150,105,0.3);padding:9px 18px;border-radius:10px;font-size:11px;font-weight:900;">
+                                            <i class="fas fa-check-circle"></i> Mark as Resolved
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- Details Grid: Landmark / Location + Situation Reason --}}
+                                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;margin-top:2px;">
+                                    {{-- Incident Landmark / Location Box --}}
+                                    <div style="padding:12px 14px;background:linear-gradient(135deg,#fff8f8 0%,#fef2f2 100%);border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:10px;">
+                                        <div style="font-size:9.5px;font-weight:900;color:#991b1b;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                                            <span style="display:inline-flex;align-items:center;gap:5px;">
+                                                <i class="fas fa-map-marker-alt"></i> Incident Landmark / Location
+                                            </span>
+                                            <template x-if="alert.google_maps_url">
+                                                <a :href="alert.google_maps_url" target="_blank" style="font-size:9px;font-weight:800;color:var(--brand);text-decoration:none;display:inline-flex;align-items:center;gap:3px;background:#fff;padding:2px 8px;border-radius:6px;border:1px solid #bfdbfe;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                                                    <i class="fas fa-external-link-alt" style="font-size:8px;"></i> Open Map
+                                                </a>
+                                            </template>
+                                        </div>
+                                        <div style="font-size:13px;color:#7f1d1d;font-weight:900;margin-top:4px;line-height:1.4;" x-text="alert.landmark ? alert.landmark : ('Same as registered address: ' + alert.resident_address)"></div>
+                                    </div>
+
+                                    {{-- Situation Details / Resident Notes --}}
+                                    <template x-if="alert.message">
+                                        <div style="padding:12px 14px;background:linear-gradient(135deg,#fffdf7 0%,#fffbeb 100%);border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:10px;">
+                                            <div style="font-size:9.5px;font-weight:900;color:#b45309;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:5px;">
+                                                <i class="fas fa-info-circle"></i> Situation Details / Reason
+                                            </div>
+                                            <div style="font-size:12.5px;color:#78350f;font-weight:700;margin-top:4px;line-height:1.4;" x-text="alert.message"></div>
                                         </div>
                                     </template>
                                 </div>
 
-                                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                    <template x-if="alert.status !== 'responding'">
-                                        <button type="button" @click="updateSosStatus(alert.id, 'responding')" class="btn btn-sm" style="background:#d97706;color:#fff;box-shadow:0 2px 6px rgba(217,119,6,0.25);">
-                                            <i class="fas fa-running"></i> Dispatch Tanod
-                                        </button>
-                                    </template>
-                                    <button type="button" @click="updateSosStatus(alert.id, 'resolved')" class="btn btn-sm btn-success" style="box-shadow:0 2px 6px rgba(5,150,105,0.25);">
-                                        <i class="fas fa-check-circle"></i> Mark Resolved
-                                    </button>
-                                </div>
                             </div>
                         </template>
                     </div>
@@ -1129,18 +1338,18 @@ html, body {
             <div class="card">
                 <div class="card-head">
                     <div class="card-title"><i class="fas fa-history"></i> Recent Resolved SOS Dispatches</div>
-                    <span class="cbadge cbadge-green" x-text="(resolvedSos ? resolvedSos.length : 0) + ' Recent'"></span>
+                    <span class="cbadge cbadge-green" x-text="(resolvedSos ? resolvedSos.length : 0) + ' Resolved Cases'"></span>
                 </div>
                 <div style="overflow-x:auto;">
                     <table class="tbl">
                         <thead>
                             <tr>
-                                <th>Alert ID</th>
-                                <th>Resident Name</th>
-                                <th>Nature / Details</th>
-                                <th>Contact & Address</th>
-                                <th>Date & Time</th>
-                                <th>Status</th>
+                                <th style="width:110px;">Alert ID</th>
+                                <th style="min-width:180px;">Resident Name & Contact</th>
+                                <th style="min-width:220px;">Nature & Incident Location</th>
+                                <th style="min-width:200px;">Registered Address</th>
+                                <th style="width:130px;">Date & Time</th>
+                                <th style="width:110px;text-align:center;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1149,31 +1358,42 @@ html, body {
                             </template>
                             <template x-for="rsos in resolvedSos" :key="rsos.id">
                                 <tr>
-                                    <td style="font-weight:900;color:var(--brand);" x-text="rsos.id_formatted || ('#SOS-' + String(rsos.id).padStart(4, '0'))"></td>
-                                    <td style="font-weight:800;color:var(--text);" x-text="rsos.resident_name"></td>
                                     <td>
-                                        <span style="font-size:8px;font-weight:900;background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:99px;text-transform:uppercase;" x-text="rsos.emergency_type"></span>
+                                        <span style="font-family:monospace;font-size:11px;font-weight:800;background:#eff6ff;color:var(--brand);padding:3px 8px;border-radius:6px;border:1px solid #dbeafe;white-space:nowrap;" x-text="rsos.id_formatted || ('#SOS-' + String(rsos.id).padStart(4, '0'))"></span>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:12px;font-weight:800;color:var(--text);" x-text="rsos.resident_name"></div>
+                                        <a :href="'tel:' + rsos.resident_contact" style="font-size:10.5px;font-weight:600;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:2px;">
+                                            <i class="fas fa-phone-alt" style="font-size:9px;color:var(--brand);"></i> <span x-text="rsos.resident_contact"></span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                                            <span style="font-size:8.5px;font-weight:900;background:#f1f5f9;color:#334155;padding:2px 7px;border-radius:99px;text-transform:uppercase;border:1px solid #e2e8f0;" x-text="rsos.emergency_type"></span>
+                                        </div>
                                         <template x-if="rsos.landmark">
-                                            <div style="font-size:10px;font-weight:800;color:#991b1b;margin-top:3px;background:#fef2f2;padding:3px 7px;border-radius:4px;border-left:2.5px solid #dc2626;">
-                                                <span style="font-size:8.5px;font-weight:900;text-transform:uppercase;">📍 Landmark:</span> <span x-text="rsos.landmark"></span>
+                                            <div style="font-size:10.5px;font-weight:800;color:#991b1b;margin-top:3px;background:#fef2f2;padding:2px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;border:1px solid #fecaca;">
+                                                <i class="fas fa-map-marker-alt" style="font-size:9px;"></i> <span x-text="rsos.landmark"></span>
                                             </div>
                                         </template>
                                         <template x-if="rsos.message">
-                                            <div style="font-size:9.5px;font-weight:600;color:#475569;margin-top:2px;">
-                                                <span style="font-weight:800;color:#b45309;">Reason:</span> <span x-text="rsos.message"></span>
+                                            <div style="font-size:10px;font-weight:600;color:#475569;margin-top:2px;line-height:1.3;">
+                                                <span style="font-weight:800;color:#b45309;">Note:</span> <span x-text="rsos.message"></span>
                                             </div>
                                         </template>
                                     </td>
-                                    <td style="font-size:10.5px;color:#475569;font-weight:600;">
-                                        <div><i class="fas fa-phone-alt" style="font-size:9px;margin-right:2px;"></i> <span x-text="rsos.resident_contact"></span></div>
-                                        <div style="font-size:9.5px;color:var(--muted);" x-text="rsos.resident_address"></div>
+                                    <td style="font-size:11px;color:#475569;font-weight:600;">
+                                        <div style="display:flex;align-items:flex-start;gap:4px;">
+                                            <i class="fas fa-home" style="color:#94a3b8;font-size:11px;margin-top:2px;flex-shrink:0;"></i>
+                                            <span x-text="rsos.resident_address"></span>
+                                        </div>
                                     </td>
-                                    <td style="font-size:10px;color:var(--muted);font-weight:700;">
+                                    <td style="font-size:11px;color:var(--text);font-weight:800;white-space:nowrap;">
                                         <div x-text="rsos.date_fmt"></div>
-                                        <div style="font-size:9px;color:var(--light);" x-text="rsos.time_fmt"></div>
+                                        <div style="font-size:9.5px;color:var(--muted);font-weight:600;" x-text="rsos.time_fmt"></div>
                                     </td>
-                                    <td>
-                                        <span class="spill spill-settled"><i class="fas fa-check"></i> Resolved</span>
+                                    <td style="text-align:center;white-space:nowrap;">
+                                        <span class="spill spill-settled" style="padding:4px 10px;font-size:9px;"><i class="fas fa-check-circle"></i> Resolved</span>
                                     </td>
                                 </tr>
                             </template>
