@@ -161,16 +161,18 @@
 
                 {{-- Date Filter Group --}}
                 <div class="filter-group" style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; flex-shrink:0; align-items:center;">
-                    <button type="button" @click="docFilter='all'; if(docStatusFilter==='released_archive') docStatusFilter='all';" :class="(docStatusFilter!=='released_archive' && docFilter==='all') ? 'active-filter' : 'plain-filter'">All</button>
-                    <button type="button" @click="docFilter='today'; if(docStatusFilter==='released_archive') docStatusFilter='all';" :class="(docStatusFilter!=='released_archive' && docFilter==='today') ? 'active-filter' : 'plain-filter'">Today</button>
+                    <button type="button" @click="docFilter='all'; if(docStatusFilter==='released_archive') docStatusFilter='all';" :class="(docStatusFilter!=='released_archive' && docFilter==='all') ? 'active-filter' : 'plain-filter'" style="font-size:9px; font-weight:800; font-family:inherit; border:none; cursor:pointer;">All</button>
+                    <button type="button" @click="docFilter='today'; if(docStatusFilter==='released_archive') docStatusFilter='all';" :class="(docStatusFilter!=='released_archive' && docFilter==='today') ? 'active-filter' : 'plain-filter'" style="font-size:9px; font-weight:800; font-family:inherit; border:none; cursor:pointer;">Today</button>
                 </div>
 
                 {{-- Dedicated Archive Button --}}
                 <div class="filter-group" style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; flex-shrink:0; align-items:center;">
                     <button type="button" @click="docStatusFilter = (docStatusFilter === 'released_archive' ? 'all' : 'released_archive'); if(docStatusFilter === 'released_archive') docFilter = 'all';"
                             :class="docStatusFilter === 'released_archive' ? 'active-filter' : 'plain-filter'"
+                            style="font-size:9px; font-weight:800; font-family:inherit; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:4px;"
                             title="Archived">
-                        Archived
+                        <i class="fas fa-archive" style="font-size:9px;"></i>
+                        <span>Archived</span>
                     </button>
                 </div>
 
@@ -180,7 +182,8 @@
 
         {{-- Archive Notification Banner & Purge Controls --}}
         <div x-show="docStatusFilter === 'released_archive'" style="padding: 10px 16px; background: #eff6ff; border-bottom: 1.5px solid #bfdbfe; font-size: 11px; color: #1e40af; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-            <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-archive" style="font-size: 13px; color: #0E5393;"></i>
                 <span><strong>Archived:</strong> Ang mga dokumentong ito ay na-release nang higit 30 araw na.</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
@@ -196,14 +199,15 @@
                 @endif
                 <button type="button" @click="docStatusFilter = 'all'; docFilter = 'all';"
                         style="padding:5px 10px; font-size:9.5px; font-weight:800; background:#fff; border:1.5px solid #cbd5e1; color:#0E5393; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; font-family:inherit;">
-                    ← Back
+                    <i class="fas fa-arrow-left"></i> <span>Back</span>
                 </button>
             </div>
         </div>
 
         <style>
-            .active-filter { background:#fff; color:#0E5393; font-family:inherit; font-size:9px; font-weight:800; padding:4px 12px; border-radius:6px; border:none; box-shadow:0 1px 3px rgba(0,0,0,0.1); cursor:pointer; }
-            .plain-filter { background:transparent; color:#64748b; font-family:inherit; font-size:9px; font-weight:700; padding:4px 12px; border-radius:6px; border:none; cursor:pointer; }
+            .active-filter { background:#fff!important; color:#0E5393!important; font-family:inherit!important; font-size:9px!important; font-weight:800!important; padding:4px 10px!important; border-radius:6px!important; border:none!important; box-shadow:0 1px 3px rgba(0,0,0,0.1)!important; cursor:pointer; display:inline-flex!important; align-items:center!important; gap:4px!important; line-height:1.2!important; }
+            .plain-filter { background:transparent!important; color:#64748b!important; font-family:inherit!important; font-size:9px!important; font-weight:700!important; padding:4px 10px!important; border-radius:6px!important; border:none!important; cursor:pointer; display:inline-flex!important; align-items:center!important; gap:4px!important; line-height:1.2!important; }
+            .plain-filter:hover { color:#1e293b!important; }
         </style>
 
         <div style="overflow-x:auto;">

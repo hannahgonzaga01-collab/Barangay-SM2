@@ -9,9 +9,9 @@
                 {{-- Archived Button (Moved beside Export CSV) --}}
                 <button type="button" @click="masterlistSubView='archived'"
                    class="btn-grad btn-grad-sm"
-                   style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%); box-shadow:0 2px 6px rgba(217,119,6,.3); padding:6px 14px; font-weight:800; font-size:10px; border:none; cursor:pointer; display:inline-flex; align-items:center; color:#fff; border-radius:var(--r-btn);"
+                   style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%); box-shadow:0 2px 6px rgba(217,119,6,.3); padding:6px 14px; font-weight:800; font-size:10px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:#fff; border-radius:var(--r-btn);"
                    title="Archived">
-                    <span>Archived</span>
+                    <i class="fas fa-archive"></i> <span>Archived</span>
                 </button>
 
                 <a :href="'/office/export?filter=' + encodeURIComponent(activeFilter) + '&search=' + encodeURIComponent(searchQuery)"
