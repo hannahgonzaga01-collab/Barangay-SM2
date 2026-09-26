@@ -237,8 +237,24 @@ html, body {
     </div>
     @endif
     <script>
+        window.stopBarangayEmergencySiren = function() {
+            try {
+                if (window._activeSirenOscillators && Array.isArray(window._activeSirenOscillators)) {
+                    window._activeSirenOscillators.forEach(osc => {
+                        try { osc.stop(); osc.disconnect(); } catch(e){}
+                    });
+                    window._activeSirenOscillators = [];
+                }
+                if (window._activeSirenGain) {
+                    try { window._activeSirenGain.disconnect(); } catch(e){}
+                    window._activeSirenGain = null;
+                }
+            } catch(e){}
+        };
+
         window.playBarangayEmergencySiren = async function() {
             try {
+                window.stopBarangayEmergencySiren();
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (!AudioCtx) return;
                 let ctx = window._brgyAudioCtx;
@@ -256,6 +272,9 @@ html, body {
                 const osc1 = ctx.createOscillator();
                 const osc2 = ctx.createOscillator();
                 const gain = ctx.createGain();
+
+                window._activeSirenOscillators = [osc1, osc2];
+                window._activeSirenGain = gain;
 
                 osc1.type = 'sawtooth'; // piercing siren horn
                 osc2.type = 'sine';     // deep acoustic siren resonance
@@ -388,57 +407,82 @@ html, body {
         })) }},
         sosPollingInterval: null,
         hasInitialPollRun: false,
+        knownSosIds: new Set({{ json_encode($sosAlerts->pluck('id')->map(fn($id) => (int)$id)->all()) }}),
+        resolvedSosIds: new Set(),
+        originalTitle: document.title,
         sosTitleInterval: null,
         flashSosTabTitle() {
             if (this.sosTitleInterval) return;
-            const originalTitle = document.title;
+            const original = this.originalTitle || document.title;
             let count = 0;
             this.sosTitleInterval = setInterval(() => {
-                document.title = (count % 2 === 0) ? '🚨 EMERGENCY SOS DISPATCH! - San Miguel II' : originalTitle;
+                document.title = (count % 2 === 0) ? '🚨 EMERGENCY SOS DISPATCH! - San Miguel II' : original;
                 count++;
                 if (count > 14) {
                     clearInterval(this.sosTitleInterval);
                     this.sosTitleInterval = null;
-                    document.title = originalTitle;
+                    document.title = original;
                 }
             }, 800);
+        },
+        stopSosTabTitle() {
+            if (this.sosTitleInterval) {
+                clearInterval(this.sosTitleInterval);
+                this.sosTitleInterval = null;
+            }
+            document.title = this.originalTitle || 'Peace & Order Portal';
         },
         playEmergencyChime() {
             if (typeof window.playBarangayEmergencySiren === 'function') {
                 return window.playBarangayEmergencySiren();
             }
         },
+        stopEmergencyChime() {
+            if (typeof window.stopBarangayEmergencySiren === 'function') {
+                window.stopBarangayEmergencySiren();
+            }
+        },
         pollSosAlerts() {
             fetch('{{ route('peace.sos.alerts') }}')
                 .then(r => r.json())
                 .then(data => {
-                    const newAlerts = data.alerts || [];
-                    const prevAlerts = this.sosAlerts || [];
-                    const prevIds = new Set(prevAlerts.map(a => Number(a.id)));
-                    const prevTriggered = prevAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length;
-                    const newTriggered = newAlerts.filter(a => a.status === 'triggered' || a.status === 'active').length;
+                    const rawAlerts = data.alerts || [];
 
-                    // New alert detected if unseen ID arrives or active count increases
-                    const hasNewAlert = newAlerts.some(a => !prevIds.has(Number(a.id)));
+                    // Filter out any alert already resolved in this session
+                    const currentAlerts = rawAlerts.filter(a => !this.resolvedSosIds.has(Number(a.id)));
 
-                    this.sosAlerts = newAlerts;
+                    // A new notification is ONLY an alert whose ID was NEVER seen before in this tab
+                    const brandNewAlerts = currentAlerts.filter(a => !this.knownSosIds.has(Number(a.id)));
+
+                    // Immediately register new alert IDs so they will never re-trigger sound
+                    brandNewAlerts.forEach(a => this.knownSosIds.add(Number(a.id)));
+
+                    this.sosAlerts = currentAlerts;
                     if (data.resolved_alerts) {
                         this.resolvedSos = data.resolved_alerts;
                     }
 
+                    // Sound ONLY when a brand new alert arrives AFTER initial page load
                     if (this.hasInitialPollRun) {
-                        if (hasNewAlert || newTriggered > prevTriggered) {
+                        if (brandNewAlerts.length > 0) {
                             this.playEmergencyChime();
                             this.flashSosTabTitle();
                         }
                     } else {
+                        // Mark all initially present alerts as already known
+                        currentAlerts.forEach(a => this.knownSosIds.add(Number(a.id)));
                         this.hasInitialPollRun = true;
                     }
                 }).catch(e => console.error(e));
         },
         updateSosStatus(alertId, newStatus) {
-            // Instantly move to resolved table optimistically
+            // Instantly silence siren and stop tab flash if resolving
             if (newStatus === 'resolved') {
+                this.stopEmergencyChime();
+                this.stopSosTabTitle();
+                this.resolvedSosIds.add(Number(alertId));
+                this.knownSosIds.add(Number(alertId));
+
                 const foundIdx = (this.sosAlerts || []).findIndex(a => a.id === alertId);
                 if (foundIdx !== -1) {
                     const item = this.sosAlerts[foundIdx];
@@ -458,6 +502,8 @@ html, body {
                         status: 'resolved'
                     });
                 }
+            } else if (newStatus === 'responding') {
+                this.knownSosIds.add(Number(alertId));
             }
 
             fetch('/peace/sos-alerts/' + alertId + '/status', {
