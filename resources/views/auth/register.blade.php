@@ -1066,7 +1066,7 @@
                             style="position:relative;overflow:hidden;border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;border-bottom:none;">
                             <i class="fas fa-lock ficon"></i>
                             <input id="password" :type="show?'text':'password'" name="password" class="finput" x-model="pwd"
-                                placeholder="Minimum 8 characters" :required="step === 2" autocomplete="new-password">
+                                maxlength="16" placeholder="8 to 16 characters (no spaces)" :required="step === 2" autocomplete="new-password">
                             <button type="button" @click="show=!show"
                                 style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;padding:0;flex-shrink:0;">
                                 <i class="fas" :class="show?'fa-eye-slash':'fa-eye'"></i>
@@ -1081,7 +1081,7 @@
                         <div
                             style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:none;border-bottom-left-radius:10px;border-bottom-right-radius:10px;padding:8px 12px;">
                             <div style="font-size:9px;color:#64748b;font-weight:700;line-height:1.4;">
-                                Tip: Include <span :style="/[A-Z]/.test(pwd) ? 'color:#10b981' : ''">Capital letter</span>,
+                                Tip: Must be <strong>8–16 characters, no spaces</strong>. Include <span :style="/[A-Z]/.test(pwd) ? 'color:#10b981' : ''">Capital letter</span>,
                                 <span :style="/[a-z]/.test(pwd) ? 'color:#10b981' : ''">Small letter</span>,
                                 <span :style="/[0-9]/.test(pwd) ? 'color:#10b981' : ''">Number</span>, &
                                 <span :style="/[@&*_.\-]/.test(pwd) ? 'color:#10b981' : ''">Symbol (@&*_-)</span>
@@ -1098,7 +1098,7 @@
                         <div class="fwrap">
                             <i class="fas fa-lock ficon"></i>
                             <input id="password_confirmation" :type="show?'text':'password'" name="password_confirmation"
-                                class="finput" placeholder="Re-enter your password" :required="step === 2" autocomplete="new-password">
+                                class="finput" maxlength="16" placeholder="Confirm 8 to 16 characters" :required="step === 2" autocomplete="new-password">
                             <button type="button" @click="show=!show"
                                 style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;padding:0;flex-shrink:0;">
                                 <i class="fas" :class="show?'fa-eye-slash':'fa-eye'"></i>

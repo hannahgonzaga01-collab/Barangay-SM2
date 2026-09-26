@@ -34,7 +34,11 @@ class NewPasswordController extends Controller
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults(), new \App\Rules\NotRecentPassword($userObj)],
+            'password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed', new \App\Rules\NotRecentPassword($userObj)],
+        ], [
+            'password.min' => 'Password must be at least 8 characters.',
+            'password.max' => 'Password must not exceed 16 characters.',
+            'password.not_regex' => 'Password must be one word and cannot contain spaces.',
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we

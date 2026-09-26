@@ -159,15 +159,18 @@
                                 <label style="display:block; font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">New Password</label>
                                 <div style="position:relative;">
                                     <i class="fas fa-key" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:12px;"></i>
-                                    <input :type="showNew ? 'text' : 'password'" name="new_password" required
+                                    <input :type="showNew ? 'text' : 'password'" name="new_password" required maxlength="16"
                                         style="width:100%; padding:12px 45px 12px 40px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; font-size:13px; font-weight:600; color:#0f172a; outline:none; transition:all 0.2s;"
-                                        placeholder="Min. 8 characters"
+                                        placeholder="8 to 16 characters (no spaces)"
                                         onfocus="this.style.borderColor='#0E5393'; this.style.background='#fff'; this.style.boxShadow='0 0 0 4px rgba(14,83,147,0.1)';"
                                         onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
                                     <button type="button" @click="showNew = !showNew" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px; cursor:pointer; background:none; border:none; outline:none;">
                                         <i class="fas" :class="showNew ? 'fa-eye-slash' : 'fa-eye'"></i>
                                     </button>
                                 </div>
+                                <p style="font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">
+                                    Must be 8–16 characters, one word (no spaces).
+                                </p>
                                 @error('new_password')
                                     <p style="font-size:10px; color:#dc2626; font-weight:700; margin-top:6px; display:flex; align-items:center; gap:4px;">
                                         <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -179,9 +182,9 @@
                                 <label style="display:block; font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Confirm Password</label>
                                 <div style="position:relative;">
                                     <i class="fas fa-check-double" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:12px;"></i>
-                                    <input :type="showConfirm ? 'text' : 'password'" name="new_password_confirmation" required
+                                    <input :type="showConfirm ? 'text' : 'password'" name="new_password_confirmation" required maxlength="16"
                                         style="width:100%; padding:12px 45px 12px 40px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; font-size:13px; font-weight:600; color:#0f172a; outline:none; transition:all 0.2s;"
-                                        placeholder="Confirm new password"
+                                        placeholder="Confirm 8 to 16 characters"
                                         onfocus="this.style.borderColor='#0E5393'; this.style.background='#fff'; this.style.boxShadow='0 0 0 4px rgba(14,83,147,0.1)';"
                                         onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
                                     <button type="button" @click="showConfirm = !showConfirm" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px; cursor:pointer; background:none; border:none; outline:none;">

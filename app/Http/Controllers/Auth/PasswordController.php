@@ -17,7 +17,11 @@ class PasswordController extends Controller
     {
         $validated = $request->validateWithBag('updatePassword', [
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed', new \App\Rules\NotRecentPassword($request->user())],
+            'password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed', new \App\Rules\NotRecentPassword($request->user())],
+        ], [
+            'password.min' => 'Password must be at least 8 characters.',
+            'password.max' => 'Password must not exceed 16 characters.',
+            'password.not_regex' => 'Password must be one word and cannot contain spaces.',
         ]);
 
         $request->user()->update([

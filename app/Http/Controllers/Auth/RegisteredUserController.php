@@ -66,8 +66,12 @@ class RegisteredUserController extends Controller
             'is_voter' => ['required', 'in:0,1'],
             'precinct_no' => ['nullable', 'string', 'max:50'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed'],
             'voter_id_photo' => ['nullable', 'image', 'max:5120'], // Max 5MB Proof/ID upload
+        ], [
+            'password.min' => 'Password must be at least 8 characters.',
+            'password.max' => 'Password must not exceed 16 characters.',
+            'password.not_regex' => 'Password must be one word and cannot contain spaces.',
         ]);
 
         // Build full name

@@ -47,14 +47,18 @@ class StaffPasswordController extends Controller
 
         $rules = [
             'security_answer'   => 'required|string',
-            'new_password'      => ['required', 'min:8', 'confirmed', new \App\Rules\NotRecentPassword($user)],
+            'new_password'      => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed', new \App\Rules\NotRecentPassword($user)],
         ];
 
         if (!$isResident) {
             $rules['current_password'] = 'required';
         }
 
-        $request->validate($rules);
+        $request->validate($rules, [
+            'new_password.min' => 'New password must be at least 8 characters.',
+            'new_password.max' => 'New password must not exceed 16 characters.',
+            'new_password.not_regex' => 'New password must be one word and cannot contain spaces.',
+        ]);
 
         if (!$isResident) {
             // Check current password for staff

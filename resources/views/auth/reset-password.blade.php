@@ -68,11 +68,14 @@
                 <div class="fwrap">
                     <i class="fas fa-lock ficon"></i>
                     <input id="password" :type="showPw?'text':'password'" name="password"
-                           class="finput" placeholder="Minimum 8 characters"
-                           x-model="pw" required autocomplete="new-password">
+                           class="finput" placeholder="8 to 16 characters (no spaces)"
+                           maxlength="16" x-model="pw" required autocomplete="new-password">
                     <button type="button" class="toggle-pw" @click="showPw=!showPw" tabindex="-1">
                         <i class="fas" :class="showPw?'fa-eye-slash':'fa-eye'"></i>
                     </button>
+                </div>
+                <div style="font-size:9.5px;color:#64748b;font-weight:600;margin-top:4px;">
+                    Must be 8–16 characters, one word (no spaces).
                 </div>
                 <div x-show="pw.length > 0">
                     <div class="pw-bars">
@@ -95,7 +98,7 @@
                     <i class="fas fa-lock ficon"></i>
                     <input id="password_confirmation" :type="showPwC?'text':'password'"
                            name="password_confirmation" class="finput"
-                           placeholder="Re-enter new password"
+                           maxlength="16" placeholder="Confirm 8 to 16 characters"
                            required autocomplete="new-password">
                     <button type="button" class="toggle-pw" @click="showPwC=!showPwC" tabindex="-1">
                         <i class="fas" :class="showPwC?'fa-eye-slash':'fa-eye'"></i>
