@@ -160,31 +160,59 @@
                     <option value="disapproved">❌ Rejected / Disapproved</option>
                 </select>
 
-                {{-- Purge Archive Button (only visible when viewing archive) --}}
-                <form x-show="docStatusFilter === 'released_archive'" action="{{ route('office.document.purge-archive') }}" method="POST" style="display:inline;"
-                      onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang lahat ng released documents na higit 30 days na sa archive? Hindi na ito maibabalik.');">
-                    @csrf
-                    <button type="submit" class="btn-plain btn-sm" style="background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; padding:5px 10px; font-size:9.5px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;"
-                            title="Permanently remove released documents older than 30 days">
-                        <i class="fas fa-trash-alt"></i> Purge Archive (>30 Days)
-                    </button>
-                </form>
-
                 {{-- Date Filter Group --}}
                 <div class="filter-group" style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; flex-shrink:0;">
                     <button @click="docFilter='all'" :class="docFilter==='all' ? 'active-filter' : 'plain-filter'">All</button>
                     <button @click="docFilter='today'" :class="docFilter==='today' ? 'active-filter' : 'plain-filter'">Today</button>
                 </div>
 
+                {{-- Dedicated Archive (>30 Days) Quick Button --}}
+                <button type="button" @click="docStatusFilter = (docStatusFilter === 'released_archive' ? 'all' : 'released_archive')"
+                        :style="docStatusFilter === 'released_archive' ? 'background:linear-gradient(135deg,#0E5393 0%,#000052 100%); color:#fff; border-color:#000052; box-shadow:0 2px 6px rgba(0,0,82,0.25);' : 'background:#fff; color:#475569; border-color:#cbd5e1;'"
+                        style="display:inline-flex; align-items:center; gap:6px; padding:5px 11px; font-size:9.5px; font-weight:800; border-radius:8px; border:1.5px solid; cursor:pointer; transition:all 0.15s; white-space:nowrap;"
+                        title="Tingnan ang Archive ng mga lumang dokumentong na-released na higit sa 30 araw">
+                    <i class="fas fa-archive" :style="docStatusFilter === 'released_archive' ? 'color:#93c5fd;' : 'color:#0E5393;'"></i>
+                    <span x-text="docStatusFilter === 'released_archive' ? '← Back to Active Requests' : '📁 Archive (>30 Days)'"></span>
+                    <span style="padding:1px 6px; border-radius:99px; font-size:9px; font-weight:900;"
+                          :style="docStatusFilter === 'released_archive' ? 'background:rgba(255,255,255,0.25); color:#fff;' : 'background:#e2e8f0; color:#475569;'">
+                        {{ $archivedDocCount ?? 0 }}
+                    </span>
+                </button>
+
                 <span class="card-badge" style="background:#fee2e2; color:#dc2626; white-space:nowrap; flex-shrink:0;">{{ $pendingDocCount ?? 0 }} Pending</span>
             </div>
         </div>
 
-        {{-- Archive Notification Banner --}}
-        <div x-show="docStatusFilter === 'released_archive'" style="padding: 10px 16px; background: #eff6ff; border-bottom: 1px solid #bfdbfe; font-size: 11px; color: #1e40af; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        {{-- Archive Notification Banner & Purge Controls --}}
+        <div x-show="docStatusFilter === 'released_archive'" style="padding: 12px 18px; background: #eff6ff; border-bottom: 1.5px solid #bfdbfe; font-size: 11px; color: #1e40af; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-archive" style="font-size: 16px; color: #0E5393;"></i>
+                <div>
+                    <div><strong>30-Day Retention Archive ({{ $archivedDocCount ?? 0 }} record{{ ($archivedDocCount ?? 0) === 1 ? '' : 's' }}):</strong></div>
+                    <div style="font-size:10px; color:#3b82f6; font-weight:500;">
+                        Ang mga dokumentong ito ay na-release nang higit 30 araw na. Awtomatikong nakatabi rito upang manatiling mabilis at malinis ang inyong Active Requests view.
+                    </div>
+                </div>
+            </div>
             <div style="display:flex; align-items:center; gap:8px;">
-                <i class="fas fa-archive" style="font-size: 14px; color: #0E5393;"></i>
-                <span><strong>30-Day Retention Archive:</strong> Ang mga dokumentong na-released nang higit sa 30 araw ay awtomatikong inilalagay dito sa Archive upang mapanatiling mabilis at malinis ang inyong Active Requests view.</span>
+                @if(($archivedDocCount ?? 0) > 0)
+                <form action="{{ route('office.document.purge-archive') }}" method="POST" style="display:inline;"
+                      onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang lahat ng released documents na higit 30 days na sa archive? Hindi na ito maibabalik.');">
+                    @csrf
+                    <button type="submit" class="btn-plain btn-sm" style="background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; padding:6px 12px; font-size:10px; font-weight:900; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; box-shadow:0 1px 3px rgba(220,38,38,0.15);"
+                            title="Permanently remove released documents older than 30 days">
+                        <i class="fas fa-trash-alt"></i> Purge / Empty Archive (>30 Days)
+                    </button>
+                </form>
+                @else
+                <span style="font-size:10px; color:#64748b; font-weight:700; background:#f1f5f9; padding:4px 10px; border-radius:6px;">
+                    <i class="fas fa-check-circle" style="color:#10b981;"></i> Archive is currently empty
+                </span>
+                @endif
+                <button type="button" @click="docStatusFilter = 'all'"
+                        style="padding:6px 12px; font-size:10px; font-weight:800; background:#fff; border:1.5px solid #cbd5e1; color:#0E5393; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                    ← Back to Active
+                </button>
             </div>
         </div>
 

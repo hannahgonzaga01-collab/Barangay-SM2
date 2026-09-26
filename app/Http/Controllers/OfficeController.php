@@ -96,6 +96,9 @@ class OfficeController extends Controller
             ->get();
 
         $pendingDocCount = $documentRequests->where('status', 'pending')->count();
+        $archivedDocCount = $documentRequests->filter(function ($r) {
+            return $r->status === 'released' && $r->updated_at && $r->updated_at < now()->subDays(30);
+        })->count();
         $pendingIdCount = $digitalIdRequests->count();
         $pendingVoters = User::where('role', 'resident')
             ->where('voter_status', 'pending')
@@ -159,6 +162,7 @@ class OfficeController extends Controller
             'documentRequests',
             'documentTemplates',
             'pendingDocCount',
+            'archivedDocCount',
             'pendingIdCount',
             'pendingVoters',
             'pendingVotersCount',
