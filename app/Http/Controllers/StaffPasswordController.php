@@ -62,9 +62,10 @@ class StaffPasswordController extends Controller
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);
             }
 
-            // Check security question for staff
-            if (strtoupper(trim($request->security_answer)) !== strtoupper(self::SECRET_ANSWER)) {
-                return back()->withErrors(['security_answer' => 'Incorrect answer. Please contact the Punong Barangay.']);
+            // Check security question for staff (custom answer from admin or fallback to system default)
+            $expectedAnswer = !empty($user->security_answer) ? $user->security_answer : self::SECRET_ANSWER;
+            if (strtolower(trim($request->security_answer)) !== strtolower(trim($expectedAnswer))) {
+                return back()->withErrors(['security_answer' => 'Incorrect answer. Please check your security question or contact the Administrator.']);
             }
         } else {
             // Check OTP for residents

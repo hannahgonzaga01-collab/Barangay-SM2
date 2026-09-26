@@ -137,7 +137,7 @@
                         <div style="background:#eff6ff; padding:20px; border-radius:16px; border:1.5px dashed #0E5393;">
                             <label style="display:block; font-size:10px; font-weight:900; color:#0E5393; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Security Verification</label>
                             <p style="font-size:11px; color:#1e40af; font-weight:600; margin-bottom:12px; line-height:1.4;">
-                                Question: Who is the authorized official for system verification?
+                                <strong>Question:</strong> {{ auth()->user()?->security_question ?? 'Who is the authorized official for system verification?' }}
                             </p>
                             <div style="position:relative;">
                                 <i class="fas fa-user-check" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#0E5393; font-size:12px;"></i>

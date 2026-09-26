@@ -120,6 +120,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Admin Site Settings ──
     Route::post('/admin/settings', [AdminController::class, 'updateSiteSetting'])->name('admin.settings.update');
 
+    // ── Staff Portal Security & Password Recovery Q&A ──
+    Route::post('/admin/staff-security/update', [AdminController::class, 'updateStaffSecurity'])->name('admin.staff-security.update');
+
     // ── Admin Messages ──
     Route::patch('/admin/messages/{id}/read', [AdminController::class, 'markMessageRead'])->name('admin.message.read');
     Route::post('/admin/messages/{id}/reply', [AdminController::class, 'replyMessage'])->name('admin.message.reply');

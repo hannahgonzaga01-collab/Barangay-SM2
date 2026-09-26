@@ -130,6 +130,10 @@ class AdminController extends Controller
         $projects         = Project::where('is_archived', false)->latest()->get();
         $archivedProjects = Project::where('is_archived', true)->latest()->get();
 
+        $staffAccounts    = User::whereIn('role', ['admin', 'office', 'vawc', 'justice', 'peace'])
+            ->orderByRaw("FIELD(role, 'admin', 'office', 'vawc', 'justice', 'peace')")
+            ->get();
+
         return view('admin.dashboard', compact(
             'totalResidents', 'totalUsers', 'totalDocs', 'pendingDocs',
             'processingDocs', 'readyDocs', 'totalIssues', 'pendingIssues',
@@ -144,7 +148,7 @@ class AdminController extends Controller
             'resList', 'reportDocs', 'reportIssues',
             'releasedDocsList', 'settledIssuesList',
             'activeResidents', 'activeDocs', 'activeIssues', 'activeHouseholds', 'allPets',
-            'carouselSlides', 'orgChartPath', 'departmentReports'
+            'carouselSlides', 'orgChartPath', 'departmentReports', 'staffAccounts'
         ));
     }
 
@@ -653,5 +657,28 @@ class AdminController extends Controller
             return redirect()->back()->with('success', 'Organizational Chart updated!');
         }
         return redirect()->back();
+    }
+
+    // ── Staff Portal Security & Password Recovery Q&A ──
+    public function updateStaffSecurity(Request $request)
+    {
+        $request->validate([
+            'user_id'           => 'required|exists:users,id',
+            'security_question' => 'required|string|max:255',
+            'security_answer'   => 'required|string|max:255',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+
+        if ($user->role === 'resident') {
+            return redirect()->back()->with('error', 'Cannot modify security credentials for resident accounts.');
+        }
+
+        $user->update([
+            'security_question' => trim($request->security_question),
+            'security_answer'   => trim($request->security_answer),
+        ]);
+
+        return redirect()->back()->with('success', "Security Question & Answer updated successfully for {$user->name} (" . ucfirst($user->role) . " portal).");
     }
 }

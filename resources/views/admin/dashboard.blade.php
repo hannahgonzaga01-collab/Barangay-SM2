@@ -279,6 +279,44 @@
                     this.showIssuesList = true;
                 },
 
+                editStaffSecurityModal: false,
+                staffSecurityData: {
+                    user_id: null,
+                    name: '',
+                    role: '',
+                    email: '',
+                    question_preset: '',
+                    security_question: '',
+                    security_answer: '',
+                    show_answer: false
+                },
+
+                openStaffSecurityModal(staff) {
+                    if (!staff) return;
+                    this.staffSecurityData.user_id = staff.id;
+                    this.staffSecurityData.name = staff.name;
+                    this.staffSecurityData.role = staff.role;
+                    this.staffSecurityData.email = staff.email;
+                    this.staffSecurityData.security_question = staff.security_question || 'What is the Barangay Station Code?';
+                    this.staffSecurityData.security_answer = staff.security_answer || '';
+                    this.staffSecurityData.show_answer = false;
+
+                    const presets = [
+                        'What is the Barangay Station Code?',
+                        'What is your first pet\'s name?',
+                        'What is your mother\'s maiden name?',
+                        'What was your childhood nickname?',
+                        'What is the official Barangay Emergency Hotline?'
+                    ];
+
+                    if (presets.includes(this.staffSecurityData.security_question)) {
+                        this.staffSecurityData.question_preset = this.staffSecurityData.security_question;
+                    } else {
+                        this.staffSecurityData.question_preset = 'custom';
+                    }
+                    this.editStaffSecurityModal = true;
+                },
+
                 get filteredResidentList() {
                     const list = Array.isArray(this.allRes) ? this.allRes : Object.values(this.allRes || {});
                     const q = (this.resSearchQuery || '').toLowerCase().trim();
@@ -3766,6 +3804,117 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- ══ STAFF SECURITY & PASSWORD RECOVERY Q&A ══ --}}
+                <div class="card" style="margin-top:20px;">
+                    <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                        <div class="card-title" style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#0E5393 0%,#000052 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 3px 8px rgba(0,0,82,0.2);">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <span style="font-weight:900;color:var(--text);font-size:14px;">Staff Portal Security & Password Recovery Q&A</span>
+                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;">Manage authentication questions & answers for department staff and official accounts</div>
+                            </div>
+                        </div>
+                        <span class="cbadge" style="background:#eff6ff;color:#0E5393;border:1px solid #bfdbfe;font-weight:800;font-size:10px;">
+                            <i class="fas fa-lock" style="margin-right:4px;"></i> {{ $staffAccounts->count() }} Department Portals
+                        </span>
+                    </div>
+
+                    <div style="padding:20px;">
+                        {{-- Informational Banner --}}
+                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;">
+                            <i class="fas fa-shield-check" style="color:#16a34a;font-size:16px;margin-top:2px;"></i>
+                            <div style="font-size:11px;color:#166534;line-height:1.5;">
+                                <strong style="font-weight:900;">Recovery Question Protection:</strong>
+                                Department staff and officials use these secret questions to verify their identity and reset their passwords if locked out or forgotten.
+                                <span style="display:block;margin-top:2px;color:#15803d;font-weight:700;">
+                                    💡 <strong>Case-Insensitive:</strong> Answers will match regardless of uppercase or lowercase letters (e.g., <code>BRGY-2026</code> is recognized the same as <code>brgy-2026</code>).
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Table of Accounts --}}
+                        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <div style="overflow-x:auto;">
+                                <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;">
+                                    <thead>
+                                        <tr style="background:#f8fafc;border-bottom:1.5px solid var(--border);">
+                                            <th style="padding:14px 16px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);">Department / Account</th>
+                                            <th style="padding:14px 16px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);">Active Security Question</th>
+                                            <th style="padding:14px 16px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);">Answer (Secret)</th>
+                                            <th style="padding:14px 16px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);text-align:right;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($staffAccounts as $acc)
+                                        @php
+                                            $roleStyles = [
+                                                'admin'   => ['bg' => '#fee2e2', 'color' => '#991b1b', 'border' => '#fecaca', 'label' => 'System Admin', 'icon' => 'fa-crown'],
+                                                'office'  => ['bg' => '#eff6ff', 'color' => '#1d4ed8', 'border' => '#bfdbfe', 'label' => 'Office Staff', 'icon' => 'fa-building'],
+                                                'vawc'    => ['bg' => '#fdf4ff', 'color' => '#86198f', 'border' => '#f5d0fe', 'label' => 'VAWC Desk', 'icon' => 'fa-female'],
+                                                'justice' => ['bg' => '#fffbeb', 'color' => '#b45309', 'border' => '#fde68a', 'label' => 'Justice / KP', 'icon' => 'fa-balance-scale'],
+                                                'peace'   => ['bg' => '#f0fdf4', 'color' => '#166534', 'border' => '#bbf7d0', 'label' => 'Peace & Order', 'icon' => 'fa-shield-alt'],
+                                            ];
+                                            $style = $roleStyles[$acc->role] ?? ['bg' => '#f1f5f9', 'color' => '#334155', 'border' => '#cbd5e1', 'label' => ucfirst($acc->role), 'icon' => 'fa-user'];
+                                        @endphp
+                                        <tr style="border-bottom:1px solid var(--border);" x-data="{ showRowAnswer: false }">
+                                            <td style="padding:14px 16px;vertical-align:middle;">
+                                                <div style="display:flex;align-items:center;gap:12px;">
+                                                    <div style="width:36px;height:36px;border-radius:10px;background:{{ $style['bg'] }};color:{{ $style['color'] }};border:1px solid {{ $style['border'] }};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+                                                        <i class="fas {{ $style['icon'] }}"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div style="font-weight:900;color:var(--text);font-size:13px;">{{ $acc->name }}</div>
+                                                        <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+                                                            <span style="font-size:8.5px;font-weight:900;padding:2px 7px;border-radius:6px;background:{{ $style['bg'] }};color:{{ $style['color'] }};border:1px solid {{ $style['border'] }};text-transform:uppercase;letter-spacing:0.04em;">
+                                                                {{ $style['label'] }}
+                                                            </span>
+                                                            <span style="font-size:10px;color:var(--muted);font-weight:600;">{{ $acc->email }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="padding:14px 16px;vertical-align:middle;max-width:320px;">
+                                                @if(!empty($acc->security_question))
+                                                    <div style="font-weight:700;color:#1e293b;font-size:12px;line-height:1.4;">
+                                                        <i class="fas fa-question-circle" style="color:var(--brand);margin-right:5px;"></i> {{ $acc->security_question }}
+                                                    </div>
+                                                @else
+                                                    <span style="font-size:11px;color:#94a3b8;font-style:italic;">No security question configured</span>
+                                                @endif
+                                            </td>
+                                            <td style="padding:14px 16px;vertical-align:middle;">
+                                                @if(!empty($acc->security_answer))
+                                                    <div style="display:inline-flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid var(--border);padding:5px 10px;border-radius:8px;">
+                                                        <template x-if="!showRowAnswer">
+                                                            <span style="letter-spacing:0.2em;font-weight:900;color:#64748b;font-size:13px;">••••••••</span>
+                                                        </template>
+                                                        <template x-if="showRowAnswer">
+                                                            <span style="font-weight:800;color:#0f172a;font-size:12px;font-family:monospace;background:#e2e8f0;padding:1px 6px;border-radius:4px;">{{ $acc->security_answer }}</span>
+                                                        </template>
+                                                        <button type="button" @click="showRowAnswer = !showRowAnswer" style="border:none;background:transparent;cursor:pointer;color:#64748b;padding:0;font-size:11px;outline:none;" :title="showRowAnswer ? 'Hide answer' : 'Reveal answer'">
+                                                            <i class="fas" :class="showRowAnswer ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                                        </button>
+                                                    </div>
+                                                @else
+                                                    <span style="font-size:11px;color:#dc2626;font-weight:700;">Not Set</span>
+                                                @endif
+                                            </td>
+                                            <td style="padding:14px 16px;vertical-align:middle;text-align:right;">
+                                                <button type="button" @click="openStaffSecurityModal(@js($acc))" class="btn btn-sm" style="background:#0E5393;color:#fff;font-weight:800;border-radius:8px;padding:7px 14px;box-shadow:0 2px 6px rgba(14,83,147,0.2);display:inline-flex;align-items:center;gap:6px;">
+                                                    <i class="fas fa-edit"></i> Edit Q&A
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>{{-- /dash-wrap --}}
@@ -4943,6 +5092,79 @@
                         <button @click="confirmModal.show = false" class="btn btn-ghost" style="padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">CANCEL</button>
                         <button @click="executeConfirm()" class="btn" :class="confirmModal.type === 'danger' ? 'btn-danger' : 'btn-primary'" style="padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;" x-text="confirmModal.confirmText"></button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ══ EDIT STAFF SECURITY Q&A MODAL ══ --}}
+        <div x-show="editStaffSecurityModal" x-cloak class="modal-ov" style="z-index: 9999;" x-transition @click.self="editStaffSecurityModal=false">
+            <div class="modal-box" style="max-width:540px;">
+                <div class="modal-in">
+                    <div class="modal-hd">
+                        <div class="modal-ttl" style="display:flex;align-items:center;gap:10px;">
+                            <div class="mico" style="background:linear-gradient(135deg,#0E5393 0%,#000052 100%);color:#fff;">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <span style="font-size:14px;font-weight:900;">Update Security Q&A</span>
+                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;" x-text="staffSecurityData.name + ' (' + staffSecurityData.email + ')'"></div>
+                            </div>
+                        </div>
+                        <button type="button" @click="editStaffSecurityModal=false" class="mclose"><i class="fas fa-times-circle"></i></button>
+                    </div>
+
+                    <form action="{{ route('admin.staff-security.update') }}" method="POST" style="margin-top:14px;">
+                        @csrf
+                        <input type="hidden" name="user_id" :value="staffSecurityData.user_id">
+
+                        <div class="fgrp" style="margin-bottom:16px;">
+                            <label class="flbl">Security Question Preset</label>
+                            <select x-model="staffSecurityData.question_preset" @change="
+                                if (staffSecurityData.question_preset !== 'custom') {
+                                    staffSecurityData.security_question = staffSecurityData.question_preset;
+                                }
+                            " class="finput" style="width:100%;font-weight:700;">
+                                <option value="What is the Barangay Station Code?">What is the Barangay Station Code? (Default)</option>
+                                <option value="What is your first pet's name?">What is your first pet's name?</option>
+                                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                                <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+                                <option value="What is the official Barangay Emergency Hotline?">What is the official Barangay Emergency Hotline?</option>
+                                <option value="custom">✏️ Enter Custom Question...</option>
+                            </select>
+                        </div>
+
+                        <div class="fgrp" style="margin-bottom:16px;" x-show="staffSecurityData.question_preset === 'custom'">
+                            <label class="flbl">Custom Security Question *</label>
+                            <input type="text" name="security_question" x-model="staffSecurityData.security_question" required class="finput" style="width:100%;" placeholder="e.g. What is the name of your first elementary school?">
+                        </div>
+
+                        <template x-if="staffSecurityData.question_preset !== 'custom'">
+                            <input type="hidden" name="security_question" :value="staffSecurityData.security_question">
+                        </template>
+
+                        <div class="fgrp" style="margin-bottom:16px;">
+                            <label class="flbl" style="display:flex;justify-content:space-between;align-items:center;">
+                                <span>Security Answer (Secret Verification Answer) *</span>
+                                <span style="font-size:9px;color:var(--brand);font-weight:800;text-transform:none;">Not case-sensitive</span>
+                            </label>
+                            <div style="position:relative;">
+                                <input :type="staffSecurityData.show_answer ? 'text' : 'password'" name="security_answer" x-model="staffSecurityData.security_answer" required class="finput" style="width:100%;padding-right:40px;font-weight:700;" placeholder="e.g. BRGY-2026">
+                                <button type="button" @click="staffSecurityData.show_answer = !staffSecurityData.show_answer" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;color:#64748b;cursor:pointer;outline:none;" :title="staffSecurityData.show_answer ? 'Hide' : 'Reveal'">
+                                    <i class="fas" :class="staffSecurityData.show_answer ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                </button>
+                            </div>
+                            <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.4;">
+                                💡 Tip: The official can type this answer in uppercase or lowercase (e.g. <code>BRGY-2026</code>, <code>brgy-2026</code>, etc.).
+                            </div>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:14px;border-top:1px solid var(--border);">
+                            <button type="button" @click="editStaffSecurityModal=false" class="btn btn-ghost" style="padding:10px 16px;">Cancel</button>
+                            <button type="submit" class="btn btn-primary" style="background:var(--btn-grad);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:800;">
+                                <i class="fas fa-check-circle"></i> Save Security Credentials
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
