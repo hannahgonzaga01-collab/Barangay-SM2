@@ -33,16 +33,18 @@ class ResidentPortalController extends Controller
             // ── 1. Already linked by user_id ──
             $resident = Resident::where('user_id', $user->id)->first();
 
-            // ── 2. Match by resident_code stored on user ──
-            if (!$resident && $user->resident_code) {
+            $isPending = in_array($user->status, ['pending_verification', 'declined']);
+
+            // ── 2. Match by resident_code stored on user (only if already approved) ──
+            if (!$resident && $user->resident_code && !$isPending) {
                 $resident = Resident::where('resident_code', $user->resident_code)->first();
                 if ($resident) {
                     $resident->update(['user_id' => $user->id]);
                 }
             }
 
-            // ── 3. Match by first + last name (case-insensitive) ──
-            if (!$resident && $user->first_name && $user->last_name) {
+            // ── 3. Match by first + last name (case-insensitive) (only if already approved) ──
+            if (!$resident && $user->first_name && $user->last_name && !$isPending) {
                 $resident = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($user->first_name)])
                     ->whereRaw('LOWER(last_name) = ?', [strtolower($user->last_name)])
                     ->whereNull('user_id')
@@ -52,8 +54,8 @@ class ResidentPortalController extends Controller
                 }
             }
 
-            // ── 4. Match by full name column ──
-            if (!$resident && $user->name) {
+            // ── 4. Match by full name column (only if already approved) ──
+            if (!$resident && $user->name && !$isPending) {
                 $parts = explode(' ', trim($user->name));
                 if (count($parts) >= 2) {
                     $first = $parts[0];

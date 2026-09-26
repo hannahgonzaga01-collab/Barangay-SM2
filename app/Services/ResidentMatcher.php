@@ -137,10 +137,16 @@ class ResidentMatcher
             return self::emptyResult();
         }
 
+        // STRICT RULE: Only literal 100% exact names (no typo at all) can be is_exact.
+        // Any typo (e.g. 90% match like Millie vs Millae) will be is_exact = false and MUST go through Office Verification.
+        $isLiteralExact = $bestMatch && 
+            self::normalizeString($bestMatch->first_name) === $inputFirst && 
+            self::normalizeString($bestMatch->last_name) === $inputLast;
+
         return [
             'matched_resident' => $bestMatch,
             'confidence_score' => $highestScore,
-            'is_exact' => $highestScore >= 98.0,
+            'is_exact' => ($highestScore >= 98.0 && $isLiteralExact),
             'confidence_level' => $highestScore >= 85 ? 'High' : ($highestScore >= 65 ? 'Medium' : 'Low'),
         ];
     }
