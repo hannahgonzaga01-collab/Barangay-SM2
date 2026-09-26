@@ -1011,11 +1011,6 @@ html, body {
                                 </div>
 
                                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                    <template x-if="alert.google_maps_url">
-                                        <a :href="alert.google_maps_url" target="_blank" class="btn btn-sm" style="background:#0284c7;color:#fff;text-decoration:none;box-shadow:0 2px 6px rgba(2,132,199,0.25);">
-                                            <i class="fas fa-map-marked-alt"></i> View GPS Map
-                                        </a>
-                                    </template>
                                     <template x-if="alert.status !== 'responding'">
                                         <button type="button" @click="updateSosStatus(alert.id, 'responding')" class="btn btn-sm" style="background:#d97706;color:#fff;box-shadow:0 2px 6px rgba(217,119,6,0.25);">
                                             <i class="fas fa-running"></i> Dispatch Tanod

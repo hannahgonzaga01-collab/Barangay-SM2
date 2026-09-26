@@ -836,25 +836,8 @@ html, body {
                 this.sosLoading = false;
                 this.sosLandmark = '';
                 this.sosMessage = '';
-                this.sosLocationStatus = 'detecting';
                 this.sosLat = null;
                 this.sosLng = null;
-                
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            this.sosLat = pos.coords.latitude;
-                            this.sosLng = pos.coords.longitude;
-                            this.sosLocationStatus = 'acquired';
-                        },
-                        (err) => {
-                            this.sosLocationStatus = 'fallback';
-                        },
-                        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-                    );
-                } else {
-                    this.sosLocationStatus = 'fallback';
-                }
             },
 
             proceedToConfirm() {
@@ -3555,23 +3538,12 @@ html, body {
                             </div>
                         </div>
 
-                        {{-- Geolocation status banner (Clean theme) --}}
+                        {{-- Registered Address info --}}
                         <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
                             <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text);">
-                                <i class="fas fa-location-crosshairs" style="color:var(--brand);" :class="sosLocationStatus==='detecting' ? 'fa-spin' : ''"></i>
-                                <span x-text="t('sos_loc_info')">Location Dispatch Information:</span>
-                            </div>
-                            <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">
-                                <template x-if="sosLat && sosLng">
-                                    <span style="display:inline-flex;align-items:center;gap:4px;color:#15803d;font-weight:700;">
-                                        <i class="fas fa-check-circle"></i> <span x-text="t('sos_gps_acquired')">GPS Pinpoint Acquired</span> (<span x-text="sosLat.toFixed(5) + ', ' + sosLng.toFixed(5)"></span>)
-                                    </span>
-                                </template>
-                                <template x-if="!sosLat">
-                                    <span style="display:inline-flex;align-items:center;gap:4px;color:var(--text);font-weight:600;">
-                                        <i class="fas fa-home" style="color:var(--brand);"></i> <span x-text="t('sos_reg_addr')">Registered Address:</span> <strong style="color:var(--text);margin-left:4px;">{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
-                                    </span>
-                                </template>
+                                <i class="fas fa-home" style="color:var(--brand);"></i>
+                                <span x-text="lang==='fil' ? 'Nakatala na Tirahan:' : 'Registered Address:'">Registered Address:</span>
+                                <strong style="color:var(--text);margin-left:auto;">{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
                             </div>
                         </div>
 
