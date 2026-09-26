@@ -1659,7 +1659,7 @@ $docConfigs = [
                 <div style="display:flex;justify-content:flex-end;gap:8px;">
                     <button type="button" @click="templateUploadModal=false" class="btn-plain btn-edit">Cancel</button>
                     <button type="submit" class="btn-plain btn-green" style="background:#0E5393;color:#fff;">
-                        <i class="fas fa-save"></i> Save Template
+                        <i class="fas fa-cloud-upload-alt"></i> Upload & Set Active Template
                     </button>
                 </div>
             </form>

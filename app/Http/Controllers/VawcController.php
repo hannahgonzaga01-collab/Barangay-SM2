@@ -63,10 +63,10 @@ class VawcController extends Controller
         // Retrieve Privacy Audit Trail
         $auditLogs = VawcAuditLog::latest()->take(100)->get();
 
-        // Retrieve Submitted Department Reports
         $vawcReports = \App\Models\DepartmentReport::where('department', 'VAWC')->latest()->get();
+        $customTemplate = \App\Http\Controllers\DepartmentReportController::getTemplateForDepartment('VAWC');
 
-        return view('vawc.index', compact('issues', 'totalV', 'newV', 'urgentV', 'settledV', 'auditLogs', 'vawcReports'));
+        return view('vawc.index', compact('issues', 'totalV', 'newV', 'urgentV', 'settledV', 'auditLogs', 'vawcReports', 'customTemplate'));
     }
 
     public function updateStatus(Request $request, $id)

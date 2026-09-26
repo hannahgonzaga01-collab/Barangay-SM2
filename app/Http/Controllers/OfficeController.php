@@ -137,6 +137,7 @@ class OfficeController extends Controller
 
         $totalPending = $pendingDocCount + $pendingIdCount + $pendingVotersCount + $pendingResidentsCount + $pendingVerificationsCount;
         $officeReports = \App\Models\DepartmentReport::where('department', 'Office')->latest()->get();
+        $customTemplate = \App\Http\Controllers\DepartmentReportController::getTemplateForDepartment('Office');
         $documentTemplates = \App\Models\DocumentTemplate::getAllKeyed();
 
         return view('office.index', compact(
@@ -171,7 +172,8 @@ class OfficeController extends Controller
             'pendingVerifications',
             'pendingVerificationsCount',
             'totalPending',
-            'officeReports'
+            'officeReports',
+            'customTemplate'
         ));
     }
 

@@ -872,6 +872,7 @@ html, body {
                             <input type="hidden" name="report_data" :value="JSON.stringify(justiceRep)">
                             <input type="hidden" name="submitted_by" :value="justiceRep.preparedBy">
                             <input type="hidden" name="submitted_role" :value="justiceRep.preparedRole">
+                            <input type="hidden" name="template_file_path" value="{{ $customTemplate['path'] ?? '' }}">
                             <button type="submit" class="btn btn-sm" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#059669,#064e3b);color:#fff;">
                                 <i class="fas fa-paper-plane"></i> Send / Transfer to Admin
                             </button>
@@ -880,6 +881,41 @@ html, body {
                 </div>
 
                 <div style="padding:20px;background:#f8fafc;border-bottom:1px solid var(--border);">
+                    {{-- ACTIVE CUSTOM TEMPLATE BANNER --}}
+                    @if(!empty($customTemplate))
+                        <div style="margin-bottom:16px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 2px 10px rgba(22,163,74,0.06);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:38px;height:38px;border-radius:10px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                                    <i class="fas fa-file-check"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size:12.5px;font-weight:900;color:#166534;display:flex;align-items:center;gap:8px;">
+                                        <span>Active Custom Format: <strong>{{ $customTemplate['original_name'] }}</strong></span>
+                                        <span style="font-size:9.5px;background:#22c55e;color:#fff;font-weight:900;padding:2px 8px;border-radius:99px;text-transform:uppercase;">Active Template</span>
+                                    </div>
+                                    <div style="font-size:10px;color:#15803d;font-weight:600;margin-top:2px;">
+                                        Uploaded on {{ $customTemplate['uploaded_at'] }} ({{ $customTemplate['size_human'] }}) &bull; Automatically attached when submitting to Admin
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <a href="{{ asset('storage/' . $customTemplate['path']) }}" target="_blank" class="btn btn-sm" style="background:#fff;border:1.5px solid #86efac;color:#166534;font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;text-decoration:none;">
+                                    <i class="fas fa-eye"></i> View / Download Template
+                                </a>
+                                <button type="button" @click="templateUploadModal=true" class="btn btn-sm btn-ghost" style="border:1.5px solid #cbd5e1;background:#fff;font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;">
+                                    <i class="fas fa-sync-alt"></i> Upload New Template
+                                </button>
+                                <form action="{{ route('department.reports.delete_template') }}" method="POST" style="margin:0;" onsubmit="return confirm('Revert to the standard system template matrix for Justice / Lupon?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="hidden" name="department" value="Justice">
+                                    <button type="submit" class="btn btn-sm" style="border:1.5px solid #fecaca;background:#fff;color:#dc2626;font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;">
+                                        <i class="fas fa-trash-alt"></i> Reset to Default
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
                     <div id="justice-printable-report" style="background:#fff;padding:24px;border-radius:12px;border:1.5px solid #cbd5e1;box-shadow:0 4px 12px rgba(0,0,0,0.04);font-family:'Times New Roman', serif;color:#000;">
                         {{-- 3 LOGOS AND OFFICIAL LETTERHEAD --}}
                         <div style="text-align:center; margin-bottom:14px;">
@@ -2254,7 +2290,7 @@ html, body {
                         <div style="display:flex;justify-content:flex-end;gap:8px;">
                             <button type="button" @click="templateUploadModal=false" class="btn btn-ghost">Cancel</button>
                             <button type="submit" class="btn btn-primary" style="background:#0E5393;color:#fff;">
-                                <i class="fas fa-save"></i> Save Template
+                                <i class="fas fa-cloud-upload-alt"></i> Upload & Set Active Template
                             </button>
                         </div>
                     </form>

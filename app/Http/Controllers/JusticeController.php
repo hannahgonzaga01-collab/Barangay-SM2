@@ -43,8 +43,9 @@ class JusticeController extends Controller
         
         $schedulesJSON = json_encode($schedules);
         $justiceReports = \App\Models\DepartmentReport::where('department', 'Justice')->latest()->get();
+        $customTemplate = \App\Http\Controllers\DepartmentReportController::getTemplateForDepartment('Justice');
 
-        return view('justice.index', compact('reports', 'schedulesJSON', 'justiceReports'));
+        return view('justice.index', compact('reports', 'schedulesJSON', 'justiceReports', 'customTemplate'));
     }
 
     public function storeBlotter(Request $request)

@@ -223,6 +223,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/department-reports/submit', [DepartmentReportController::class, 'submit'])->name('department.reports.submit');
     Route::get('/department-reports/{id}', [DepartmentReportController::class, 'show'])->name('department.reports.show');
     Route::post('/department-reports/template-upload', [DepartmentReportController::class, 'uploadTemplate'])->name('department.reports.upload_template');
+    Route::match(['delete', 'post'], '/department-reports/template-delete', [DepartmentReportController::class, 'deleteTemplate'])->name('department.reports.delete_template');
 
     // ── BACKUP & MAINTENANCE ──
     Route::get('/admin/backups', [\App\Http\Controllers\BackupController::class, 'index']);

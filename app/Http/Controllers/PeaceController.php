@@ -28,7 +28,9 @@ class PeaceController extends Controller
             ->take(10)
             ->get();
 
-        return view('peace and order.index', compact('issues', 'patrols', 'peaceReports', 'sosAlerts', 'recentResolvedSos'));
+        $customTemplate = \App\Http\Controllers\DepartmentReportController::getTemplateForDepartment('Peace & Order');
+
+        return view('peace and order.index', compact('issues', 'patrols', 'peaceReports', 'sosAlerts', 'recentResolvedSos', 'customTemplate'));
     }
 
     public function updateStatus(Request $request, $id)
