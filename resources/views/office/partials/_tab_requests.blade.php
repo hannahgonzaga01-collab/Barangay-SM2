@@ -174,7 +174,6 @@
                 <div class="filter-group" style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; flex-shrink:0;">
                     <button @click="docFilter='all'" :class="docFilter==='all' ? 'active-filter' : 'plain-filter'">All</button>
                     <button @click="docFilter='today'" :class="docFilter==='today' ? 'active-filter' : 'plain-filter'">Today</button>
-                    <button @click="docFilter='future'" :class="docFilter==='future' ? 'active-filter' : 'plain-filter'">Upcoming</button>
                 </div>
 
                 <span class="card-badge" style="background:#fee2e2; color:#dc2626; white-space:nowrap; flex-shrink:0;">{{ $pendingDocCount ?? 0 }} Pending</span>
@@ -213,7 +212,7 @@
                         $isOldReleased = $req->status === 'released' && $req->updated_at && $req->updated_at < now()->subDays(30);
                     @endphp
                     <tr id="doc-req-{{ $req->id }}" 
-                        x-show="(docFilter==='all' || (docFilter==='today' && '{{ $isToday ? '1':'0' }}' === '1') || (docFilter==='future' && '{{ $isFuture ? '1':'0' }}' === '1')) && (
+                        x-show="(docFilter==='all' || (docFilter==='today' && '{{ $isToday ? '1':'0' }}' === '1')) && (
                             (docStatusFilter==='all' && '{{ $isOldReleased ? '1':'0' }}' === '0') ||
                             (docStatusFilter==='released' && '{{ $req->status==='released' && !$isOldReleased ? '1':'0' }}' === '1') ||
                             (docStatusFilter==='released_archive' && '{{ $isOldReleased ? '1':'0' }}' === '1') ||
