@@ -146,6 +146,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Office Document Requests & Templates ──
     Route::patch('/office/document-request/{id}/status', [OfficeController::class, 'updateDocumentStatus'])->name('office.document.status');
     Route::get('/office/document-request/{id}/json', [OfficeController::class, 'getDocumentRequest'])->name('office.document.request.json');
+    Route::delete('/office/document-request/{id}', [OfficeController::class, 'destroyDocumentRequest'])->name('office.document.destroy');
     Route::post('/office/document-requests/purge-archive', [OfficeController::class, 'purgeArchivedRequests'])->name('office.document.purge-archive');
     Route::get('/office/document-templates', [\App\Http\Controllers\DocumentTemplateController::class, 'all'])->name('office.document.templates');
     Route::post('/office/document-templates/{key}', [\App\Http\Controllers\DocumentTemplateController::class, 'update'])->name('office.document.templates.update');

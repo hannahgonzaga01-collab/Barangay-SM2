@@ -189,11 +189,11 @@
             <div style="display:flex; align-items:center; gap:8px;">
                 @if(($archivedDocCount ?? 0) > 0)
                 <form action="{{ route('office.document.purge-archive') }}" method="POST" style="display:inline;"
-                      onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang lahat ng released documents na higit 30 days na sa archive? Hindi na ito maibabalik.');">
+                      onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang lahat ng released documents na nasa archive? Hindi na ito maibabalik.');">
                     @csrf
-                    <button type="submit" class="btn-plain btn-sm" style="background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; padding:5px 10px; font-size:9.5px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-family:inherit;"
-                            title="Permanently remove released documents older than 30 days">
-                        <i class="fas fa-trash-alt"></i> Purge Archive
+                    <button type="submit" class="btn-plain btn-sm" style="background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; padding:5px 12px; font-size:9.5px; font-weight:800; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; font-family:inherit;"
+                            title="Permanently remove all released documents in this archive">
+                        <i class="fas fa-trash-alt"></i> Delete All
                     </button>
                 </form>
                 @endif
@@ -410,6 +410,17 @@
                                     class="tbl-btn tbl-view" style="width:auto;padding:0 10px;font-size:10px;gap:4px;">
                                     <i class="fas fa-print"></i> Print
                                 </button>
+                                
+                                @if($isOldReleased || in_array($req->status, ['released', 'disapproved']))
+                                    <form action="{{ route('office.document.destroy', $req->id) }}" method="POST" style="display:inline;margin:0;"
+                                          onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang request record na ito? Hindi na ito maibabalik.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="tbl-btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;width:auto;padding:0 8px;font-size:9.5px;gap:3px;" title="Delete this record">
+                                            <i class="fas fa-trash-alt"></i> Delete
+                                        </button>
+                                    </form>
+                                @endif
                                 
                                 @if(!in_array($req->status, ['released', 'disapproved']))
                                     <div x-data="{ showDisapprove: false, reasonSelect: '', reasonCustom: '' }" style="display:inline;">

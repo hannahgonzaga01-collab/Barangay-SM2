@@ -753,7 +753,15 @@ class OfficeController extends Controller
             ->where('updated_at', '<', $cutoff)
             ->delete();
 
-        return redirect()->back()->with('success', "Na-clean up at nabura na ang {$count} released document request(s) na lampas 30 days na.");
+        return redirect()->back()->with('success', "Na-clean up at nabura na ang {$count} released document request(s) na nasa archive.");
+    }
+
+    public function destroyDocumentRequest($id)
+    {
+        $doc = DocumentRequest::findOrFail($id);
+        $doc->delete();
+
+        return redirect()->back()->with('success', 'Document request record successfully deleted.');
     }
 
     public function store(Request $request)
