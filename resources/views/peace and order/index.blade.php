@@ -592,28 +592,6 @@ html, body {
         }
     }">
 
-        {{-- ACTIVE EMERGENCY ALERT BANNER --}}
-        <template x-if="hasActiveSosAlerts()">
-            <div style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:14px 20px;border-radius:12px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 4px 18px rgba(220,38,38,0.35);">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
-                        <i class="fas fa-bullhorn ringing-bell"></i>
-                    </div>
-                    <div>
-                        <div style="font-size:13px;font-weight:900;letter-spacing:0.02em;">ACTIVE RESIDENT EMERGENCY SOS DISPATCH!</div>
-                        <div style="font-size:10.5px;opacity:0.95;">An urgent emergency dispatch requires immediate Tanod response and acknowledgement.</div>
-                    </div>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <button type="button" @click="activeTab='sos'" class="btn btn-sm" style="background:#fff;color:#dc2626;font-weight:900;border:none;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:7px 14px;border-radius:8px;">
-                        <i class="fas fa-eye"></i> View & Respond to SOS
-                    </button>
-                    <button type="button" @click="stopEmergencyChime(); stopSosTabTitle();" class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.35);font-weight:800;padding:7px 14px;border-radius:8px;">
-                        <i class="fas fa-volume-mute"></i> Silence Siren
-                    </button>
-                </div>
-            </div>
-        </template>
 
         {{-- HERO --}}
         <div class="hero">
