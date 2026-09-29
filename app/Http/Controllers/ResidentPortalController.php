@@ -1046,12 +1046,6 @@ class ResidentPortalController extends Controller
     public function storeIssueReport(Request $request)
     {
         if (auth()->check()) {
-            if (in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', '⚠️ Your account is currently not verified by the Barangay Office. Reporting issues/blotters will be unlocked once approved.');
-            }
-
             $activeReport = IssueReport::where('user_id', auth()->id())
                 ->whereNotIn('status', ['resolved', 'closed', 'dismissed', 'disapproved', 'settled', 'rejected'])
                 ->first();
@@ -1063,14 +1057,28 @@ class ResidentPortalController extends Controller
             }
         }
 
-        $request->validate([
+        $rules = [
             'issue_type'       => 'required|string',
-            'complainant_name' => 'required|string',
+            'complainant_name' => 'required|string|max:255',
             'contact'          => 'required|digits:11',
-            'respondent_name'  => 'required|string',
+            'respondent_name'  => 'required|string|max:255',
             'description'      => 'required|string',
             'incident_date'    => 'required|date|after_or_equal:' . now()->subMonths(6)->toDateString(),
-        ]);
+        ];
+
+        if (!auth()->check()) {
+            $rules['guest_email'] = 'required|email|max:255';
+        }
+
+        $request->validate($rules);
+
+        $guestFirst = null;
+        $guestLast = null;
+        if (!auth()->check() && $request->filled('complainant_name')) {
+            $nameParts = explode(' ', trim($request->complainant_name));
+            $guestFirst = $nameParts[0] ?? '';
+            $guestLast = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
+        }
 
         $rawIssueType = $request->issue_type;
         $issueType = $rawIssueType === 'Others'
@@ -1102,6 +1110,9 @@ class ResidentPortalController extends Controller
 
         $report = IssueReport::create([
             'user_id'            => auth()->id(),
+            'guest_first_name'   => $guestFirst,
+            'guest_last_name'    => $guestLast,
+            'guest_email'        => $request->guest_email,
             'issue_type'         => $issueType,
             'complainant_name'   => $request->complainant_name,
             'complainant_age'    => $request->complainant_age,
@@ -1126,7 +1137,6 @@ class ResidentPortalController extends Controller
             'status'             => $status,
             'admin_notes'        => $adminNotes,
             'is_restricted'      => $isRestricted,
-            'guest_email'        => $request->guest_email,
         ]);
 
         // Log creation into VAWC audit trail if routed to VAWC

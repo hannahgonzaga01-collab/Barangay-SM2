@@ -435,6 +435,10 @@ html, body {
             scheduleTab: 'kagawad',
             docuModal: false,
             issueModal: false,
+            issueStep: 1,
+            legalAcknowledged: false,
+            isSubmittingReport: false,
+            issueErrorMsg: '',
             profileModal: false,
             emailEditModal: false,
             sosResidentEmail: '',
@@ -1004,6 +1008,128 @@ html, body {
                 .catch(() => { this.msgSending = false; this.msgSent = true; });
             },
 
+            goToIssueStep2() {
+                this.issueErrorMsg = '';
+
+                if (!this.selectedOffense) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Pumili po ng Uri ng Reklamo / Offense.' : 'Please select the Type of Offense / Complaint.';
+                    return;
+                }
+                if (this.selectedOffense === 'Others') {
+                    const otherInput = document.querySelector('input[name="issue_type_other"]');
+                    if (!otherInput || !otherInput.value.trim()) {
+                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakitukoy ang uri ng reklamo.' : 'Please specify the type of offense.';
+                        otherInput?.focus();
+                        return;
+                    }
+                }
+
+                const nameInput = document.querySelector('input[name="complainant_name"]');
+                if (!nameInput || !nameInput.value.trim()) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng nagrereklamo.' : 'Please enter complainant full name.';
+                    nameInput?.focus();
+                    return;
+                }
+
+                const ageInput = document.querySelector('input[name="complainant_age"]');
+                if (!ageInput || !ageInput.value || parseInt(ageInput.value) < 18) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangang 18 taong gulang pataas ang nagrereklamo.' : 'Complainant must be at least 18 years old.';
+                    ageInput?.focus();
+                    return;
+                }
+
+                const contactInput = document.querySelector('input[name="contact"]');
+                if (!contactInput || !contactInput.value.trim() || contactInput.value.trim().length !== 11) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangang eksaktong 11-digit ang contact number (hal. 09XXXXXXXXX).' : 'Contact number must be exactly 11 digits (e.g. 09XXXXXXXXX).';
+                    contactInput?.focus();
+                    return;
+                }
+
+                if (!this.isAuth) {
+                    const emailInput = document.querySelector('input[name="guest_email"]');
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailInput || !emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
+                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang wastong email address para sa mga update.' : 'Please enter a valid email address for notifications.';
+                        emailInput?.focus();
+                        return;
+                    }
+                }
+
+                const behalfCheckbox = document.querySelector('input[name="is_on_behalf"]');
+                if (behalfCheckbox && behalfCheckbox.checked) {
+                    const victimName = document.querySelector('input[name="victim_name"]');
+                    const victimAge = document.querySelector('input[name="victim_age"]');
+                    const victimGender = document.querySelector('select[name="victim_gender"]');
+                    const victimRel = document.querySelector('input[name="victim_relationship"]');
+                    if (!victimName?.value.trim()) {
+                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng biktima.' : 'Please enter the victim full name.';
+                        victimName?.focus();
+                        return;
+                    }
+                    if (!victimAge?.value) {
+                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang edad ng biktima.' : 'Please enter the victim age.';
+                        victimAge?.focus();
+                        return;
+                    }
+                    if (!victimGender?.value) {
+                        this.issueErrorMsg = this.lang === 'fil' ? 'Pumili ng kasarian ng biktima.' : 'Please select the victim gender.';
+                        victimGender?.focus();
+                        return;
+                    }
+                    if (!victimRel?.value.trim()) {
+                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang relasyon sa nagrereklamo.' : 'Please enter relationship to complainant.';
+                        victimRel?.focus();
+                        return;
+                    }
+                }
+
+                const respNameInput = document.querySelector('input[name="respondent_name"]');
+                if (!respNameInput || !respNameInput.value.trim()) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang pangalan ng inirereklamo (Respondent).' : 'Please enter the name of the person being reported (Respondent).';
+                    respNameInput?.focus();
+                    return;
+                }
+
+                this.issueStep = 2;
+                this.$nextTick(() => {
+                    const modalBox = document.getElementById('issueReportModalBox');
+                    if (modalBox) modalBox.scrollTop = 0;
+                });
+            },
+
+            submitIssueReport(e) {
+                this.issueErrorMsg = '';
+
+                const incDate = document.querySelector('input[name="incident_date"]');
+                if (!incDate || !incDate.value) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang petsa at oras ng insidente.' : 'Please specify the date & time of the incident.';
+                    incDate?.focus();
+                    return;
+                }
+
+                const incLoc = document.querySelector('input[name="incident_location"]');
+                if (!incLoc || !incLoc.value.trim()) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang lokasyon ng insidente.' : 'Please specify the location of the incident.';
+                    incLoc?.focus();
+                    return;
+                }
+
+                const desc = document.querySelector('textarea[name="description"]');
+                if (!desc || !desc.value.trim()) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong salaysay o detalye ng insidente.' : 'Please provide the incident description / narration.';
+                    desc?.focus();
+                    return;
+                }
+
+                if (!this.legalAcknowledged) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangan ninyong lagyan ng tsek ang legal certification / warning laban sa maling ulat bago magsumite.' : 'You must check the legal certification against false/prank reporting before submitting.';
+                    return;
+                }
+
+                this.isSubmittingReport = true;
+                e.target.submit();
+            },
+
             init(){
                 if(this.activeSlides.length > 0){
                     this.activityTimer = setInterval(()=>this.nextActivitySlide(), 5000);
@@ -1228,7 +1354,7 @@ html, body {
                     <div class="service-name" x-text="t('faqs')">FAQs</div>
                     <div class="service-sub" x-text="t('faqs_sub')">How to use & portal guide</div>
                 </div>
-                <div class="service-card" @click="isAuth ? (isPendingVerification ? pendingLockModal=true : issueModal=true) : window.location.href='{{ route('login') }}'">
+                <div class="service-card" @click="issueModal = true; issueStep = 1; issueErrorMsg = ''; legalAcknowledged = false; isSubmittingReport = false;">
                     <div class="service-ico"><i class="fas fa-flag"></i></div>
                     <div class="service-name" x-text="t('report_issue')">Report an Issue</div>
                     <div class="service-sub" x-text="t('report_sub')">Blotter, VAWC & more</div>
@@ -2210,128 +2336,236 @@ html, body {
 
     {{-- ADD PET MODAL --}}
 
-    {{-- REPORT ISSUE MODAL --}}
-    <div x-show="issueModal" x-cloak class="modal-ov" x-transition>
-        <div class="modal-box modal-box-red" @click.away="issueModal=false">
+    {{-- REPORT ISSUE MODAL (2-STEP WIZARD) --}}
+    <div x-show="issueModal" x-cloak class="modal-ov" x-transition style="z-index:9999;" @keydown.window.escape="issueModal=false">
+        <div class="modal-box modal-box-red" id="issueReportModalBox" style="max-width:560px;" @click.away="issueModal=false">
             <div class="modal-in">
+                {{-- Header --}}
                 <div class="modal-hd">
                     <div class="modal-ttl">
                         <div class="modal-ico modal-ico-red"><i class="fas fa-exclamation-triangle"></i></div>
                         <div>
                             <div>Report an Issue / Concern</div>
-                            <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;">Blotter, VAWC, Peace & Order</div>
-                        </div>
-                    </div>
-                    <button @click="issueModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
-                </div>
-                <form action="{{ route('resident.issue.report') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="fgrp">
-                        <label class="flbl">Type of Offense / Complaint *</label>
-                        <select name="issue_type" class="finput fselect" x-model="selectedOffense" @change="showOtherOffense = selectedOffense === 'Others'" required>
-                            <option value="">— Select Type —</option>
-                            <template x-for="o in offenses" :key="o"><option :value="o" x-text="o"></option></template>
-                        </select>
-                    </div>
-                    <div x-show="showOtherOffense" x-transition class="fgrp">
-                        <label class="flbl">Specify Type *</label>
-                        <input type="text" name="issue_type_other" placeholder="Describe the type of offense..." class="finput">
-                    </div>
-                    <div class="sblk" x-data="{ isOnBehalf: false }">
-                        <div class="sblk-ttl"><i class="fas fa-user"></i> Complainant Information</div>
-                        <div class="fgrid2 fgrp">
-                            <div><label class="flbl">Full Name *</label><input type="text" name="complainant_name" required class="finput" placeholder="Juan Dela Cruz" value="{{ $isAuth ? (($authUser?->first_name??'').' '.($authUser?->last_name??'')) : old('complainant_name') }}"></div>
-                            <div><label class="flbl">Age *</label><input type="number" name="complainant_age" required class="finput" placeholder="Min. 18" min="18" value="{{ $isAuth ? $authUser?->age : old('complainant_age') }}"></div>
-                            <div><label class="flbl">Contact Number *</label><input type="text" name="contact" required class="finput" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}"></div>
-                            @if(!$isAuth)
-                            <div class="fspan2"><label class="flbl">Email Address * (For notification)</label><input type="email" name="guest_email" required class="finput" placeholder="example@gmail.com"></div>
-                            @endif
-                            <div><label class="flbl">Gender</label>
-                                <select name="complainant_gender" class="finput fselect">
-                                    <option value="">Select</option>
-                                    <option value="Male" @if($isAuth && ($authUser?->gender??'') === 'Male') selected @endif>Male</option>
-                                    <option value="Female" @if($isAuth && ($authUser?->gender??'') === 'Female') selected @endif>Female</option>
-                                    <option value="Other" @if($isAuth && ($authUser?->gender??'') === 'Other') selected @endif>Other</option>
-                                </select>
+                            <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;">
+                                Blotter, VAWC, Peace & Order • Open to Residents & Non-Residents
                             </div>
-                            <div class="fspan2"><label class="flbl">Address</label><input type="text" name="complainant_address" class="finput" placeholder="Blk/Lot, Street, Brgy. SM2..." value="{{ $isAuth ? $authUser?->address : old('complainant_address') }}"></div>
+                        </div>
+                    </div>
+                    <button type="button" @click="issueModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                </div>
+
+                {{-- 2-STEP PROGRESS STEPPER --}}
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; background:#f8fafc; border-radius:12px; padding:10px 14px; border:1.5px solid #e2e8f0;">
+                    {{-- Step 1 Tab --}}
+                    <div style="display:flex; align-items:center; gap:8px; cursor:pointer;" @click="if(issueStep > 1) { issueStep = 1; issueErrorMsg = ''; }">
+                        <div :style="issueStep === 1 ? 'background:#dc2626; color:#fff; box-shadow:0 2px 6px rgba(220,38,38,0.35);' : 'background:#16a34a; color:#fff;'" style="width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; transition:all .2s;">
+                            <template x-if="issueStep > 1"><i class="fas fa-check" style="font-size:10px;"></i></template>
+                            <template x-if="issueStep === 1"><span>1</span></template>
+                        </div>
+                        <div>
+                            <div style="font-size:11px; font-weight:800; line-height:1.2;" :style="issueStep === 1 ? 'color:#dc2626;' : 'color:#1e293b;'" x-text="lang==='fil'?'Hakbang 1: Pagkakakilanlan':'Step 1: Parties & Offense'">Step 1: Parties & Offense</div>
+                            <div style="font-size:9px; color:#64748b; font-weight:600;" x-text="lang==='fil'?'Complainant at Inirereklamo':'Complainant & Respondent'">Complainant & Respondent</div>
+                        </div>
+                    </div>
+
+                    {{-- Step Connector Line --}}
+                    <div style="flex:1; height:3px; background:#e2e8f0; margin:0 12px; border-radius:99px; overflow:hidden;">
+                        <div :style="issueStep === 2 ? 'width:100%; background:#dc2626;' : 'width:0%; background:#e2e8f0;'" style="height:100%; transition:width 0.3s ease;"></div>
+                    </div>
+
+                    {{-- Step 2 Tab --}}
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div :style="issueStep === 2 ? 'background:#dc2626; color:#fff; box-shadow:0 2px 6px rgba(220,38,38,0.35);' : 'background:#e2e8f0; color:#64748b;'" style="width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; transition:all .2s;">
+                            2
+                        </div>
+                        <div>
+                            <div style="font-size:11px; font-weight:800; line-height:1.2;" :style="issueStep === 2 ? 'color:#dc2626;' : 'color:#64748b;'" x-text="lang==='fil'?'Hakbang 2: Detalye ng Reklamo':'Step 2: Incident Details'">Step 2: Incident Details</div>
+                            <div style="font-size:9px; color:#64748b; font-weight:600;" x-text="lang==='fil'?'Salaysay at Legal Warning':'Narration & Legal Notice'">Narration & Legal Notice</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Dynamic Error Alert Banner --}}
+                <div x-show="issueErrorMsg" x-transition style="background:#fef2f2; border:1.5px solid #f87171; border-radius:10px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; gap:10px; color:#991b1b; font-size:11px; font-weight:700;">
+                    <i class="fas fa-exclamation-circle" style="font-size:14px; flex-shrink:0;"></i>
+                    <span x-text="issueErrorMsg"></span>
+                </div>
+
+                <form id="issueReportForm" action="{{ route('resident.issue.report') }}" method="POST" enctype="multipart/form-data" @submit.prevent="submitIssueReport($event)">
+                    @csrf
+
+                    {{-- ==================== STEP 1: PARTIES & OFFENSE ==================== --}}
+                    <div x-show="issueStep === 1" x-transition:enter.opacity.duration.200ms>
+                        {{-- Type of Offense --}}
+                        <div class="fgrp">
+                            <label class="flbl">Type of Offense / Complaint *</label>
+                            <select name="issue_type" class="finput fselect" x-model="selectedOffense" @change="showOtherOffense = selectedOffense === 'Others'" required>
+                                <option value="">— Select Type —</option>
+                                <template x-for="o in offenses" :key="o"><option :value="o" x-text="o"></option></template>
+                            </select>
+                        </div>
+                        <div x-show="showOtherOffense" x-transition class="fgrp">
+                            <label class="flbl">Specify Type *</label>
+                            <input type="text" name="issue_type_other" placeholder="Describe the type of offense..." class="finput">
                         </div>
 
-                        {{-- BEHALF CHECKBOX --}}
-                        <div style="margin-top: 10px; padding: 10px 12px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 8px;">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 11px; font-weight: 800; color: #1e293b;">
-                                <input type="checkbox" name="is_on_behalf" value="1" x-model="isOnBehalf" style="width: 16px; height: 16px; accent-color: var(--brand); cursor: pointer;">
-                                <span><i class="fas fa-hands-helping" style="color: var(--brand); margin-right: 4px;"></i> Filing on behalf of a victim / dependent</span>
-                            </label>
-                        </div>
-
-                        {{-- DEDICATED VICTIM INFORMATION SECTION --}}
-                        <div x-show="isOnBehalf" x-transition style="margin-top: 12px; padding: 12px; background: #fdf4ff; border: 1.5px solid #f0abfc; border-radius: 10px;">
-                            <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; color: #a21caf; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;">
-                                <i class="fas fa-shield-alt"></i> Dedicated Victim Information
+                        {{-- Complainant Information --}}
+                        <div class="sblk" x-data="{ isOnBehalf: false }">
+                            <div class="sblk-ttl" style="display:flex; align-items:center; justify-content:space-between;">
+                                <span><i class="fas fa-user"></i> Complainant Information</span>
+                                @if(!$isAuth)
+                                <span style="font-size:9px; background:#e0f2fe; color:#0369a1; padding:2px 7px; border-radius:6px; font-weight:700; text-transform:none;">Open for Residents & Non-Residents</span>
+                                @endif
                             </div>
                             <div class="fgrid2 fgrp">
-                                <div class="fspan2">
-                                    <label class="flbl" style="color: #86198f;">Victim Full Name <span style="color:#dc2626;">*</span></label>
-                                    <input type="text" name="victim_name" :required="isOnBehalf" class="finput" placeholder="Full name of victim/dependent" style="border-color: #f0abfc; background: #fff;">
-                                </div>
-                                <div>
-                                    <label class="flbl" style="color: #86198f;">Victim Age <span style="color:#dc2626;">*</span></label>
-                                    <input type="number" name="victim_age" :required="isOnBehalf" min="0" max="120" class="finput" placeholder="e.g. 14" style="border-color: #f0abfc; background: #fff;">
-                                </div>
-                                <div>
-                                    <label class="flbl" style="color: #86198f;">Victim Gender <span style="color:#dc2626;">*</span></label>
-                                    <select name="victim_gender" :required="isOnBehalf" class="finput fselect" style="border-color: #f0abfc; background: #fff;">
-                                        <option value="">Select Gender</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Other">Other</option>
+                                <div class="fspan2"><label class="flbl">Full Name *</label><input type="text" name="complainant_name" required class="finput" placeholder="Juan Dela Cruz" value="{{ $isAuth ? (($authUser?->first_name??'').' '.($authUser?->last_name??'')) : old('complainant_name') }}"></div>
+                                <div><label class="flbl">Age *</label><input type="number" name="complainant_age" required class="finput" placeholder="Min. 18" min="18" value="{{ $isAuth ? $authUser?->age : old('complainant_age') }}"></div>
+                                <div><label class="flbl">Contact Number *</label><input type="text" name="contact" required class="finput" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}"></div>
+                                @if(!$isAuth)
+                                <div class="fspan2"><label class="flbl">Email Address * (For official updates & status notifications)</label><input type="email" name="guest_email" required class="finput" placeholder="example@gmail.com"></div>
+                                @endif
+                                <div><label class="flbl">Gender</label>
+                                    <select name="complainant_gender" class="finput fselect">
+                                        <option value="">Select</option>
+                                        <option value="Male" @if($isAuth && ($authUser?->gender??'') === 'Male') selected @endif>Male</option>
+                                        <option value="Female" @if($isAuth && ($authUser?->gender??'') === 'Female') selected @endif>Female</option>
+                                        <option value="Other" @if($isAuth && ($authUser?->gender??'') === 'Other') selected @endif>Other</option>
                                     </select>
                                 </div>
-                                <div class="fspan2">
-                                    <label class="flbl" style="color: #86198f;">Relationship to Complainant <span style="color:#dc2626;">*</span></label>
-                                    <input type="text" name="victim_relationship" :required="isOnBehalf" class="finput" placeholder="e.g. Daughter, Son, Spouse, Sister, Neighbor, etc." style="border-color: #f0abfc; background: #fff;">
+                                <div class="fspan2"><label class="flbl">Address / Location</label><input type="text" name="complainant_address" class="finput" placeholder="House/Blk/Lot, Street, Barangay, City..." value="{{ $isAuth ? $authUser?->address : old('complainant_address') }}"></div>
+                            </div>
+
+                            {{-- BEHALF CHECKBOX --}}
+                            <div style="margin-top: 10px; padding: 10px 12px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 11px; font-weight: 800; color: #1e293b;">
+                                    <input type="checkbox" name="is_on_behalf" value="1" x-model="isOnBehalf" style="width: 16px; height: 16px; accent-color: var(--brand); cursor: pointer;">
+                                    <span><i class="fas fa-hands-helping" style="color: var(--brand); margin-right: 4px;"></i> Filing on behalf of a victim / dependent</span>
+                                </label>
+                            </div>
+
+                            {{-- DEDICATED VICTIM INFORMATION SECTION --}}
+                            <div x-show="isOnBehalf" x-transition style="margin-top: 12px; padding: 12px; background: #fdf4ff; border: 1.5px solid #f0abfc; border-radius: 10px;">
+                                <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; color: #a21caf; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-shield-alt"></i> Dedicated Victim Information
+                                </div>
+                                <div class="fgrid2 fgrp">
+                                    <div class="fspan2">
+                                        <label class="flbl" style="color: #86198f;">Victim Full Name <span style="color:#dc2626;">*</span></label>
+                                        <input type="text" name="victim_name" :required="isOnBehalf" class="finput" placeholder="Full name of victim/dependent" style="border-color: #f0abfc; background: #fff;">
+                                    </div>
+                                    <div>
+                                        <label class="flbl" style="color: #86198f;">Victim Age <span style="color:#dc2626;">*</span></label>
+                                        <input type="number" name="victim_age" :required="isOnBehalf" min="0" max="120" class="finput" placeholder="e.g. 14" style="border-color: #f0abfc; background: #fff;">
+                                    </div>
+                                    <div>
+                                        <label class="flbl" style="color: #86198f;">Victim Gender <span style="color:#dc2626;">*</span></label>
+                                        <select name="victim_gender" :required="isOnBehalf" class="finput fselect" style="border-color: #f0abfc; background: #fff;">
+                                            <option value="">Select Gender</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="fspan2">
+                                        <label class="flbl" style="color: #86198f;">Relationship to Complainant <span style="color:#dc2626;">*</span></label>
+                                        <input type="text" name="victim_relationship" :required="isOnBehalf" class="finput" placeholder="e.g. Daughter, Son, Spouse, Sister, Neighbor, etc." style="border-color: #f0abfc; background: #fff;">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="sblk">
-                        <div class="sblk-ttl"><i class="fas fa-user-slash"></i> Respondent Information</div>
-                        <div class="fgrid2 fgrp">
-                            <div class="fspan2"><label class="flbl">Respondent Full Name *</label><input type="text" name="respondent_name" required class="finput" placeholder="Name of person being reported"></div>
-                            <div class="fspan2"><label class="flbl">Respondent Address</label><input type="text" name="respondent_address" class="finput" placeholder="Address of respondent"></div>
+
+                        {{-- Respondent Information --}}
+                        <div class="sblk">
+                            <div class="sblk-ttl"><i class="fas fa-user-slash"></i> Respondent Information</div>
+                            <div class="fgrid2 fgrp">
+                                <div class="fspan2"><label class="flbl">Respondent Full Name *</label><input type="text" name="respondent_name" required class="finput" placeholder="Name of person being reported"></div>
+                                <div class="fspan2"><label class="flbl">Respondent Address (Optional / If known)</label><input type="text" name="respondent_address" class="finput" placeholder="Address or known location of respondent"></div>
+                            </div>
+                        </div>
+
+                        {{-- Step 1 Buttons --}}
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:8px;">
+                            <button type="button" @click="issueModal=false" class="btn-plain btn-ghost">Cancel</button>
+                            <button type="button" @click="goToIssueStep2()" class="btn-grad btn-grad-red" style="padding:10px 20px; font-size:12px; display:flex; align-items:center; gap:6px;">
+                                <span x-text="lang==='fil'?'Susunod: Detalye ng Insidente':'Next: Incident Details'">Next: Incident Details</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="sblk">
-                        <div class="sblk-ttl"><i class="fas fa-map-marker-alt"></i> Incident Details</div>
-                        <div class="fgrid2 fgrp">
-                            <div><label class="flbl">Date & Time of Incident *</label><input type="datetime-local" name="incident_date" required class="finput" max="{{ date('Y-m-d\TH:i') }}" min="{{ date('Y-m-d\TH:i', strtotime('-6 months')) }}"></div>
-                            <div><label class="flbl">Location of Incident *</label><input type="text" name="incident_location" required class="finput" placeholder="Purok, Street, Block..."></div>
-                            <div class="fspan2"><label class="flbl">Description / Narration *</label><textarea name="description" rows="4" required class="finput" style="resize:vertical;" placeholder="Describe the incident in full detail..."></textarea></div>
-                            <div><label class="flbl">Witness Name (Optional)</label><input type="text" name="witness_name" class="finput" placeholder="Name of witness"></div>
-                            <div x-data="{ evCount: 0, isDragging: false }">
-                                <label class="flbl">Upload Proof / Evidence (Optional)</label>
-                                <div class="upload-card" 
-                                     :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
-                                     @click="$refs.evidenceInput.click()" 
-                                     @dragover.prevent="isDragging = true"
-                                     @dragleave.prevent="isDragging = false"
-                                     @drop.prevent="isDragging = false; $refs.evidenceInput.files = $event.dataTransfer.files; evCount = $refs.evidenceInput.files.length"
-                                     style="padding: 10px;">
-                                    <i class="fas fa-file-upload" style="font-size:16px;"></i>
-                                    <div class="upload-txt" x-text="evCount > 0 ? evCount + ' file(s) selected' : 'Click or Drag Files'" style="margin-top:4px;"></div>
-                                    <input type="file" x-ref="evidenceInput" name="evidence[]" multiple accept="image/*,video/*,.pdf" style="display:none;" @change="evCount = $event.target.files.length">
+
+                    {{-- ==================== STEP 2: INCIDENT DETAILS & LEGAL NOTICE ==================== --}}
+                    <div x-show="issueStep === 2" x-transition:enter.opacity.duration.200ms>
+                        {{-- Incident Details --}}
+                        <div class="sblk">
+                            <div class="sblk-ttl"><i class="fas fa-map-marker-alt"></i> Incident Details</div>
+                            <div class="fgrid2 fgrp">
+                                <div><label class="flbl">Date & Time of Incident *</label><input type="datetime-local" name="incident_date" required class="finput" max="{{ date('Y-m-d\TH:i') }}" min="{{ date('Y-m-d\TH:i', strtotime('-6 months')) }}"></div>
+                                <div><label class="flbl">Location of Incident *</label><input type="text" name="incident_location" required class="finput" placeholder="Purok, Street, Landmark..."></div>
+                                <div class="fspan2"><label class="flbl">Description / Narration *</label><textarea name="description" rows="4" required class="finput" style="resize:vertical;" placeholder="Describe what happened in complete detail (chronological events, actions, dialogue)..."></textarea></div>
+                                <div><label class="flbl">Witness Name (Optional)</label><input type="text" name="witness_name" class="finput" placeholder="Name of witness (if any)"></div>
+                                <div x-data="{ evCount: 0, isDragging: false }">
+                                    <label class="flbl">Upload Proof / Evidence (Optional)</label>
+                                    <div class="upload-card" 
+                                         :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
+                                         @click="$refs.evidenceInput.click()" 
+                                         @dragover.prevent="isDragging = true"
+                                         @dragleave.prevent="isDragging = false"
+                                         @drop.prevent="isDragging = false; $refs.evidenceInput.files = $event.dataTransfer.files; evCount = $refs.evidenceInput.files.length"
+                                         style="padding: 10px;">
+                                        <i class="fas fa-file-upload" style="font-size:16px;"></i>
+                                        <div class="upload-txt" x-text="evCount > 0 ? evCount + ' file(s) selected' : 'Click or Drag Photos/Videos/PDF'" style="margin-top:4px;"></div>
+                                        <input type="file" x-ref="evidenceInput" name="evidence[]" multiple accept="image/*,video/*,.pdf" style="display:none;" @change="evCount = $event.target.files.length">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:12px 13px;margin-bottom:12px;font-size:10px;font-weight:700;color:#7f1d1d;line-height:1.4;">
-                        <div style="margin-bottom:4px;display:flex;align-items:center;gap:6px;"><i class="fas fa-exclamation-circle"></i> <strong>REPORTING POLICY:</strong></div>
-                        Only <strong>one (1) active incident report</strong> is allowed per resident. Please wait for your current report to be resolved before filing another. For <strong>immediate emergencies</strong>, call <strong>911</strong> or PNP.
-                    </div>
-                    <div style="display:flex;justify-content:flex-end;gap:8px;">
-                        <button type="button" @click="issueModal=false" class="btn-plain btn-ghost">Cancel</button>
-                        <button type="submit" class="btn-grad btn-grad-red"><i class="fas fa-flag"></i> Submit Report</button>
+
+                        {{-- LEGAL WARNING & ANTI-FALSE REPORTING NOTE --}}
+                        <div style="background:linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border:1.5px solid #f87171; border-radius:12px; padding:14px 16px; margin:14px 0; box-shadow:0 2px 8px rgba(220,38,38,0.08);">
+                            <div style="display:flex; align-items:flex-start; gap:10px;">
+                                <div style="background:#dc2626; color:#fff; width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; margin-top:2px;">
+                                    <i class="fas fa-balance-scale"></i>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:11.5px; font-weight:900; color:#991b1b; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:4px;" x-text="lang==='fil'?'BABALA SA PAG-UULAT / LEGAL WARNING':'OFFICIAL LEGAL WARNING & NOTICE'">
+                                        OFFICIAL LEGAL WARNING & NOTICE
+                                    </div>
+                                    <p style="font-size:10.5px; color:#7f1d1d; font-weight:600; line-height:1.45; margin:0 0 10px 0;" x-text="lang==='fil'?'Ang paghahain ng gawa-gawang reklamo, panloloko, biro (prank), o hindi seryosong sumbong ay mahigpit na ipinagbabawal sa ilalim ng Revised Penal Code (Art. 183 - Perjury / False Testimony) at mga Ordinansa ng Barangay. Ang sinumang mapapatunayang naghain ng pekeng ulat ay pananagutin sa batas at maaaring maharap sa kasong kriminal.':'Filing a false, fabricated, prank, joke, or non-serious report is strictly prohibited and punishable under Article 183 of the Revised Penal Code (Perjury / False Testimony) and Barangay Ordinances. Making malicious or untruthful statements to barangay authorities carries legal consequences and criminal prosecution.'">
+                                        Filing a false, fabricated, prank, joke, or non-serious report is strictly prohibited and punishable under Article 183 of the Revised Penal Code (Perjury / False Testimony) and Barangay Ordinances. Making malicious or untruthful statements to barangay authorities carries legal consequences and criminal prosecution.
+                                    </p>
+                                    
+                                    {{-- Mandatory Legal Acknowledgment Checkbox --}}
+                                    <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer; background:rgba(255,255,255,0.85); border:1.5px solid #fca5a5; padding:8px 12px; border-radius:8px;">
+                                        <input type="checkbox" name="legal_acknowledgment" value="1" x-model="legalAcknowledged" style="width:16px; height:16px; accent-color:#dc2626; margin-top:1px; cursor:pointer;" required>
+                                        <span style="font-size:10.5px; font-weight:800; color:#991b1b; line-height:1.35;" x-text="lang==='fil'?'Pinatutunayan ko sa ilalim ng batas na ang aking sumbong ay totoo, seryoso, at hindi biro o gawa-gawa.':'I certify under penalty of law that this report is true, serious, and not a prank, joke, or false complaint.'">
+                                            I certify under penalty of law that this report is true, serious, and not a prank, joke, or false complaint.
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Reporting Policy Reminder --}}
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:9px 12px; margin-bottom:12px; font-size:10px; font-weight:600; color:#475569; line-height:1.4; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-info-circle" style="color:var(--brand); font-size:13px; flex-shrink:0;"></i>
+                            <span>For immediate life-threatening emergencies requiring Tanod or Police, call <strong>911</strong> or use the <strong>EMERGENCY SOS</strong> button.</span>
+                        </div>
+
+                        {{-- Step 2 Buttons --}}
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <button type="button" @click="issueStep=1; issueErrorMsg='';" class="btn-plain btn-outline" style="padding:10px 18px; font-size:12px; display:flex; align-items:center; gap:6px;">
+                                <i class="fas fa-arrow-left"></i>
+                                <span x-text="lang==='fil'?'Bumalik sa Hakbang 1':'Back to Step 1'">Back to Step 1</span>
+                            </button>
+                            <button type="submit" :disabled="!legalAcknowledged || isSubmittingReport" class="btn-grad btn-grad-red" :style="(!legalAcknowledged || isSubmittingReport) ? 'opacity:0.6; cursor:not-allowed;' : ''" style="padding:10px 22px; font-size:12px; display:flex; align-items:center; gap:6px;">
+                                <template x-if="!isSubmittingReport">
+                                    <span style="display:flex; align-items:center; gap:6px;"><i class="fas fa-flag"></i> <span x-text="lang==='fil'?'Isumite ang Opisyal na Reklamo':'Submit Official Report'">Submit Official Report</span></span>
+                                </template>
+                                <template x-if="isSubmittingReport">
+                                    <span style="display:flex; align-items:center; gap:6px;"><i class="fas fa-spinner fa-spin"></i> <span x-text="lang==='fil'?'Isinusumite...':'Submitting...'">Submitting...</span></span>
+                                </template>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
