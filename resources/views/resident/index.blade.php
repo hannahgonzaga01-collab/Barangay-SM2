@@ -1431,58 +1431,87 @@ html, body {
 
         {{-- APPLICATION HISTORY --}}
         @if($isAuth)
-        <div class="wcard" id="application-history">
-            <div class="wcard-head">
-                <div class="wcard-title"><i class="fas fa-history"></i> <span x-text="t('my_history')">Your Application History</span></div>
-                <div class="wcard-badge">{{ $requests->count() }} <span x-text="t('requests')">requests</span></div>
-            </div>
-            @foreach($requests as $req)
-            <div class="event-item">
-                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="fas fa-file-invoice" style="color:var(--brand);font-size:13px;"></i>
+        <div class="wcard" id="application-history"
+             x-data="{ 
+                isAppHistoryCollapsed: false, 
+                showAllApps: false 
+             }"
+             @hashchange.window="if(window.location.hash === '#application-history') { isAppHistoryCollapsed = false; }">
+            <div class="wcard-head" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;" @click="isAppHistoryCollapsed = !isAppHistoryCollapsed">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="wcard-title"><i class="fas fa-history"></i> <span x-text="t('my_history')">Your Application History</span></div>
+                    <div class="wcard-badge">{{ $requests->count() }} <span x-text="t('requests')">requests</span></div>
                 </div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-size:12px;font-weight:800;color:var(--text);">{{ ucwords(str_replace('_',' ',$req->document_type)) }}</div>
-                    <div style="font-size:10px;color:var(--muted);font-weight:600;">
-                        Purpose: {{ $req->purpose ?? 'N/A' }} •
-                        Status: <span class="s-{{ $req->status }}">{{ ucfirst($req->status) }}</span>
-                    </div>
-                    <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;display:flex;align-items:center;gap:4px;">
-                        <i class="fas fa-calendar-alt" style="color:var(--brand);font-size:9px;"></i> 
-                        Appointment: 
-                        <span style="color:var(--text);font-weight:800;">
-                            @if($req->appointment_date)
-                                {{ \Carbon\Carbon::parse($req->appointment_date)->format('M d, Y') }} ({{ \Carbon\Carbon::parse($req->appointment_time)->format('h:i A') }})
-                            @else
-                                <span style="color:#0284c7;">Assigned upon processing</span>
-                            @endif
-                        </span>
-                    </div>
-                    @if($req->status === 'disapproved' && $req->disapproval_reason)
-                    <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:8px;padding:6px 10px;margin-top:6px;font-size:10px;color:#dc2626;font-weight:700;">
-                        <i class="fas fa-exclamation-circle"></i> Reason: {{ $req->disapproval_reason }}
-                    </div>
-                    @endif
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-                    <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;">{{ $req->created_at->format('M d') }}</span>
-                    @if($req->status !== 'disapproved' && $req->status !== 'released' && $req->reschedule_count < 1 && $req->appointment_date)
-                    <button type="button" @click="activeReq={{ json_encode($req) }}; rescheduleModal=true" 
-                            style="background:none;border:none;color:var(--brand);font-size:9.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;padding:2px 4px;border-radius:4px;"
-                            onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                        <i class="fas fa-calendar-edit"></i> Reschedule
-                    </button>
-                    @endif
-                </div>
-            </div>
-            @endforeach
 
-            @if($requests->isEmpty())
-            <div style="padding:30px;text-align:center;color:var(--light);">
-                <i class="fas fa-folder-open" style="font-size:26px;display:block;margin-bottom:7px;opacity:.25;"></i>
-                <p style="font-size:11px;font-weight:700;">No document requests submitted yet.</p>
+                {{-- Collapse / Hide Arrow Button --}}
+                <button type="button" @click.stop="isAppHistoryCollapsed = !isAppHistoryCollapsed" 
+                        style="border:none; background:transparent; color:#64748b; font-size:11px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; padding:4px 8px; border-radius:6px; transition:all .15s;"
+                        :title="isAppHistoryCollapsed ? 'Expand section' : 'Hide / Collapse section'">
+                    <span x-text="isAppHistoryCollapsed ? 'Expand' : 'Hide'" style="font-size:10px; text-transform:uppercase; letter-spacing:0.04em;"></span>
+                    <i class="fas" :class="isAppHistoryCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'" style="font-size:10px;"></i>
+                </button>
             </div>
-            @endif
+
+            {{-- Collapsible Body --}}
+            <div x-show="!isAppHistoryCollapsed" x-transition:enter.duration.200ms>
+                @foreach($requests as $index => $req)
+                <div class="event-item" x-show="showAllApps || {{ $index }} < 3" x-transition>
+                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-file-invoice" style="color:var(--brand);font-size:13px;"></i>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;font-weight:800;color:var(--text);">{{ ucwords(str_replace('_',' ',$req->document_type)) }}</div>
+                        <div style="font-size:10px;color:var(--muted);font-weight:600;">
+                            Purpose: {{ $req->purpose ?? 'N/A' }} •
+                            Status: <span class="s-{{ $req->status }}">{{ ucfirst($req->status) }}</span>
+                        </div>
+                        <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;display:flex;align-items:center;gap:4px;">
+                            <i class="fas fa-calendar-alt" style="color:var(--brand);font-size:9px;"></i> 
+                            Appointment: 
+                            <span style="color:var(--text);font-weight:800;">
+                                @if($req->appointment_date)
+                                    {{ \Carbon\Carbon::parse($req->appointment_date)->format('M d, Y') }} ({{ \Carbon\Carbon::parse($req->appointment_time)->format('h:i A') }})
+                                @else
+                                    <span style="color:#0284c7;">Assigned upon processing</span>
+                                @endif
+                            </span>
+                        </div>
+                        @if($req->status === 'disapproved' && $req->disapproval_reason)
+                        <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:8px;padding:6px 10px;margin-top:6px;font-size:10px;color:#dc2626;font-weight:700;">
+                            <i class="fas fa-exclamation-circle"></i> Reason: {{ $req->disapproval_reason }}
+                        </div>
+                        @endif
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                        <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;">{{ $req->created_at->format('M d') }}</span>
+                        @if($req->status !== 'disapproved' && $req->status !== 'released' && $req->reschedule_count < 1 && $req->appointment_date)
+                        <button type="button" @click="activeReq={{ json_encode($req) }}; rescheduleModal=true" 
+                                style="background:none;border:none;color:var(--brand);font-size:9.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;padding:2px 4px;border-radius:4px;"
+                                onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                            <i class="fas fa-calendar-edit"></i> Reschedule
+                        </button>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+
+                @if($requests->count() > 3)
+                <div style="padding:10px 14px 14px; text-align:center;">
+                    <button type="button" @click="showAllApps = !showAllApps" 
+                            style="width:100%; padding:7px 12px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:8px; font-size:11px; font-weight:800; color:var(--brand); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .2s;">
+                        <i class="fas" :class="showAllApps ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        <span x-text="showAllApps ? 'Show Less (Top 3)' : 'View all {{ $requests->count() }} requests'"></span>
+                    </button>
+                </div>
+                @endif
+
+                @if($requests->isEmpty())
+                <div style="padding:30px;text-align:center;color:var(--light);">
+                    <i class="fas fa-folder-open" style="font-size:26px;display:block;margin-bottom:7px;opacity:.25;"></i>
+                    <p style="font-size:11px;font-weight:700;">No document requests submitted yet.</p>
+                </div>
+                @endif
+            </div>
         </div>
         @endif
         @if($isAuth)
