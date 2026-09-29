@@ -450,6 +450,8 @@ html, body {
             docuModal: false,
             issueModal: false,
             issueStep: 1,
+            incidentDatePart: '{{ date('Y-m-d') }}',
+            incidentTimePart: '{{ date('H:i') }}',
             legalAcknowledged: false,
             isSubmittingReport: false,
             issueErrorMsg: '',
@@ -1116,10 +1118,14 @@ html, body {
             submitIssueReport(e) {
                 this.issueErrorMsg = '';
 
+                let incDateVal = this.incidentDatePart ? (this.incidentDatePart + ' ' + (this.incidentTimePart || '12:00')) : '';
                 const incDate = document.querySelector('input[name="incident_date"]');
-                if (!incDate || !incDate.value) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang petsa at oras ng insidente.' : 'Please specify the date & time of the incident.';
-                    incDate?.focus();
+                if (incDate && incDateVal) {
+                    incDate.value = incDateVal;
+                }
+                if (!this.incidentDatePart) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang petsa ng insidente.' : 'Please specify the date of the incident.';
+                    document.querySelector('input[name="incident_date_only"]')?.focus();
                     return;
                 }
 
@@ -2516,10 +2522,15 @@ html, body {
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Date & Time of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                    <input type="datetime-local" name="incident_date" required style="width:100%; height:40px; padding:6px 10px; font-size:12.5px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" max="{{ date('Y-m-d\TH:i') }}" min="{{ date('Y-m-d\TH:i', strtotime('-6 months')) }}">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Date of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="date" name="incident_date_only" x-model="incidentDatePart" required style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box; cursor:pointer;" max="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-6 months')) }}">
                                 </div>
                                 <div>
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Time of Incident (Optional)</label>
+                                    <input type="time" name="incident_time_only" x-model="incidentTimePart" style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box; cursor:pointer;">
+                                </div>
+                                <input type="hidden" name="incident_date" :value="incidentDatePart ? (incidentDatePart + ' ' + (incidentTimePart || '12:00')) : ''">
+                                <div style="grid-column:span 2;">
                                     <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Location of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
                                     <input type="text" name="incident_location" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Purok, Street, Landmark...">
                                 </div>

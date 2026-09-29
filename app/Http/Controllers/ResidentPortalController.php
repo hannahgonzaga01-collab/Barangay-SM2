@@ -1057,6 +1057,14 @@ class ResidentPortalController extends Controller
             }
         }
 
+        if (!$request->filled('incident_date') && $request->filled('incident_date_only')) {
+            $datePart = $request->input('incident_date_only');
+            $timePart = $request->input('incident_time_only') ?: '12:00';
+            $request->merge([
+                'incident_date' => date('Y-m-d H:i:s', strtotime("$datePart $timePart"))
+            ]);
+        }
+
         $rules = [
             'issue_type'       => 'required|string',
             'complainant_name' => 'required|string|max:255',
