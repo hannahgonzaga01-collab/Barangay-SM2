@@ -2398,15 +2398,15 @@ html, body {
 
                         {{-- Type of Offense --}}
                         <div class="fgrp" style="margin-bottom:12px;">
-                            <label class="flbl" style="font-weight:800; font-size:11px; color:#1e293b;">Type of Offense / Complaint <span style="color:#dc2626;">*</span></label>
-                            <select name="issue_type" class="finput fselect" x-model="selectedOffense" @change="showOtherOffense = selectedOffense === 'Others'" required style="border-radius:8px; height:38px;">
+                            <label class="flbl" style="font-weight:800; font-size:11px; color:#1e293b; height:18px; display:flex; align-items:center; margin-bottom:4px;">Type of Offense / Complaint <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                            <select name="issue_type" x-model="selectedOffense" @change="showOtherOffense = selectedOffense === 'Others'" required style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; cursor:pointer; font-family:inherit; box-sizing:border-box;">
                                 <option value="">— Select Offense Type —</option>
                                 <template x-for="o in offenses" :key="o"><option :value="o" x-text="o"></option></template>
                             </select>
                         </div>
                         <div x-show="showOtherOffense" x-transition class="fgrp" style="margin-bottom:12px;">
-                            <label class="flbl" style="font-weight:800; font-size:11px; color:#1e293b;">Specify Offense Type <span style="color:#dc2626;">*</span></label>
-                            <input type="text" name="issue_type_other" placeholder="Describe the type of offense..." class="finput" style="border-radius:8px; height:38px;">
+                            <label class="flbl" style="font-weight:800; font-size:11px; color:#1e293b; height:18px; display:flex; align-items:center; margin-bottom:4px;">Specify Offense Type <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                            <input type="text" name="issue_type_other" placeholder="Describe the type of offense..." style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
                         </div>
 
                         {{-- Complainant Information Card --}}
@@ -2417,22 +2417,22 @@ html, body {
                                 <span style="font-size:9px; background:#e0f2fe; color:#0369a1; padding:2px 7px; border-radius:6px; font-weight:700;">Open to All</span>
                                 @endif
                             </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
                                 <div style="grid-column:span 2;">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Full Name <span style="color:#dc2626;">*</span></label>
-                                    <input type="text" name="complainant_name" required class="finput" style="border-radius:8px; height:38px;" placeholder="Juan Dela Cruz" value="{{ $isAuth ? (($authUser?->first_name??'').' '.($authUser?->last_name??'')) : old('complainant_name') }}">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="text" name="complainant_name" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Juan Dela Cruz" value="{{ $isAuth ? (($authUser?->first_name??'').' '.($authUser?->last_name??'')) : old('complainant_name') }}">
                                 </div>
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Contact Number (11 digits) <span style="color:#dc2626;">*</span></label>
-                                    <input type="text" name="contact" required class="finput" style="border-radius:8px; height:38px;" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Contact Number (11 digits) <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="text" name="contact" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}">
                                 </div>
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Age <span style="color:#dc2626;">*</span></label>
-                                    <input type="number" name="complainant_age" required class="finput" style="border-radius:8px; height:38px;" placeholder="Min. 18" min="18" value="{{ $isAuth ? $authUser?->age : old('complainant_age') }}">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Age <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="number" name="complainant_age" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Min. 18" min="18" value="{{ $isAuth ? $authUser?->age : old('complainant_age') }}">
                                 </div>
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Gender</label>
-                                    <select name="complainant_gender" class="finput fselect" style="border-radius:8px; height:38px;">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Gender</label>
+                                    <select name="complainant_gender" style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; cursor:pointer; font-family:inherit; box-sizing:border-box;">
                                         <option value="">Select Gender</option>
                                         <option value="Male" @if($isAuth && ($authUser?->gender??'') === 'Male') selected @endif>Male</option>
                                         <option value="Female" @if($isAuth && ($authUser?->gender??'') === 'Female') selected @endif>Female</option>
@@ -2441,24 +2441,24 @@ html, body {
                                 </div>
                                 <div>
                                     @if(!$isAuth)
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Email Address <span style="color:#dc2626;">*</span></label>
-                                    <input type="email" name="guest_email" required class="finput" style="border-radius:8px; height:38px;" placeholder="example@gmail.com">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Email Address <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="email" name="guest_email" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="example@gmail.com">
                                     @else
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Address / Location</label>
-                                    <input type="text" name="complainant_address" class="finput" style="border-radius:8px; height:38px;" placeholder="Blk/Lot, Street, Brgy..." value="{{ $authUser?->address }}">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Address / Location</label>
+                                    <input type="text" name="complainant_address" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Blk/Lot, Street, Brgy..." value="{{ $authUser?->address }}">
                                     @endif
                                 </div>
                                 @if(!$isAuth)
                                 <div style="grid-column:span 2;">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Address / Location</label>
-                                    <input type="text" name="complainant_address" class="finput" style="border-radius:8px; height:38px;" placeholder="House/Blk/Lot, Street, Barangay, City..." value="{{ old('complainant_address') }}">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Address / Location</label>
+                                    <input type="text" name="complainant_address" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="House/Blk/Lot, Street, Barangay, City..." value="{{ old('complainant_address') }}">
                                 </div>
                                 @endif
                             </div>
 
                             {{-- Filing on Behalf Checkbox --}}
                             <div style="margin-top:10px; padding:8px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:10.5px; font-weight:800; color:#1e293b;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:10.5px; font-weight:800; color:#1e293b; margin:0;">
                                     <input type="checkbox" name="is_on_behalf" value="1" x-model="isOnBehalf" style="width:15px; height:15px; accent-color:var(--brand); cursor:pointer;">
                                     <span><i class="fas fa-hands-helping" style="color:var(--brand); margin-right:3px;"></i> Filing on behalf of a victim / dependent</span>
                                 </label>
@@ -2469,18 +2469,18 @@ html, body {
                                 <div style="font-size:9.5px; font-weight:900; text-transform:uppercase; color:#a21caf; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
                                     <i class="fas fa-shield-alt"></i> Dedicated Victim Information
                                 </div>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start;">
                                     <div style="grid-column:span 2;">
-                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700;">Victim Full Name <span style="color:#dc2626;">*</span></label>
-                                        <input type="text" name="victim_name" :required="isOnBehalf" class="finput" placeholder="Full name of victim/dependent" style="border-color:#f0abfc; background:#fff; border-radius:8px; height:36px;">
+                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                        <input type="text" name="victim_name" :required="isOnBehalf" placeholder="Full name of victim/dependent" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
                                     </div>
                                     <div>
-                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700;">Victim Age <span style="color:#dc2626;">*</span></label>
-                                        <input type="number" name="victim_age" :required="isOnBehalf" min="0" max="120" class="finput" placeholder="e.g. 14" style="border-color:#f0abfc; background:#fff; border-radius:8px; height:36px;">
+                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Age <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                        <input type="number" name="victim_age" :required="isOnBehalf" min="0" max="120" placeholder="e.g. 14" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
                                     </div>
                                     <div>
-                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700;">Victim Gender <span style="color:#dc2626;">*</span></label>
-                                        <select name="victim_gender" :required="isOnBehalf" class="finput fselect" style="border-color:#f0abfc; background:#fff; border-radius:8px; height:36px;">
+                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Gender <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                        <select name="victim_gender" :required="isOnBehalf" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; cursor:pointer; font-family:inherit; box-sizing:border-box;">
                                             <option value="">Select Gender</option>
                                             <option value="Female">Female</option>
                                             <option value="Male">Male</option>
@@ -2488,8 +2488,8 @@ html, body {
                                         </select>
                                     </div>
                                     <div style="grid-column:span 2;">
-                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700;">Relationship to Complainant <span style="color:#dc2626;">*</span></label>
-                                        <input type="text" name="victim_relationship" :required="isOnBehalf" class="finput" placeholder="e.g. Daughter, Son, Spouse, Sister, Neighbor, etc." style="border-color:#f0abfc; background:#fff; border-radius:8px; height:36px;">
+                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Relationship to Complainant <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                        <input type="text" name="victim_relationship" :required="isOnBehalf" placeholder="e.g. Daughter, Son, Spouse, Sister, Neighbor, etc." style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
                                     </div>
                                 </div>
                             </div>
@@ -2500,14 +2500,14 @@ html, body {
                             <div style="font-size:11px; font-weight:800; color:#1e293b; margin-bottom:10px;">
                                 <i class="fas fa-user-slash" style="color:#dc2626; margin-right:5px;"></i> Respondent (Person being reported)
                             </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Respondent Full Name <span style="color:#dc2626;">*</span></label>
-                                    <input type="text" name="respondent_name" required class="finput" style="border-radius:8px; height:38px;" placeholder="Name of person being reported">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Respondent Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="text" name="respondent_name" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Name of person being reported">
                                 </div>
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Respondent Address (Optional / If known)</label>
-                                    <input type="text" name="respondent_address" class="finput" style="border-radius:8px; height:38px;" placeholder="Address or known location">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Respondent Address (Optional)">Respondent Address (Optional)</label>
+                                    <input type="text" name="respondent_address" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Address or known location">
                                 </div>
                             </div>
                         </div>
@@ -2520,34 +2520,34 @@ html, body {
                             <div style="font-size:11px; font-weight:800; color:#1e293b; margin-bottom:10px;">
                                 <i class="fas fa-map-marker-alt" style="color:#dc2626; margin-right:5px;"></i> Incident Details
                             </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Date & Time of Incident <span style="color:#dc2626;">*</span></label>
-                                    <input type="datetime-local" name="incident_date" required class="finput" style="border-radius:8px; height:38px;" max="{{ date('Y-m-d\TH:i') }}" min="{{ date('Y-m-d\TH:i', strtotime('-6 months')) }}">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Date & Time of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="datetime-local" name="incident_date" required style="width:100%; height:40px; padding:6px 10px; font-size:12.5px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" max="{{ date('Y-m-d\TH:i') }}" min="{{ date('Y-m-d\TH:i', strtotime('-6 months')) }}">
                                 </div>
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Location of Incident <span style="color:#dc2626;">*</span></label>
-                                    <input type="text" name="incident_location" required class="finput" style="border-radius:8px; height:38px;" placeholder="Purok, Street, Landmark...">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Location of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="text" name="incident_location" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Purok, Street, Landmark...">
                                 </div>
                                 <div style="grid-column:span 2;">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Description / Narration <span style="color:#dc2626;">*</span></label>
-                                    <textarea name="description" rows="3" required class="finput" style="resize:vertical; border-radius:8px;" placeholder="Describe what happened in complete detail (chronological events, actions, dialogue)..."></textarea>
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Description / Narration <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <textarea name="description" rows="3" required style="width:100%; padding:10px 12px; font-size:13px; font-weight:500; line-height:1.45; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; resize:vertical; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Describe what happened in complete detail (chronological events, actions, dialogue)..."></textarea>
                                 </div>
                                 <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Witness Name (Optional)</label>
-                                    <input type="text" name="witness_name" class="finput" style="border-radius:8px; height:38px;" placeholder="Name of witness (if any)">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Witness Name (Optional)</label>
+                                    <input type="text" name="witness_name" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Name of witness (if any)">
                                 </div>
                                 <div x-data="{ evCount: 0, isDragging: false }">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155;">Proof / Evidence (Optional)</label>
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Proof / Evidence (Optional)</label>
                                     <div class="upload-card" 
                                          :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
                                          @click="$refs.evidenceInput.click()" 
                                          @dragover.prevent="isDragging = true"
                                          @dragleave.prevent="isDragging = false"
                                          @drop.prevent="isDragging = false; $refs.evidenceInput.files = $event.dataTransfer.files; evCount = $refs.evidenceInput.files.length"
-                                         style="padding:8px 12px; height:38px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; border:1.5px dashed #cbd5e1; cursor:pointer; background:#fff; transition:all .2s;">
+                                         style="padding:6px 12px; height:40px; min-height:40px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; border:1.5px dashed #cbd5e1; cursor:pointer; background:#fff; transition:all .2s; box-sizing:border-box; margin:0;">
                                         <i class="fas fa-file-upload" style="font-size:13px; color:var(--brand);"></i>
-                                        <span class="upload-txt" x-text="evCount > 0 ? evCount + ' file(s) selected' : 'Upload Photos/Videos/PDF'" style="margin:0; font-size:10px; font-weight:700; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
+                                        <span class="upload-txt" x-text="evCount > 0 ? evCount + ' file(s) selected' : 'Upload Photos/Videos/PDF'" style="margin:0; font-size:10.5px; font-weight:700; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                                         <input type="file" x-ref="evidenceInput" name="evidence[]" multiple accept="image/*,video/*,.pdf" style="display:none;" @change="evCount = $event.target.files.length">
                                     </div>
                                 </div>
