@@ -417,6 +417,20 @@ html, body {
     @php
         $isAuth   = auth()->check();
         $authUser = auth()->user();
+        $authUserAge = null;
+        if ($isAuth && $authUser) {
+            if (!empty($authUser->resident?->age)) {
+                $authUserAge = $authUser->resident->age;
+            } elseif (!empty($authUser->birthday)) {
+                try {
+                    $authUserAge = \Carbon\Carbon::parse($authUser->birthday)->age;
+                } catch (\Exception $e) {}
+            } elseif (!empty($authUser->resident?->birthday)) {
+                try {
+                    $authUserAge = \Carbon\Carbon::parse($authUser->resident->birthday)->age;
+                } catch (\Exception $e) {}
+            }
+        }
         $tagColors = [
             'Announcement' => ['bg'=>'#dbeafe','color'=>'#1d4ed8'],
             'Health'       => ['bg'=>'#dcfce7','color'=>'#15803d'],
@@ -2376,26 +2390,6 @@ html, body {
                     {{-- ==================== STEP 1: PARTIES & OFFENSE ==================== --}}
                     <div x-show="issueStep === 1" x-transition:enter.opacity.duration.200ms>
                         
-                        {{-- PROMINENT ₱100 FILING FEE & ADVISORY BANNER --}}
-                        <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 2px 6px rgba(245,158,11,0.12);">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #f59e0b; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(245,158,11,0.3);">
-                                    <i class="fas fa-receipt"></i>
-                                </div>
-                                <div>
-                                    <div style="font-size: 12px; font-weight: 900; color: #92400e; text-transform: uppercase; letter-spacing: 0.02em;">
-                                        Official Filing Fee: ₱100.00 (Any Case)
-                                    </div>
-                                    <div style="font-size: 10px; color: #78350f; font-weight: 600; line-height: 1.35;">
-                                        Standard barangay fee for all blotter & incident reports, settled at the Barangay Hall.
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="background: #fff; border: 1.5px solid #f59e0b; color: #b45309; font-size: 13px; font-weight: 900; padding: 4px 12px; border-radius: 8px; white-space: nowrap;">
-                                ₱100.00
-                            </div>
-                        </div>
-
                         {{-- Type of Offense --}}
                         <div class="fgrp" style="margin-bottom:12px;">
                             <label class="flbl" style="font-weight:800; font-size:11px; color:#1e293b; height:18px; display:flex; align-items:center; margin-bottom:4px;">Type of Offense / Complaint <span style="color:#dc2626; margin-left:2px;">*</span></label>
@@ -2428,7 +2422,7 @@ html, body {
                                 </div>
                                 <div>
                                     <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Age <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                    <input type="number" name="complainant_age" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Min. 18" min="18" value="{{ $isAuth ? $authUser?->age : old('complainant_age') }}">
+                                    <input type="number" name="complainant_age" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Min. 18" min="18" value="{{ $isAuth ? ($authUserAge ?? '') : old('complainant_age') }}">
                                 </div>
                                 <div>
                                     <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Gender</label>
