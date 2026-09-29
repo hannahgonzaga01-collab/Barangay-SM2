@@ -2338,7 +2338,7 @@ html, body {
 
     {{-- ADD PET MODAL --}}
 
-    {{-- REPORT ISSUE MODAL (2-STEP WIZARD WITH FIXED HEADER/FOOTER & ₱100 FILING FEE) --}}
+    {{-- REPORT ISSUE MODAL (2-STEP WIZARD WITH SEGMENTED TABS & PROMINENT ₱100 FILING FEE) --}}
     <div x-show="issueModal" x-cloak class="modal-ov" x-transition style="z-index:9999;" @keydown.window.escape="issueModal=false">
         <div class="modal-box modal-box-red" id="issueReportModalBox" style="max-width:580px; width:100%; max-height:86vh; display:flex; flex-direction:column; overflow:hidden; border-radius:20px; box-shadow:0 25px 60px rgba(0,0,52,0.35); padding:0;" @click.away="issueModal=false">
             
@@ -2346,48 +2346,42 @@ html, body {
                 @csrf
 
                 {{-- 1. FIXED MODAL HEADER --}}
-                <div style="padding:16px 20px 14px; background:#fff; border-bottom:1px solid #e2e8f0; flex-shrink:0;">
-                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                <div style="padding:16px 20px 12px; background:#fff; border-bottom:1px solid #e2e8f0; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:36px; height:36px; border-radius:10px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">
+                            <div style="width:38px; height:38px; border-radius:10px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">
                                 <i class="fas fa-flag"></i>
                             </div>
                             <div>
                                 <div style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em;">Report an Issue / Concern</div>
-                                <div style="font-size:10px; font-weight:600; color:#64748b;">Blotter, VAWC, Peace & Order • Open to All</div>
+                                <div style="font-size:10.5px; font-weight:600; color:#64748b;">Blotter, VAWC, Peace & Order • Open to All</div>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
-                                <i class="fas fa-receipt"></i> ₱100 Fee (Any Case)
-                            </span>
-                            <button type="button" @click="issueModal=false" class="modal-close" style="margin:0; width:28px; height:28px; font-size:14px;"><i class="fas fa-times"></i></button>
-                        </div>
+                        <button type="button" @click="issueModal=false" class="modal-close" style="margin:0; width:30px; height:30px; font-size:15px;"><i class="fas fa-times"></i></button>
                     </div>
 
-                    {{-- 2-STEP PROGRESS STEPPER --}}
-                    <div style="display:flex; align-items:center; justify-content:center; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:6px 12px;">
-                        {{-- Step 1 Indicator --}}
-                        <div style="display:flex; align-items:center; gap:6px; cursor:pointer;" @click="if(issueStep > 1) { issueStep = 1; issueErrorMsg = ''; }">
-                            <div :style="issueStep === 1 ? 'background:#dc2626; color:#fff; box-shadow:0 2px 5px rgba(220,38,38,0.3);' : 'background:#16a34a; color:#fff;'" style="width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; transition:all .2s;">
+                    {{-- FULL-WIDTH SEGMENTED PILL STEPPER --}}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#f1f5f9; padding:4px; border-radius:12px; border:1px solid #e2e8f0;">
+                        <button type="button" @click="if(issueStep > 1) { issueStep = 1; issueErrorMsg = ''; }" 
+                                :style="issueStep === 1 ? 'background:#fff; color:#dc2626; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600; cursor:pointer;'"
+                                style="border:none; padding:7px 10px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:11.5px; transition:all .2s;">
+                            <span :style="issueStep === 1 ? 'background:#dc2626; color:#fff;' : (issueStep > 1 ? 'background:#16a34a; color:#fff;' : 'background:#cbd5e1; color:#475569;')" 
+                                  style="width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; flex-shrink:0;">
                                 <template x-if="issueStep > 1"><i class="fas fa-check" style="font-size:9px;"></i></template>
-                                <template x-if="issueStep === 1"><span>1</span></template>
-                            </div>
-                            <span style="font-size:11px; font-weight:800;" :style="issueStep === 1 ? 'color:#dc2626;' : 'color:#334155;'" x-text="lang==='fil'?'1. Pagkakakilanlan':'1. Parties & Offense'">1. Parties & Offense</span>
-                        </div>
+                                <template x-if="issueStep <= 1"><span>1</span></template>
+                            </span>
+                            <span x-text="lang==='fil'?'Hakbang 1: Pagkakakilanlan':'Step 1: Parties & Offense'">Step 1: Parties & Offense</span>
+                        </button>
 
-                        {{-- Line Connector --}}
-                        <div style="width:36px; height:2px; background:#cbd5e1; position:relative; border-radius:99px; overflow:hidden;">
-                            <div :style="issueStep === 2 ? 'width:100%; background:#dc2626;' : 'width:0%; background:#cbd5e1;'" style="height:100%; transition:width 0.3s ease;"></div>
-                        </div>
-
-                        {{-- Step 2 Indicator --}}
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <div :style="issueStep === 2 ? 'background:#dc2626; color:#fff; box-shadow:0 2px 5px rgba(220,38,38,0.3);' : 'background:#e2e8f0; color:#64748b;'" style="width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; transition:all .2s;">
+                        <button type="button" 
+                                :style="issueStep === 2 ? 'background:#fff; color:#dc2626; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600; cursor:default;'"
+                                style="border:none; padding:7px 10px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:11.5px; transition:all .2s;">
+                            <span :style="issueStep === 2 ? 'background:#dc2626; color:#fff;' : 'background:#cbd5e1; color:#475569;'" 
+                                  style="width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; flex-shrink:0;">
                                 2
-                            </div>
-                            <span style="font-size:11px; font-weight:800;" :style="issueStep === 2 ? 'color:#dc2626;' : 'color:#64748b;'" x-text="lang==='fil'?'2. Insidente & Paunawa':'2. Incident & Legal Note'">2. Incident & Legal Note</span>
-                        </div>
+                            </span>
+                            <span x-text="lang==='fil'?'Hakbang 2: Detalye & Paunawa':'Step 2: Incident & Advisory'">Step 2: Incident & Advisory</span>
+                        </button>
                     </div>
                 </div>
 
@@ -2402,6 +2396,27 @@ html, body {
 
                     {{-- ==================== STEP 1: PARTIES & OFFENSE ==================== --}}
                     <div x-show="issueStep === 1" x-transition:enter.opacity.duration.200ms>
+                        
+                        {{-- PROMINENT ₱100 FILING FEE & ADVISORY BANNER --}}
+                        <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 2px 6px rgba(245,158,11,0.12);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #f59e0b; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(245,158,11,0.3);">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 900; color: #92400e; text-transform: uppercase; letter-spacing: 0.02em;">
+                                        Official Filing Fee: ₱100.00 (Any Case)
+                                    </div>
+                                    <div style="font-size: 10px; color: #78350f; font-weight: 600; line-height: 1.35;">
+                                        Standard barangay fee for all blotter & incident reports, settled at the Barangay Hall.
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="background: #fff; border: 1.5px solid #f59e0b; color: #b45309; font-size: 13px; font-weight: 900; padding: 4px 12px; border-radius: 8px; white-space: nowrap;">
+                                ₱100.00
+                            </div>
+                        </div>
+
                         {{-- Type of Offense --}}
                         <div class="fgrp" style="margin-bottom:12px;">
                             <label class="flbl" style="font-weight:800; font-size:11px; color:#1e293b;">Type of Offense / Complaint <span style="color:#dc2626;">*</span></label>
@@ -2560,26 +2575,45 @@ html, body {
                             </div>
                         </div>
 
-                        {{-- ₱100 FILING FEE & OFFICIAL LEGAL WARNING CARD --}}
-                        <div style="background:#fff; border:1.5px solid #fca5a5; border-radius:12px; padding:12px 14px; margin-top:12px; box-shadow:0 2px 6px rgba(220,38,38,0.06);">
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid #fee2e2;">
-                                <div style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:900; color:#991b1b; text-transform:uppercase;">
-                                    <i class="fas fa-balance-scale" style="color:#dc2626;"></i> Legal Advisory & Filing Fee
+                        {{-- PROMINENT LEGAL ADVISORY & ₱100 FILING FEE CERTIFICATION BOX --}}
+                        <div style="background:#fff; border:1.5px solid #fca5a5; border-radius:14px; padding:14px 16px; margin-top:14px; box-shadow:0 2px 10px rgba(220,38,38,0.08);">
+                            {{-- Title --}}
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:8px; border-bottom:1.5px solid #fee2e2;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="width:32px; height:32px; border-radius:8px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:12px; font-weight:900; color:#991b1b; text-transform:uppercase; letter-spacing:0.02em;">
+                                            Official Legal Advisory & Fees
+                                        </div>
+                                        <div style="font-size:9.5px; font-weight:600; color:#7f1d1d;">
+                                            Barangay San Miguel II • Peace & Order Desk
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style="background:#fee2e2; color:#991b1b; font-size:10px; font-weight:800; padding:2px 8px; border-radius:99px; border:1px solid #fca5a5;">
-                                    <i class="fas fa-receipt"></i> ₱100.00 Filing Fee (Any Case)
+                                <div style="background:#fef2f2; border:1.5px solid #f87171; color:#991b1b; font-size:12px; font-weight:900; padding:3px 10px; border-radius:8px; white-space:nowrap;">
+                                    ₱100.00 Filing Fee
                                 </div>
                             </div>
-                            <div style="font-size:10px; color:#7f1d1d; line-height:1.45; margin-bottom:10px;">
-                                • <strong>Strictly No Joke/Prank Reports:</strong> Making false statements or joke accusations is punishable under <strong>Article 183 of the RPC (Perjury / False Testimony)</strong> & Barangay Ordinances.<br>
-                                • <strong>Filing Fee:</strong> A standard fee of <strong>₱100.00</strong> applies to any filed incident report / blotter, payable upon processing at the Barangay Hall.
+
+                            {{-- Bullet Notes --}}
+                            <div style="font-size:10.5px; color:#7f1d1d; line-height:1.5; margin-bottom:12px;">
+                                <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:6px;">
+                                    <i class="fas fa-ban" style="color:#dc2626; margin-top:2px; flex-shrink:0; font-size:12px;"></i>
+                                    <span><strong>Strictly No False or Joke Reports:</strong> Filing a fabricated, joke, or non-serious report is punishable under <strong>Article 183 of the Revised Penal Code (Perjury / False Testimony)</strong> and Barangay Ordinances.</span>
+                                </div>
+                                <div style="display:flex; align-items:flex-start; gap:8px;">
+                                    <i class="fas fa-receipt" style="color:#d97706; margin-top:2px; flex-shrink:0; font-size:12px;"></i>
+                                    <span><strong>₱100.00 Filing Fee:</strong> Any case or blotter filed requires a standard <strong>₱100.00 filing fee</strong> payable upon official processing or summon hearing at the Barangay Hall.</span>
+                                </div>
                             </div>
-                            
-                            {{-- Mandatory Legal Certification Checkbox --}}
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; background:#fef2f2; border:1.2px solid #fca5a5; padding:8px 10px; border-radius:8px;">
-                                <input type="checkbox" name="legal_acknowledgment" value="1" x-model="legalAcknowledged" style="width:16px; height:16px; accent-color:#dc2626; cursor:pointer;" required>
-                                <span style="font-size:10.5px; font-weight:800; color:#991b1b; line-height:1.3;" x-text="lang==='fil'?'Pinatutunayan ko sa ilalim ng batas na ang aking sumbong ay totoo, seryoso, at hindi biro.':'I certify under penalty of law that this report is true, serious, and not a prank or false complaint.'">
-                                    I certify under penalty of law that this report is true, serious, and not a prank or false complaint.
+
+                            {{-- Mandatory Legal Acknowledgment Checkbox --}}
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; background:#fef2f2; border:1.5px solid #fca5a5; padding:10px 12px; border-radius:10px; transition:all .2s;">
+                                <input type="checkbox" name="legal_acknowledgment" value="1" x-model="legalAcknowledged" style="width:18px; height:18px; accent-color:#dc2626; cursor:pointer; flex-shrink:0;" required>
+                                <span style="font-size:11px; font-weight:800; color:#991b1b; line-height:1.35;" x-text="lang==='fil'?'Pinatutunayan ko sa ilalim ng batas na ang aking sumbong ay totoo, seryoso, at hindi biro o gawa-gawa.':'I solemnly certify under penalty of law that this report is true, serious, and not a prank or false complaint.'">
+                                    I solemnly certify under penalty of law that this report is true, serious, and not a prank or false complaint.
                                 </span>
                             </label>
                         </div>
