@@ -2531,18 +2531,93 @@ html, body {
                                     <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Witness Name (Optional)</label>
                                     <input type="text" name="witness_name" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Name of witness (if any)">
                                 </div>
-                                <div x-data="{ evCount: 0, isDragging: false }">
+                                <div x-data="{ 
+                                        evFiles: [], 
+                                        previewUrl: null, 
+                                        previewName: '', 
+                                        previewModal: false,
+                                        handleFileSelect(e) {
+                                            const files = Array.from(e.target.files || []);
+                                            this.evFiles = files;
+                                            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                                                this.previewUrl = URL.createObjectURL(files[0]);
+                                                this.previewName = files[0].name;
+                                            } else {
+                                                this.previewUrl = null;
+                                                this.previewName = files[0] ? files[0].name : '';
+                                            }
+                                        },
+                                        removeFile(e) {
+                                            e.stopPropagation();
+                                            this.evFiles = [];
+                                            this.previewUrl = null;
+                                            this.previewName = '';
+                                            this.$refs.evidenceInput.value = '';
+                                        }
+                                     }">
                                     <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Proof / Evidence (Optional)</label>
-                                    <div class="upload-card" 
-                                         :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
-                                         @click="$refs.evidenceInput.click()" 
-                                         @dragover.prevent="isDragging = true"
-                                         @dragleave.prevent="isDragging = false"
-                                         @drop.prevent="isDragging = false; $refs.evidenceInput.files = $event.dataTransfer.files; evCount = $refs.evidenceInput.files.length"
-                                         style="padding:6px 12px; height:40px; min-height:40px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; border:1.5px dashed #cbd5e1; cursor:pointer; background:#fff; transition:all .2s; box-sizing:border-box; margin:0;">
-                                        <i class="fas fa-file-upload" style="font-size:13px; color:var(--brand);"></i>
-                                        <span class="upload-txt" x-text="evCount > 0 ? evCount + ' file(s) selected' : 'Upload Photos/Videos/PDF'" style="margin:0; font-size:10.5px; font-weight:700; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
-                                        <input type="file" x-ref="evidenceInput" name="evidence[]" multiple accept="image/*,video/*,.pdf" style="display:none;" @change="evCount = $event.target.files.length">
+                                    
+                                    {{-- Exact 40px box matching Witness Name input --}}
+                                    <div @click="evFiles.length > 0 && previewUrl ? previewModal = true : $refs.evidenceInput.click()" 
+                                         style="width:100%; height:40px; padding:0 10px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:border-color .15s;">
+                                        
+                                        {{-- Left: Icon & Text / Filename --}}
+                                        <div style="display:flex; align-items:center; gap:8px; overflow:hidden; min-width:0;">
+                                            <i class="fas fa-paperclip" style="color:var(--brand); font-size:13px; flex-shrink:0;"></i>
+                                            
+                                            <template x-if="evFiles.length === 0">
+                                                <span style="color:#94a3b8; font-size:12.5px; font-weight:500;">Attach photo / proof (Optional)</span>
+                                            </template>
+                                            
+                                            <template x-if="evFiles.length > 0">
+                                                <span style="color:#0f172a; font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" x-text="evFiles.length === 1 ? evFiles[0].name : evFiles.length + ' files attached'"></span>
+                                            </template>
+                                        </div>
+
+                                        {{-- Right: Action Button (View Pill / Remove Button / Browse) --}}
+                                        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                            <template x-if="evFiles.length > 0 && previewUrl">
+                                                <span style="font-size:10px; background:#eff6ff; color:#0284c7; border:1px solid #bfdbfe; padding:2px 8px; border-radius:6px; font-weight:800; display:flex; align-items:center; gap:4px;">
+                                                    <i class="fas fa-eye"></i> View
+                                                </span>
+                                            </template>
+                                            <template x-if="evFiles.length > 0">
+                                                <button type="button" @click.stop="removeFile($event)" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; padding:2px 4px;" title="Remove file">
+                                                    <i class="fas fa-times-circle"></i>
+                                                </button>
+                                            </template>
+                                            <template x-if="evFiles.length === 0">
+                                                <span style="font-size:11px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; padding:3px 8px; border-radius:6px; font-weight:700;">
+                                                    Browse
+                                                </span>
+                                            </template>
+                                        </div>
+
+                                        <input type="file" x-ref="evidenceInput" name="evidence[]" multiple accept="image/*,video/*,.pdf" style="display:none;" @change="handleFileSelect($event)">
+                                    </div>
+
+                                    {{-- PHOTO LIGHTBOX MODAL WITH BACK BUTTON --}}
+                                    <div x-show="previewModal" x-cloak class="modal-ov" style="z-index:99999;" @keydown.window.escape="previewModal = false">
+                                        <div class="modal-box" style="max-width:500px; width:95%; border-radius:16px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.4);" @click.away="previewModal = false">
+                                            <div style="padding:12px 16px; background:#0f172a; color:#fff; display:flex; align-items:center; justify-content:space-between;">
+                                                <div style="display:flex; align-items:center; gap:8px;">
+                                                    <i class="fas fa-image" style="color:#38bdf8;"></i>
+                                                    <span style="font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:300px;" x-text="previewName || 'Proof Photo'"></span>
+                                                </div>
+                                                <button type="button" @click="previewModal = false" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer;"><i class="fas fa-times"></i></button>
+                                            </div>
+                                            <div style="padding:16px; background:#020617; display:flex; align-items:center; justify-content:center; min-height:240px; max-height:55vh; overflow:auto;">
+                                                <img :src="previewUrl" alt="Proof Preview" style="max-width:100%; max-height:50vh; object-fit:contain; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                                            </div>
+                                            <div style="padding:10px 16px; background:#0f172a; display:flex; justify-content:space-between; align-items:center;">
+                                                <button type="button" @click="previewModal = false; $refs.evidenceInput.click()" style="padding:6px 12px; background:#1e293b; border:1px solid #334155; color:#cbd5e1; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">
+                                                    <i class="fas fa-sync-alt" style="margin-right:4px;"></i> Change Photo
+                                                </button>
+                                                <button type="button" @click="previewModal = false" class="btn-grad" style="padding:6px 16px; font-size:11.5px; display:inline-flex; align-items:center; gap:6px;">
+                                                    <i class="fas fa-arrow-left"></i> Back to Form
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
