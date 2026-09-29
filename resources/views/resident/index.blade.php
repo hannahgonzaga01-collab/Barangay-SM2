@@ -2346,42 +2346,21 @@ html, body {
                 @csrf
 
                 {{-- 1. FIXED MODAL HEADER --}}
-                <div style="padding:16px 20px 12px; background:#fff; border-bottom:1px solid #e2e8f0; flex-shrink:0;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <div style="padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <div style="width:38px; height:38px; border-radius:10px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">
                                 <i class="fas fa-flag"></i>
                             </div>
                             <div>
                                 <div style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em;">Report an Issue / Concern</div>
-                                <div style="font-size:10.5px; font-weight:600; color:#64748b;">Blotter, VAWC, Peace & Order • Open to All</div>
+                                <div style="font-size:11px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px; margin-top:2px;">
+                                    <span style="background:#fee2e2; color:#dc2626; padding:1px 7px; border-radius:6px; font-weight:800; font-size:10px;" x-text="issueStep === 1 ? (lang==='fil'?'Hakbang 1 ng 2':'Step 1 of 2') : (lang==='fil'?'Hakbang 2 ng 2':'Step 2 of 2')">Step 1 of 2</span>
+                                    <span x-text="issueStep === 1 ? (lang==='fil'?'Parties & Reklamo':'Parties & Offense') : (lang==='fil'?'Detalye ng Insidente & Paunawa':'Incident Details & Legal Notice')">Parties & Offense</span>
+                                </div>
                             </div>
                         </div>
                         <button type="button" @click="issueModal=false" class="modal-close" style="margin:0; width:30px; height:30px; font-size:15px;"><i class="fas fa-times"></i></button>
-                    </div>
-
-                    {{-- FULL-WIDTH SEGMENTED PILL STEPPER --}}
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#f1f5f9; padding:4px; border-radius:12px; border:1px solid #e2e8f0;">
-                        <button type="button" @click="if(issueStep > 1) { issueStep = 1; issueErrorMsg = ''; }" 
-                                :style="issueStep === 1 ? 'background:#fff; color:#dc2626; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600; cursor:pointer;'"
-                                style="border:none; padding:7px 10px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:11.5px; transition:all .2s;">
-                            <span :style="issueStep === 1 ? 'background:#dc2626; color:#fff;' : (issueStep > 1 ? 'background:#16a34a; color:#fff;' : 'background:#cbd5e1; color:#475569;')" 
-                                  style="width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; flex-shrink:0;">
-                                <template x-if="issueStep > 1"><i class="fas fa-check" style="font-size:9px;"></i></template>
-                                <template x-if="issueStep <= 1"><span>1</span></template>
-                            </span>
-                            <span x-text="lang==='fil'?'Hakbang 1: Pagkakakilanlan':'Step 1: Parties & Offense'">Step 1: Parties & Offense</span>
-                        </button>
-
-                        <button type="button" 
-                                :style="issueStep === 2 ? 'background:#fff; color:#dc2626; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600; cursor:default;'"
-                                style="border:none; padding:7px 10px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:11.5px; transition:all .2s;">
-                            <span :style="issueStep === 2 ? 'background:#dc2626; color:#fff;' : 'background:#cbd5e1; color:#475569;'" 
-                                  style="width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; flex-shrink:0;">
-                                2
-                            </span>
-                            <span x-text="lang==='fil'?'Hakbang 2: Detalye & Paunawa':'Step 2: Incident & Advisory'">Step 2: Incident & Advisory</span>
-                        </button>
                     </div>
                 </div>
 
