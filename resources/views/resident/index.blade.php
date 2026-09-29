@@ -1486,122 +1486,163 @@ html, body {
         </div>
         @endif
         @if($isAuth)
-        <div class="wcard" x-data="{ reportHistoryTab: (window.location.hash === '#incident-reports' ? 'incidents' : 'sos') }"
-             @hashchange.window="if(window.location.hash === '#incident-reports') reportHistoryTab = 'incidents'; if(window.location.hash === '#sos-history') reportHistoryTab = 'sos';">
-            <div class="about-tabs" style="margin-bottom:0; background:#f8fafc; border-bottom:1.5px solid var(--border); padding:6px 10px; gap:6px;">
-                <button type="button" class="about-tab" :class="reportHistoryTab === 'sos' ? 'active' : ''" @click="reportHistoryTab = 'sos'" style="display:flex; align-items:center; gap:7px;">
-                    <i class="fas fa-bullhorn" :style="reportHistoryTab === 'sos' ? 'color:#fff;' : 'color:#dc2626;'"></i>
-                    <span>Emergency SOS Dispatches</span>
-                    <span class="wcard-badge" style="padding:2px 7px; font-size:8.5px; border-radius:99px; {{ $sosHistory->count() > 0 ? 'background:#fee2e2;color:#dc2626;' : '' }}" :style="reportHistoryTab === 'sos' ? 'background:rgba(255,255,255,0.25);color:#fff;' : ''">
-                        {{ $sosHistory->count() }}
-                    </span>
-                </button>
-                <button type="button" class="about-tab" :class="reportHistoryTab === 'incidents' ? 'active' : ''" @click="reportHistoryTab = 'incidents'" style="display:flex; align-items:center; gap:7px;">
-                    <i class="fas fa-shield-alt" :style="reportHistoryTab === 'incidents' ? 'color:#fff;' : 'color:var(--brand);'"></i>
-                    <span>Incident Reports History</span>
-                    <span class="wcard-badge" style="padding:2px 7px; font-size:8.5px; border-radius:99px;" :style="reportHistoryTab === 'incidents' ? 'background:rgba(255,255,255,0.25);color:#fff;' : ''">
-                        {{ $issueReports->count() }}
-                    </span>
+        <div class="wcard" x-data="{ 
+                reportHistoryTab: (window.location.hash === '#incident-reports' ? 'incidents' : 'sos'), 
+                isCardCollapsed: false,
+                showAllSos: false,
+                showAllIncidents: false 
+             }"
+             @hashchange.window="if(window.location.hash === '#incident-reports') { reportHistoryTab = 'incidents'; isCardCollapsed = false; } if(window.location.hash === '#sos-history') { reportHistoryTab = 'sos'; isCardCollapsed = false; }">
+            
+            {{-- Tabs Header with Collapse Arrow Toggle --}}
+            <div class="about-tabs" style="margin-bottom:0; background:#f8fafc; border-bottom:1.5px solid var(--border); padding:6px 12px; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <button type="button" class="about-tab" :class="reportHistoryTab === 'sos' ? 'active' : ''" @click="reportHistoryTab = 'sos'; isCardCollapsed = false;" style="display:flex; align-items:center; gap:7px;">
+                        <i class="fas fa-bullhorn" :style="reportHistoryTab === 'sos' ? 'color:#fff;' : 'color:#dc2626;'"></i>
+                        <span>Emergency SOS Dispatches</span>
+                        <span class="wcard-badge" style="padding:2px 7px; font-size:8.5px; border-radius:99px; {{ $sosHistory->count() > 0 ? 'background:#fee2e2;color:#dc2626;' : '' }}" :style="reportHistoryTab === 'sos' ? 'background:rgba(255,255,255,0.25);color:#fff;' : ''">
+                            {{ $sosHistory->count() }}
+                        </span>
+                    </button>
+                    <button type="button" class="about-tab" :class="reportHistoryTab === 'incidents' ? 'active' : ''" @click="reportHistoryTab = 'incidents'; isCardCollapsed = false;" style="display:flex; align-items:center; gap:7px;">
+                        <i class="fas fa-shield-alt" :style="reportHistoryTab === 'incidents' ? 'color:#fff;' : 'color:var(--brand);'"></i>
+                        <span>Incident Reports History</span>
+                        <span class="wcard-badge" style="padding:2px 7px; font-size:8.5px; border-radius:99px;" :style="reportHistoryTab === 'incidents' ? 'background:rgba(255,255,255,0.25);color:#fff;' : ''">
+                            {{ $issueReports->count() }}
+                        </span>
+                    </button>
+                </div>
+
+                {{-- Collapse / Hide Arrow Button --}}
+                <button type="button" @click="isCardCollapsed = !isCardCollapsed" 
+                        style="border:none; background:transparent; color:#64748b; font-size:11px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; padding:4px 8px; border-radius:6px; transition:all .15s;"
+                        :title="isCardCollapsed ? 'Expand section' : 'Hide / Collapse section'">
+                    <span x-text="isCardCollapsed ? 'Expand' : 'Hide'" style="font-size:10px; text-transform:uppercase; letter-spacing:0.04em;"></span>
+                    <i class="fas" :class="isCardCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'" style="font-size:10px;"></i>
                 </button>
             </div>
 
-            {{-- 1. SOS DISPATCHES TAB CONTENT --}}
-            <div x-show="reportHistoryTab === 'sos'" id="sos-history">
-                <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:5px;">
-                    <i class="fas fa-history" style="color:var(--brand);"></i> <span>Resolved dispatches are automatically cleared from your history after 30 days.</span>
-                </div>
-                @foreach($sosHistory as $sos)
-                <div class="event-item">
-                    <div style="background:{{ $sos->status === 'resolved' ? '#f0fdf4' : '#fef2f2' }};border:1px solid {{ $sos->status === 'resolved' ? '#bbf7d0' : '#fecaca' }};border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas {{ $sos->status === 'resolved' ? 'fa-check-circle' : 'fa-ambulance' }}" style="color:{{ $sos->status === 'resolved' ? '#16a34a' : '#dc2626' }};font-size:14px;"></i>
+            {{-- Collapsible Body --}}
+            <div x-show="!isCardCollapsed" x-transition:enter.duration.200ms>
+                
+                {{-- 1. SOS DISPATCHES TAB CONTENT --}}
+                <div x-show="reportHistoryTab === 'sos'" id="sos-history" style="padding:10px 14px 14px;">
+                    <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:5px;">
+                        <i class="fas fa-history" style="color:var(--brand);"></i> <span>Resolved dispatches are automatically cleared from your history after 30 days.</span>
                     </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:12px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                            <span>{{ $sos->emergency_type ?? 'Emergency SOS' }}</span>
-                            <span style="font-size:10px;font-weight:700;color:var(--muted);">#SOS-{{ sprintf('%04d', $sos->id) }}</span>
+                    @foreach($sosHistory as $index => $sos)
+                    <div class="event-item" x-show="showAllSos || {{ $index }} < 3" x-transition style="margin-bottom:8px;">
+                        <div style="background:{{ $sos->status === 'resolved' ? '#f0fdf4' : '#fef2f2' }};border:1px solid {{ $sos->status === 'resolved' ? '#bbf7d0' : '#fecaca' }};border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas {{ $sos->status === 'resolved' ? 'fa-check-circle' : 'fa-ambulance' }}" style="color:{{ $sos->status === 'resolved' ? '#16a34a' : '#dc2626' }};font-size:14px;"></i>
                         </div>
-                        <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;">
-                            @if($sos->landmark)
-                                <span><i class="fas fa-map-marker-alt" style="color:#dc2626;"></i> {{ $sos->landmark }}</span> • 
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:12px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span>{{ $sos->emergency_type ?? 'Emergency SOS' }}</span>
+                                <span style="font-size:10px;font-weight:700;color:var(--muted);">#SOS-{{ sprintf('%04d', $sos->id) }}</span>
+                            </div>
+                            <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;">
+                                @if($sos->landmark)
+                                    <span><i class="fas fa-map-marker-alt" style="color:#dc2626;"></i> {{ $sos->landmark }}</span> • 
+                                @endif
+                                Status: 
+                                @if($sos->status === 'resolved')
+                                    <span style="font-weight:900;text-transform:uppercase;color:#15803d;background:#dcfce7;padding:2px 8px;border-radius:99px;border:1px solid #bbf7d0;font-size:9px;"><i class="fas fa-check"></i> Resolved</span>
+                                @elseif($sos->status === 'responding')
+                                    <span style="font-weight:900;text-transform:uppercase;color:#1d4ed8;background:#eff6ff;padding:2px 8px;border-radius:99px;border:1px solid #bfdbfe;font-size:9px;"><i class="fas fa-motorcycle"></i> Tanod Responding</span>
+                                @elseif($sos->status === 'acknowledged')
+                                    <span style="font-weight:900;text-transform:uppercase;color:#7c3aed;background:#fdf4ff;padding:2px 8px;border-radius:99px;border:1px solid #e9d5ff;font-size:9px;"><i class="fas fa-check-double"></i> Acknowledged</span>
+                                @else
+                                    <span style="font-weight:900;text-transform:uppercase;color:#be123c;background:#fff1f2;padding:2px 8px;border-radius:99px;border:1px solid #fecdd3;font-size:9px;"><i class="fas fa-satellite-dish"></i> Alert Dispatched</span>
+                                @endif
+                            </div>
+
+                            @if($sos->dispatched_units)
+                            <div style="font-size:9.5px;font-weight:800;color:#1e40af;background:#eff6ff;padding:3px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;margin-top:5px;border:1px solid #dbeafe;">
+                                <i class="fas fa-shield-alt"></i> Assigned Unit: {{ $sos->dispatched_units }}
+                            </div>
                             @endif
-                            Status: 
-                            @if($sos->status === 'resolved')
-                                <span style="font-weight:900;text-transform:uppercase;color:#15803d;background:#dcfce7;padding:2px 8px;border-radius:99px;border:1px solid #bbf7d0;font-size:9px;"><i class="fas fa-check"></i> Resolved</span>
-                            @elseif($sos->status === 'responding')
-                                <span style="font-weight:900;text-transform:uppercase;color:#1d4ed8;background:#eff6ff;padding:2px 8px;border-radius:99px;border:1px solid #bfdbfe;font-size:9px;"><i class="fas fa-motorcycle"></i> Tanod Responding</span>
-                            @elseif($sos->status === 'acknowledged')
-                                <span style="font-weight:900;text-transform:uppercase;color:#7c3aed;background:#fdf4ff;padding:2px 8px;border-radius:99px;border:1px solid #e9d5ff;font-size:9px;"><i class="fas fa-check-double"></i> Acknowledged</span>
-                            @else
-                                <span style="font-weight:900;text-transform:uppercase;color:#be123c;background:#fff1f2;padding:2px 8px;border-radius:99px;border:1px solid #fecdd3;font-size:9px;"><i class="fas fa-satellite-dish"></i> Alert Dispatched</span>
-                            @endif
-                        </div>
 
-                        @if($sos->dispatched_units)
-                        <div style="font-size:9.5px;font-weight:800;color:#1e40af;background:#eff6ff;padding:3px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;margin-top:5px;border:1px solid #dbeafe;">
-                            <i class="fas fa-shield-alt"></i> Assigned Unit: {{ $sos->dispatched_units }}
-                        </div>
-                        @endif
-
-                        @if($sos->responder_notes)
-                        <div style="font-size:9.5px;font-weight:700;color:#475569;background:#f8fafc;padding:4px 9px;border-radius:6px;margin-top:4px;border:1px dashed #cbd5e1;">
-                            <i class="fas fa-clipboard-list" style="color:#64748b;"></i> Tanod Notes: {{ $sos->responder_notes }}
-                        </div>
-                        @endif
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                        <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;display:block;">{{ $sos->created_at->format('M d') }}</span>
-                        <span style="font-size:9px;color:var(--light);font-weight:600;">{{ $sos->created_at->format('h:i A') }}</span>
-                    </div>
-                </div>
-                @endforeach
-
-                @if($sosHistory->isEmpty())
-                <div style="padding:30px;text-align:center;color:var(--light);">
-                    <i class="fas fa-shield-heart" style="font-size:26px;display:block;margin-bottom:7px;opacity:.25;"></i>
-                    <p style="font-size:11px;font-weight:700;">No emergency SOS dispatches recorded.</p>
-                </div>
-                @endif
-            </div>
-
-            {{-- 2. INCIDENT REPORTS TAB CONTENT --}}
-            <div x-show="reportHistoryTab === 'incidents'" id="incident-reports" x-cloak>
-                @foreach($issueReports as $rep)
-                <div class="event-item">
-                    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-flag" style="color:#dc2626;font-size:13px;"></i>
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:12px;font-weight:800;color:var(--text);">{{ $rep->issue_type }} — {{ $rep->department }}</div>
-                        <div style="font-size:10px;color:var(--muted);font-weight:600;">
-                            Case No: {{ $rep->case_no ?? 'Pending' }} •
-                            Status: 
-                            @if($rep->status === 'under_review' && str_contains((string)$rep->admin_notes, 'AUTO-FLAGGED'))
-                                <span style="font-weight:900;text-transform:uppercase;color:#7c3aed;background:#fdf4ff;padding:2px 8px;border-radius:99px;border:1px solid #e9d5ff;font-size:9px;"><i class="fas fa-shield-alt"></i> Under Review (Auto-Flagged)</span>
-                            @elseif(str_contains((string)$rep->admin_notes, 'PENDING CLASSIFICATION'))
-                                <span style="font-weight:900;text-transform:uppercase;color:#b45309;background:#fef3c7;padding:2px 8px;border-radius:99px;border:1px solid #fde68a;font-size:9px;"><i class="fas fa-hourglass-half"></i> Pending Classification</span>
-                            @else
-                                <span style="font-weight:900;text-transform:uppercase;color:{{ 
-                                    $rep->status === 'settled' || $rep->status === 'resolved' ? '#15803d' : 
-                                    ($rep->status === 'on-going' ? '#1d4ed8' : '#92400e') 
-                                }}">{{ ucfirst(str_replace('_',' ',$rep->status)) }}</span>
+                            @if($sos->responder_notes)
+                            <div style="font-size:9.5px;font-weight:700;color:#475569;background:#f8fafc;padding:4px 9px;border-radius:6px;margin-top:4px;border:1px dashed #cbd5e1;">
+                                <i class="fas fa-clipboard-list" style="color:#64748b;"></i> Tanod Notes: {{ $sos->responder_notes }}
+                            </div>
                             @endif
                         </div>
-                        @if($rep->hearing_date)
-                        <div style="font-size:9px;font-weight:900;background:#eff6ff;color:#1d4ed8;padding:3px 10px;border-radius:99px;display:inline-block;margin-top:5px;border:1px solid #bfdbfe;">
-                            <i class="fas fa-calendar-alt"></i> Hearing: {{ \Carbon\Carbon::parse($rep->hearing_date)->format('M d, Y h:i A') }}
+                        <div style="text-align:right;flex-shrink:0;">
+                            <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;display:block;">{{ $sos->created_at->format('M d') }}</span>
+                            <span style="font-size:9px;color:var(--light);font-weight:600;">{{ $sos->created_at->format('h:i A') }}</span>
                         </div>
-                        @endif
                     </div>
-                    <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;flex-shrink:0;">{{ $rep->created_at->format('M d') }}</span>
-                </div>
-                @endforeach
+                    @endforeach
 
-                @if($issueReports->isEmpty())
-                <div style="padding:30px;text-align:center;color:var(--light);">
-                    <i class="fas fa-clipboard-check" style="font-size:26px;display:block;margin-bottom:7px;opacity:.25;"></i>
-                    <p style="font-size:11px;font-weight:700;">No reports filed.</p>
+                    @if($sosHistory->count() > 3)
+                    <div style="text-align:center; margin-top:8px;">
+                        <button type="button" @click="showAllSos = !showAllSos" 
+                                style="width:100%; padding:7px 12px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:8px; font-size:11px; font-weight:800; color:var(--brand); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .2s;">
+                            <i class="fas" :class="showAllSos ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            <span x-text="showAllSos ? 'Show Less (Top 3)' : 'View all {{ $sosHistory->count() }} dispatches'"></span>
+                        </button>
+                    </div>
+                    @endif
+
+                    @if($sosHistory->isEmpty())
+                    <div style="padding:30px;text-align:center;color:var(--light);">
+                        <i class="fas fa-shield-heart" style="font-size:26px;display:block;margin-bottom:7px;opacity:.25;"></i>
+                        <p style="font-size:11px;font-weight:700;">No emergency SOS dispatches recorded.</p>
+                    </div>
+                    @endif
                 </div>
-                @endif
+
+                {{-- 2. INCIDENT REPORTS TAB CONTENT --}}
+                <div x-show="reportHistoryTab === 'incidents'" id="incident-reports" x-cloak style="padding:10px 14px 14px;">
+                    @foreach($issueReports as $index => $rep)
+                    <div class="event-item" x-show="showAllIncidents || {{ $index }} < 3" x-transition style="margin-bottom:8px;">
+                        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-flag" style="color:#dc2626;font-size:13px;"></i>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:12px;font-weight:800;color:var(--text);">{{ $rep->issue_type }} — {{ $rep->department }}</div>
+                            <div style="font-size:10px;color:var(--muted);font-weight:600;">
+                                Case No: {{ $rep->case_no ?? 'Pending' }} •
+                                Status: 
+                                @if($rep->status === 'under_review' && str_contains((string)$rep->admin_notes, 'AUTO-FLAGGED'))
+                                    <span style="font-weight:900;text-transform:uppercase;color:#7c3aed;background:#fdf4ff;padding:2px 8px;border-radius:99px;border:1px solid #e9d5ff;font-size:9px;"><i class="fas fa-shield-alt"></i> Under Review (Auto-Flagged)</span>
+                                @elseif(str_contains((string)$rep->admin_notes, 'PENDING CLASSIFICATION'))
+                                    <span style="font-weight:900;text-transform:uppercase;color:#b45309;background:#fef3c7;padding:2px 8px;border-radius:99px;border:1px solid #fde68a;font-size:9px;"><i class="fas fa-hourglass-half"></i> Pending Classification</span>
+                                @else
+                                    <span style="font-weight:900;text-transform:uppercase;color:{{ 
+                                        $rep->status === 'settled' || $rep->status === 'resolved' ? '#15803d' : 
+                                        ($rep->status === 'on-going' ? '#1d4ed8' : '#92400e') 
+                                    }}">{{ ucfirst(str_replace('_',' ',$rep->status)) }}</span>
+                                @endif
+                            </div>
+                            @if($rep->hearing_date)
+                            <div style="font-size:9px;font-weight:900;background:#eff6ff;color:#1d4ed8;padding:3px 10px;border-radius:99px;display:inline-block;margin-top:5px;border:1px solid #bfdbfe;">
+                                <i class="fas fa-calendar-alt"></i> Hearing: {{ \Carbon\Carbon::parse($rep->hearing_date)->format('M d, Y h:i A') }}
+                            </div>
+                            @endif
+                        </div>
+                        <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;flex-shrink:0;">{{ $rep->created_at->format('M d') }}</span>
+                    </div>
+                    @endforeach
+
+                    @if($issueReports->count() > 3)
+                    <div style="text-align:center; margin-top:8px;">
+                        <button type="button" @click="showAllIncidents = !showAllIncidents" 
+                                style="width:100%; padding:7px 12px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:8px; font-size:11px; font-weight:800; color:var(--brand); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .2s;">
+                            <i class="fas" :class="showAllIncidents ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            <span x-text="showAllIncidents ? 'Show Less (Top 3)' : 'View all {{ $issueReports->count() }} reports'"></span>
+                        </button>
+                    </div>
+                    @endif
+
+                    @if($issueReports->isEmpty())
+                    <div style="padding:30px;text-align:center;color:var(--light);">
+                        <i class="fas fa-clipboard-check" style="font-size:26px;display:block;margin-bottom:7px;opacity:.25;"></i>
+                        <p style="font-size:11px;font-weight:700;">No reports filed.</p>
+                    </div>
+                    @endif
+                </div>
             </div>
         </div>
         @endif
