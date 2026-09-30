@@ -16,9 +16,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         *{box-sizing:border-box;}
-        html, body{font-family:'Plus Jakarta Sans', sans-serif !important;background:#f1f5f9;margin:0;display:flex;flex-direction:column;min-height:100vh;}
+        html, body{font-family:'Plus Jakarta Sans', sans-serif !important;background:#f1f5f9;margin:0;display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;width:100%;max-width:100vw;}
         input, button, select, textarea{font-family:inherit;}
-        main{flex:1;}
+        main{flex:1;width:100%;max-width:100vw;overflow-x:hidden;}
     </style>
     <script>
         // Styled Toast notification helper

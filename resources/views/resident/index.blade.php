@@ -12,6 +12,9 @@ html, body {
     padding: 0;
     background: var(--body-bg);
     color: var(--text);
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
 }
 [x-cloak]{display:none!important;}
 
@@ -66,13 +69,13 @@ html, body {
 .activity-carousel-box{position:relative;width:100%;height:360px;}
 @media(max-width:640px){.activity-carousel-box{height:230px;}}
 @media(max-width:420px){.activity-carousel-box{height:200px;}}
-.service-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px 12px 20px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;}
+.service-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px 12px 20px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-width:0;overflow:hidden;word-break:break-word;}
 .service-card:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);transform:translateY(-5px);box-shadow:0 12px 30px rgba(0,0,0,0.3);}
 .service-ico{width:52px;height:52px;background:rgba(255,255,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .3s;}
 .service-ico i{color:#fff;font-size:20px;}
 .service-card:hover .service-ico{background:var(--brand);transform:scale(1.1);box-shadow:0 0 20px rgba(14,83,147,0.4);}
-.service-name{font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.3;}
-.service-sub{font-size:11px;font-weight:500;color:rgba(255,255,255,.8);margin-top:6px;}
+.service-name{font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.3;word-break:break-word;overflow-wrap:break-word;}
+.service-sub{font-size:11px;font-weight:500;color:rgba(255,255,255,.8);margin-top:6px;word-break:break-word;overflow-wrap:break-word;}
 
 /* DUTY WIDGET */
 .duty-widget{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px 20px;margin-bottom:20px;backdrop-filter:blur(10px);}
@@ -166,10 +169,18 @@ html, body {
 .lp-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
 
 /* MODALS */
-.modal-ov{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,18,.68);backdrop-filter:blur(5px);}
-.modal-box{background:#fff;width:100%;max-width:580px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,52,.35);border-bottom:5px solid var(--brand);max-height:94vh;overflow-y:auto;}
+.modal-ov{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,18,.68);backdrop-filter:blur(5px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.modal-box{background:#fff;width:100%;max-width:580px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,52,.35);border-bottom:5px solid var(--brand);max-height:94vh;overflow-y:auto;margin:0 auto;box-sizing:border-box;}
 .modal-box-red{border-bottom-color:#dc2626;}
 .modal-in{padding:20px;}
+
+/* RESPONSIVE ISSUE MODAL & FORM GRIDS */
+.issue-modal-header { padding: 16px 20px; background: #fff; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+.issue-modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 20px; background: #f8fafc; }
+.issue-modal-footer { padding: 12px 20px; background: #fff; border-top: 1px solid #e2e8f0; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; z-index: 10; gap: 8px; }
+.issue-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.issue-grid-split2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.issue-grid-span2 { grid-column: span 2; }
 .schedule-modal-scroll{overflow-y:auto !important;max-height:calc(88vh - 84px) !important;scrollbar-width:thin;scrollbar-color:#0284c7 #e2e8f0;}
 .schedule-modal-scroll::-webkit-scrollbar{width:8px;}
 .schedule-modal-scroll::-webkit-scrollbar-track{background:#f1f5f9;border-radius:8px;}
@@ -328,7 +339,11 @@ html, body {
         padding: 11px 12px !important;
         gap: 8px !important;
     }
-    .rp-wrap{padding:0 10px 60px;}
+    .duty-table-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .rp-wrap{padding:0 10px 60px;width:100%;max-width:100vw;overflow-x:hidden;}
     .navy-box{padding:18px 14px;border-radius:18px;margin-bottom:16px;}
     .duty-widget{padding:14px 12px;border-radius:14px;}
     .duty-name{font-size:15px;}
@@ -348,15 +363,26 @@ html, body {
     .recent-ann-list .recent-ann-card{flex-direction:column;align-items:stretch;}
     .recent-ann-list .recent-ann-img, .recent-ann-list .recent-ann-img-placeholder{width:100%;height:160px;}
     .item-modal-img-wrap{height:200px;}
-    .modal-box{max-height:90vh;border-radius:16px;margin:8px;width:100%;}
-    .modal-in{padding:16px 14px;}
+    .modal-ov{padding:8px;}
+    .modal-box{max-height:92vh;border-radius:16px;margin:0 auto;width:100%;}
+    .modal-in{padding:14px 12px;}
     .login-notice-btns, .lp-btns { flex-direction: column; gap: 8px; }
     .login-notice-btns a, .login-notice-btns button, .lp-btns a, .lp-btns button { width: 100%; justify-content: center; }
-    .ask-float{bottom:16px;right:14px;padding:10px 14px;font-size:10px;}
+    .ask-float{bottom:16px;right:14px;padding:9px 13px;font-size:10px;}
+    .sos-float{bottom:16px;left:14px;padding:9px 13px;font-size:10px;}
     .hero-carousel{min-height:220px;max-height:300px;}
     .carousel-slide{padding:24px 16px;}
     .carousel-slide h2{font-size:22px;}
     .carousel-slide p{font-size:12px;}
+
+    /* Modal adaptations for mobile */
+    .issue-modal-header { padding: 12px 14px !important; }
+    .issue-modal-body { padding: 12px 10px !important; }
+    .issue-modal-footer { padding: 10px 12px !important; }
+    .issue-grid-2 { grid-template-columns: 1fr !important; gap: 9px !important; }
+    .issue-grid-span2 { grid-column: span 1 !important; }
+    .issue-grid-split2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+    .sched-tabs-grid { grid-template-columns: 1fr !important; gap: 6px !important; }
 }
 </style>
 
@@ -1027,12 +1053,15 @@ html, body {
             goToIssueStep2() {
                 this.issueErrorMsg = '';
 
+                const form = document.getElementById('issueReportForm');
+                if (!form) return;
+
                 if (!this.selectedOffense) {
                     this.issueErrorMsg = this.lang === 'fil' ? 'Pumili po ng Uri ng Reklamo / Offense.' : 'Please select the Type of Offense / Complaint.';
                     return;
                 }
                 if (this.selectedOffense === 'Others') {
-                    const otherInput = document.querySelector('input[name="issue_type_other"]');
+                    const otherInput = form.querySelector('input[name="issue_type_other"]');
                     if (!otherInput || !otherInput.value.trim()) {
                         this.issueErrorMsg = this.lang === 'fil' ? 'Pakitukoy ang uri ng reklamo.' : 'Please specify the type of offense.';
                         otherInput?.focus();
@@ -1040,29 +1069,31 @@ html, body {
                     }
                 }
 
-                const nameInput = document.querySelector('input[name="complainant_name"]');
+                const nameInput = form.querySelector('input[name="complainant_name"]');
                 if (!nameInput || !nameInput.value.trim()) {
                     this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng nagrereklamo.' : 'Please enter complainant full name.';
                     nameInput?.focus();
                     return;
                 }
 
-                const ageInput = document.querySelector('input[name="complainant_age"]');
+                const ageInput = form.querySelector('input[name="complainant_age"]');
                 if (!ageInput || !ageInput.value || parseInt(ageInput.value) < 18) {
                     this.issueErrorMsg = this.lang === 'fil' ? 'Kailangang 18 taong gulang pataas ang nagrereklamo.' : 'Complainant must be at least 18 years old.';
                     ageInput?.focus();
                     return;
                 }
 
-                const contactInput = document.querySelector('input[name="contact"]');
-                if (!contactInput || !contactInput.value.trim() || contactInput.value.trim().length !== 11) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangang eksaktong 11-digit ang contact number (hal. 09XXXXXXXXX).' : 'Contact number must be exactly 11 digits (e.g. 09XXXXXXXXX).';
+                const contactInput = form.querySelector('#issueContactInput') || form.querySelector('input[name="contact"]');
+                const rawContact = contactInput ? contactInput.value.replace(/[^0-9]/g, '').trim() : '';
+                if (!contactInput || rawContact.length !== 11 || !rawContact.startsWith('09')) {
+                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangang eksaktong 11-digit ang contact number na nagsisimula sa 09 (hal. 09XXXXXXXXX).' : 'Contact number must be exactly 11 digits starting with 09 (e.g. 09XXXXXXXXX).';
                     contactInput?.focus();
                     return;
                 }
+                contactInput.value = rawContact;
 
                 if (!this.isAuth) {
-                    const emailInput = document.querySelector('input[name="guest_email"]');
+                    const emailInput = form.querySelector('input[name="guest_email"]');
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailInput || !emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
                         this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang wastong email address para sa mga update.' : 'Please enter a valid email address for notifications.';
@@ -1071,12 +1102,12 @@ html, body {
                     }
                 }
 
-                const behalfCheckbox = document.querySelector('input[name="is_on_behalf"]');
+                const behalfCheckbox = form.querySelector('input[name="is_on_behalf"]');
                 if (behalfCheckbox && behalfCheckbox.checked) {
-                    const victimName = document.querySelector('input[name="victim_name"]');
-                    const victimAge = document.querySelector('input[name="victim_age"]');
-                    const victimGender = document.querySelector('select[name="victim_gender"]');
-                    const victimRel = document.querySelector('input[name="victim_relationship"]');
+                    const victimName = form.querySelector('input[name="victim_name"]');
+                    const victimAge = form.querySelector('input[name="victim_age"]');
+                    const victimGender = form.querySelector('select[name="victim_gender"]');
+                    const victimRel = form.querySelector('input[name="victim_relationship"]');
                     if (!victimName?.value.trim()) {
                         this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng biktima.' : 'Please enter the victim full name.';
                         victimName?.focus();
@@ -1099,7 +1130,7 @@ html, body {
                     }
                 }
 
-                const respNameInput = document.querySelector('input[name="respondent_name"]');
+                const respNameInput = form.querySelector('input[name="respondent_name"]');
                 if (!respNameInput || !respNameInput.value.trim()) {
                     this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang pangalan ng inirereklamo (Respondent).' : 'Please enter the name of the person being reported (Respondent).';
                     respNameInput?.focus();
@@ -1118,25 +1149,28 @@ html, body {
             submitIssueReport(e) {
                 this.issueErrorMsg = '';
 
+                const form = document.getElementById('issueReportForm') || e.target;
+                if (!form) return;
+
                 let incDateVal = this.incidentDatePart ? (this.incidentDatePart + ' ' + (this.incidentTimePart || '12:00')) : '';
-                const incDate = document.querySelector('input[name="incident_date"]');
+                const incDate = form.querySelector('input[name="incident_date"]');
                 if (incDate && incDateVal) {
                     incDate.value = incDateVal;
                 }
                 if (!this.incidentDatePart) {
                     this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang petsa ng insidente.' : 'Please specify the date of the incident.';
-                    document.querySelector('input[name="incident_date_only"]')?.focus();
+                    form.querySelector('input[name="incident_date_only"]')?.focus();
                     return;
                 }
 
-                const incLoc = document.querySelector('input[name="incident_location"]');
+                const incLoc = form.querySelector('input[name="incident_location"]');
                 if (!incLoc || !incLoc.value.trim()) {
                     this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang lokasyon ng insidente.' : 'Please specify the location of the incident.';
                     incLoc?.focus();
                     return;
                 }
 
-                const desc = document.querySelector('textarea[name="description"]');
+                const desc = form.querySelector('textarea[name="description"]');
                 if (!desc || !desc.value.trim()) {
                     this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong salaysay o detalye ng insidente.' : 'Please provide the incident description / narration.';
                     desc?.focus();
@@ -2436,14 +2470,14 @@ html, body {
                 @csrf
 
                 {{-- 1. FIXED MODAL HEADER --}}
-                <div style="padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0; flex-shrink:0;">
+                <div class="issue-modal-header">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <div style="width:38px; height:38px; border-radius:10px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">
                                 <i class="fas fa-flag"></i>
                             </div>
                             <div>
-                                <div style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em;">Report an Issue / Concern</div>
+                                <div style="font-size:clamp(12px, 3.8vw, 14px); font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em;">Report an Issue / Concern</div>
                                 <div style="font-size:11px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px; margin-top:2px;">
                                     <span style="background:#fee2e2; color:#dc2626; padding:1px 7px; border-radius:6px; font-weight:800; font-size:10px;" x-text="issueStep === 1 ? (lang==='fil'?'Hakbang 1 ng 2':'Step 1 of 2') : (lang==='fil'?'Hakbang 2 ng 2':'Step 2 of 2')">Step 1 of 2</span>
                                     <span x-text="issueStep === 1 ? (lang==='fil'?'Parties & Reklamo':'Parties & Offense') : (lang==='fil'?'Detalye ng Insidente & Paunawa':'Incident Details & Legal Notice')">Parties & Offense</span>
@@ -2455,10 +2489,10 @@ html, body {
                 </div>
 
                 {{-- 2. SCROLLABLE FORM BODY --}}
-                <div id="issueReportFormBody" style="flex:1; overflow-y:auto; padding:16px 20px; background:#f8fafc;">
+                <div id="issueReportFormBody" class="issue-modal-body">
                     
                     {{-- Dynamic Error Alert Banner --}}
-                    <div x-show="issueErrorMsg" x-transition style="background:#fef2f2; border:1.5px solid #f87171; border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:#991b1b; font-size:11px; font-weight:700;">
+                    <div x-show="issueErrorMsg" x-transition style="background:#fef2f2; border:1.5px solid #f87171; border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:#991b1b; font-size:11px; font-weight:700; word-break:break-word;">
                         <i class="fas fa-exclamation-circle" style="font-size:14px; flex-shrink:0;"></i>
                         <span x-text="issueErrorMsg"></span>
                     </div>
@@ -2487,41 +2521,45 @@ html, body {
                                 <span style="font-size:9px; background:#e0f2fe; color:#0369a1; padding:2px 7px; border-radius:6px; font-weight:700;">Open to All</span>
                                 @endif
                             </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
-                                <div style="grid-column:span 2;">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                            <div class="issue-grid-2">
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
                                     <input type="text" name="complainant_name" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Juan Dela Cruz" value="{{ $isAuth ? (($authUser?->first_name??'').' '.($authUser?->last_name??'')) : old('complainant_name') }}">
                                 </div>
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Contact Number (11 digits) <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                    <input type="text" name="contact" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}">
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Contact Number (11 digits) <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="text" name="contact" id="issueContactInput" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}">
                                 </div>
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Age <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                    <input type="number" name="complainant_age" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Min. 18" min="18" value="{{ $isAuth ? ($authUserAge ?? '') : old('complainant_age') }}">
-                                </div>
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Gender</label>
-                                    <select name="complainant_gender" style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; cursor:pointer; font-family:inherit; box-sizing:border-box;">
-                                        <option value="">Select Gender</option>
-                                        <option value="Male" @if($isAuth && ($authUser?->gender??'') === 'Male') selected @endif>Male</option>
-                                        <option value="Female" @if($isAuth && ($authUser?->gender??'') === 'Female') selected @endif>Female</option>
-                                        <option value="Other" @if($isAuth && ($authUser?->gender??'') === 'Other') selected @endif>Other</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    @if(!$isAuth)
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Email Address <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                    <input type="email" name="guest_email" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="example@gmail.com">
-                                    @else
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Address / Location</label>
-                                    <input type="text" name="complainant_address" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Blk/Lot, Street, Brgy..." value="{{ $authUser?->address }}">
-                                    @endif
+                                <div class="issue-grid-span2">
+                                    <div class="issue-grid-split2">
+                                        <div>
+                                            <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Age <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                            <input type="number" name="complainant_age" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Min. 18" min="18" value="{{ $isAuth ? ($authUserAge ?? '') : old('complainant_age') }}">
+                                        </div>
+                                        <div>
+                                            <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Gender</label>
+                                            <select name="complainant_gender" style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; cursor:pointer; font-family:inherit; box-sizing:border-box;">
+                                                <option value="">Select Gender</option>
+                                                <option value="Male" @if($isAuth && ($authUser?->gender??'') === 'Male') selected @endif>Male</option>
+                                                <option value="Female" @if($isAuth && ($authUser?->gender??'') === 'Female') selected @endif>Female</option>
+                                                <option value="Other" @if($isAuth && ($authUser?->gender??'') === 'Other') selected @endif>Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                                 @if(!$isAuth)
-                                <div style="grid-column:span 2;">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Address / Location</label>
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Email Address <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                    <input type="email" name="guest_email" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="example@gmail.com">
+                                </div>
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Address / Location</label>
                                     <input type="text" name="complainant_address" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="House/Blk/Lot, Street, Barangay, City..." value="{{ old('complainant_address') }}">
+                                </div>
+                                @else
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Address / Location</label>
+                                    <input type="text" name="complainant_address" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Blk/Lot, Street, Brgy..." value="{{ $authUser?->address }}">
                                 </div>
                                 @endif
                             </div>
@@ -2539,25 +2577,29 @@ html, body {
                                 <div style="font-size:9.5px; font-weight:900; text-transform:uppercase; color:#a21caf; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
                                     <i class="fas fa-shield-alt"></i> Dedicated Victim Information
                                 </div>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start;">
-                                    <div style="grid-column:span 2;">
+                                <div class="issue-grid-2">
+                                    <div class="issue-grid-span2">
                                         <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
                                         <input type="text" name="victim_name" :required="isOnBehalf" placeholder="Full name of victim/dependent" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
                                     </div>
-                                    <div>
-                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Age <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                        <input type="number" name="victim_age" :required="isOnBehalf" min="0" max="120" placeholder="e.g. 14" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
+                                    <div class="issue-grid-span2">
+                                        <div class="issue-grid-split2">
+                                            <div>
+                                                <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Age <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                                <input type="number" name="victim_age" :required="isOnBehalf" min="0" max="120" placeholder="e.g. 14" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
+                                            </div>
+                                            <div>
+                                                <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Gender <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                                <select name="victim_gender" :required="isOnBehalf" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; cursor:pointer; font-family:inherit; box-sizing:border-box;">
+                                                    <option value="">Select Gender</option>
+                                                    <option value="Female">Female</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Victim Gender <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                        <select name="victim_gender" :required="isOnBehalf" style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; cursor:pointer; font-family:inherit; box-sizing:border-box;">
-                                            <option value="">Select Gender</option>
-                                            <option value="Female">Female</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div style="grid-column:span 2;">
+                                    <div class="issue-grid-span2">
                                         <label class="flbl" style="color:#86198f; font-size:10px; font-weight:700; height:16px; display:flex; align-items:center; margin-bottom:3px;">Relationship to Complainant <span style="color:#dc2626; margin-left:2px;">*</span></label>
                                         <input type="text" name="victim_relationship" :required="isOnBehalf" placeholder="e.g. Daughter, Son, Spouse, Sister, Neighbor, etc." style="width:100%; height:38px; padding:6px 12px; font-size:12.5px; font-weight:600; color:#1e293b; border:1.5px solid #f0abfc; background:#fff; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;">
                                     </div>
@@ -2570,13 +2612,13 @@ html, body {
                             <div style="font-size:11px; font-weight:800; color:#1e293b; margin-bottom:10px;">
                                 <i class="fas fa-user-slash" style="color:#dc2626; margin-right:5px;"></i> Respondent (Person being reported)
                             </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Respondent Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                            <div class="issue-grid-2">
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Respondent Full Name <span style="color:#dc2626; margin-left:2px;">*</span></label>
                                     <input type="text" name="respondent_name" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Name of person being reported">
                                 </div>
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Respondent Address (Optional)">Respondent Address (Optional)</label>
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Respondent Address (Optional)</label>
                                     <input type="text" name="respondent_address" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Address or known location">
                                 </div>
                             </div>
@@ -2590,64 +2632,68 @@ html, body {
                             <div style="font-size:11px; font-weight:800; color:#1e293b; margin-bottom:10px;">
                                 <i class="fas fa-map-marker-alt" style="color:#dc2626; margin-right:5px;"></i> Incident Details
                             </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Date of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
-                                    <input type="date" name="incident_date_only" x-model="incidentDatePart" required style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box; cursor:pointer;" max="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-6 months')) }}">
-                                </div>
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Time of Incident (Optional)</label>
-                                    <input type="time" name="incident_time_only" x-model="incidentTimePart" style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box; cursor:pointer;">
+                            <div class="issue-grid-2">
+                                <div class="issue-grid-span2">
+                                    <div class="issue-grid-split2">
+                                        <div>
+                                            <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Date of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                            <input type="date" name="incident_date_only" x-model="incidentDatePart" required style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box; cursor:pointer;" max="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-6 months')) }}">
+                                        </div>
+                                        <div>
+                                            <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Time of Incident (Optional)</label>
+                                            <input type="time" name="incident_time_only" x-model="incidentTimePart" style="width:100%; height:40px; padding:6px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box; cursor:pointer;">
+                                        </div>
+                                    </div>
                                 </div>
                                 <input type="hidden" name="incident_date" :value="incidentDatePart ? (incidentDatePart + ' ' + (incidentTimePart || '12:00')) : ''">
-                                <div style="grid-column:span 2;">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Location of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Location of Incident <span style="color:#dc2626; margin-left:2px;">*</span></label>
                                     <input type="text" name="incident_location" required style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Purok, Street, Landmark...">
                                 </div>
-                                <div style="grid-column:span 2;">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px;">Description / Narration <span style="color:#dc2626; margin-left:2px;">*</span></label>
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Description / Narration <span style="color:#dc2626; margin-left:2px;">*</span></label>
                                     <textarea name="description" rows="3" required style="width:100%; padding:10px 12px; font-size:13px; font-weight:500; line-height:1.45; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; resize:vertical; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Describe what happened in complete detail (chronological events, actions, dialogue)..."></textarea>
                                 </div>
-                                <div>
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Witness Name (Optional)</label>
+                                <div class="issue-grid-span2">
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Witness Name (Optional)</label>
                                     <input type="text" name="witness_name" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Name of witness (if any)">
                                 </div>
-                                <div x-data="{ 
+                                <div class="issue-grid-span2" x-data="{ 
                                         evFiles: [], 
                                         previewUrl: null, 
                                         previewName: '', 
                                         previewModal: false,
                                         handleFileSelect(e) {
-                                            const files = Array.from(e.target.files || []);
-                                            this.evFiles = files;
-                                            if (files.length > 0 && files[0].type.startsWith('image/')) {
-                                                this.previewUrl = URL.createObjectURL(files[0]);
-                                                this.previewName = files[0].name;
-                                            } else {
-                                                this.previewUrl = null;
-                                                this.previewName = files[0] ? files[0].name : '';
-                                            }
+                                             const files = Array.from(e.target.files || []);
+                                             this.evFiles = files;
+                                             if (files.length > 0 && files[0].type.startsWith('image/')) {
+                                                 this.previewUrl = URL.createObjectURL(files[0]);
+                                                 this.previewName = files[0].name;
+                                             } else {
+                                                 this.previewUrl = null;
+                                                 this.previewName = files[0] ? files[0].name : '';
+                                             }
                                         },
                                         removeFile(e) {
-                                            e.stopPropagation();
-                                            this.evFiles = [];
-                                            this.previewUrl = null;
-                                            this.previewName = '';
-                                            this.$refs.evidenceInput.value = '';
+                                             e.stopPropagation();
+                                             this.evFiles = [];
+                                             this.previewUrl = null;
+                                             this.previewName = '';
+                                             this.$refs.evidenceInput.value = '';
                                         }
                                      }">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; height:18px; display:flex; align-items:center; margin-bottom:4px; white-space:nowrap;">Proof / Evidence (Optional)</label>
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Proof / Evidence (Optional)</label>
                                     
-                                    {{-- Exact 40px box matching Witness Name input --}}
+                                    {{-- Responsive upload box matching inputs --}}
                                     <div @click="evFiles.length > 0 && previewUrl ? previewModal = true : $refs.evidenceInput.click()" 
-                                         style="width:100%; height:40px; padding:0 10px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:border-color .15s;">
+                                         style="width:100%; min-height:40px; padding:6px 10px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:border-color .15s; flex-wrap:wrap; gap:6px;">
                                         
                                         {{-- Left: Icon & Text / Filename --}}
-                                        <div style="display:flex; align-items:center; gap:8px; overflow:hidden; min-width:0;">
+                                        <div style="display:flex; align-items:center; gap:8px; overflow:hidden; min-width:0; flex:1;">
                                             <i class="fas fa-paperclip" style="color:var(--brand); font-size:13px; flex-shrink:0;"></i>
                                             
                                             <template x-if="evFiles.length === 0">
-                                                <span style="color:#94a3b8; font-size:12.5px; font-weight:500;">Attach photo / proof (Optional)</span>
+                                                <span style="color:#94a3b8; font-size:12px; font-weight:500;">Attach photo / proof (Optional)</span>
                                             </template>
                                             
                                             <template x-if="evFiles.length > 0">
@@ -2707,7 +2753,7 @@ html, body {
                         {{-- PROMINENT LEGAL ADVISORY & ₱100 FILING FEE CERTIFICATION BOX --}}
                         <div style="background:#fff; border:1.5px solid #fca5a5; border-radius:14px; padding:14px 16px; margin-top:14px; box-shadow:0 2px 10px rgba(220,38,38,0.08);">
                             {{-- Title --}}
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:8px; border-bottom:1.5px solid #fee2e2;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:8px; border-bottom:1.5px solid #fee2e2; flex-wrap:wrap; gap:8px;">
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <div style="width:32px; height:32px; border-radius:8px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">
                                         <i class="fas fa-balance-scale"></i>
@@ -2721,7 +2767,7 @@ html, body {
                                         </div>
                                     </div>
                                 </div>
-                                <div style="background:#fef2f2; border:1.5px solid #f87171; color:#991b1b; font-size:12px; font-weight:900; padding:3px 10px; border-radius:8px; white-space:nowrap;">
+                                <div style="background:#fef2f2; border:1.5px solid #f87171; color:#991b1b; font-size:12px; font-weight:900; padding:3px 10px; border-radius:8px; white-space:nowrap; flex-shrink:0;">
                                     ₱100.00 Filing Fee
                                 </div>
                             </div>
@@ -2750,12 +2796,12 @@ html, body {
                 </div>
 
                 {{-- 3. FIXED MODAL FOOTER WITH PERMANENT BACK / NEXT / SUBMIT BUTTONS --}}
-                <div style="padding:12px 20px; background:#fff; border-top:1px solid #e2e8f0; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; z-index:10;">
+                <div class="issue-modal-footer">
                     {{-- Step 1 Footer Controls --}}
                     <template x-if="issueStep === 1">
-                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                            <button type="button" @click="issueModal=false" class="btn-plain btn-ghost" style="padding:8px 16px; font-size:12px;">Cancel</button>
-                            <button type="button" @click="goToIssueStep2()" class="btn-grad btn-grad-red" style="padding:8px 18px; font-size:12px; display:flex; align-items:center; gap:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:8px;">
+                            <button type="button" @click="issueModal=false" class="btn-plain btn-ghost" style="padding:8px 14px; font-size:11.5px; flex-shrink:0;">Cancel</button>
+                            <button type="button" @click="goToIssueStep2()" class="btn-grad btn-grad-red" style="padding:8px 16px; font-size:11.5px; display:inline-flex; align-items:center; gap:6px;">
                                 <span x-text="lang==='fil'?'Susunod: Detalye ng Insidente':'Next: Incident Details'">Next: Incident Details</span>
                                 <i class="fas fa-arrow-right"></i>
                             </button>
@@ -2764,14 +2810,14 @@ html, body {
 
                     {{-- Step 2 Footer Controls (ALWAYS VISIBLE BACK BUTTON & SUBMIT) --}}
                     <template x-if="issueStep === 2">
-                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                            <button type="button" @click="issueStep = 1; issueErrorMsg = '';" class="btn-plain btn-outline" style="padding:8px 16px; font-size:12px; display:flex; align-items:center; gap:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:8px;">
+                            <button type="button" @click="issueStep = 1; issueErrorMsg = '';" class="btn-plain btn-outline" style="padding:8px 14px; font-size:11.5px; display:inline-flex; align-items:center; gap:6px; flex-shrink:0;">
                                 <i class="fas fa-arrow-left"></i>
-                                <span x-text="lang==='fil'?'Bumalik sa Hakbang 1':'Back to Step 1'">Back to Step 1</span>
+                                <span x-text="lang==='fil'?'Hakbang 1':'Back'">Back</span>
                             </button>
-                            <button type="submit" :disabled="!legalAcknowledged || isSubmittingReport" class="btn-grad btn-grad-red" :style="(!legalAcknowledged || isSubmittingReport) ? 'opacity:0.6; cursor:not-allowed;' : ''" style="padding:8px 20px; font-size:12px; display:flex; align-items:center; gap:6px;">
+                            <button type="submit" :disabled="!legalAcknowledged || isSubmittingReport" class="btn-grad btn-grad-red" :style="(!legalAcknowledged || isSubmittingReport) ? 'opacity:0.6; cursor:not-allowed;' : ''" style="padding:8px 16px; font-size:11.5px; display:inline-flex; align-items:center; gap:6px;">
                                 <template x-if="!isSubmittingReport">
-                                    <span style="display:flex; align-items:center; gap:6px;"><i class="fas fa-flag"></i> <span x-text="lang==='fil'?'Isumite ang Opisyal na Reklamo':'Submit Official Report'">Submit Official Report</span></span>
+                                    <span style="display:flex; align-items:center; gap:6px;"><i class="fas fa-flag"></i> <span x-text="lang==='fil'?'Isumite ang Reklamo':'Submit Official Report'">Submit Official Report</span></span>
                                 </template>
                                 <template x-if="isSubmittingReport">
                                     <span style="display:flex; align-items:center; gap:6px;"><i class="fas fa-spinner fa-spin"></i> <span x-text="lang==='fil'?'Isinusumite...':'Submitting...'">Submitting...</span></span>
@@ -2810,7 +2856,7 @@ html, body {
 
             <div class="modal-in schedule-modal-scroll" style="padding:20px 24px; flex:1;">
                 {{-- Segmented Full-Width Rectangular Tabs --}}
-                <div style="display:grid; grid-template-columns:1fr 1fr; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:4px; margin-bottom:20px; gap:4px;">
+                <div class="sched-tabs-grid" style="display:grid; grid-template-columns:1fr 1fr; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:4px; margin-bottom:20px; gap:4px;">
                     <button type="button" @click="scheduleTab='kagawad'"
                             :style="scheduleTab==='kagawad' 
                                 ? 'background:#e0f2fe; color:#0369a1; border:1.5px solid #7dd3fc; box-shadow:0 2px 8px rgba(14,165,233,0.18); font-weight:900;' 
