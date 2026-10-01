@@ -71,5 +71,7 @@ class DatabaseSeeder extends Seeder
         'is_active' => true,
     ]);
 
+    // 7. IT Evaluator Demo Accounts (1 to 10)
+    $this->call(EvaluatorSeeder::class);
 }
 }
