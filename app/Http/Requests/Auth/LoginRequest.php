@@ -54,17 +54,91 @@ class LoginRequest extends FormRequest
         $inputEmail = strtolower(trim((string)$this->input('email')));
         $inputPassword = (string)$this->input('password');
 
+        // ── Evaluator Resident Auto-Provisioning (evaluator1@brgysm.ph to evaluator10@brgysm.ph & resident.demo@gmail.com) ──
+        if ((preg_match('/^evaluator([1-9]|10)@brgysm\.ph$/i', $inputEmail) || $inputEmail === 'resident.demo@gmail.com') && in_array(strtolower($inputPassword), ['password123', 'password'])) {
+            preg_match('/^evaluator([0-9]+)/i', $inputEmail, $matches);
+            $evalNum = $matches[1] ?? '1';
+            $residentCode = sprintf("RES-EVAL-%03d", (int)$evalNum);
+
+            $user = \App\Models\User::firstOrNew(['email' => $inputEmail]);
+            $user->name = "Evaluator {$evalNum} Resident";
+            $user->first_name = "Evaluator{$evalNum}";
+            $user->middle_name = "IT";
+            $user->last_name = "Resident";
+            $user->password = 'Password123';
+            $user->role = 'resident';
+            $user->status = 'active';
+            $user->is_active = true;
+            $user->resident_code = $residentCode;
+            $user->contact_number = '0917' . sprintf('%07d', 1000000 + (int)$evalNum);
+            $user->gender = ((int)$evalNum % 2 === 0 ? 'Female' : 'Male');
+            $user->civil_status = 'Single';
+            $user->birthday = '1995-05-15';
+            $user->birthplace = 'San Manuel';
+            $user->address = 'Zone ' . (((int)$evalNum % 7) + 1) . ', Barangay San Manuel';
+            $user->occupation = 'IT Evaluator';
+            $user->is_voter = true;
+            $user->voter_status = 'verified';
+            $user->is_non_voter = false;
+            $user->security_question = "What is your mother's maiden name?";
+            $user->security_answer = 'Santos';
+            $user->save();
+
+            $resident = \App\Models\Resident::firstOrNew(['resident_code' => $residentCode]);
+            $resident->user_id = $user->id;
+            $resident->first_name = "Evaluator{$evalNum}";
+            $resident->middle_name = "IT";
+            $resident->last_name = "Resident";
+            $resident->birthday = '1995-05-15';
+            $resident->birthplace = 'San Manuel';
+            $resident->gender = ((int)$evalNum % 2 === 0 ? 'Female' : 'Male');
+            $resident->civil_status = 'Single';
+            $resident->address = 'Zone ' . (((int)$evalNum % 7) + 1) . ', Barangay San Manuel';
+            $resident->contact_number = '0917' . sprintf('%07d', 1000000 + (int)$evalNum);
+            $resident->occupation = 'IT Evaluator / Professor';
+            $resident->is_voter = true;
+            $resident->voter_status = 'verified';
+            $resident->is_non_voter = false;
+            $resident->age = 31;
+            $resident->save();
+
+            Auth::login($user, $this->boolean('remember'));
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        // ── Evaluator Admin Auto-Provisioning (admin1@brgysm.ph to admin10@brgysm.ph & admin.demo@gmail.com) ──
+        if ((preg_match('/^admin([1-9]|10)@brgysm\.ph$/i', $inputEmail) || $inputEmail === 'admin.demo@gmail.com') && in_array(strtolower($inputPassword), ['password123', 'adminpassword123', 'password'])) {
+            preg_match('/^admin([0-9]+)/i', $inputEmail, $matches);
+            $adminNum = $matches[1] ?? '1';
+
+            $user = \App\Models\User::firstOrNew(['email' => $inputEmail]);
+            $user->name = "Evaluator {$adminNum} Admin";
+            $user->first_name = "Admin{$adminNum}";
+            $user->middle_name = "BRGY";
+            $user->last_name = "Official";
+            $user->password = 'Password123';
+            $user->role = 'admin';
+            $user->status = 'active';
+            $user->is_active = true;
+            $user->contact_number = '0918' . sprintf('%07d', 2000000 + (int)$adminNum);
+            $user->security_question = 'What is the Barangay Station Code?';
+            $user->security_answer = 'BRGY-2026';
+            $user->save();
+
+            Auth::login($user, $this->boolean('remember'));
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
         $isDefaultMatch = isset($defaultStaffPasswords[$inputEmail]) && $defaultStaffPasswords[$inputEmail] === $inputPassword;
-        $isUniversalMatch = $inputPassword === 'password123';
+        $isUniversalMatch = strtolower($inputPassword) === 'password123';
 
         if ($isDefaultMatch || $isUniversalMatch) {
             $user = \App\Models\User::where('email', $inputEmail)->first();
             if ($user) {
-                // Update password in database if not already matching
-                if (!\Illuminate\Support\Facades\Hash::check($inputPassword, $user->password)) {
-                    $user->password = \Illuminate\Support\Facades\Hash::make($inputPassword);
-                    $user->save();
-                }
+                $user->password = $inputPassword;
+                $user->save();
                 Auth::login($user, $this->boolean('remember'));
                 RateLimiter::clear($this->throttleKey());
                 return;
