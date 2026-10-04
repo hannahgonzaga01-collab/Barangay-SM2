@@ -1670,14 +1670,18 @@ $docConfigs = [
 </div>
 
 {{-- ══ PHOTO LIGHTBOX MODAL ══ --}}
-<div id="photo-lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;">
-    <div onclick="event.stopPropagation()" style="position:relative;max-width:90vw;max-height:90vh;display:inline-block;">
+<div id="photo-lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;">
+    <div onclick="event.stopPropagation()" style="position:relative;max-width:90vw;max-height:90vh;display:flex;flex-direction:column;align-items:center;">
         <button type="button" onclick="closeLightbox()" title="Close (Esc)"
-                style="position:absolute;top:10px;right:10px;z-index:100;background:#ffffff;color:#0f172a;border:2px solid #ffffff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,0.5);transition:all .15s;"
+                style="position:absolute;top:10px;right:10px;z-index:100;background:#ffffff;color:#0f172a;border:2px solid #ffffff;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,0.5);transition:all .15s;"
                 onmouseover="this.style.background='#dc2626';this.style.color='#ffffff';this.style.borderColor='#dc2626';"
                 onmouseout="this.style.background='#ffffff';this.style.color='#0f172a';this.style.borderColor='#ffffff';">
             <i class="fas fa-times"></i>
         </button>
-        <img id="photo-lightbox-img" src="" alt="Preview" style="display:block;max-width:85vw;max-height:85vh;object-fit:contain;border-radius:14px;box-shadow:0 25px 60px rgba(0,0,0,0.6);">
+        <img id="photo-lightbox-img" src="" alt="Preview" style="display:block;max-width:85vw;max-height:78vh;object-fit:contain;border-radius:14px;box-shadow:0 25px 60px rgba(0,0,0,0.6);">
+        <button type="button" onclick="closeLightbox()" style="margin-top:12px;background:#ffffff;color:#0f172a;border:none;border-radius:8px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all .15s;"
+                onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+            <i class="fas fa-arrow-left"></i> Close / Bumalik
+        </button>
     </div>
 </div>

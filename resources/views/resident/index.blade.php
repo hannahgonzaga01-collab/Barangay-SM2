@@ -205,7 +205,7 @@ html, body {
 .fgrid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .fgrp{margin-bottom:11px;}
 .fspan2{grid-column:span 2;}
-.fselect{appearance:none;cursor:pointer;}
+.fselect{appearance:auto;-webkit-appearance:menulist;cursor:pointer;}
 .sblk{background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:11px;border:1px solid var(--border);}
 .sblk-ttl{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
 
@@ -484,6 +484,14 @@ html, body {
             profileModal: false,
             emailEditModal: false,
             idUploadModal: false,
+            viewPhotoModal: false,
+            photoModalUrl: '',
+            photoModalTitle: 'Uploaded ID Proof',
+            openPhotoModal(url, title = 'Uploaded ID Proof') {
+                this.photoModalUrl = url;
+                this.photoModalTitle = title;
+                this.viewPhotoModal = true;
+            },
             selectedIdType: 'PhilSys National ID',
             otherIdType: '',
             idPreviewUrl: null,
@@ -1419,9 +1427,9 @@ html, body {
                             Your verification proof has been submitted and is currently being reviewed by the Barangay Office against the Official Masterlist. If you are newly moving into the barangay, you may submit a Move-In Certificate.
                         </p>
                         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                            <a href="{{ asset('storage/'.$authUser->voter_id_photo) }}" target="_blank" style="font-size:10.5px; font-weight:800; color:#b45309; text-decoration:underline; display:inline-flex; align-items:center; gap:4px;">
+                            <button type="button" @click="openPhotoModal('{{ asset('storage/'.$authUser->voter_id_photo) }}', 'Submitted Verification ID')" style="background:none; border:none; padding:0; cursor:pointer; font-size:10.5px; font-weight:800; color:#b45309; text-decoration:underline; display:inline-flex; align-items:center; gap:4px;">
                                 <i class="fas fa-image"></i> View Submitted ID
-                            </a>
+                            </button>
                             <button type="button" @click="profileModal=true" style="background:#fff; border:1px solid #fcd34d; border-radius:6px; padding:3px 9px; font-size:10px; font-weight:700; color:#92400e; cursor:pointer;">
                                 <i class="fas fa-sync-alt" style="margin-right:3px;"></i> Re-upload / Change ID
                             </button>
@@ -3307,9 +3315,9 @@ html, body {
                     </p>
                     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                         @if($authUser->voter_id_photo)
-                            <a href="{{ asset('storage/'.$authUser->voter_id_photo) }}" target="_blank" style="color:#d97706;font-weight:800;font-size:10.5px;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;">
+                            <button type="button" @click="openPhotoModal('{{ asset('storage/'.$authUser->voter_id_photo) }}', 'Uploaded ID Proof')" style="color:#d97706;font-weight:800;font-size:10.5px;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;">
                                 <i class="fas fa-image"></i> View Uploaded Photo
-                            </a>
+                            </button>
                         @endif
                         <button type="button" @click="profileModal=false; idUploadModal=true" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px 9px;font-size:10px;font-weight:700;color:#475569;cursor:pointer;">
                             <i class="fas fa-sync-alt" style="margin-right:3px;"></i> Change / Re-upload ID
@@ -3540,6 +3548,30 @@ html, body {
                 </div>
             </div>
         </div>
+    {{-- VIEW PHOTO PREVIEW MODAL --}}
+    <div x-show="viewPhotoModal" x-cloak class="modal-ov" style="z-index: 9999999;" @keydown.window.escape="viewPhotoModal=false" @click.self="viewPhotoModal=false">
+        <div class="modal-box" style="max-width: 560px; width: 95%; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.5);">
+            <div class="modal-hd" style="background: linear-gradient(135deg, #0E5393 0%, #000052 100%); padding: 14px 18px; color: #fff; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-id-card"></i> <span x-text="photoModalTitle">Uploaded ID Proof</span>
+                </span>
+                <button type="button" @click="viewPhotoModal = false" title="Close (Esc)" style="background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="padding: 18px; text-align: center; background: #0b1120; min-height: 240px; display: flex; align-items: center; justify-content: center;">
+                <img :src="photoModalUrl" alt="ID Proof" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+            </div>
+            <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <span style="font-size: 11px; color: #64748b; font-weight: 600;">
+                    <i class="fas fa-shield-alt" style="color:var(--brand);"></i> Verification Document Preview
+                </span>
+                <button type="button" @click="viewPhotoModal = false" class="btn-plain btn-ghost btn-sm" style="background:#e2e8f0; color:#1e293b; font-weight:800; padding:6px 16px; border-radius:8px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fas fa-arrow-left"></i> Close / Bumalik
+                </button>
+            </div>
+        </div>
+    </div>
 
     {{-- UPLOAD / CHANGE VERIFICATION ID MODAL --}}
     <div x-show="idUploadModal" x-cloak class="modal-ov" x-transition style="z-index: 999999;">

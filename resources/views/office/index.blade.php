@@ -206,7 +206,7 @@ html, body {
 .fgrp{margin-bottom:12px;}
 .fspan2{grid-column:span 2;}
 .fspan3{grid-column:span 3;}
-.fselect{appearance:none;cursor:pointer;}
+.fselect{appearance:auto;-webkit-appearance:menulist;cursor:pointer;}
 .section-blk{background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:12px;border:1px solid var(--border);}
 .section-blk-ttl{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;gap:5px;}
 .classif-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}

@@ -106,6 +106,13 @@
                             <div style="font-size:9px;color:var(--light);">{{ $pv->created_at->diffForHumans() }}</div>
                         </td>
                         <td data-label="Photo ID">
+                            @if(!empty($pv->id_type))
+                            <div style="margin-bottom: 4px;">
+                                <span style="font-size: 8px; font-weight: 800; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 2px 6px; border-radius: 99px; display: inline-block;">
+                                    {{ $pv->id_type }}
+                                </span>
+                            </div>
+                            @endif
                             @if($pv->voter_id_photo)
                             <button type="button" onclick="viewPhoto('{{ asset('storage/'.$pv->voter_id_photo) }}')" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#f1f5f9;border-radius:4px;font-size:10px;font-weight:700;color:var(--brand);border:none;cursor:pointer;"><i class="fas fa-image"></i> View ID</button>
                             @else
@@ -113,7 +120,7 @@
                             @endif
                         </td>
                         <td data-label="Action" style="text-align:right;">
-                            <div x-show="!openDecline" style="display:flex;justify-content:flex-end;gap:5px;">
+                            <div style="display:flex;justify-content:flex-end;gap:5px;">
                                 <form action="{{ route('office.voter.approve', $pv->id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     <button type="submit" class="btn-grad btn-grad-sm" style="background:var(--success);box-shadow:none;">
@@ -124,25 +131,67 @@
                                     <i class="fas fa-times"></i> Decline
                                 </button>
                             </div>
-                            <div x-show="openDecline" x-transition style="margin-top:5px;text-align:left;" x-cloak>
-                                <form action="{{ route('office.voter.decline', $pv->id) }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="reason" :value="reasonSelect === 'Others' ? reasonCustom : reasonSelect">
-                                    <select x-model="reasonSelect" required class="finput fselect" style="font-size:10px;padding:6px;width:100%;margin-bottom:4px;">
-                                        <option value="">— Select Reason —</option>
-                                        <option value="Unclear / Blurry Voter ID Photo">Unclear / Blurry Voter ID Photo</option>
-                                        <option value="Name Mismatch with Barangay / COMELEC Records">Name Mismatch with Barangay / COMELEC Records</option>
-                                        <option value="Invalid / Non-Voter ID Document">Invalid / Non-Voter ID Document</option>
-                                        <option value="Others">Others (Please specify)</option>
-                                    </select>
-                                    <div x-show="reasonSelect === 'Others'" x-transition>
-                                        <textarea x-model="reasonCustom" :required="reasonSelect === 'Others'" rows="2" class="finput" style="font-size:10px;padding:6px;width:100%;resize:none;margin-bottom:4px;" placeholder="Specify reason for declining..."></textarea>
+
+                            {{-- DEDICATED DECLINE MODAL --}}
+                            <div x-show="openDecline" x-cloak class="modal-ov" style="text-align: left; z-index: 99999;" @click.self="openDecline = false" @keydown.window.escape="openDecline = false">
+                                <div class="modal-box" style="max-width: 480px; width: 95%; background: #fff; border-radius: 16px; overflow: hidden; border-top: 4px solid #dc2626; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+                                    <div class="modal-hd" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 14px 18px; color: #fff; display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 8px;">
+                                            <i class="fas fa-times-circle"></i> Decline Voter ID Verification
+                                        </span>
+                                        <button type="button" @click="openDecline = false" style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; line-height: 1;">&times;</button>
                                     </div>
-                                    <div style="display:flex;justify-content:flex-end;gap:5px;">
-                                        <button @click="openDecline=false" type="button" class="btn-plain btn-edit" style="padding:4px 8px;font-size:9px;">Cancel</button>
-                                        <button type="submit" class="btn-grad btn-grad-sm" style="background:var(--danger);box-shadow:none;padding:4px 8px;font-size:9px;">Submit</button>
-                                    </div>
-                                </form>
+                                    <form action="{{ route('office.voter.decline', $pv->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="reason" :value="reasonSelect === 'Others' ? reasonCustom : reasonSelect">
+                                        
+                                        <div style="padding: 18px;">
+                                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;">
+                                                <img src="{{ $pv->profile_photo_url ?? $pvAvatarFallback }}"
+                                                     onerror="this.onerror=null; this.src='{{ $pvAvatarFallback }}';"
+                                                     style="width:40px;height:40px;border-radius:99px;object-fit:cover;flex-shrink:0;">
+                                                <div>
+                                                    <div style="font-size:13px;font-weight:800;color:#0f172a;">{{ $pv->first_name }} {{ $pv->last_name }}</div>
+                                                    <div style="font-size:11px;color:#64748b;font-weight:600;">{{ $pv->email }}</div>
+                                                    @if(!empty($pv->id_type))
+                                                    <div style="font-size:9.5px;color:#0369a1;font-weight:700;margin-top:2px;">Submitted: {{ $pv->id_type }}</div>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <div class="fgrp">
+                                                <label class="flbl" style="font-size:10px;font-weight:800;color:#334155;text-transform:uppercase;margin-bottom:6px;display:block;">
+                                                    Select Reason for Declining <span style="color:#dc2626;">*</span>
+                                                </label>
+                                                <select x-model="reasonSelect" required class="finput" style="appearance:auto !important; -webkit-appearance:menulist !important; font-size:12px; font-weight:700; height:42px; width:100%; border:1.5px solid #cbd5e1; border-radius:8px; background:#fff; padding:6px 10px; cursor:pointer;">
+                                                    <option value="">— Select Reason —</option>
+                                                    <option value="Unclear / Blurry Voter ID Photo">Unclear / Blurry Voter ID Photo</option>
+                                                    <option value="Name Mismatch with Barangay / COMELEC Records">Name Mismatch with Barangay / COMELEC Records</option>
+                                                    <option value="Invalid / Non-Voter ID Document">Invalid / Non-Voter ID Document</option>
+                                                    <option value="Others">Others (Please specify)</option>
+                                                </select>
+                                            </div>
+
+                                            <div x-show="reasonSelect === 'Others'" x-transition style="margin-top:10px;">
+                                                <label class="flbl" style="font-size:10px;font-weight:800;color:#334155;text-transform:uppercase;margin-bottom:6px;display:block;">
+                                                    Specify Reason <span style="color:#dc2626;">*</span>
+                                                </label>
+                                                <textarea x-model="reasonCustom" :required="reasonSelect === 'Others'" rows="3" class="finput" style="font-size:12px;padding:8px 10px;width:100%;resize:vertical;border:1.5px solid #cbd5e1;border-radius:8px;" placeholder="Please specify why the ID proof is declined..."></textarea>
+                                            </div>
+
+                                            <div style="background:#fef2f2;border-left:3px solid #dc2626;padding:8px 12px;border-radius:4px;font-size:10.5px;color:#991b1b;font-weight:600;margin-top:12px;">
+                                                <i class="fas fa-exclamation-triangle"></i> Declining will update the resident's status and notify them via email with this reason.
+                                            </div>
+                                        </div>
+
+                                        <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
+                                            <button type="button" @click="openDecline = false" class="btn-plain btn-ghost btn-sm" style="background:#e2e8f0; color:#1e293b; font-weight:800; cursor:pointer;">Cancel</button>
+                                            <button type="submit" class="btn-grad btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); font-weight:800; cursor:pointer;">
+                                                <i class="fas fa-paper-plane"></i> Confirm Decline
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -448,7 +497,7 @@
                                                     <input type="hidden" name="disapproval_reason" :value="reasonSelect === 'Others' ? reasonCustom : reasonSelect">
                                                     <div class="fgrp">
                                                         <label class="flbl">Reason for Disapproval *</label>
-                                                        <select x-model="reasonSelect" required class="finput fselect" style="margin-bottom:8px;">
+                                                        <select x-model="reasonSelect" required class="finput" style="appearance:auto !important; -webkit-appearance:menulist !important; font-size:12px; height:38px; width:100%; border:1.5px solid #cbd5e1; border-radius:8px; background:#fff; padding:6px 10px; cursor:pointer; margin-bottom:8px;">
                                                             <option value="">— Select Reason —</option>
                                                             <option value="Incomplete or Missing Requirements">Incomplete or Missing Requirements</option>
                                                             <option value="Unclear / Expired Valid ID Uploaded">Unclear / Expired Valid ID Uploaded</option>
