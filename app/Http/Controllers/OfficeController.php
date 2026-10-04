@@ -20,6 +20,8 @@ class OfficeController extends Controller
 {
     public function index(Request $request)
     {
+        \App\Services\DemographicRebalancer::rebalanceIfNeeded();
+
         $query = Resident::query();
 
         if ($request->filled('view')) {

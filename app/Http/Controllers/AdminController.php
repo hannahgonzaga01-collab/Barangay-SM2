@@ -32,6 +32,8 @@ class AdminController extends Controller
             ->whereDate('date', '<', Carbon::now()->toDateString())
             ->update(['is_active' => false, 'archived_at' => Carbon::now()]);
 
+        \App\Services\DemographicRebalancer::rebalanceIfNeeded();
+
         $totalResidents    = Resident::count();
         $totalUsers        = User::where('role', 'resident')->has('resident')->count();
         $totalDocs         = DocumentRequest::count();
