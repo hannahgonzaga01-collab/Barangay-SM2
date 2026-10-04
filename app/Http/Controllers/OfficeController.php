@@ -20,7 +20,11 @@ class OfficeController extends Controller
 {
     public function index(Request $request)
     {
-        \App\Services\DemographicRebalancer::rebalanceIfNeeded();
+        if (\App\Models\Resident::count() < 2000 && file_exists(base_path('database/data/official_masterlist.json'))) {
+            (new \Database\Seeders\OfficialMasterlistSeeder())->run();
+        } else {
+            \App\Services\DemographicRebalancer::rebalanceIfNeeded();
+        }
 
         $query = Resident::query();
 

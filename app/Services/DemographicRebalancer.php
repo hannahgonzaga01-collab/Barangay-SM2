@@ -10,8 +10,8 @@ class DemographicRebalancer
     public static function rebalanceIfNeeded(): void
     {
         $totalResidents = Resident::count();
-        if ($totalResidents < 50) {
-            return;
+        if ($totalResidents >= 2000 || $totalResidents < 50) {
+            return; // Official masterlist is loaded, do not overwrite!
         }
 
         // Check if rebalance is needed (if households <= 1 or voters <= 15 or students <= 5)

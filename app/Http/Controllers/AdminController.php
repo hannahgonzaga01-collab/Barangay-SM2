@@ -32,7 +32,11 @@ class AdminController extends Controller
             ->whereDate('date', '<', Carbon::now()->toDateString())
             ->update(['is_active' => false, 'archived_at' => Carbon::now()]);
 
-        \App\Services\DemographicRebalancer::rebalanceIfNeeded();
+        if (Resident::count() < 2000 && file_exists(base_path('database/data/official_masterlist.json'))) {
+            (new \Database\Seeders\OfficialMasterlistSeeder())->run();
+        } else {
+            \App\Services\DemographicRebalancer::rebalanceIfNeeded();
+        }
 
         $totalResidents    = Resident::count();
         $totalUsers        = User::where('role', 'resident')->has('resident')->count();
