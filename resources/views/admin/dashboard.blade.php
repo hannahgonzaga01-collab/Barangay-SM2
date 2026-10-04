@@ -245,11 +245,22 @@
                 filterMonth: '',
                 filterDept: '',
 
+                resPage: 1,
+                resPerPage: 50,
+                selectedResident: null,
+                showResidentProfileModal: false,
+
                 openResidentModal(filter = 'all', title = 'Resident Masterlist') {
                     this.resFilterType = filter;
                     this.resModalTitle = title;
                     this.resSearchQuery = '';
+                    this.resPage = 1;
                     this.showResList = true;
+                },
+
+                openResidentProfile(r) {
+                    this.selectedResident = r;
+                    this.showResidentProfileModal = true;
                 },
 
                 openDocsModal() {
@@ -323,21 +334,25 @@
                     const currentMonth = new Date().getMonth() + 1;
                     return list.filter(r => {
                         if (!r) return false;
-                        if (this.resFilterType === 'voter' && !r.is_voter) return false;
-                        if (this.resFilterType === 'non_voters' && r.is_voter) return false;
-                        if (this.resFilterType === 'pending' && r.is_voter) return false;
-                        if (this.resFilterType === 'senior' && !r.is_senior) return false;
-                        if (this.resFilterType === 'pwd' && !r.is_pwd) return false;
-                        if (this.resFilterType === 'bedridden' && !r.is_bedridden) return false;
-                        if (this.resFilterType === 'solo_parent' && !r.is_single_parent) return false;
-                        if (this.resFilterType === 'student' && !r.is_student) return false;
-                        if (this.resFilterType === 'with_account' && !r.user_id) return false;
-                        
+
                         let calcAge = r.age !== null && r.age !== undefined && r.age !== '' ? Number(r.age) : NaN;
                         if (isNaN(calcAge) && r.birthday) {
                             calcAge = Math.floor((new Date() - new Date(r.birthday)) / 31557600000);
                         }
 
+                        if (this.resFilterType === 'voter' && !(r.is_voter == true || r.is_voter == 1)) return false;
+                        if (this.resFilterType === 'non_voters' && (r.is_voter == true || r.is_voter == 1)) return false;
+                        if (this.resFilterType === 'pending' && (r.is_voter == true || r.is_voter == 1)) return false;
+                        if (this.resFilterType === 'senior') {
+                            const isSenior = (r.is_senior == true || r.is_senior == 1) || (!isNaN(calcAge) && calcAge >= 60);
+                            if (!isSenior) return false;
+                        }
+                        if (this.resFilterType === 'pwd' && !(r.is_pwd == true || r.is_pwd == 1)) return false;
+                        if (this.resFilterType === 'bedridden' && !(r.is_bedridden == true || r.is_bedridden == 1)) return false;
+                        if (this.resFilterType === 'solo_parent' && !(r.is_single_parent == true || r.is_single_parent == 1)) return false;
+                        if (this.resFilterType === 'student' && !(r.is_student == true || r.is_student == 1)) return false;
+                        if (this.resFilterType === 'with_account' && !r.user_id) return false;
+                        
                         if (this.resFilterType === 'minor') {
                             if (isNaN(calcAge) || calcAge >= 18) return false;
                         }
@@ -361,6 +376,29 @@
                             }
                         }
                         return true;
+                    });
+                },
+
+                get paginatedResidentList() {
+                    const list = this.filteredResidentList;
+                    const start = (this.resPage - 1) * this.resPerPage;
+                    return list.slice(start, start + this.resPerPage);
+                },
+
+                get totalResPages() {
+                    return Math.ceil(this.filteredResidentList.length / this.resPerPage) || 1;
+                },
+
+                get selectedResidentFamily() {
+                    if (!this.selectedResident) return [];
+                    const curr = this.selectedResident;
+                    const list = Array.isArray(this.allRes) ? this.allRes : Object.values(this.allRes || {});
+                    return list.filter(r => {
+                        if (!r || r.id === curr.id) return false;
+                        if (curr.household_id && r.household_id && r.household_id === curr.household_id) return true;
+                        if (curr.is_household_head && r.household_head_id === curr.id) return true;
+                        if (curr.household_head_id && (r.id === curr.household_head_id || r.household_head_id === curr.household_head_id)) return true;
+                        return false;
                     });
                 },
 
@@ -3947,11 +3985,12 @@
                     </div>
                     <div style="margin-bottom: 16px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 240px; position: relative;">
-                            <input type="text" x-model="resSearchQuery" placeholder="Search by name, code, or address..." class="finput" style="width: 100%; padding-left: 32px;">
+                            <input type="text" x-model="resSearchQuery" @input="resPage = 1" placeholder="Search by name, code, or address..." class="finput" style="width: 100%; padding-left: 32px;">
                             <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--light); font-size: 11px;"></i>
                         </div>
                         <div style="position: relative; min-width: 220px;">
                             <select x-model="resFilterType" @change="
+                                resPage = 1;
                                 const titles = {
                                     'all': 'Total Residents Masterlist',
                                     'voter': 'Registered Voters List',
@@ -3992,11 +4031,15 @@
                                     <th style="padding: 12px; text-align: left; color: var(--muted); text-transform: uppercase;">Code</th>
                                     <th style="padding: 12px; text-align: left; color: var(--muted); text-transform: uppercase;">Details</th>
                                     <th style="padding: 12px; text-align: left; color: var(--muted); text-transform: uppercase;">Status / Badges</th>
+                                    <th style="padding: 12px; width: 36px; text-align: center;"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="r in filteredResidentList" :key="r.id">
-                                    <tr style="border-bottom: 1px solid #f8fafc;">
+                                <template x-for="r in paginatedResidentList" :key="r.id">
+                                    <tr @click="openResidentProfile(r)"
+                                        style="border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s ease;"
+                                        onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"
+                                        title="Click to view resident profile">
                                         <td style="padding: 12px;">
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <img :src="r.photo ? '/storage/' + r.photo : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((r.first_name||'') + '+' + (r.last_name||'')) + '&background=0E5393&color=fff'" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
@@ -4014,18 +4057,22 @@
                                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                                 <template x-if="r.is_voter"><span style="background: #eff6ff; color: #1d4ed8; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">VOTER</span></template>
                                                 <template x-if="!r.is_voter"><span style="background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">NON-VOTER</span></template>
-                                                <template x-if="r.is_senior"><span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">SENIOR</span></template>
+                                                <template x-if="r.is_senior || (Number(r.age) >= 60)"><span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">SENIOR</span></template>
                                                 <template x-if="r.is_pwd"><span style="background: #fce7f3; color: #be185d; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">PWD</span></template>
                                                 <template x-if="r.is_single_parent"><span style="background: #fdf2f8; color: #9d174d; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">SOLO PARENT</span></template>
                                                 <template x-if="r.is_student"><span style="background: #ecfdf5; color: #047857; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">STUDENT</span></template>
                                                 <template x-if="r.is_bedridden"><span style="background: #fef2f2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">BEDRIDDEN</span></template>
+                                                <template x-if="r.is_household_head"><span style="background: #f0fdf4; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">HEAD</span></template>
                                             </div>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center; color: var(--light);">
+                                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
                                         </td>
                                     </tr>
                                 </template>
                                 <template x-if="filteredResidentList.length === 0">
                                     <tr>
-                                        <td colspan="4" style="padding: 30px; text-align: center; color: var(--light); font-weight: 600;">
+                                        <td colspan="5" style="padding: 30px; text-align: center; color: var(--light); font-weight: 600;">
                                             <i class="fas fa-user-slash" style="display: block; font-size: 20px; margin-bottom: 8px; opacity: 0.5;"></i>
                                             No residents found matching your criteria.
                                         </td>
@@ -4034,6 +4081,162 @@
                             </tbody>
                         </table>
                     </div>
+
+                    {{-- Pagination Controls --}}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 6px 0; border-top: 1px solid #f1f5f9; margin-top: 12px; font-size: 11px; flex-wrap: wrap; gap: 8px;">
+                        <div style="color: var(--muted); font-weight: 600;">
+                            Showing <span style="font-weight: 800; color: var(--text);" x-text="filteredResidentList.length === 0 ? 0 : ((resPage - 1) * resPerPage + 1)"></span> to 
+                            <span style="font-weight: 800; color: var(--text);" x-text="Math.min(resPage * resPerPage, filteredResidentList.length)"></span> of 
+                            <span style="font-weight: 800; color: var(--brand);" x-text="filteredResidentList.length"></span> residents
+                        </div>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <button type="button" @click="resPage = Math.max(1, resPage - 1)" :disabled="resPage <= 1"
+                                    style="padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                    :style="resPage <= 1 ? 'opacity: 0.5; cursor: not-allowed;' : ''">
+                                <i class="fas fa-chevron-left"></i> Prev
+                            </button>
+                            <span style="padding: 0 8px; font-weight: 700; color: var(--text);">
+                                Page <span x-text="resPage"></span> of <span x-text="totalResPages"></span>
+                            </span>
+                            <button type="button" @click="resPage = Math.min(totalResPages, resPage + 1)" :disabled="resPage >= totalResPages"
+                                    style="padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                    :style="resPage >= totalResPages ? 'opacity: 0.5; cursor: not-allowed;' : ''">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Resident Profile Modal --}}
+        <div x-show="showResidentProfileModal" x-cloak class="modal-ov" x-transition style="z-index: 600;" @click.self="showResidentProfileModal=false">
+            <div class="modal-box" style="max-width: 620px;" @click.away="showResidentProfileModal=false">
+                <div class="modal-in">
+                    <div class="modal-hd">
+                        <div class="modal-ttl">
+                            <div class="mico"><i class="fas fa-id-card"></i></div>
+                            <span>Resident Profile</span>
+                        </div>
+                        <button @click="showResidentProfileModal=false" class="mclose"><i class="fas fa-times-circle"></i></button>
+                    </div>
+
+                    <template x-if="selectedResident">
+                        <div>
+                            {{-- Header with Photo and Badges --}}
+                            <div style="display:flex; align-items:center; gap:16px; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--border);">
+                                <img :src="selectedResident.photo ? '/storage/' + selectedResident.photo : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((selectedResident.first_name||'') + '+' + (selectedResident.last_name||'')) + '&background=0E5393&color=fff&size=128&bold=true'"
+                                     style="width:72px; height:72px; border-radius:14px; object-fit:cover; border:3px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.08); flex-shrink:0;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size:18px; font-weight:900; color:var(--text); line-height:1.2;" 
+                                         x-text="(selectedResident.first_name || '') + ' ' + (selectedResident.middle_name ? selectedResident.middle_name + ' ' : '') + (selectedResident.last_name || '') + (selectedResident.suffix ? ' ' + selectedResident.suffix : '')"></div>
+                                    <div style="font-size:11px; font-weight:800; color:var(--brand); text-transform:uppercase; letter-spacing:.05em; margin-top:3px;" 
+                                         x-text="selectedResident.resident_code || ('RES-' + selectedResident.id)"></div>
+                                    <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+                                        <template x-if="selectedResident.is_voter"><span style="background: #eff6ff; color: #1d4ed8; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">VOTER</span></template>
+                                        <template x-if="!selectedResident.is_voter"><span style="background: #f1f5f9; color: #64748b; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">NON-VOTER</span></template>
+                                        <template x-if="selectedResident.is_senior || (Number(selectedResident.age) >= 60)"><span style="background: #fef3c7; color: #92400e; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">SENIOR CITIZEN</span></template>
+                                        <template x-if="selectedResident.is_pwd"><span style="background: #fce7f3; color: #be185d; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">PWD</span></template>
+                                        <template x-if="selectedResident.is_single_parent"><span style="background: #fdf2f8; color: #9d174d; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">SOLO PARENT</span></template>
+                                        <template x-if="selectedResident.is_student"><span style="background: #ecfdf5; color: #047857; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">STUDENT</span></template>
+                                        <template x-if="selectedResident.is_bedridden"><span style="background: #fef2f2; color: #b91c1c; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">BEDRIDDEN</span></template>
+                                        <template x-if="selectedResident.is_household_head"><span style="background: #f0fdf4; color: #166534; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">HOUSEHOLD HEAD</span></template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Demographics Details Grid --}}
+                            <div class="fgrid2" style="gap:10px; margin-bottom:16px;">
+                                <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border);">
+                                    <div style="font-size:9px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Age & Birthday</div>
+                                    <div style="font-size:12px; font-weight:800; color:var(--text);">
+                                        <span x-text="selectedResident.age ? selectedResident.age + ' yrs old' : '—'"></span>
+                                        <span style="color:var(--muted); font-weight:600;" x-show="selectedResident.birthday" x-text="' (' + new Date(selectedResident.birthday).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) + ')'"></span>
+                                    </div>
+                                </div>
+
+                                <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border);">
+                                    <div style="font-size:9px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Gender & Civil Status</div>
+                                    <div style="font-size:12px; font-weight:800; color:var(--text);" x-text="(selectedResident.gender || '—') + ' • ' + (selectedResident.civil_status || '—')"></div>
+                                </div>
+
+                                <div x-show="selectedResident.spouse_name" style="background:#fdf4ff; padding:10px 12px; border-radius:8px; border:1px solid #f0abfc;">
+                                    <div style="font-size:9px; font-weight:900; color:#86198f; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Spouse / Partner</div>
+                                    <div style="font-size:12px; font-weight:800; color:var(--text);" x-text="selectedResident.spouse_name || 'N/A'"></div>
+                                </div>
+
+                                <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border);">
+                                    <div style="font-size:9px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Occupation</div>
+                                    <div style="font-size:12px; font-weight:800; color:var(--text);" x-text="selectedResident.occupation || 'N/A'"></div>
+                                </div>
+
+                                <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border);">
+                                    <div style="font-size:9px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Contact Number</div>
+                                    <div style="font-size:12px; font-weight:800; color:var(--text);" x-text="selectedResident.contact_number || 'N/A'"></div>
+                                </div>
+
+                                <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border);">
+                                    <div style="font-size:9px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Voter Status</div>
+                                    <div style="font-size:12px; font-weight:800;" :style="selectedResident.is_voter ? 'color:#15803d;' : 'color:#64748b;'" x-text="selectedResident.is_voter ? 'Registered Voter' : 'Non-Voter'"></div>
+                                </div>
+
+                                <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border); grid-column: span 2;">
+                                    <div style="font-size:9px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Address</div>
+                                    <div style="font-size:12px; font-weight:800; color:var(--text);" x-text="selectedResident.address || 'San Miguel II, Dasmariñas, Cavite'"></div>
+                                </div>
+
+                                <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border); grid-column: span 2;">
+                                    <div style="font-size:9px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;">Household Role & ID</div>
+                                    <div style="font-size:12px; font-weight:800; color:var(--text);">
+                                        <span x-text="selectedResident.is_household_head ? 'Household Head' : (selectedResident.relationship || 'Household Member')"></span>
+                                        <span style="color:var(--brand); font-weight:700; margin-left:6px;" x-text="'[' + (selectedResident.household_id || 'N/A') + ']'"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Household Family Members --}}
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:16px;">
+                                <div style="font-size:10px; font-weight:900; color:var(--text); text-transform:uppercase; letter-spacing:.07em; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+                                    <span><i class="fas fa-users" style="margin-right:6px; color:var(--brand);"></i> Household Members</span>
+                                    <span style="font-size:10px; color:var(--muted); font-weight:700;" x-text="'(' + selectedResidentFamily.length + ' member' + (selectedResidentFamily.length === 1 ? '' : 's') + ')'"></span>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;">
+                                    <template x-for="fm in selectedResidentFamily" :key="fm.id">
+                                        <div @click="openResidentProfile(fm)" 
+                                             style="display:flex; align-items:center; justify-content:space-between; background:#fff; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0; cursor:pointer; transition:all 0.15s ease;"
+                                             onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='var(--brand)';"
+                                             onmouseout="this.style.background='#fff'; this.style.borderColor='#e2e8f0';"
+                                             title="Click to switch to this resident's profile">
+                                            <div style="display:flex; align-items:center; gap:10px;">
+                                                <img :src="fm.photo ? '/storage/' + fm.photo : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((fm.first_name||'') + '+' + (fm.last_name||'')) + '&background=0E5393&color=fff&size=64&bold=true'" 
+                                                     style="width:28px; height:28px; border-radius:6px; object-fit:cover;">
+                                                <div>
+                                                    <div style="font-weight:800; font-size:11px; color:var(--text);" x-text="(fm.first_name || '') + ' ' + (fm.last_name || '')"></div>
+                                                    <div style="font-size:9px; color:var(--muted);" x-text="(fm.is_household_head ? 'Head' : (fm.relationship || 'Member')) + ' • ' + (fm.age ? fm.age + ' yrs' : (fm.gender || '—'))"></div>
+                                                </div>
+                                            </div>
+                                            <div style="display:flex; align-items:center; gap:6px;">
+                                                <span style="font-size:9px; font-weight:800; color:var(--brand);" x-text="fm.resident_code"></span>
+                                                <i class="fas fa-chevron-right" style="font-size:9px; color:var(--light);"></i>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template x-if="selectedResidentFamily.length === 0">
+                                        <div style="font-size:11px; color:var(--light); font-weight:600; text-align:center; padding:12px;">
+                                            <i class="fas fa-info-circle" style="margin-right:4px;"></i> No other registered household members.
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- Footer action --}}
+                            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                                <button type="button" @click="showResidentProfileModal=false" class="btn-plain" style="padding:8px 16px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer;">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>

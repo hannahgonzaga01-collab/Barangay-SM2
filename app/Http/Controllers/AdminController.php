@@ -82,7 +82,20 @@ class AdminController extends Controller
         $settledIssuesList = IssueReport::with('user')->where('status', 'settled')->orderBy('updated_at', 'desc')->get();
 
         // Detailed lists for interactive dashboard modals
-        $activeResidents  = Resident::latest()->take(500)->get()->values(); // Limit to 500 for performance
+        $activeResidents  = Resident::orderBy('id', 'asc')
+            ->select([
+                'id', 'resident_code', 'first_name', 'middle_name', 'last_name', 'suffix',
+                'photo', 'address', 'gender', 'civil_status', 'spouse_name', 'age', 'birthday', 'birthplace',
+                'occupation', 'contact_number', 'is_voter', 'voter_status', 'is_senior',
+                'is_pwd', 'is_single_parent', 'is_student', 'is_bedridden', 'user_id',
+                'is_household_head', 'household_id', 'household_head_id', 'relationship'
+            ])
+            ->get()
+            ->map(function ($r) {
+                $r->bmonth = $r->birthday ? \Carbon\Carbon::parse($r->birthday)->month : null;
+                return $r;
+            })
+            ->values();
         $activeDocs       = DocumentRequest::where('status', '!=', 'released')->latest()->get()->values();
         $activeIssues     = IssueReport::with('user')->where('status', '!=', 'settled')->latest()->get()->values();
         $activeHouseholds = Resident::with('householdMembers')->where('is_household_head', true)->latest()->get()->values();
