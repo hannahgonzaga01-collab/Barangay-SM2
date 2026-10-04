@@ -773,27 +773,41 @@ class ResidentPortalController extends Controller
     {
         $request->validate([
             'voter_id_photo' => 'required|image|max:5120',
+            'id_type' => 'nullable|string|max:100',
+            'id_type_other' => 'nullable|string|max:150',
         ]);
 
         $user = auth()->user();
         if ($request->hasFile('voter_id_photo')) {
             $photoPath = $request->file('voter_id_photo')->store('voter_ids', 'public');
             
-            $user->update([
+            $idType = $request->input('id_type', 'Valid ID');
+            if ($idType === 'Other' && $request->filled('id_type_other')) {
+                $idType = 'Other: ' . trim($request->input('id_type_other'));
+            }
+
+            $updateData = [
                 'voter_id_photo' => $photoPath,
-                'voter_status' => 'pending',
-                'status' => 'pending_verification',
+                'voter_status'   => 'pending',
+                'status'         => 'pending_verification',
                 'decline_reason' => null,
-            ]);
+            ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'id_type')) {
+                $updateData['id_type'] = $idType;
+            }
+
+            $user->update($updateData);
 
             if ($user->resident) {
-                $user->resident->update([
-                    'voter_status' => 'pending',
-                ]);
+                $resData = ['voter_status' => 'pending'];
+                if (\Illuminate\Support\Facades\Schema::hasColumn('residents', 'id_type')) {
+                    $resData['id_type'] = $idType;
+                }
+                $user->resident->update($resData);
             }
         }
 
-        return redirect()->back()->with('success', '✅ Verification ID / proof uploaded successfully! The Barangay Office will review and verify your submitted ID.');
+        return redirect()->back()->with('success', '✅ Verification ID / proof submitted successfully! The Barangay Office will review and verify your submitted ID.');
     }
 
     public function storeDocumentRequest(Request $request)

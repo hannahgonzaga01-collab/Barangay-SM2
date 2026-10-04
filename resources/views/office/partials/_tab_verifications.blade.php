@@ -128,6 +128,13 @@
                                 <td style="padding: 14px 14px; text-align: center; vertical-align: middle;">
                                     @if($pv->voter_id_photo)
                                         <div x-data="{ openImg: false }">
+                                            @if(!empty($pv->id_type))
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="font-size: 8px; font-weight: 800; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 2px 6px; border-radius: 99px; display: inline-block;">
+                                                        {{ $pv->id_type }}
+                                                    </span>
+                                                </div>
+                                            @endif
                                             <button type="button" @click="openImg = true" 
                                                     style="display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #eff6ff; border: 1.5px solid #bfdbfe; color: #0E5393; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all .15s;">
                                                 <i class="fas fa-image"></i> View ID

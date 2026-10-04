@@ -26,6 +26,7 @@ class Resident extends Model
         'photo',
         'is_voter',
         'voter_status',
+        'id_type',
         'is_non_voter',
         'is_pwd',
         'is_senior',

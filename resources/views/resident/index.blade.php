@@ -483,6 +483,10 @@ html, body {
             issueErrorMsg: '',
             profileModal: false,
             emailEditModal: false,
+            idUploadModal: false,
+            selectedIdType: 'PhilSys National ID',
+            otherIdType: '',
+            idPreviewUrl: null,
             sosResidentEmail: '',
             familyModal: false,
             classification: '',
@@ -1373,26 +1377,26 @@ html, body {
             {{-- COMPACT BANNER FOR PENDING VERIFICATION --}}
             @if(empty($authUser->voter_id_photo))
             {{-- CASE 1: NO ID UPLOADED YET (e.g. non-voter or unmatched resident) --}}
-            <div style="background:linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border:1.5px solid #3b82f6; border-radius:12px; padding:14px 16px; margin-bottom:18px; box-shadow:0 2px 10px rgba(59, 130, 246, 0.15);">
+            <div style="background:linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border:1.5px solid #bfdbfe; border-radius:12px; padding:14px 16px; margin-bottom:18px; box-shadow:0 2px 8px rgba(37, 99, 235, 0.08);">
                 <div style="display:flex; align-items:flex-start; gap:12px;">
-                    <div style="width:36px; height:36px; border-radius:10px; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; box-shadow:0 2px 6px rgba(37, 99, 235, 0.35);">
+                    <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#0E5393 0%,#000052 100%); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; box-shadow:0 2px 6px rgba(14, 83, 147, 0.25);">
                         <i class="fas fa-id-card"></i>
                     </div>
                     <div style="flex:1; min-width:0;">
                         <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
                             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                <span style="font-size:13px; font-weight:900; color:#1e3a8a; letter-spacing:0.02em;">🆔 Verification ID / Proof Required</span>
-                                <span style="font-size:9px; font-weight:800; background:#dbeafe; color:#1d4ed8; border:1px solid #93c5fd; padding:1px 8px; border-radius:99px;">NO ID UPLOADED</span>
+                                <span style="font-size:13px; font-weight:900; color:#1e3a8a; letter-spacing:0.02em;">🆔 Identity Verification Proof</span>
+                                <span style="font-size:9px; font-weight:800; background:#dbeafe; color:#1d4ed8; border:1px solid #93c5fd; padding:1px 8px; border-radius:99px;">FOR VERIFICATION</span>
                             </div>
                         </div>
-                        <p style="font-size:11.5px; color:#1e40af; line-height:1.45; margin:0 0 10px 0; font-weight:600;">
-                            You registered without uploading a valid ID. To verify your residency details and unlock all Barangay Online Services, please upload a clear photo of your Valid ID (Voter ID, PhilSys, Student ID, or any valid Gov't ID / Proof of Residency).
+                        <p style="font-size:11.5px; color:#334155; line-height:1.45; margin:0 0 10px 0; font-weight:600;">
+                            Note: For identity verification, you may submit a photo of your Valid ID (PhilSys, Student ID, TIN ID, Voter ID, or any valid Gov't ID / Proof of Residency) so the Barangay Office can verify or update your records.
                         </p>
                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <button type="button" @click="profileModal=true" class="btn-grad btn-sm" style="background:linear-gradient(135deg,#0E5393 0%,#000052 100%); font-size:10.5px; font-weight:800; padding:6px 14px; border-radius:8px; border:none; cursor:pointer; color:#fff; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(14,83,147,0.3);">
+                            <button type="button" @click="idUploadModal=true" class="btn-grad btn-sm" style="background:linear-gradient(135deg,#0E5393 0%,#000052 100%); font-size:10.5px; font-weight:800; padding:6px 14px; border-radius:8px; border:none; cursor:pointer; color:#fff; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(14,83,147,0.3);">
                                 <i class="fas fa-upload"></i> Upload Valid ID / Proof
                             </button>
-                            <button type="button" @click="docuModal=true; selectedDoc='movein'" class="btn-plain btn-sm" style="background:#fff; font-size:10px; font-weight:800; padding:6px 12px; border-radius:8px; border:1px solid #93c5fd; cursor:pointer; color:#1e40af; display:inline-flex; align-items:center; gap:5px;">
+                            <button type="button" @click="docuModal=true; selectedDoc='movein'" class="btn-plain btn-sm" style="background:#fff; font-size:10px; font-weight:800; padding:6px 12px; border-radius:8px; border:1px solid #cbd5e1; cursor:pointer; color:#334155; display:inline-flex; align-items:center; gap:5px;">
                                 <i class="fas fa-sign-in-alt"></i> Request Move-In Certificate
                             </button>
                         </div>
@@ -3266,64 +3270,32 @@ html, body {
 
                 {{-- VOTER / RESIDENT ID UPLOAD LOGIC --}}
                 @if($authUser && ($authUser->voter_status === 'declined' || $authUser->status === 'declined'))
-                <div style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:11px;padding:14px;margin-bottom:14px;" x-data="{ isDragging: false }">
+                <div style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:11px;padding:14px;margin-bottom:14px;">
                     <div style="font-size:9px;font-weight:900;color:#dc2626;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i> ID / Voter Verification Declined</div>
                     <p style="font-size:10px;color:#991b1b;font-weight:600;margin-bottom:10px;">Reason: {{ $authUser->decline_reason ?? 'Invalid ID.' }}</p>
-                    <form action="{{ route('resident.voter.upload') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <input type="file" name="voter_id_photo" x-ref="voterReuploadInput" id="voterProofReupload" required accept="image/*" style="display:none;" onchange="
-                        if(this.files.length) { 
-                            let btn = document.getElementById('btnReuploadText'); 
-                            btn.innerHTML = '<i class=\'fas fa-spinner fa-spin\' style=\'margin-right:6px;\'></i> Uploading...'; 
-                            btn.parentElement.style.opacity = '0.7';
-                            btn.parentElement.style.pointerEvents = 'none';
-                            this.form.submit(); 
-                        }
-                        ">
-                        <label for="voterProofReupload" class="btn-grad btn-grad-red btn-sm" 
-                               :style="isDragging ? 'transform:scale(1.05); filter:brightness(1.1);' : ''"
-                               @dragover.prevent="isDragging = true"
-                               @dragleave.prevent="isDragging = false"
-                               @drop.prevent="isDragging = false; $refs.voterReuploadInput.files = $event.dataTransfer.files; $refs.voterReuploadInput.dispatchEvent(new Event('change'))"
-                               style="display:inline-flex;cursor:pointer;margin:0;"><i class="fas fa-upload" style="margin-right:6px;"></i> <span id="btnReuploadText">Re-upload Proof</span></label>
-                    </form>
+                    <button type="button" @click="profileModal=false; idUploadModal=true" class="btn-grad btn-grad-red btn-sm" style="display:inline-flex;cursor:pointer;margin:0;">
+                        <i class="fas fa-upload" style="margin-right:6px;"></i> Re-upload Proof
+                    </button>
                 </div>
                 @elseif($authUser && empty($authUser->voter_id_photo))
-                {{-- NO ID UPLOADED YET (e.g. registered as non-voter or unmatched resident) --}}
-                <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:11px;padding:14px;margin-bottom:14px;" x-data="{ isDragging: false }">
+                {{-- IDENTITY VERIFICATION NOTE (OPTIONAL) --}}
+                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:14px;margin-bottom:14px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                        <div style="font-size:9.5px;font-weight:900;color:#1e40af;text-transform:uppercase;letter-spacing:.06em;">
-                            <i class="fas fa-id-card" style="margin-right:5px;color:#2563eb;"></i> Verification ID / Proof Required
+                        <div style="font-size:9.5px;font-weight:900;color:#334155;text-transform:uppercase;letter-spacing:.06em;">
+                            <i class="fas fa-id-card" style="margin-right:5px;color:var(--brand);"></i> Identity Verification
                         </div>
-                        <span style="font-size:8.5px;font-weight:800;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:99px;">NO ID UPLOADED</span>
+                        <span style="font-size:8.5px;font-weight:800;background:#f1f5f9;color:#64748b;padding:2px 8px;border-radius:99px;">OPTIONAL / VERIFICATION</span>
                     </div>
-                    <p style="font-size:10.5px;color:#1e3a8a;font-weight:600;line-height:1.45;margin-bottom:10px;">
-                        You have not uploaded a verification ID yet. Please upload a clear photo of your Valid ID (Voter ID, PhilSys, Student ID, or any valid Gov't ID / Proof of Residency) so the Barangay Office can verify and approve your account.
+                    <p style="font-size:10.5px;color:#64748b;font-weight:600;line-height:1.45;margin-bottom:10px;">
+                        Note: For identity verification, you may submit a photo of any valid ID (Student ID, PhilSys, TIN, Voter ID, or any valid Gov't / School ID) so the Barangay Office can verify or update your resident profile.
                     </p>
-                    <form action="{{ route('resident.voter.upload') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <input type="file" name="voter_id_photo" x-ref="voterUploadInput" id="voterProofUpload" required accept="image/*" style="display:none;" onchange="
-                        if(this.files.length) { 
-                            let btn = document.getElementById('btnUploadText'); 
-                            btn.innerHTML = '<i class=\'fas fa-spinner fa-spin\' style=\'margin-right:6px;\'></i> Uploading...'; 
-                            btn.parentElement.style.opacity = '0.7';
-                            btn.parentElement.style.pointerEvents = 'none';
-                            this.form.submit(); 
-                        }
-                        ">
-                        <label for="voterProofUpload" class="btn-grad btn-sm" 
-                               :style="isDragging ? 'transform:scale(1.05); filter:brightness(1.1);' : ''"
-                               @dragover.prevent="isDragging = true"
-                               @dragleave.prevent="isDragging = false"
-                               @drop.prevent="isDragging = false; $refs.voterUploadInput.files = $event.dataTransfer.files; $refs.voterUploadInput.dispatchEvent(new Event('change'))"
-                               style="display:inline-flex;cursor:pointer;margin:0;background:linear-gradient(135deg,#0E5393 0%,#000052 100%);">
-                            <i class="fas fa-upload" style="margin-right:6px;"></i> <span id="btnUploadText">Upload Valid ID / Proof</span>
-                        </label>
-                    </form>
+                    <button type="button" @click="profileModal=false; idUploadModal=true" class="btn-grad btn-sm" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:0;background:linear-gradient(135deg,#0E5393 0%,#000052 100%);">
+                        <i class="fas fa-upload"></i> <span>Upload Valid ID / Proof</span>
+                    </button>
                 </div>
                 @elseif($authUser && ($authUser->voter_status === 'pending' || $authUser->status === 'pending_verification'))
                 {{-- ID WAS UPLOADED AND IS PENDING --}}
-                <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:11px;padding:14px;margin-bottom:14px;" x-data="{ reuploadOpen: false }">
+                <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:11px;padding:14px;margin-bottom:14px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                         <div style="font-size:9.5px;font-weight:900;color:#92400e;text-transform:uppercase;letter-spacing:.06em;">
                             <i class="fas fa-clock" style="margin-right:4px;"></i> ID Verification Pending Approval
@@ -3339,23 +3311,14 @@ html, body {
                                 <i class="fas fa-image"></i> View Uploaded Photo
                             </a>
                         @endif
-                        <button type="button" @click="reuploadOpen = !reuploadOpen" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px 9px;font-size:10px;font-weight:700;color:#475569;cursor:pointer;">
-                            <i class="fas fa-sync-alt" style="margin-right:3px;"></i> <span x-text="reuploadOpen ? 'Cancel' : 'Change / Re-upload ID'"></span>
+                        <button type="button" @click="profileModal=false; idUploadModal=true" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px 9px;font-size:10px;font-weight:700;color:#475569;cursor:pointer;">
+                            <i class="fas fa-sync-alt" style="margin-right:3px;"></i> Change / Re-upload ID
                         </button>
-                    </div>
-                    <div x-show="reuploadOpen" x-cloak style="margin-top:10px;padding-top:10px;border-top:1px dashed #fcd34d;">
-                        <form action="{{ route('resident.voter.upload') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <input type="file" name="voter_id_photo" id="voterProofChangeInput" required accept="image/*" style="display:none;" onchange="this.form.submit();">
-                            <label for="voterProofChangeInput" class="btn-grad btn-sm" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:0;">
-                                <i class="fas fa-upload"></i> <span>Select New ID Photo</span>
-                            </label>
-                        </form>
                     </div>
                 </div>
                 @elseif($authUser)
                 {{-- APPROVED / ACTIVE RESIDENT (ALLOW UPGRADING VOTER STATUS OR UPDATING ID) --}}
-                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:12px 14px;margin-bottom:14px;" x-data="{ upgradeOpen: false }">
+                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:12px 14px;margin-bottom:14px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
                         <div style="font-size:9.5px;font-weight:900;color:#1e293b;text-transform:uppercase;letter-spacing:.06em;">
                             <i class="fas fa-shield-alt" style="margin-right:4px;color:var(--brand);"></i> ID Verification Status:
@@ -3365,21 +3328,9 @@ html, body {
                                 <span style="color:#64748b;margin-left:4px;">Non-Voter Resident</span>
                             @endif
                         </div>
-                        <button type="button" @click="upgradeOpen = !upgradeOpen" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px 9px;font-size:9.5px;font-weight:800;color:var(--brand);cursor:pointer;">
-                            <i class="fas fa-upload" style="margin-right:3px;"></i> <span x-text="upgradeOpen ? 'Cancel' : 'Upload / Update ID Proof'"></span>
+                        <button type="button" @click="profileModal=false; idUploadModal=true" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px 9px;font-size:9.5px;font-weight:800;color:var(--brand);cursor:pointer;">
+                            <i class="fas fa-upload" style="margin-right:3px;"></i> Upload / Update ID Proof
                         </button>
-                    </div>
-                    <div x-show="upgradeOpen" x-cloak style="margin-top:10px;padding-top:10px;border-top:1px dashed #cbd5e1;">
-                        <p style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:8px;">
-                            Upload your Voter ID, PhilSys ID, or valid Gov't ID to verify or update your registered status with the office.
-                        </p>
-                        <form action="{{ route('resident.voter.upload') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <input type="file" name="voter_id_photo" id="voterProofUpdateInput" required accept="image/*" style="display:none;" onchange="this.form.submit();">
-                            <label for="voterProofUpdateInput" class="btn-grad btn-sm" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:0;">
-                                <i class="fas fa-upload"></i> <span>Choose ID File</span>
-                            </label>
-                        </form>
                     </div>
                 </div>
                 @endif
@@ -3589,6 +3540,103 @@ html, body {
                 </div>
             </div>
         </div>
+
+    {{-- UPLOAD / CHANGE VERIFICATION ID MODAL --}}
+    <div x-show="idUploadModal" x-cloak class="modal-ov" x-transition style="z-index: 999999;">
+        <div class="modal-box" style="max-width:480px; border-radius:18px; overflow:hidden;" @click.away="idUploadModal=false">
+            <div class="modal-in" style="padding:0;">
+                <div class="modal-hd" style="background:linear-gradient(135deg,#0E5393 0%,#000052 100%); padding:16px 20px; color:#fff; display:flex; align-items:center; justify-content:space-between;">
+                    <div class="modal-ttl" style="color:#fff; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:.04em;">
+                        <i class="fas fa-id-card" style="font-size:16px;"></i>
+                        <span>Identity Verification Proof</span>
+                    </div>
+                    <button type="button" @click="idUploadModal=false; profileModal=true;" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer; opacity:.85;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.85'">&times;</button>
+                </div>
+
+                <form action="{{ route('resident.voter.upload') }}" method="POST" enctype="multipart/form-data" style="padding:20px;" x-data="{ isDragging: false }">
+                    @csrf
+                    
+                    <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-bottom:16px;">
+                        <p style="font-size:11px; color:#0369a1; font-weight:600; line-height:1.45; margin:0;">
+                            <i class="fas fa-info-circle" style="margin-right:4px;"></i> 
+                            Please select the type of ID you are submitting and attach a clear image. This helps the Barangay Office verify and update your resident profile.
+                        </p>
+                    </div>
+
+                    {{-- 1. SELECT ID TYPE --}}
+                    <div style="margin-bottom:14px;">
+                        <label class="flbl" style="font-size:10.5px; font-weight:800; color:#1e293b; margin-bottom:6px; display:block;">
+                            1. Select ID / Document Type <span style="color:#e11d48;">*</span>
+                        </label>
+                        <select name="id_type" x-model="selectedIdType" class="finput" style="width:100%; font-size:11.5px; font-weight:700; padding:9px 12px; border-radius:8px; border:1.5px solid #cbd5e1;" required>
+                            <option value="PhilSys National ID">PhilSys National ID</option>
+                            <option value="Student ID">Student ID</option>
+                            <option value="TIN ID">TIN ID</option>
+                            <option value="Voter's ID / Certification">Voter's ID / COMELEC Certification</option>
+                            <option value="Driver's License">Driver's License</option>
+                            <option value="Passport">Passport</option>
+                            <option value="SSS / UMID / GSIS">SSS / UMID / GSIS</option>
+                            <option value="Postal ID">Postal ID</option>
+                            <option value="Senior Citizen / PWD / Solo Parent ID">Senior Citizen / PWD / Solo Parent ID</option>
+                            <option value="Barangay Certificate / Proof of Residency">Barangay Certificate / Proof of Residency</option>
+                            <option value="Other">Other (Please Specify)</option>
+                        </select>
+                        
+                        {{-- SPECIFY FIELD IF OTHER --}}
+                        <div x-show="selectedIdType === 'Other'" x-cloak style="margin-top:8px;">
+                            <input type="text" name="id_type_other" x-model="otherIdType" placeholder="Specify ID type (e.g. Employee ID, PRC ID, NBI Clearance)..." class="finput" style="width:100%; font-size:11px; padding:8px 12px; border-radius:8px; border:1.5px solid #93c5fd;">
+                        </div>
+                    </div>
+
+                    {{-- 2. UPLOAD ID PHOTO --}}
+                    <div style="margin-bottom:18px;">
+                        <label class="flbl" style="font-size:10.5px; font-weight:800; color:#1e293b; margin-bottom:6px; display:block;">
+                            2. Upload Photo of ID / Document <span style="color:#e11d48;">*</span>
+                        </label>
+                        <input type="file" name="voter_id_photo" x-ref="idModalFileInput" id="idModalFileInput" required accept="image/*" style="display:none;" 
+                               @change="if($event.target.files[0]) {
+                                   let reader = new FileReader();
+                                   reader.onload = (e) => { idPreviewUrl = e.target.result; };
+                                   reader.readAsDataURL($event.target.files[0]);
+                               }">
+
+                        <div @click="$refs.idModalFileInput.click()" 
+                             @dragover.prevent="isDragging = true"
+                             @dragleave.prevent="isDragging = false"
+                             @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.idModalFileInput.files = $event.dataTransfer.files; $refs.idModalFileInput.dispatchEvent(new Event('change')); }"
+                             :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
+                             style="border:2px dashed #94a3b8; border-radius:12px; padding:18px; text-align:center; cursor:pointer; background:#f8fafc; transition:all 0.2s;">
+                            
+                            <template x-if="!idPreviewUrl">
+                                <div>
+                                    <div style="width:42px; height:42px; border-radius:50%; background:#e2e8f0; color:#475569; display:inline-flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:8px;">
+                                        <i class="fas fa-camera"></i>
+                                    </div>
+                                    <div style="font-size:11.5px; font-weight:800; color:#1e293b;">Click or Drag & Drop photo here</div>
+                                    <div style="font-size:9.5px; color:#64748b; margin-top:2px;">Supports JPG, PNG, WEBP (Max 5MB)</div>
+                                </div>
+                            </template>
+
+                            <template x-if="idPreviewUrl">
+                                <div>
+                                    <img :src="idPreviewUrl" alt="ID Preview" style="max-height:160px; max-width:100%; border-radius:8px; object-fit:contain; box-shadow:0 2px 8px rgba(0,0,0,0.15); margin-bottom:8px;">
+                                    <div style="font-size:10.5px; font-weight:800; color:var(--brand);"><i class="fas fa-check-circle"></i> Photo Selected (Click to change)</div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- ACTION BUTTONS --}}
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button type="button" @click="idUploadModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm" style="font-weight:700;">Cancel</button>
+                        <button type="submit" class="btn-grad btn-sm" style="background:linear-gradient(135deg,#0E5393 0%,#000052 100%); padding:8px 20px; font-weight:800; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-upload"></i> Submit Verification ID
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     {{-- ADD PET MODAL --}}
     <div x-show="petModal" x-cloak class="modal-ov" x-transition>

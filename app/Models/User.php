@@ -44,7 +44,8 @@ class User extends Authenticatable
         'security_question',
         'security_answer',
         'password_history',
-        'photo_updated_at'
+        'photo_updated_at',
+        'id_type',
     ];
 
     protected $hidden = [
