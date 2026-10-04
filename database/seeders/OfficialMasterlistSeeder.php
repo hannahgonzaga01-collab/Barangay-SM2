@@ -89,22 +89,31 @@ class OfficialMasterlistSeeder extends Seeder
             ->update(['user_id' => null]);
 
         // 6. Create 5 Dedicated Dummy Resident Accounts for Evaluation/Testing
+        $dummyNames = [
+            1 => ['first' => 'Juan', 'middle' => 'Dela Cruz', 'gender' => 'Male'],
+            2 => ['first' => 'Maria', 'middle' => 'Santos', 'gender' => 'Female'],
+            3 => ['first' => 'Jose', 'middle' => 'Reyes', 'gender' => 'Male'],
+            4 => ['first' => 'Angelica', 'middle' => 'Garcia', 'gender' => 'Female'],
+            5 => ['first' => 'Carlo', 'middle' => 'Ramos', 'gender' => 'Male'],
+        ];
+
         for ($i = 1; $i <= 5; $i++) {
             $email = $i === 1 ? 'resident_eval@brgysm.ph' : "resident_eval{$i}@brgysm.ph";
             $code  = sprintf("RES-DUMMY-%03d", $i);
+            $info  = $dummyNames[$i] ?? ['first' => 'Juan', 'middle' => 'Dela Cruz', 'gender' => 'Male'];
 
             $user = User::firstOrNew(['email' => $email]);
-            $user->name              = "Demo Eval Resident {$i}";
-            $user->first_name        = "Demo";
-            $user->middle_name       = "Eval";
-            $user->last_name         = "Resident {$i}";
+            $user->name              = "{$info['first']} Dummy";
+            $user->first_name        = $info['first'];
+            $user->middle_name       = $info['middle'];
+            $user->last_name         = "Dummy";
             $user->password          = 'Password123';
             $user->role              = 'resident';
             $user->status            = 'active';
             $user->is_active         = true;
             $user->resident_code     = $code;
             $user->contact_number    = '0917' . sprintf('%07d', 3000000 + $i);
-            $user->gender            = ($i % 2 === 0 ? 'Female' : 'Male');
+            $user->gender            = $info['gender'];
             $user->civil_status      = 'Single';
             $user->birthday          = '1995-05-15';
             $user->birthplace        = 'Dasmariñas, Cavite';
@@ -119,12 +128,12 @@ class OfficialMasterlistSeeder extends Seeder
 
             $dummyResident = Resident::firstOrNew(['resident_code' => $code]);
             $dummyResident->user_id           = $user->id;
-            $dummyResident->first_name        = "Demo";
-            $dummyResident->middle_name       = "Eval";
-            $dummyResident->last_name         = "Resident {$i}";
+            $dummyResident->first_name        = $info['first'];
+            $dummyResident->middle_name       = $info['middle'];
+            $dummyResident->last_name         = "Dummy";
             $dummyResident->birthday          = '1995-05-15';
             $dummyResident->birthplace        = 'Dasmariñas, Cavite';
-            $dummyResident->gender            = ($i % 2 === 0 ? 'Female' : 'Male');
+            $dummyResident->gender            = $info['gender'];
             $dummyResident->civil_status      = 'Single';
             $dummyResident->address           = "Purok {$i}, Barangay San Miguel II";
             $dummyResident->contact_number    = '0917' . sprintf('%07d', 3000000 + $i);

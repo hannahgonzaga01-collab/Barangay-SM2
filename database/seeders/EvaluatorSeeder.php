@@ -14,7 +14,22 @@ class EvaluatorSeeder extends Seeder
      */
     public function run(): void
     {
+        $evaluatorNames = [
+            1  => ['first' => 'Paolo', 'middle' => 'Bautista', 'gender' => 'Male'],
+            2  => ['first' => 'Christine', 'middle' => 'Mendoza', 'gender' => 'Female'],
+            3  => ['first' => 'Mark', 'middle' => 'Aquino', 'gender' => 'Male'],
+            4  => ['first' => 'Patricia', 'middle' => 'Dela Rosa', 'gender' => 'Female'],
+            5  => ['first' => 'Rafael', 'middle' => 'Castro', 'gender' => 'Male'],
+            6  => ['first' => 'Nicole', 'middle' => 'Flores', 'gender' => 'Female'],
+            7  => ['first' => 'Miguel', 'middle' => 'Villanueva', 'gender' => 'Male'],
+            8  => ['first' => 'Jasmine', 'middle' => 'Navarro', 'gender' => 'Female'],
+            9  => ['first' => 'Antonio', 'middle' => 'Mercado', 'gender' => 'Male'],
+            10 => ['first' => 'Bea', 'middle' => 'Salazar', 'gender' => 'Female'],
+        ];
+
         for ($i = 1; $i <= 10; $i++) {
+            $info = $evaluatorNames[$i] ?? ['first' => 'Paolo', 'middle' => 'Bautista', 'gender' => 'Male'];
+
             // ── 1. Create / Update Resident User Account ──
             $residentCode = sprintf("RES-EVAL-%03d", $i);
             $residentEmail = "evaluator{$i}@brgysm.ph";
@@ -22,17 +37,17 @@ class EvaluatorSeeder extends Seeder
             $residentUser = User::updateOrCreate(
                 ['email' => $residentEmail],
                 [
-                    'name'              => "Evaluator {$i} Resident",
-                    'first_name'        => "Evaluator{$i}",
-                    'middle_name'       => "IT",
-                    'last_name'         => "Resident",
+                    'name'              => "{$info['first']} Dummy",
+                    'first_name'        => $info['first'],
+                    'middle_name'       => $info['middle'],
+                    'last_name'         => "Dummy",
                     'password'          => Hash::make('Password123'),
                     'role'              => 'resident',
                     'status'            => 'active',
                     'is_active'         => true,
                     'resident_code'     => $residentCode,
                     'contact_number'    => '0917' . sprintf('%07d', 1000000 + $i),
-                    'gender'            => ($i % 2 === 0 ? 'Female' : 'Male'),
+                    'gender'            => $info['gender'],
                     'civil_status'      => 'Single',
                     'birthday'          => '1995-05-15',
                     'birthplace'        => 'San Manuel',
@@ -51,12 +66,12 @@ class EvaluatorSeeder extends Seeder
                 ['resident_code' => $residentCode],
                 [
                     'user_id'           => $residentUser->id,
-                    'first_name'        => "Evaluator{$i}",
-                    'middle_name'       => "IT",
-                    'last_name'         => "Resident",
+                    'first_name'        => $info['first'],
+                    'middle_name'       => $info['middle'],
+                    'last_name'         => "Dummy",
                     'birthday'          => '1995-05-15',
                     'birthplace'        => 'San Manuel',
-                    'gender'            => ($i % 2 === 0 ? 'Female' : 'Male'),
+                    'gender'            => $info['gender'],
                     'civil_status'      => 'Single',
                     'address'           => 'Zone ' . (($i % 7) + 1) . ', Barangay San Manuel',
                     'contact_number'    => '0917' . sprintf('%07d', 1000000 + $i),
@@ -74,10 +89,10 @@ class EvaluatorSeeder extends Seeder
             User::updateOrCreate(
                 ['email' => $adminEmail],
                 [
-                    'name'              => "Evaluator {$i} Admin",
-                    'first_name'        => "Admin{$i}",
+                    'name'              => "Admin {$info['first']} Dummy",
+                    'first_name'        => "Admin {$info['first']}",
                     'middle_name'       => "BRGY",
-                    'last_name'         => "Official",
+                    'last_name'         => "Dummy",
                     'password'          => Hash::make('Password123'),
                     'role'              => 'admin',
                     'status'            => 'active',

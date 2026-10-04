@@ -60,18 +60,27 @@ class LoginRequest extends FormRequest
             $accountNum = !empty($m[1]) ? (int)$m[1] : 1;
             $residentCode = sprintf("RES-DUMMY-%03d", $accountNum);
 
+            $dummyNames = [
+                1 => ['first' => 'Juan', 'middle' => 'Dela Cruz', 'gender' => 'Male'],
+                2 => ['first' => 'Maria', 'middle' => 'Santos', 'gender' => 'Female'],
+                3 => ['first' => 'Jose', 'middle' => 'Reyes', 'gender' => 'Male'],
+                4 => ['first' => 'Angelica', 'middle' => 'Garcia', 'gender' => 'Female'],
+                5 => ['first' => 'Carlo', 'middle' => 'Ramos', 'gender' => 'Male'],
+            ];
+            $info = $dummyNames[$accountNum] ?? ['first' => 'Juan', 'middle' => 'Dela Cruz', 'gender' => 'Male'];
+
             $user = \App\Models\User::firstOrNew(['email' => $inputEmail]);
-            $user->name              = "Demo Eval Resident {$accountNum}";
-            $user->first_name        = "Demo";
-            $user->middle_name       = "Eval";
-            $user->last_name         = "Resident {$accountNum}";
+            $user->name              = "{$info['first']} Dummy";
+            $user->first_name        = $info['first'];
+            $user->middle_name       = $info['middle'];
+            $user->last_name         = "Dummy";
             $user->password          = 'Password123';
             $user->role              = 'resident';
             $user->status            = 'active';
             $user->is_active         = true;
             $user->resident_code     = $residentCode;
             $user->contact_number    = '0917' . sprintf('%07d', 3000000 + $accountNum);
-            $user->gender            = ($accountNum % 2 === 0 ? 'Female' : 'Male');
+            $user->gender            = $info['gender'];
             $user->civil_status      = 'Single';
             $user->birthday          = '1995-05-15';
             $user->birthplace        = 'Dasmariñas, Cavite';
@@ -86,12 +95,12 @@ class LoginRequest extends FormRequest
 
             $dummyResident = \App\Models\Resident::firstOrNew(['resident_code' => $residentCode]);
             $dummyResident->user_id           = $user->id;
-            $dummyResident->first_name        = "Demo";
-            $dummyResident->middle_name       = "Eval";
-            $dummyResident->last_name         = "Resident {$accountNum}";
+            $dummyResident->first_name        = $info['first'];
+            $dummyResident->middle_name       = $info['middle'];
+            $dummyResident->last_name         = "Dummy";
             $dummyResident->birthday          = '1995-05-15';
             $dummyResident->birthplace        = 'Dasmariñas, Cavite';
-            $dummyResident->gender            = ($accountNum % 2 === 0 ? 'Female' : 'Male');
+            $dummyResident->gender            = $info['gender'];
             $dummyResident->civil_status      = 'Single';
             $dummyResident->address           = "Purok {$accountNum}, Barangay San Miguel II";
             $dummyResident->contact_number    = '0917' . sprintf('%07d', 3000000 + $accountNum);
@@ -112,49 +121,63 @@ class LoginRequest extends FormRequest
         // ── Evaluator Resident Auto-Provisioning (evaluator1@brgysm.ph to evaluator10@brgysm.ph & resident.demo@gmail.com) ──
         if ((preg_match('/^evaluator([1-9]|10)@brgysm\.ph$/i', $inputEmail) || $inputEmail === 'resident.demo@gmail.com') && in_array(strtolower($inputPassword), ['password123', 'password'])) {
             preg_match('/^evaluator([0-9]+)/i', $inputEmail, $matches);
-            $evalNum = $matches[1] ?? '1';
-            $residentCode = sprintf("RES-EVAL-%03d", (int)$evalNum);
+            $evalNum = !empty($matches[1]) ? (int)$matches[1] : 1;
+            $residentCode = sprintf("RES-EVAL-%03d", $evalNum);
+
+            $evaluatorNames = [
+                1  => ['first' => 'Paolo', 'middle' => 'Bautista', 'gender' => 'Male'],
+                2  => ['first' => 'Christine', 'middle' => 'Mendoza', 'gender' => 'Female'],
+                3  => ['first' => 'Mark', 'middle' => 'Aquino', 'gender' => 'Male'],
+                4  => ['first' => 'Patricia', 'middle' => 'Dela Rosa', 'gender' => 'Female'],
+                5  => ['first' => 'Rafael', 'middle' => 'Castro', 'gender' => 'Male'],
+                6  => ['first' => 'Nicole', 'middle' => 'Flores', 'gender' => 'Female'],
+                7  => ['first' => 'Miguel', 'middle' => 'Villanueva', 'gender' => 'Male'],
+                8  => ['first' => 'Jasmine', 'middle' => 'Navarro', 'gender' => 'Female'],
+                9  => ['first' => 'Antonio', 'middle' => 'Mercado', 'gender' => 'Male'],
+                10 => ['first' => 'Bea', 'middle' => 'Salazar', 'gender' => 'Female'],
+            ];
+            $info = $evaluatorNames[$evalNum] ?? ['first' => 'Paolo', 'middle' => 'Bautista', 'gender' => 'Male'];
 
             $user = \App\Models\User::firstOrNew(['email' => $inputEmail]);
-            $user->name = "Evaluator {$evalNum} Resident";
-            $user->first_name = "Evaluator{$evalNum}";
-            $user->middle_name = "IT";
-            $user->last_name = "Resident";
-            $user->password = 'Password123';
-            $user->role = 'resident';
-            $user->status = 'active';
-            $user->is_active = true;
-            $user->resident_code = $residentCode;
-            $user->contact_number = '0917' . sprintf('%07d', 1000000 + (int)$evalNum);
-            $user->gender = ((int)$evalNum % 2 === 0 ? 'Female' : 'Male');
-            $user->civil_status = 'Single';
-            $user->birthday = '1995-05-15';
-            $user->birthplace = 'San Manuel';
-            $user->address = 'Zone ' . (((int)$evalNum % 7) + 1) . ', Barangay San Manuel';
-            $user->occupation = 'IT Evaluator';
-            $user->is_voter = true;
-            $user->voter_status = 'verified';
-            $user->is_non_voter = false;
+            $user->name              = "{$info['first']} Dummy";
+            $user->first_name        = $info['first'];
+            $user->middle_name       = $info['middle'];
+            $user->last_name         = "Dummy";
+            $user->password          = 'Password123';
+            $user->role              = 'resident';
+            $user->status            = 'active';
+            $user->is_active         = true;
+            $user->resident_code     = $residentCode;
+            $user->contact_number    = '0917' . sprintf('%07d', 1000000 + $evalNum);
+            $user->gender            = $info['gender'];
+            $user->civil_status      = 'Single';
+            $user->birthday          = '1995-05-15';
+            $user->birthplace        = 'San Manuel';
+            $user->address           = 'Zone ' . (($evalNum % 7) + 1) . ', Barangay San Manuel';
+            $user->occupation        = 'IT Evaluator';
+            $user->is_voter          = true;
+            $user->voter_status      = 'verified';
+            $user->is_non_voter      = false;
             $user->security_question = "What is your mother's maiden name?";
-            $user->security_answer = 'Santos';
+            $user->security_answer   = 'Santos';
             $user->save();
 
             $resident = \App\Models\Resident::firstOrNew(['resident_code' => $residentCode]);
-            $resident->user_id = $user->id;
-            $resident->first_name = "Evaluator{$evalNum}";
-            $resident->middle_name = "IT";
-            $resident->last_name = "Resident";
-            $resident->birthday = '1995-05-15';
-            $resident->birthplace = 'San Manuel';
-            $resident->gender = ((int)$evalNum % 2 === 0 ? 'Female' : 'Male');
-            $resident->civil_status = 'Single';
-            $resident->address = 'Zone ' . (((int)$evalNum % 7) + 1) . ', Barangay San Manuel';
-            $resident->contact_number = '0917' . sprintf('%07d', 1000000 + (int)$evalNum);
-            $resident->occupation = 'IT Evaluator / Professor';
-            $resident->is_voter = true;
-            $resident->voter_status = 'verified';
-            $resident->is_non_voter = false;
-            $resident->age = 31;
+            $resident->user_id        = $user->id;
+            $resident->first_name     = $info['first'];
+            $resident->middle_name    = $info['middle'];
+            $resident->last_name      = "Dummy";
+            $resident->birthday       = '1995-05-15';
+            $resident->birthplace     = 'San Manuel';
+            $resident->gender         = $info['gender'];
+            $resident->civil_status   = 'Single';
+            $resident->address        = 'Zone ' . (($evalNum % 7) + 1) . ', Barangay San Manuel';
+            $resident->contact_number = '0917' . sprintf('%07d', 1000000 + $evalNum);
+            $resident->occupation     = 'IT Evaluator / Professor';
+            $resident->is_voter       = true;
+            $resident->voter_status   = 'verified';
+            $resident->is_non_voter   = false;
+            $resident->age            = 31;
             $resident->save();
 
             Auth::login($user, $this->boolean('remember'));
@@ -165,20 +188,34 @@ class LoginRequest extends FormRequest
         // ── Evaluator Admin Auto-Provisioning (admin1@brgysm.ph to admin10@brgysm.ph & admin.demo@gmail.com) ──
         if ((preg_match('/^admin([1-9]|10)@brgysm\.ph$/i', $inputEmail) || $inputEmail === 'admin.demo@gmail.com') && in_array(strtolower($inputPassword), ['password123', 'adminpassword123', 'password'])) {
             preg_match('/^admin([0-9]+)/i', $inputEmail, $matches);
-            $adminNum = $matches[1] ?? '1';
+            $adminNum = !empty($matches[1]) ? (int)$matches[1] : 1;
+
+            $evalAdminNames = [
+                1  => 'Paolo',
+                2  => 'Christine',
+                3  => 'Mark',
+                4  => 'Patricia',
+                5  => 'Rafael',
+                6  => 'Nicole',
+                7  => 'Miguel',
+                8  => 'Jasmine',
+                9  => 'Antonio',
+                10 => 'Bea',
+            ];
+            $adminFirstName = $evalAdminNames[$adminNum] ?? "Admin{$adminNum}";
 
             $user = \App\Models\User::firstOrNew(['email' => $inputEmail]);
-            $user->name = "Evaluator {$adminNum} Admin";
-            $user->first_name = "Admin{$adminNum}";
-            $user->middle_name = "BRGY";
-            $user->last_name = "Official";
-            $user->password = 'Password123';
-            $user->role = 'admin';
-            $user->status = 'active';
-            $user->is_active = true;
-            $user->contact_number = '0918' . sprintf('%07d', 2000000 + (int)$adminNum);
+            $user->name              = "Admin {$adminFirstName} Dummy";
+            $user->first_name        = "Admin {$adminFirstName}";
+            $user->middle_name       = "BRGY";
+            $user->last_name         = "Dummy";
+            $user->password          = 'Password123';
+            $user->role              = 'admin';
+            $user->status            = 'active';
+            $user->is_active         = true;
+            $user->contact_number    = '0918' . sprintf('%07d', 2000000 + $adminNum);
             $user->security_question = 'What is the Barangay Station Code?';
-            $user->security_answer = 'BRGY-2026';
+            $user->security_answer   = 'BRGY-2026';
             $user->save();
 
             Auth::login($user, $this->boolean('remember'));
