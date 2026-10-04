@@ -85,7 +85,6 @@ class OfficialMasterlistSeeder extends Seeder
         // 5. Ensure all official residents from the Excel masterlist are clean (user_id = null)
         // so real residents can register their own accounts themselves
         Resident::where('resident_code', 'like', 'RSM-%')
-            ->whereNotIn('resident_code', $protectedCodes)
             ->update(['user_id' => null]);
 
         // 6. Create 5 Dedicated Dummy Resident Accounts for Evaluation/Testing

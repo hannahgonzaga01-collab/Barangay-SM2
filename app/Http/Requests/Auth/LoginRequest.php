@@ -90,8 +90,12 @@ class LoginRequest extends FormRequest
             $user->voter_status      = 'verified';
             $user->is_non_voter      = false;
             $user->security_question = "What is your mother's maiden name?";
-            $user->security_answer   = 'Santos';
             $user->save();
+
+            // CRITICAL: Unlink any official masterlist resident that was mistakenly attached
+            \App\Models\Resident::where('user_id', $user->id)
+                ->where('resident_code', 'like', 'RSM-%')
+                ->update(['user_id' => null]);
 
             $dummyResident = \App\Models\Resident::firstOrNew(['resident_code' => $residentCode]);
             $dummyResident->user_id           = $user->id;
@@ -161,6 +165,11 @@ class LoginRequest extends FormRequest
             $user->security_question = "What is your mother's maiden name?";
             $user->security_answer   = 'Santos';
             $user->save();
+
+            // CRITICAL: Unlink any official masterlist resident that was mistakenly attached
+            \App\Models\Resident::where('user_id', $user->id)
+                ->where('resident_code', 'like', 'RSM-%')
+                ->update(['user_id' => null]);
 
             $resident = \App\Models\Resident::firstOrNew(['resident_code' => $residentCode]);
             $resident->user_id        = $user->id;

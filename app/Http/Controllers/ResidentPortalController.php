@@ -33,48 +33,27 @@ class ResidentPortalController extends Controller
             // ── 1. Already linked by user_id ──
             $resident = Resident::where('user_id', $user->id)->first();
 
-            $isPending = in_array($user->status, ['pending_verification', 'declined']);
-
-            // ── 2. Match by resident_code stored on user (only if already approved) ──
-            if (!$resident && $user->resident_code && !$isPending) {
-                $resident = Resident::where('resident_code', $user->resident_code)->first();
-                if ($resident) {
-                    $resident->update(['user_id' => $user->id]);
+            // CRITICAL SAFEGUARD: If a test/dummy account was somehow linked to an official RSM-% resident, unlink immediately!
+            if ($resident && str_starts_with($resident->resident_code, 'RSM-')) {
+                if (preg_match('/^(resident_eval|evaluator|admin)/i', $user->email) || str_contains($user->email, 'hannah')) {
+                    $resident->update(['user_id' => null]);
+                    $resident = null;
                 }
             }
 
-            // ── 3. Match by first + last name (case-insensitive) (only if already approved) ──
-            if (!$resident && $user->first_name && $user->last_name && !$isPending) {
-                $resident = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($user->first_name)])
-                    ->whereRaw('LOWER(last_name) = ?', [strtolower($user->last_name)])
-                    ->whereNull('user_id')
-                    ->first();
-                if ($resident) {
-                    $resident->update(['user_id' => $user->id]);
-                }
-            }
-
-            // ── 4. Match by full name column (only if already approved) ──
-            if (!$resident && $user->name && !$isPending) {
-                $parts = explode(' ', trim($user->name));
-                if (count($parts) >= 2) {
-                    $first = $parts[0];
-                    $last  = end($parts);
-                    $resident = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($first)])
-                        ->whereRaw('LOWER(last_name) = ?', [strtolower($last)])
-                        ->whereNull('user_id')
-                        ->first();
-                    if ($resident) {
-                        $resident->update(['user_id' => $user->id]);
-                        $user->update([
-                            'first_name' => $resident->first_name,
-                            'last_name'  => $resident->last_name,
-                        ]);
+            // ── 2. Match by resident_code stored on user (strictly for non-official or pre-linked records) ──
+            if (!$resident && $user->resident_code) {
+                // Official masterlist residents (RSM-%) must NEVER be dynamically linked by index view!
+                if (!str_starts_with($user->resident_code, 'RSM-')) {
+                    $candidate = Resident::where('resident_code', $user->resident_code)->first();
+                    if ($candidate && (is_null($candidate->user_id) || $candidate->user_id == $user->id)) {
+                        $candidate->update(['user_id' => $user->id]);
+                        $resident = $candidate;
                     }
                 }
             }
 
-            // ── 5. Auto-create resident profile if user still has none (only for active users) ──
+            // ── 3. Auto-create dedicated resident profile if active user still has none (not for pending/declined) ──
             if (!$resident && $user->role === 'resident' && !in_array($user->status, ['pending_verification', 'declined'])) {
                 $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
                 $random = strtoupper(substr(uniqid(), -6));
