@@ -814,7 +814,7 @@ class ResidentPortalController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Voter verification proof re-uploaded successfully. Awaiting office approval.');
+        return redirect()->back()->with('success', '✅ Verification ID / proof uploaded successfully! The Barangay Office will review and verify your submitted ID.');
     }
 
     public function storeDocumentRequest(Request $request)
