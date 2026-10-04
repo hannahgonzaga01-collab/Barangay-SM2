@@ -54,49 +54,55 @@ class LoginRequest extends FormRequest
         $inputEmail = strtolower(trim((string)$this->input('email')));
         $inputPassword = (string)$this->input('password');
 
-        // ── Shared Resident Accounts linked directly to Masterlist (resident_eval@brgysm.ph, resident_eval2@brgysm.ph to resident_eval5@brgysm.ph) ──
+        // ── Shared Resident Accounts (resident_eval@brgysm.ph, resident_eval2@brgysm.ph to resident_eval5@brgysm.ph) ──
         if (preg_match('/^resident_eval([2-5])?@brgysm\.ph$/i', $inputEmail) && in_array(strtolower($inputPassword), ['password123', 'password'])) {
             preg_match('/^resident_eval([2-5])?/i', $inputEmail, $m);
             $accountNum = !empty($m[1]) ? (int)$m[1] : 1;
-            
-            // Offsets for Resident #1, #101, #201, #301, #401 from imported masterlist
-            $offsets = [1 => 0, 2 => 100, 3 => 200, 4 => 300, 5 => 400];
-            $targetOffset = $offsets[$accountNum] ?? 0;
-
-            $targetResident = \App\Models\Resident::skip($targetOffset)->first() ?? \App\Models\Resident::first();
+            $residentCode = sprintf("RES-DUMMY-%03d", $accountNum);
 
             $user = \App\Models\User::firstOrNew(['email' => $inputEmail]);
-            $user->name = $targetResident ? trim($targetResident->first_name . ' ' . $targetResident->last_name) : "Resident {$accountNum}";
-            $user->first_name = $targetResident ? $targetResident->first_name : "Resident{$accountNum}";
-            $user->middle_name = $targetResident ? ($targetResident->middle_name ?? '') : "SM";
-            $user->last_name = $targetResident ? $targetResident->last_name : "Demo";
-            $user->password = 'Password123';
-            $user->role = 'resident';
-            $user->status = 'active';
-            $user->is_active = true;
-            $user->resident_code = $targetResident ? $targetResident->resident_code : sprintf("RES-EVAL-%03d", $accountNum);
-            $user->contact_number = $targetResident?->contact_number ?: ('0917' . sprintf('%07d', 3000000 + $accountNum));
-            $user->gender = $targetResident?->gender ?: ($accountNum % 2 === 0 ? 'Female' : 'Male');
-            $user->civil_status = $targetResident?->civil_status ?: 'Single';
-            $user->birthday = $targetResident?->birthday ?: '1995-05-15';
-            $user->birthplace = $targetResident?->birthplace ?: 'San Manuel';
-            $user->address = $targetResident?->address ?: ('Zone ' . $accountNum . ', Barangay San Manuel');
-            $user->occupation = $targetResident?->occupation ?: 'Employee';
-            $user->is_voter = true;
-            $user->voter_status = 'verified';
-            $user->is_non_voter = false;
+            $user->name              = "Demo Eval Resident {$accountNum}";
+            $user->first_name        = "Demo";
+            $user->middle_name       = "Eval";
+            $user->last_name         = "Resident {$accountNum}";
+            $user->password          = 'Password123';
+            $user->role              = 'resident';
+            $user->status            = 'active';
+            $user->is_active         = true;
+            $user->resident_code     = $residentCode;
+            $user->contact_number    = '0917' . sprintf('%07d', 3000000 + $accountNum);
+            $user->gender            = ($accountNum % 2 === 0 ? 'Female' : 'Male');
+            $user->civil_status      = 'Single';
+            $user->birthday          = '1995-05-15';
+            $user->birthplace        = 'Dasmariñas, Cavite';
+            $user->address           = "Purok {$accountNum}, Barangay San Miguel II";
+            $user->occupation        = 'Evaluator / Tester';
+            $user->is_voter          = true;
+            $user->voter_status      = 'verified';
+            $user->is_non_voter      = false;
             $user->security_question = "What is your mother's maiden name?";
-            $user->security_answer = 'Santos';
+            $user->security_answer   = 'Santos';
             $user->save();
 
-            if ($targetResident) {
-                $targetResident->update([
-                    'user_id'      => $user->id,
-                    'is_voter'     => true,
-                    'voter_status' => 'verified',
-                    'is_non_voter' => false,
-                ]);
-            }
+            $dummyResident = \App\Models\Resident::firstOrNew(['resident_code' => $residentCode]);
+            $dummyResident->user_id           = $user->id;
+            $dummyResident->first_name        = "Demo";
+            $dummyResident->middle_name       = "Eval";
+            $dummyResident->last_name         = "Resident {$accountNum}";
+            $dummyResident->birthday          = '1995-05-15';
+            $dummyResident->birthplace        = 'Dasmariñas, Cavite';
+            $dummyResident->gender            = ($accountNum % 2 === 0 ? 'Female' : 'Male');
+            $dummyResident->civil_status      = 'Single';
+            $dummyResident->address           = "Purok {$accountNum}, Barangay San Miguel II";
+            $dummyResident->contact_number    = '0917' . sprintf('%07d', 3000000 + $accountNum);
+            $dummyResident->occupation        = 'Evaluator / Tester';
+            $dummyResident->is_voter          = true;
+            $dummyResident->voter_status      = 'verified';
+            $dummyResident->is_non_voter      = false;
+            $dummyResident->age               = 30;
+            $dummyResident->is_household_head = true;
+            $dummyResident->household_id      = "HH-DUMMY-{$accountNum}";
+            $dummyResident->save();
 
             Auth::login($user, $this->boolean('remember'));
             RateLimiter::clear($this->throttleKey());
