@@ -288,6 +288,11 @@ class ResidentPortalController extends Controller
                 ->exists()
             : false;
 
+        // Fetch Active Projects
+        $projects = class_exists(\App\Models\Project::class)
+            ? \App\Models\Project::where('is_active', true)->latest()->get()
+            : collect([]);
+
         return view('resident.index', compact(
             'requests', 'digitalId', 'resident', 'issueReports', 'sosHistory',
             'announcements', 'events', 'recentUpdates',
