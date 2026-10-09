@@ -347,7 +347,12 @@ class OfficeController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $updateData = ['voter_status' => 'approved'];
+        $updateData = [
+            'voter_status'   => 'approved',
+            'status'         => 'active',
+            'is_active'      => 1,
+            'decline_reason' => null,
+        ];
         if ($user->is_voter) {
             $updateData['is_non_voter'] = 0;
         } else {
@@ -358,7 +363,29 @@ class OfficeController extends Controller
         $user->update($updateData);
 
         if ($user->resident) {
-            $user->resident->update($updateData);
+            $user->resident->update([
+                'voter_status'        => 'approved',
+                'verification_status' => 'approved',
+                'is_voter'            => $user->is_voter,
+                'is_non_voter'        => $user->is_non_voter,
+            ]);
+        } else {
+            // Check if matching resident exists by name to link and approve
+            $resident = Resident::where('user_id', $user->id)->first();
+            if (!$resident && $user->first_name && $user->last_name) {
+                $resident = Resident::where('first_name', $user->first_name)
+                    ->where('last_name', $user->last_name)
+                    ->first();
+                if ($resident) {
+                    $resident->update([
+                        'user_id'             => $user->id,
+                        'voter_status'        => 'approved',
+                        'verification_status' => 'approved',
+                        'is_voter'            => $user->is_voter,
+                        'is_non_voter'        => $user->is_non_voter,
+                    ]);
+                }
+            }
         }
 
         try {
@@ -367,7 +394,7 @@ class OfficeController extends Controller
             \Log::error('Failed to send approve mail: ' . $e->getMessage());
         }
 
-        return redirect()->back()->with('success', 'Voter verification approved.');
+        return redirect()->back()->with('success', 'Voter verification approved and resident account activated.');
     }
 
     public function declineVoter(Request $request, $id)
@@ -1128,11 +1155,23 @@ class OfficeController extends Controller
     {
         $resident = Resident::findOrFail($id);
         $resident->verification_status = 'approved';
+        $resident->voter_status = 'approved';
         
         // If there's a linked user, ensure they can login too
         if ($resident->user) {
             $resident->user->update(['voter_status' => 'approved', 'status' => 'active', 'is_active' => 1]);
-            $resident->voter_status = 'approved';
+        } else {
+            // Check if there is an unlinked user matching this resident
+            $user = User::where('resident_code', $resident->resident_code)
+                ->orWhere(function($q) use ($resident) {
+                    if ($resident->first_name && $resident->last_name) {
+                        $q->where('first_name', $resident->first_name)->where('last_name', $resident->last_name);
+                    }
+                })->first();
+            if ($user) {
+                $resident->user_id = $user->id;
+                $user->update(['voter_status' => 'approved', 'status' => 'active', 'is_active' => 1]);
+            }
         }
         
         $resident->save();

@@ -427,29 +427,15 @@ html, body {
         </div>
     </div>
 
-    {{-- TOAST --}}
-    @if(session('success'))
-    <div x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,4000)"
-         x-transition:leave="transition ease-in duration-300"
-         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="toast">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
-    </div>
-    @endif
-
-    @if(session('error'))
-    <div x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,6000)"
-         x-transition:leave="transition ease-in duration-300"
-         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="toast" style="background:#ef4444; border-left-color:#b91c1c;">
-        <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
-    </div>
-    @endif
-
+    {{-- TOAST: Handled centrally by layouts/app.blade.php (showToast) --}}
     @if($errors->any())
-    <div x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,8000)"
-         x-transition:leave="transition ease-in duration-300"
-         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="toast" style="background:#ef4444; border-left-color:#b91c1c; top:65px;">
-        <i class="fas fa-exclamation-triangle"></i> {{ $errors->first() }}
-    </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof showToast === 'function') {
+                    showToast(@json($errors->first()), 'error');
+                }
+            });
+        </script>
     @endif
 
     @php
@@ -552,6 +538,7 @@ html, body {
             activeReq: {},
             trackerModal: false,
             selectedTrackerReq: null,
+            reqFilter: 'all',
             openTrackerModal(req) {
                 this.selectedTrackerReq = req;
                 this.trackerModal = true;
@@ -560,7 +547,7 @@ html, body {
             hasAvailedJobseeker: {{ $hasAvailedJobseeker ? 'true' : 'false' }},
             isAuth: {{ $isAuth ? 'true' : 'false' }},
             isVoter: {{ ($isAuth && $authUser?->is_voter) ? 'true' : 'false' }},
-            isPendingVerification: {{ ($isAuth && in_array($authUser?->status, ['pending_verification', 'declined'])) ? 'true' : 'false' }},
+            isPendingVerification: {{ ($isAuth && in_array($authUser?->status, ['pending_verification', 'declined']) && $authUser?->voter_status !== 'approved' && $authUser?->resident?->verification_status !== 'approved') ? 'true' : 'false' }},
             pendingLockModal: false,
             annIdx: 0,
             annTotal: {{ $announcements->count() }},
@@ -1564,8 +1551,37 @@ html, body {
 
             {{-- Collapsible Body --}}
             <div x-show="!isAppHistoryCollapsed" x-transition:enter.duration.200ms>
+                {{-- Status Filter Pills --}}
+                <div style="display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #f1f5f9;-webkit-overflow-scrolling:touch;">
+                    <button type="button" @click="reqFilter='all'" 
+                            :style="reqFilter==='all' ? 'background:var(--brand);color:#fff;border-color:var(--brand);' : 'background:#f8fafc;color:#64748b;border-color:#e2e8f0;'"
+                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
+                        All ({{ $requests->count() }})
+                    </button>
+                    <button type="button" @click="reqFilter='pending'" 
+                            :style="reqFilter==='pending' ? 'background:#d97706;color:#fff;border-color:#d97706;' : 'background:#fffbeb;color:#b45309;border-color:#fde68a;'"
+                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
+                        Pending ({{ $requests->where('status', 'pending')->count() }})
+                    </button>
+                    <button type="button" @click="reqFilter='processing'" 
+                            :style="reqFilter==='processing' ? 'background:#2563eb;color:#fff;border-color:#2563eb;' : 'background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;'"
+                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
+                        Processing ({{ $requests->where('status', 'processing')->count() }})
+                    </button>
+                    <button type="button" @click="reqFilter='ready'" 
+                            :style="reqFilter==='ready' ? 'background:#059669;color:#fff;border-color:#059669;' : 'background:#ecfdf5;color:#047857;border-color:#a7f3d0;'"
+                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
+                        Ready for Pickup ({{ $requests->where('status', 'ready')->count() }})
+                    </button>
+                    <button type="button" @click="reqFilter='released'" 
+                            :style="reqFilter==='released' ? 'background:#475569;color:#fff;border-color:#475569;' : 'background:#f1f5f9;color:#475569;border-color:#cbd5e1;'"
+                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
+                        Released ({{ $requests->where('status', 'released')->count() }})
+                    </button>
+                </div>
+
                 @foreach($requests as $index => $req)
-                <div class="event-item" x-show="showAllApps || {{ $index }} < 3" x-transition
+                <div class="event-item" x-show="(reqFilter === 'all' || reqFilter === '{{ $req->status }}') && (reqFilter !== 'all' || showAllApps || {{ $index }} < 3)" x-transition
                      @click="openTrackerModal({{ json_encode($req) }})"
                      style="cursor:pointer; transition:all .15s; border-radius:10px; padding:10px 12px; margin-bottom:8px;"
                      onmouseover="this.style.background='#f0fdf4'; this.style.borderColor='#86efac';" onmouseout="this.style.background='#fff'; this.style.borderColor='var(--border)';">
@@ -1592,6 +1608,20 @@ html, body {
                                 @endif
                             </span>
                         </div>
+                        @if($req->status === 'ready')
+                        <div style="background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:8px;padding:6px 10px;margin-top:6px;font-size:10.5px;color:#065f46;font-weight:700;">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                                <i class="fas fa-check-circle" style="color:#059669;"></i>
+                                <span style="text-transform:uppercase;letter-spacing:.04em;font-size:9.5px;color:#047857;font-weight:900;">Handa nang kunin sa Barangay Hall!</span>
+                            </div>
+                            <div>
+                                Petsa ng Pagkuha: <strong style="color:#065f46;">{{ $req->pickup_date ? \Carbon\Carbon::parse($req->pickup_date)->format('M d, Y') : ($req->appointment_date ? \Carbon\Carbon::parse($req->appointment_date)->format('M d, Y') : 'Available Now') }}</strong>
+                            </div>
+                            <div style="font-size:9.5px;color:#047857;margin-top:2px;">
+                                Duty Personnel / Desk: <strong>{{ $req->personnel_in_charge ?: 'MARVIN M. BENIS (Barangay Secretary)' }}</strong>
+                            </div>
+                        </div>
+                        @endif
                         @if($req->status === 'disapproved' && $req->disapproval_reason)
                         <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:8px;padding:6px 10px;margin-top:6px;font-size:10px;color:#dc2626;font-weight:700;">
                             <i class="fas fa-exclamation-circle"></i> Reason: {{ $req->disapproval_reason }}
@@ -2131,25 +2161,23 @@ html, body {
                         $selfStreetParsed = trim(trim($tempStr), " ,\t\n\r\0\x0B");
                         $isSelfLocked = $isAuth && !in_array($authUser->status, ['pending_verification', 'declined']);
                     @endphp
-                    <form action="{{ route('resident.document.request') }}" method="POST" enctype="multipart/form-data" 
-                          x-ref="docReqForm"
-                          id="docReqForm"
-                          @submit.prevent="handleDocSubmit()"
-                          x-data="{ 
+                    <script>
+                    function residentDocFormState() {
+                        return { 
                             cType: 'self', 
                             selfPurpose: '',
                             selfPurposeSelect: '',
                             selfPurposeCustom: '',
-                            selfBlk: '{{ $selfBlkParsed }}',
-                            selfLot: '{{ $selfLotParsed }}',
-                            selfStreet: '{{ addslashes($selfStreetParsed) }}',
-                            selfFullAddress: '{{ addslashes($rawSelfAddress) }}',
+                            selfBlk: @json($selfBlkParsed),
+                            selfLot: @json($selfLotParsed),
+                            selfStreet: @json($selfStreetParsed),
+                            selfFullAddress: @json($rawSelfAddress),
                             isSelfLocked: {{ $isSelfLocked ? 'true' : 'false' }},
                             validationAlertMsg: '',
                             showDocConfirmModal: false,
                             isSubmitting: false,
-                            age: '{{ $isAuth ? ($resident->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : "")) : "" }}',
-                            birthday: '{{ $isAuth ? ($resident->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format("Y-m-d") : "")) : "" }}',
+                            age: @json($isAuth ? ($resident->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : '')) : ''),
+                            birthday: @json($isAuth ? ($resident->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format('Y-m-d') : '')) : ''),
                             authLetterName: '',
                             authIdName: '',
                             authId2Name: '',
@@ -2387,17 +2415,17 @@ html, body {
                                 ];
                             },
                             init() {
-                                if (selectedDoc === 'jobseeker') {
+                                if (this.selectedDoc === 'jobseeker') {
                                     this.cType = 'self';
                                 }
-                                if (selectedDoc === 'movein') {
+                                if (this.selectedDoc === 'movein') {
                                     this.selfPurposeSelect = 'New Resident Transfer / Relocation';
                                     this.selfPurpose = 'New Resident Transfer / Relocation';
                                 }
                                 if (!this.isSelfLocked && (this.selfBlk || this.selfLot)) {
                                     this.updateSelfAddress();
                                 }
-                                this.$watch('selectedDoc', val => {
+                                this.$watch('selectedDoc', (val) => {
                                     if (val === 'jobseeker') {
                                         this.cType = 'self';
                                     }
@@ -2410,7 +2438,14 @@ html, body {
                                     }
                                 });
                             }
-                         }">
+                        };
+                    }
+                    </script>
+                    <form action="{{ route('resident.document.request') }}" method="POST" enctype="multipart/form-data" 
+                          x-ref="docReqForm"
+                          id="docReqForm"
+                          @submit.prevent="handleDocSubmit()"
+                          x-data="residentDocFormState()">
                         @csrf
                         <input type="hidden" name="document_type" :value="selectedDoc">
 
@@ -2941,9 +2976,9 @@ html, body {
 
     {{-- ✦ Live Request Tracker Modal ✦ --}}
     <div x-show="trackerModal" x-cloak class="modal-ov" style="z-index:99999;" x-transition>
-        <div class="modal-box" style="max-width:480px;" @click.away="trackerModal=false">
-            <div class="modal-in" x-show="selectedTrackerReq">
-                <div class="modal-hd">
+        <div class="modal-box" style="max-width:540px; max-height:92vh; overflow-y:auto;" @click.away="trackerModal=false">
+            <div class="modal-in" x-show="selectedTrackerReq" style="padding:20px;">
+                <div class="modal-hd" style="margin-bottom:12px;">
                     <div class="modal-ttl">
                         <div class="modal-ico" style="background:#eff6ff;color:var(--brand);"><i class="fas fa-search-location"></i></div>
                         <div>
@@ -2955,22 +2990,22 @@ html, body {
                 </div>
 
                 {{-- Document Summary Header --}}
-                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                         <div>
-                            <div style="font-size:13px;font-weight:900;color:var(--text);" x-text="(selectedTrackerReq?.document_type || '').toUpperCase().replace(/_/g,' ')"></div>
-                            <div style="font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px;">
-                                Purpose: <strong style="color:var(--text);" x-text="selectedTrackerReq?.purpose || 'N/A'"></strong>
+                            <div style="font-size:13.5px;font-weight:900;color:var(--text);" x-text="(selectedTrackerReq?.document_type || '').toUpperCase().replace(/_/g,' ')"></div>
+                            <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">
+                                Layunin / Purpose: <strong style="color:var(--text);" x-text="selectedTrackerReq?.purpose || 'N/A'"></strong>
                             </div>
                         </div>
-                        <span style="font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:99px;text-transform:uppercase;"
+                        <span style="font-size:9.5px;font-weight:900;padding:4px 11px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;"
                               :class="'s-' + selectedTrackerReq?.status"
                               x-text="selectedTrackerReq?.status"></span>
                     </div>
                 </div>
 
                 {{-- 4-Step Progress Indicator --}}
-                <div style="padding:10px 6px;margin-bottom:16px;">
+                <div style="padding:10px 6px;margin-bottom:14px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
                         <div style="position:absolute;top:14px;left:20px;right:20px;height:3px;background:#e2e8f0;z-index:1;"></div>
                         
@@ -2979,7 +3014,7 @@ html, body {
                             <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;background:#059669;color:#fff;">
                                 <i class="fas fa-check"></i>
                             </div>
-                            <span style="font-size:9px;font-weight:800;color:var(--text);margin-top:5px;text-align:center;">Submitted</span>
+                            <span style="font-size:9.5px;font-weight:800;color:var(--text);margin-top:5px;text-align:center;">Submitted</span>
                         </div>
 
                         {{-- Step 2: Processing --}}
@@ -2988,7 +3023,7 @@ html, body {
                                  :style="['processing','ready','released'].includes(selectedTrackerReq?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
                                 <i class="fas" :class="['processing','ready','released'].includes(selectedTrackerReq?.status) ? 'fa-check' : 'fa-hourglass-half'"></i>
                             </div>
-                            <span style="font-size:9px;font-weight:800;margin-top:5px;text-align:center;"
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
                                   :style="['processing','ready','released'].includes(selectedTrackerReq?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Processing</span>
                         </div>
 
@@ -2998,7 +3033,7 @@ html, body {
                                  :style="['ready','released'].includes(selectedTrackerReq?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
                                 <i class="fas" :class="['ready','released'].includes(selectedTrackerReq?.status) ? 'fa-check' : 'fa-calendar-check'"></i>
                             </div>
-                            <span style="font-size:9px;font-weight:800;margin-top:5px;text-align:center;"
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
                                   :style="['ready','released'].includes(selectedTrackerReq?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Ready</span>
                         </div>
 
@@ -3008,28 +3043,131 @@ html, body {
                                  :style="selectedTrackerReq?.status === 'released' ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
                                 <i class="fas" :class="selectedTrackerReq?.status === 'released' ? 'fa-check' : 'fa-box-open'"></i>
                             </div>
-                            <span style="font-size:9px;font-weight:800;margin-top:5px;text-align:center;"
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
                                   :style="selectedTrackerReq?.status === 'released' ? 'color:var(--text);' : 'color:#94a3b8;'">Released</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- Pickup Details Card --}}
-                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
-                    <div style="font-size:10.5px;font-weight:800;color:#1e40af;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-                        <i class="fas fa-building"></i> Barangay Office Pickup Schedule:
+                {{-- ✦ PROMINENT READY FOR PICK-UP ALERT (Visible when status is 'ready') ✦ --}}
+                <template x-if="selectedTrackerReq?.status === 'ready'">
+                    <div style="background:#ecfdf5;border:2px solid #10b981;border-radius:12px;padding:13px 15px;margin-bottom:14px;box-shadow:0 3px 10px rgba(16,185,129,0.12);">
+                        <div style="font-size:12px;font-weight:900;color:#065f46;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.04em;">
+                            <i class="fas fa-check-circle" style="color:#059669;font-size:15px;"></i> HANDA NA PARA SA PAGKUHA (READY FOR PICK-UP)
+                        </div>
+                        <div style="font-size:11.5px;color:#064e3b;line-height:1.6;">
+                            <div>
+                                📅 <strong>Petsa ng Pagkuha:</strong> 
+                                <span style="color:#059669;font-weight:900;" x-text="selectedTrackerReq?.pickup_date || selectedTrackerReq?.appointment_date || 'Nakatakda ngayong araw'"></span>
+                            </div>
+                            <div>
+                                ⏰ <strong>Oras ng Pagkuha:</strong> 8:00 AM – 5:00 PM (Lunes hanggang Biyernes)
+                            </div>
+                            <div>
+                                👤 <strong>Sino ang Pagkukunan (Duty Personnel):</strong> 
+                                <strong style="color:#047857;" x-text="selectedTrackerReq?.personnel_in_charge || 'MARVIN M. BENIS (Barangay Secretary)'"></strong>
+                                <template x-if="selectedTrackerReq?.alternate_personnel">
+                                    <span style="font-size:10px;color:#065f46;" x-text="' (Alternate: ' + selectedTrackerReq.alternate_personnel + ')'"></span>
+                                </template>
+                            </div>
+                            <div>
+                                🏢 <strong>Desk / Lugar:</strong> Barangay San Miguel II Hall — Frontline Releasing Window
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size:11px;color:#1e3a8a;line-height:1.55;">
+                </template>
+
+                {{-- ✦ MISMONG MGA DETALYE NA SINUBMIT (SUBMITTED DETAILS) ✦ --}}
+                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:13px 15px;margin-bottom:14px;">
+                    <div style="font-size:11px;font-weight:900;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-file-lines"></i> Mga Detalye ng Sinumite (Submitted Request Details)
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:11px;line-height:1.45;">
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Pangalan (Applicant):</span>
+                            <strong style="color:var(--text);" x-text="selectedTrackerReq?.claimant_name || (selectedTrackerReq?.guest_first_name ? (selectedTrackerReq.guest_first_name + ' ' + selectedTrackerReq.guest_last_name) : 'Resident')"></strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Claimant Type:</span>
+                            <span style="font-weight:800;color:var(--brand);" x-text="selectedTrackerReq?.claimant_type === 'authorized' ? 'Authorized Representative' : 'Self (Personal)'"></span>
+                        </div>
+                        <template x-if="selectedTrackerReq?.claimant_type === 'authorized'">
+                            <div style="grid-column: span 2; background:#eff6ff; padding:8px 10px; border-radius:8px; border:1px solid #bfdbfe;">
+                                <div style="font-size:9.5px;font-weight:800;color:#1e40af;text-transform:uppercase;">Authorized Representative:</div>
+                                <div style="font-weight:800;color:#1e3a8a;" x-text="(selectedTrackerReq?.claimant_first_name ? (selectedTrackerReq.claimant_first_name + ' ' + (selectedTrackerReq.claimant_middle_name ? selectedTrackerReq.claimant_middle_name + ' ' : '') + selectedTrackerReq.claimant_last_name) : selectedTrackerReq?.claimant_name) + ' (' + (selectedTrackerReq?.claimant_relation || 'Representative') + ')'"></div>
+                            </div>
+                        </template>
+                        <div style="grid-column: span 2;">
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Tirahan (Address):</span>
+                            <strong style="color:var(--text);" x-text="selectedTrackerReq?.address || ((selectedTrackerReq?.blk ? 'Blk ' + selectedTrackerReq.blk + ' ' : '') + (selectedTrackerReq?.lot ? 'Lot ' + selectedTrackerReq.lot + ', ' : '') + 'Brgy. San Miguel II, Dasmariñas, Cavite')"></strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Contact Number:</span>
+                            <span style="color:var(--text);font-weight:700;" x-text="selectedTrackerReq?.contact || 'N/A'"></span>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Layunin (Purpose):</span>
+                            <strong style="color:var(--text);" x-text="selectedTrackerReq?.purpose || 'Standard'"></strong>
+                        </div>
+                        <template x-if="selectedTrackerReq?.birthday || selectedTrackerReq?.age">
+                            <div>
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Kaarawan / Edad:</span>
+                                <span style="color:var(--text);font-weight:700;" x-text="(selectedTrackerReq?.birthday ? selectedTrackerReq.birthday + ' ' : '') + (selectedTrackerReq?.age ? '(' + selectedTrackerReq.age + ' taong gulang)' : '')"></span>
+                            </div>
+                        </template>
+                        <template x-if="selectedTrackerReq?.move_date">
+                            <div>
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Petsa ng Paglipat:</span>
+                                <span style="color:var(--text);font-weight:700;" x-text="selectedTrackerReq?.move_date"></span>
+                            </div>
+                        </template>
+                        <template x-if="selectedTrackerReq?.child_name">
+                            <div style="grid-column: span 2;">
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Pangalan ng Anak (Late Reg):</span>
+                                <span style="color:var(--text);font-weight:700;" x-text="selectedTrackerReq?.child_name"></span>
+                            </div>
+                        </template>
+                        <template x-if="selectedTrackerReq?.landlord">
+                            <div>
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Landlord / May-ari:</span>
+                                <span style="color:var(--text);font-weight:700;" x-text="selectedTrackerReq?.landlord"></span>
+                            </div>
+                        </template>
+                        <template x-if="selectedTrackerReq?.residing_since || selectedTrackerReq?.living_since">
+                            <div>
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Nakatira Mula Noong:</span>
+                                <span style="color:var(--text);font-weight:700;" x-text="selectedTrackerReq?.residing_since || selectedTrackerReq?.living_since"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    {{-- Attached Proofs / Documents --}}
+                    <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;padding-top:8px;border-top:1px solid #e2e8f0;">
+                        <template x-if="selectedTrackerReq?.id_proof">
+                            <button type="button" @click="openPhotoModal('/storage/' + selectedTrackerReq.id_proof, 'Uploaded ID Proof')" style="padding:4px 9px;border-radius:6px;background:#fff;border:1px solid #cbd5e1;font-size:10px;font-weight:800;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                                <i class="fas fa-image"></i> Tingnan ang ID Proof
+                            </button>
+                        </template>
+                        <template x-if="selectedTrackerReq?.authorization_letter_path">
+                            <button type="button" @click="openPhotoModal('/storage/' + selectedTrackerReq.authorization_letter_path, 'Authorization Letter')" style="padding:4px 9px;border-radius:6px;background:#fff;border:1px solid #cbd5e1;font-size:10px;font-weight:800;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                                <i class="fas fa-file-contract"></i> Tingnan ang Authorization Letter
+                            </button>
+                        </template>
+                        <template x-if="selectedTrackerReq?.authorized_id_path">
+                            <button type="button" @click="openPhotoModal('/storage/' + selectedTrackerReq.authorized_id_path, 'Representative ID')" style="padding:4px 9px;border-radius:6px;background:#fff;border:1px solid #cbd5e1;font-size:10px;font-weight:800;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                                <i class="fas fa-id-card"></i> Tingnan ang ID ng Kinatawan
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Standard Pickup Office Reference Card --}}
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:11px 14px;margin-bottom:14px;">
+                    <div style="font-size:10.5px;font-weight:800;color:#1e40af;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-building"></i> Barangay Office General Schedule:
+                    </div>
+                    <div style="font-size:11px;color:#1e3a8a;line-height:1.5;">
                         <div><strong>Hours:</strong> 8:00 AM – 5:00 PM (Monday to Friday, Fixed Office Hours)</div>
-                        <div x-show="selectedTrackerReq?.pickup_date">
-                            <strong>Date Assigned:</strong> <span style="color:#0E5393;font-weight:800;" x-text="selectedTrackerReq?.pickup_date"></span>
-                        </div>
-                        <div x-show="selectedTrackerReq?.personnel_in_charge">
-                            <strong>Duty Personnel:</strong> <span x-text="selectedTrackerReq?.personnel_in_charge"></span>
-                        </div>
-                        <div x-show="selectedTrackerReq?.alternate_personnel">
-                            <strong>Alternate Personnel:</strong> <span x-text="selectedTrackerReq?.alternate_personnel"></span>
-                        </div>
                     </div>
                 </div>
 
@@ -3918,7 +4056,7 @@ html, body {
                         <i class="fas fa-upload"></i> <span>Upload Valid ID / Proof</span>
                     </button>
                 </div>
-                @elseif($authUser && ($authUser->voter_status === 'pending' || $authUser->status === 'pending_verification'))
+                @elseif($authUser && ($authUser->voter_status === 'pending' || ($authUser->status === 'pending_verification' && $authUser->voter_status !== 'approved' && $authUser->resident?->verification_status !== 'approved')))
                 {{-- ID WAS UPLOADED AND IS PENDING --}}
                 <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:11px;padding:14px;margin-bottom:14px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -3943,18 +4081,25 @@ html, body {
                 </div>
                 @elseif($authUser)
                 {{-- APPROVED / ACTIVE RESIDENT (ALLOW UPGRADING VOTER STATUS OR UPDATING ID) --}}
-                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:12px 14px;margin-bottom:14px;">
+                <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:11px;padding:12px 14px;margin-bottom:14px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
-                        <div style="font-size:9.5px;font-weight:900;color:#1e293b;text-transform:uppercase;letter-spacing:.06em;">
-                            <i class="fas fa-shield-alt" style="margin-right:4px;color:var(--brand);"></i> ID Verification Status:
-                            @if($authUser->is_voter)
-                                <span style="color:#16a34a;margin-left:4px;"><i class="fas fa-check-circle"></i> Registered Voter</span>
-                            @else
-                                <span style="color:#64748b;margin-left:4px;">Non-Voter Resident</span>
-                            @endif
+                        <div>
+                            <div style="font-size:9.5px;font-weight:900;color:#14532d;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;">
+                                <i class="fas fa-certificate" style="color:#16a34a;"></i> ID Verification:
+                                <span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:99px;font-size:9px;font-weight:900;">
+                                    <i class="fas fa-check-circle"></i> VERIFIED & APPROVED
+                                </span>
+                            </div>
+                            <div style="font-size:10px;font-weight:700;color:#166534;margin-top:3px;">
+                                @if($authUser->is_voter)
+                                    <i class="fas fa-check-circle"></i> Official Registered Voter of Brgy. San Miguel II
+                                @else
+                                    <i class="fas fa-user-check"></i> Verified Resident (Non-Voter)
+                                @endif
+                            </div>
                         </div>
-                        <button type="button" @click="profileModal=false; idUploadModal=true" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px 9px;font-size:9.5px;font-weight:800;color:var(--brand);cursor:pointer;">
-                            <i class="fas fa-upload" style="margin-right:3px;"></i> Upload / Update ID Proof
+                        <button type="button" @click="profileModal=false; idUploadModal=true" style="background:#fff;border:1px solid #86efac;border-radius:6px;padding:4px 10px;font-size:9.5px;font-weight:800;color:#15803d;cursor:pointer;">
+                            <i class="fas fa-upload" style="margin-right:3px;"></i> Update ID Proof
                         </button>
                     </div>
                 </div>
@@ -4816,9 +4961,35 @@ html, body {
     </div>
 
     {{-- EMERGENCY SOS MODAL --}}
+    <script>
+    window.callOrCopyHotline = function(num, formattedNum, name) {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+            window.location.href = 'tel:' + num;
+        } else {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(num).catch(() => {});
+            }
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: name,
+                    html: '<div style="font-size:18px;margin:10px 0;color:#0E5393;font-weight:900;letter-spacing:0.5px;">' + formattedNum + '</div>' +
+                          '<p style="font-size:12px;color:#64748b;margin:0;">Nakopya ang numero sa iyong clipboard! Maaari mo itong tawagan gamit ang iyong mobile phone o landline.</p>',
+                    icon: 'info',
+                    confirmButtonColor: '#0E5393',
+                    confirmButtonText: 'Naiintindihan Ko'
+                });
+            } else if (typeof showToast === 'function') {
+                showToast('Copied ' + formattedNum + ' to clipboard!', 'info');
+            } else {
+                alert('Hotline ' + name + ': ' + formattedNum + ' (Copied to clipboard)');
+            }
+        }
+    };
+    </script>
     <div x-show="sosModal" x-cloak class="modal-ov" x-transition style="z-index:10000;" @keydown.window.escape="if(!sosLoading) sosModal=false">
-        <div class="modal-box" style="max-width:480px;border-top:5px solid #e11d48;border-radius:20px;" @click.away="if(!sosLoading) sosModal=false">
-            <div class="modal-in">
+        <div class="modal-box" style="max-width:500px; max-height:90vh; overflow-y:auto; border-top:5px solid #e11d48; border-radius:20px;" @click.away="if(!sosLoading) sosModal=false">
+            <div class="modal-in" style="padding:18px 20px;">
                 {{-- STEP 1: FILL OUT & DETAILS (with Serious Advisory Note before dispatch) --}}
                 <template x-if="!sosSuccess && !sosConfirmStep">
                     <div>
@@ -4848,39 +5019,39 @@ html, body {
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                                 <div style="font-size:10.5px; font-weight:900; color:#14532d; display:flex; align-items:center; gap:5px; text-transform:uppercase;">
                                     <i class="fas fa-phone-volume" style="color:#16a34a;"></i>
-                                    <span>Direct Emergency Hotlines (One-Tap Call)</span>
+                                    <span>Direct Emergency Hotlines</span>
                                 </div>
                                 <span style="font-size:8.5px; font-weight:900; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:99px; letter-spacing:0.04em;">24/7 ACTIVE</span>
                             </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
-                                <a href="tel:0464160283" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:7px;">
+                                <button type="button" @click="callOrCopyHotline('0464160283', '(046) 416-0283', 'Brgy. SM2 Tanod Desk')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-shield-alt"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#15803d;font-weight:700;">Brgy. SM2 Tanod Desk</div>
                                         <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0283</div>
                                     </div>
-                                </a>
-                                <a href="tel:09175432100" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
+                                </button>
+                                <button type="button" @click="callOrCopyHotline('09175432100', '0917-543-2100', 'Desk Officer Mobile')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-mobile-alt"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#15803d;font-weight:700;">Desk Officer Mobile</div>
                                         <div style="font-family:monospace;font-size:10.5px;font-weight:900;">0917-543-2100</div>
                                     </div>
-                                </a>
-                                <a href="tel:0464160278" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #93c5fd; padding:7px 9px; border-radius:8px; color:#1e3a8a; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'">
+                                </button>
+                                <button type="button" @click="callOrCopyHotline('0464160278', '(046) 416-0278', 'Dasma PNP Police')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #93c5fd; padding:7px 9px; border-radius:8px; color:#1e3a8a; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-building-shield"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#1d4ed8;font-weight:700;">Dasma PNP Police</div>
                                         <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0278</div>
                                     </div>
-                                </a>
-                                <a href="tel:911" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #fca5a5; padding:7px 9px; border-radius:8px; color:#7f1d1d; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
+                                </button>
+                                <button type="button" @click="callOrCopyHotline('911', '911 / (046) 481-8000', 'CDRRMO / Rescue')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #fca5a5; padding:7px 9px; border-radius:8px; color:#7f1d1d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-ambulance"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#b91c1c;font-weight:700;">CDRRMO / Rescue</div>
                                         <div style="font-family:monospace;font-size:10.5px;font-weight:900;">911 / 481-8000</div>
                                     </div>
-                                </a>
+                                </button>
                             </div>
                         </div>
 

@@ -25,6 +25,8 @@ class ResidentPortalController extends Controller
         self::sendDueAppointmentReminders();
 
         $resident   = null;
+        $requests   = collect();
+        $digitalId  = null;
 
         if (auth()->check()) {
             /** @var User $user */
@@ -101,6 +103,21 @@ class ResidentPortalController extends Controller
                     'is_non_voter'     => $resident->is_non_voter,
                     'is_bedridden'     => $resident->is_bedridden,
                 ]);
+
+                if (in_array($resident->verification_status, ['approved', 'verified'])) {
+                    $healData = [];
+                    if ($user->status === 'pending_verification') {
+                        $healData['status'] = 'active';
+                        $healData['is_active'] = 1;
+                    }
+                    if ($resident->voter_status === 'approved' && $user->voter_status !== 'approved') {
+                        $healData['voter_status'] = 'approved';
+                    }
+                    if (!empty($healData)) {
+                        $user->update($healData);
+                    }
+                }
+
                 $user->refresh();
             }
 
