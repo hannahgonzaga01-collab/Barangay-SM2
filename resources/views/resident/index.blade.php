@@ -2148,18 +2148,6 @@ html, body {
                     <button @click="selectedDoc=''" class="btn-plain btn-ghost btn-sm" style="margin-bottom:12px;"><i class="fas fa-arrow-left"></i> <span x-text="lang==='fil'?'Bumalik':'Back'">Back</span></button>
                     @php
                         $rawSelfAddress = $isAuth ? ($resident->address ?? $authUser?->address ?? '') : old('address', '');
-                        $selfBlkParsed = '';
-                        $selfLotParsed = '';
-                        $selfStreetParsed = '';
-                        if (preg_match('/(?:BLK|BLOCK)\.?\s*([0-9A-Za-z-]+)/i', $rawSelfAddress, $mB)) {
-                            $selfBlkParsed = $mB[1];
-                        }
-                        if (preg_match('/(?:LOT)\.?\s*([0-9A-Za-z-]+)/i', $rawSelfAddress, $mL)) {
-                            $selfLotParsed = $mL[1];
-                        }
-                        $tempStr = preg_replace('/(?:BLK|BLOCK)\.?\s*[0-9A-Za-z-]+|(?:LOT)\.?\s*[0-9A-Za-z-]+|BARANGAY\s+SAN\s+MIGUEL\s*(?:II|2)?|DASMARI[ÑN]AS(?:\s*CITY)?|CAVITE/i', '', $rawSelfAddress);
-                        $selfStreetParsed = trim(trim($tempStr), " ,\t\n\r\0\x0B");
-                        $isSelfLocked = $isAuth && !in_array($authUser->status, ['pending_verification', 'declined']);
                     @endphp
                     <script>
                     function residentDocFormState() {
@@ -2168,11 +2156,6 @@ html, body {
                             selfPurpose: '',
                             selfPurposeSelect: '',
                             selfPurposeCustom: '',
-                            selfBlk: @json($selfBlkParsed),
-                            selfLot: @json($selfLotParsed),
-                            selfStreet: @json($selfStreetParsed),
-                            selfFullAddress: @json($rawSelfAddress),
-                            isSelfLocked: {{ $isSelfLocked ? 'true' : 'false' }},
                             validationAlertMsg: '',
                             showDocConfirmModal: false,
                             isSubmitting: false,
@@ -2191,12 +2174,11 @@ html, body {
                                 relation: '', 
                                 blk_no: '',
                                 lot_no: '',
-                                street_name: '',
-                                address: '', 
+                                address: 'Barangay San Miguel II, Dasmariñas City, Cavite', 
                                 purpose: '', 
-                                purposeSelect: '',
-                                purposeCustom: '',
-                                contact: '', 
+                                purposeSelect: '', 
+                                purposeCustom: '', 
+                                contact: @json($isAuth ? ($authUser?->contact_number ?? $resident?->contact_number ?? '') : ''), 
                                 age: '', 
                                 birthday: '' 
                             }],
@@ -2209,32 +2191,23 @@ html, body {
                                  if(m < 0 || (m === 0 && today.getDate() < bd.getDate())) a--;
                                  return a;
                             },
-                            updateSelfAddress() {
-                                if (this.isSelfLocked && this.selfFullAddress) return;
-                                let parts = [];
-                                if (this.selfBlk && this.selfBlk.trim()) parts.push('Block ' + this.selfBlk.trim());
-                                if (this.selfLot && this.selfLot.trim()) parts.push('Lot ' + this.selfLot.trim());
-                                let prefix = parts.join(' ');
-                                let full = prefix;
-                                if (this.selfStreet && this.selfStreet.trim()) {
-                                    full = full ? full + ', ' + this.selfStreet.trim() : this.selfStreet.trim();
-                                }
-                                this.selfFullAddress = full ? full + ', Barangay San Miguel II, Dasmariñas City, Cavite' : '';
-                            },
                             updateApplicantAddress(app) {
+                                let b = (app.blk_no || '').trim();
+                                let l = (app.lot_no || '').trim();
                                 let parts = [];
-                                if (app.blk_no && app.blk_no.trim()) parts.push('Block ' + app.blk_no.trim());
-                                if (app.lot_no && app.lot_no.trim()) parts.push('Lot ' + app.lot_no.trim());
+                                if (b) parts.push('Block ' + b);
+                                if (l) parts.push('Lot ' + l);
                                 let prefix = parts.join(' ');
-                                let full = prefix;
-                                if (app.street_name && app.street_name.trim()) {
-                                    full = full ? full + ', ' + app.street_name.trim() : app.street_name.trim();
-                                }
-                                app.address = full ? full + ', Barangay San Miguel II, Dasmariñas City, Cavite' : '';
+                                app.address = prefix ? prefix + ', Barangay San Miguel II, Dasmariñas City, Cavite' : 'Barangay San Miguel II, Dasmariñas City, Cavite';
                             },
                             handleDocSubmit() {
                                 this.validationAlertMsg = '';
                                 const form = this.$refs.docReqForm;
+
+                                // Sync claimant type with checked DOM radio
+                                const claimantRadio = form.querySelector('input[name="claimant_type"]:checked');
+                                const currentClaimant = claimantRadio ? claimantRadio.value : this.cType;
+                                this.cType = currentClaimant;
 
                                 const flagMissing = (targetEl, msg) => {
                                     if (!targetEl) return;
@@ -2254,7 +2227,7 @@ html, body {
                                     }, 4000);
                                 };
 
-                                if (this.cType === 'authorized') {
+                                if (currentClaimant === 'authorized') {
                                     if (!this.$refs.authLetter?.files?.length && !this.authLetterName) {
                                         flagMissing(this.$refs.authLetterCard, 'Pakilagay po ang Authorization Letter.');
                                         return;
@@ -2318,21 +2291,12 @@ html, body {
                                         flagMissing(guestEmail, 'Pakilagay po ang inyong valid na Gmail address.');
                                         return;
                                     }
+                                    const guestAddr = form.querySelector('input[name="address"]');
+                                    if (guestAddr && !guestAddr.value.trim()) {
+                                        flagMissing(guestAddr, 'Pakilagay po ang inyong address sa Brgy. San Miguel II.');
+                                        return;
+                                    }
                                     @endif
-
-                                    if (!this.isSelfLocked && (!this.selfBlk || !this.selfBlk.trim())) {
-                                        const blkEl = form.querySelector('.self-blk-input');
-                                        flagMissing(blkEl, 'Pakilagay po ang inyong Block No. sa Brgy. San Miguel II.');
-                                        return;
-                                    }
-                                    if (!this.isSelfLocked && (!this.selfLot || !this.selfLot.trim())) {
-                                        const lotEl = form.querySelector('.self-lot-input');
-                                        flagMissing(lotEl, 'Pakilagay po ang inyong Lot No. sa Brgy. San Miguel II.');
-                                        return;
-                                    }
-                                    if (!this.selfFullAddress) {
-                                        this.updateSelfAddress();
-                                    }
 
                                     if (!this.selfPurpose || !this.selfPurpose.trim()) {
                                         const purEl = form.querySelector('.self-purpose-select');
@@ -2345,6 +2309,8 @@ html, body {
                                 for (const el of visibleInputs) {
                                     if (el.type === 'file' && el.style.display === 'none') continue;
                                     if (el.offsetParent === null) continue;
+                                    if (currentClaimant === 'self' && el.closest('.auth-blue-box')) continue;
+                                    if (currentClaimant === 'authorized' && el.closest('.self-section-container')) continue;
                                     if (!el.checkValidity() || !el.value.trim()) {
                                         flagMissing(el, el.validationMessage || 'Pakisagutan po ang field na ito bago magpatuloy.');
                                         return;
@@ -2415,6 +2381,8 @@ html, body {
                                 ];
                             },
                             init() {
+                                this.cType = 'self';
+                                this.validationAlertMsg = '';
                                 if (this.selectedDoc === 'jobseeker') {
                                     this.cType = 'self';
                                 }
@@ -2422,13 +2390,9 @@ html, body {
                                     this.selfPurposeSelect = 'New Resident Transfer / Relocation';
                                     this.selfPurpose = 'New Resident Transfer / Relocation';
                                 }
-                                if (!this.isSelfLocked && (this.selfBlk || this.selfLot)) {
-                                    this.updateSelfAddress();
-                                }
                                 this.$watch('selectedDoc', (val) => {
-                                    if (val === 'jobseeker') {
-                                        this.cType = 'self';
-                                    }
+                                    this.cType = 'self';
+                                    this.validationAlertMsg = '';
                                     this.selfPurposeSelect = '';
                                     this.selfPurpose = '';
                                     this.selfPurposeCustom = '';
@@ -2454,11 +2418,11 @@ html, body {
                                 <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user-check"></i> Who is claiming this document?</div>
                                 <div class="fgrid2 fgrp">
                                     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:800;color:var(--text);padding:8px 12px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;">
-                                        <input type="radio" name="claimant_type" value="self" x-model="cType" required style="accent-color:var(--brand);width:16px;height:16px;"> Self (Personal)
+                                        <input type="radio" name="claimant_type" value="self" x-model="cType" @change="validationAlertMsg=''" required style="accent-color:var(--brand);width:16px;height:16px;"> Self (Personal)
                                     </label>
                                     <label style="display:flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;font-weight:800;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;"
                                            :style="selectedDoc === 'jobseeker' ? 'opacity:0.45;cursor:not-allowed;background:#f1f5f9;color:var(--muted);' : 'cursor:pointer;background:#f8fafc;color:var(--text);'">
-                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:16px;height:16px;"> Authorized Person
+                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" @change="validationAlertMsg=''" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:16px;height:16px;"> Authorized Person
                                     </label>
                                 </div>
                                 <template x-if="selectedDoc === 'jobseeker'">
@@ -2567,55 +2531,29 @@ html, body {
                                             </div>
                                         </div>
 
-                                        {{-- Structured Address: Block & Lot Auto-formatted + Locked Jurisdiction --}}
+                                        {{-- Structured Address: Block & Lot in ONE single field with locked barangay/city text (NO BADGE, NO STREET) --}}
                                         <div class="fgrp">
-                                            <label class="flbl" style="font-size:12.5px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-                                                <i class="fas fa-map-marker-alt" style="color:var(--brand);"></i> Residence Address in Barangay San Miguel II *
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;color:var(--text);margin-bottom:6px;">
+                                                Residence Address in Barangay San Miguel II *
                                             </label>
-                                            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:8px;margin-bottom:8px;">
-                                                <div>
-                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Block No. *</label>
-                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
-                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Block</span>
-                                                        <input type="text" 
-                                                               placeholder="e.g. 12" 
-                                                               class="app-blk-input" 
-                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
-                                                               x-model="app.blk_no"
-                                                               @input="updateApplicantAddress(app)"
-                                                               :required="cType === 'authorized'">
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Lot No. *</label>
-                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
-                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Lot</span>
-                                                        <input type="text" 
-                                                               placeholder="e.g. 34" 
-                                                               class="app-lot-input" 
-                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
-                                                               x-model="app.lot_no"
-                                                               @input="updateApplicantAddress(app)"
-                                                               :required="cType === 'authorized'">
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Street / Phase (Optional)</label>
-                                                    <input type="text" 
-                                                           placeholder="e.g. Sampaguita St." 
-                                                           class="finput" 
-                                                           style="padding:8px 10px;font-size:13px;"
-                                                           x-model="app.street_name"
-                                                           @input="updateApplicantAddress(app)">
-                                                </div>
-                                            </div>
-                                            {{-- Locked Barangay and City autofill --}}
-                                            <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                                                <div style="display:flex;align-items:center;gap:8px;">
-                                                    <i class="fas fa-lock" style="color:#0284c7;font-size:13px;"></i>
-                                                    <span style="font-size:12.5px;font-weight:800;color:#0f172a;">Barangay San Miguel II, Dasmariñas City, Cavite</span>
-                                                </div>
-                                                <span style="background:#e0f2fe;color:#0369a1;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:6px;text-transform:uppercase;">Fixed / Locked</span>
+                                            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;padding:9px 14px;font-size:13px;color:var(--text);font-weight:700;">
+                                                <span>Block</span>
+                                                <input type="text" 
+                                                       placeholder="___" 
+                                                       class="app-blk-input" 
+                                                       style="width:58px;padding:4px 8px;border:1.5px solid #cbd5e1;border-radius:6px;font-size:13.5px;font-weight:800;text-align:center;background:#fff;color:var(--text);outline:none;"
+                                                       x-model="app.blk_no"
+                                                       @input="updateApplicantAddress(app)"
+                                                       :required="cType === 'authorized'">
+                                                <span>Lot</span>
+                                                <input type="text" 
+                                                       placeholder="___" 
+                                                       class="app-lot-input" 
+                                                       style="width:58px;padding:4px 8px;border:1.5px solid #cbd5e1;border-radius:6px;font-size:13.5px;font-weight:800;text-align:center;background:#fff;color:var(--text);outline:none;"
+                                                       x-model="app.lot_no"
+                                                       @input="updateApplicantAddress(app)"
+                                                       :required="cType === 'authorized'">
+                                                <span style="color:#475569;font-weight:700;">, Barangay San Miguel II, Dasmariñas City, Cavite</span>
                                             </div>
                                             <input type="hidden" :name="'applicants['+index+'][address]'" :value="app.address">
                                         </div>
@@ -2660,7 +2598,7 @@ html, body {
                                 </template>
 
                                 <div x-show="applicants.length < 2" style="margin-top:15px;">
-                                    <button type="button" @click="applicants.push({ first_name: '', middle_name: '', last_name: '', relation: '', blk_no: '', lot_no: '', street_name: '', address: '', purpose: '', purposeSelect: '', purposeCustom: '', contact: '', age: '', birthday: '' })" class="btn-plain btn-outline btn-sm" style="width:100%;justify-content:center;border-style:dashed;background:#fff;font-size:13px;padding:10px;">
+                                    <button type="button" @click="applicants.push({ first_name: '', middle_name: '', last_name: '', relation: '', blk_no: '', lot_no: '', address: 'Barangay San Miguel II, Dasmariñas City, Cavite', purpose: '', purposeSelect: '', purposeCustom: '', contact: @json($isAuth ? ($authUser?->contact_number ?? $resident?->contact_number ?? '') : ''), age: '', birthday: '' })" class="btn-plain btn-outline btn-sm" style="width:100%;justify-content:center;border-style:dashed;background:#fff;font-size:13px;padding:10px;">
                                         <i class="fas fa-plus-circle"></i> Add Another Applicant (Max 2)
                                     </button>
                                 </div>
@@ -2671,7 +2609,7 @@ html, body {
                             </div>
 
                             {{-- SELF THEME --}}
-                            <div x-show="cType === 'self'">
+                            <div x-show="cType === 'self'" class="self-section-container">
                                 @if(!$isAuth)
                                 <div class="sblk">
                                     <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user"></i> Your Details</div>
@@ -2688,78 +2626,21 @@ html, body {
                                 <div class="sblk">
                                     <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-info"></i> Request Details</div>
                                     <div class="fgrid2 fgrp" style="margin-bottom: 15px;">
-                                        {{-- Structured Self Address: Block & Lot Auto-formatted + Locked Jurisdiction --}}
+                                        {{-- Clean Single-Field Self Address from Masterlist (NO BADGES) --}}
                                         <div class="fspan2">
-                                            <label class="flbl" style="font-size:12.5px;font-weight:800;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;">
-                                                <span style="display:flex;align-items:center;gap:6px;">
-                                                    <i class="fas fa-map-marker-alt" style="color:var(--brand);"></i> Registered Residence Address in Brgy. San Miguel II *
-                                                </span>
-                                                @if($isSelfLocked)
-                                                <span style="font-size:10.5px;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 8px;border-radius:6px;display:flex;align-items:center;gap:4px;">
-                                                    <i class="fas fa-lock"></i> Verified Masterlist Profile
-                                                </span>
-                                                @endif
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;color:var(--text);margin-bottom:6px;">
+                                                Registered Residence Address in Barangay San Miguel II *
                                             </label>
-
-                                            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:8px;margin-bottom:8px;">
-                                                <div>
-                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Block No. *</label>
-                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;" :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''">
-                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Block</span>
-                                                        <input type="text" 
-                                                               placeholder="e.g. 12" 
-                                                               class="self-blk-input" 
-                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
-                                                               :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''"
-                                                               x-model="selfBlk"
-                                                               @input="updateSelfAddress()"
-                                                               :readonly="isSelfLocked"
-                                                               :required="cType === 'self' && !isSelfLocked">
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Lot No. *</label>
-                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;" :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''">
-                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Lot</span>
-                                                        <input type="text" 
-                                                               placeholder="e.g. 34" 
-                                                               class="self-lot-input" 
-                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
-                                                               :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''"
-                                                               x-model="selfLot"
-                                                               @input="updateSelfAddress()"
-                                                               :readonly="isSelfLocked"
-                                                               :required="cType === 'self' && !isSelfLocked">
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Street / Phase (Optional)</label>
-                                                    <input type="text" 
-                                                           placeholder="e.g. Sampaguita St." 
-                                                           class="finput" 
-                                                           style="padding:8px 10px;font-size:13px;"
-                                                           :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''"
-                                                           x-model="selfStreet"
-                                                           @input="updateSelfAddress()"
-                                                           :readonly="isSelfLocked">
-                                                </div>
-                                            </div>
-
-                                            {{-- Locked Barangay and City autofill --}}
-                                            <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                                                <div style="display:flex;align-items:center;gap:8px;">
-                                                    <i class="fas fa-lock" style="color:#0284c7;font-size:13px;"></i>
-                                                    <span style="font-size:12.5px;font-weight:800;color:#0f172a;">Barangay San Miguel II, Dasmariñas City, Cavite</span>
-                                                </div>
-                                                <span style="background:#e0f2fe;color:#0369a1;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:6px;text-transform:uppercase;">Fixed / Locked</span>
-                                            </div>
-
-                                            <input type="hidden" name="address" :value="selfFullAddress">
+                                            @if($isAuth)
+                                            <input type="text" name="address" class="finput" value="{{ $rawSelfAddress }}" readonly style="background:#f8fafc;color:#1e293b;font-weight:700;">
+                                            @else
+                                            <input type="text" name="address" class="finput" placeholder="e.g. Block 12 Lot 34, Barangay San Miguel II, Dasmariñas City, Cavite" :required="cType === 'self'">
+                                            @endif
                                         </div>
 
                                         <div>
                                             <label class="flbl" style="font-size:12.5px;font-weight:800;">Contact Number</label>
-                                            <input type="text" name="contact" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}>
+                                            <input type="text" name="contact" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" value="{{ $isAuth ? ($authUser?->contact_number ?? $resident?->contact_number) : old('contact') }}">
                                         </div>
                                         <div>
                                             <label class="flbl" style="font-size:12.5px;font-weight:800;">Purpose *</label>
