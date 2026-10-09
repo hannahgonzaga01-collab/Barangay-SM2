@@ -26,7 +26,7 @@ class OfficeController extends Controller
             \App\Services\DemographicRebalancer::rebalanceIfNeeded();
         }
 
-        $query = Resident::query();
+        $query = Resident::with(['user.digitalId']);
 
         if ($request->filled('view')) {
             if ($request->view === 'heads') {
@@ -56,17 +56,17 @@ class OfficeController extends Controller
         $archivedPetsCount = $archivedPets->count();
 
         $currentMonth = now()->month;
-        $birthdayThisMonth = Resident::whereMonth('birthday', $currentMonth)->get();
+        $birthdayThisMonth = Resident::whereMonth('birthday', $currentMonth)->select('id')->get();
         $seniors = Resident::where(function($q) {
             $q->where('is_senior', true)
               ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
               ->orWhere('age', '>=', 60);
-        })->get();
-        $pwds = Resident::where('is_pwd', true)->get();
-        $soloParents = Resident::where('is_single_parent', true)->get();
-        $nonVoters = Resident::where('is_non_voter', true)->get();
-        $bedridden = Resident::where('is_bedridden', true)->get();
-        $households = Resident::where('is_household_head', true)->with('householdMembers')->get();
+        })->select('id')->get();
+        $pwds = Resident::where('is_pwd', true)->select('id')->get();
+        $soloParents = Resident::where('is_single_parent', true)->select('id')->get();
+        $nonVoters = Resident::where('is_non_voter', true)->select('id')->get();
+        $bedridden = Resident::where('is_bedridden', true)->select('id')->get();
+        $households = Resident::where('is_household_head', true)->select('id')->get();
         $kdbmCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('KDBM', $u->memberships))->count();
         $fourPsCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('4Ps', $u->memberships))->count();
         $anyMembershipCount = $users->filter(fn($u) => is_array($u->memberships) && count($u->memberships) > 0)->count();

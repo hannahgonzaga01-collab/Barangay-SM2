@@ -18,6 +18,18 @@ html, body {
 }
 [x-cloak]{display:none!important;}
 
+@keyframes shakeAndGlow {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+.input-field-missing {
+    animation: shakeAndGlow 0.4s ease-in-out !important;
+    border: 2px solid #ef4444 !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25) !important;
+    background-color: #fff1f2 !important;
+}
+
 /* PRIVACY */
 .privacy-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,30,.78);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;}
 .privacy-box{background:#fff;border-radius:20px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,52,.4);border-bottom:5px solid var(--brand);overflow:hidden;}
@@ -1233,8 +1245,13 @@ html, body {
     <div class="hero-section">
         <div class="hero-carousel">
             <div class="carousel-slide active">
-                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;" title="Barangay San Miguel II">
-                    <img src="{{ asset('images/circlelogo.png') }}" style="width:62px;height:62px;border-radius:50%;object-fit:contain;margin:0 auto 10px;display:block;opacity:.95;box-shadow:0 4px 16px rgba(0,0,0,0.25);transition:transform .2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onerror="this.style.display='none'">
+                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;margin:0 auto 12px;" title="Barangay San Miguel II • Home">
+                    <img src="{{ asset('images/circlelogo.png') }}" 
+                         alt="Barangay San Miguel II Logo"
+                         style="width:96px;height:96px;border-radius:50%;object-fit:contain;margin:0 auto;display:block;opacity:1;box-shadow:0 8px 25px rgba(0,0,0,0.35);border:3.5px solid rgba(255,255,255,0.95);background:#ffffff;padding:2px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;" 
+                         onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.5)'" 
+                         onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.35)'" 
+                         onerror="this.style.display='none'">
                 </a>
                 <span class="slide-tag" x-text="t('welcome')">Welcome</span>
                 <h2 x-text="t('hero_title')">Barangay San Miguel II</h2>
@@ -2099,206 +2116,376 @@ html, body {
 
                 <div x-show="selectedDoc" x-transition>
                     <button @click="selectedDoc=''" class="btn-plain btn-ghost btn-sm" style="margin-bottom:12px;"><i class="fas fa-arrow-left"></i> <span x-text="lang==='fil'?'Bumalik':'Back'">Back</span></button>
-                        <form action="{{ route('resident.document.request') }}" method="POST" enctype="multipart/form-data" 
-                              x-ref="docReqForm"
-                              id="docReqForm"
-                              @submit.prevent="if($refs.docReqForm.reportValidity()){ showDocConfirmModal = true; }"
-                              x-data="{ 
-                                cType: 'self', 
-                                selfPurpose: '',
-                                selfPurposeSelect: '',
-                                selfPurposeCustom: '',
-                                showDocConfirmModal: false,
-                                isSubmitting: false,
-                                age: '{{ $isAuth ? ($resident->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : "")) : "" }}',
-                                birthday: '{{ $isAuth ? ($resident->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format("Y-m-d") : "")) : "" }}',
-                                authLetterName: '',
-                                authIdName: '',
-                                authId2Name: '',
-                                isDraggingLetter: false,
-                                isDraggingId: false,
-                                isDraggingId2: false,
-                                applicants: [{ 
-                                    first_name: '', 
-                                    middle_name: '', 
-                                    last_name: '', 
-                                    relation: '', 
-                                    house_street: '',
-                                    address: '', 
-                                    purpose: '', 
-                                    purposeSelect: '',
-                                    purposeCustom: '',
-                                    contact: '', 
-                                    age: '', 
-                                    birthday: '' 
-                                }],
-                                calculateAge(bday) {
-                                     if(!bday) return '';
-                                     const bd = new Date(bday);
-                                     const today = new Date();
-                                     let a = today.getFullYear() - bd.getFullYear();
-                                     const m = today.getMonth() - bd.getMonth();
-                                     if(m < 0 || (m === 0 && today.getDate() < bd.getDate())) a--;
-                                     return a;
-                                 },
-                                 getPurposes(docKey) {
-                                     if (docKey === 'clearance') {
-                                         return [
-                                             'Local Employment',
-                                             'Overseas Employment (Abroad)',
-                                             'Student Enrollment / School Requirement / Scholarship',
-                                             'Postal ID / Passport / Gov ID Application',
-                                             'Bank Account Opening',
-                                             'Police Clearance Requirement',
-                                             'Others'
-                                         ];
-                                     } else if (docKey === 'indigency') {
-                                         return [
-                                             'Medical Assistance (DSWD / Malasakit / Hospital)',
-                                             'Financial Assistance',
-                                             'Educational / Scholarship Subsidy',
-                                             'Burial / Funeral Assistance',
-                                             'Legal Aid (PAO)',
-                                             'Others'
-                                         ];
-                                     } else if (docKey === 'residency') {
-                                         return [
-                                             'Proof of Address / Residency',
-                                             'Utility Connection (Meralco / Water / Internet)',
-                                             'Loan Application',
-                                             'Bank Requirement',
-                                             'School / University Requirement',
-                                             'Others'
-                                         ];
-                                     } else if (docKey === 'business') {
-                                         return [
-                                             'New Business Permit / Mayor\'s Permit',
-                                             'Business Permit Renewal',
-                                             'DTI / SEC Registration',
-                                             'Tricycle / Franchise Permit',
-                                             'Others'
-                                         ];
-                                     } else if (docKey === 'jobseeker') {
-                                         return [
-                                             'First-Time Jobseeker Employment (RA 11261)',
-                                             'Government Examination / Pre-Employment',
-                                             'Others'
-                                         ];
-                                     } else if (docKey === 'movein' || docKey === 'moveout') {
-                                         return [
-                                             'New Resident Transfer / Relocation',
-                                             'Proof of Residency Transfer',
-                                             'Others'
-                                         ];
-                                     }
-                                     return [
-                                         'Employment',
-                                         'Scholarship / School Requirement',
-                                         'Financial / Medical Assistance',
-                                         'Loan Application',
-                                         'ID Requirement / Postal / Passport',
-                                         'Proof of Residency',
-                                         'Legal / Court Requirement',
-                                         'Others'
-                                     ];
-                                 },
-                                 init() {
-                                     if (selectedDoc === 'jobseeker') {
-                                         this.cType = 'self';
-                                     }
-                                     if (selectedDoc === 'movein') {
-                                         this.selfPurposeSelect = 'New Resident Transfer / Relocation';
-                                         this.selfPurpose = 'New Resident Transfer / Relocation';
-                                     }
-                                     this.$watch('selectedDoc', val => {
-                                         if (val === 'jobseeker') {
-                                             this.cType = 'self';
-                                         }
-                                         this.selfPurposeSelect = '';
-                                         this.selfPurpose = '';
-                                         this.selfPurposeCustom = '';
-                                         if (val === 'movein') {
-                                             this.selfPurposeSelect = 'New Resident Transfer / Relocation';
-                                             this.selfPurpose = 'New Resident Transfer / Relocation';
-                                         }
-                                     });
-                                 }
-                              }">
+                    @php
+                        $rawSelfAddress = $isAuth ? ($resident->address ?? $authUser?->address ?? '') : old('address', '');
+                        $selfBlkParsed = '';
+                        $selfLotParsed = '';
+                        $selfStreetParsed = '';
+                        if (preg_match('/(?:BLK|BLOCK)\.?\s*([0-9A-Za-z-]+)/i', $rawSelfAddress, $mB)) {
+                            $selfBlkParsed = $mB[1];
+                        }
+                        if (preg_match('/(?:LOT)\.?\s*([0-9A-Za-z-]+)/i', $rawSelfAddress, $mL)) {
+                            $selfLotParsed = $mL[1];
+                        }
+                        $tempStr = preg_replace('/(?:BLK|BLOCK)\.?\s*[0-9A-Za-z-]+|(?:LOT)\.?\s*[0-9A-Za-z-]+|BARANGAY\s+SAN\s+MIGUEL\s*(?:II|2)?|DASMARI[ÑN]AS(?:\s*CITY)?|CAVITE/i', '', $rawSelfAddress);
+                        $selfStreetParsed = trim(trim($tempStr), " ,\t\n\r\0\x0B");
+                        $isSelfLocked = $isAuth && !in_array($authUser->status, ['pending_verification', 'declined']);
+                    @endphp
+                    <form action="{{ route('resident.document.request') }}" method="POST" enctype="multipart/form-data" 
+                          x-ref="docReqForm"
+                          id="docReqForm"
+                          @submit.prevent="handleDocSubmit()"
+                          x-data="{ 
+                            cType: 'self', 
+                            selfPurpose: '',
+                            selfPurposeSelect: '',
+                            selfPurposeCustom: '',
+                            selfBlk: '{{ $selfBlkParsed }}',
+                            selfLot: '{{ $selfLotParsed }}',
+                            selfStreet: '{{ addslashes($selfStreetParsed) }}',
+                            selfFullAddress: '{{ addslashes($rawSelfAddress) }}',
+                            isSelfLocked: {{ $isSelfLocked ? 'true' : 'false' }},
+                            validationAlertMsg: '',
+                            showDocConfirmModal: false,
+                            isSubmitting: false,
+                            age: '{{ $isAuth ? ($resident->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : "")) : "" }}',
+                            birthday: '{{ $isAuth ? ($resident->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format("Y-m-d") : "")) : "" }}',
+                            authLetterName: '',
+                            authIdName: '',
+                            authId2Name: '',
+                            isDraggingLetter: false,
+                            isDraggingId: false,
+                            isDraggingId2: false,
+                            applicants: [{ 
+                                first_name: '', 
+                                middle_name: '', 
+                                last_name: '', 
+                                relation: '', 
+                                blk_no: '',
+                                lot_no: '',
+                                street_name: '',
+                                address: '', 
+                                purpose: '', 
+                                purposeSelect: '',
+                                purposeCustom: '',
+                                contact: '', 
+                                age: '', 
+                                birthday: '' 
+                            }],
+                            calculateAge(bday) {
+                                 if(!bday) return '';
+                                 const bd = new Date(bday);
+                                 const today = new Date();
+                                 let a = today.getFullYear() - bd.getFullYear();
+                                 const m = today.getMonth() - bd.getMonth();
+                                 if(m < 0 || (m === 0 && today.getDate() < bd.getDate())) a--;
+                                 return a;
+                            },
+                            updateSelfAddress() {
+                                if (this.isSelfLocked && this.selfFullAddress) return;
+                                let parts = [];
+                                if (this.selfBlk && this.selfBlk.trim()) parts.push('Block ' + this.selfBlk.trim());
+                                if (this.selfLot && this.selfLot.trim()) parts.push('Lot ' + this.selfLot.trim());
+                                let prefix = parts.join(' ');
+                                let full = prefix;
+                                if (this.selfStreet && this.selfStreet.trim()) {
+                                    full = full ? full + ', ' + this.selfStreet.trim() : this.selfStreet.trim();
+                                }
+                                this.selfFullAddress = full ? full + ', Barangay San Miguel II, Dasmariñas City, Cavite' : '';
+                            },
+                            updateApplicantAddress(app) {
+                                let parts = [];
+                                if (app.blk_no && app.blk_no.trim()) parts.push('Block ' + app.blk_no.trim());
+                                if (app.lot_no && app.lot_no.trim()) parts.push('Lot ' + app.lot_no.trim());
+                                let prefix = parts.join(' ');
+                                let full = prefix;
+                                if (app.street_name && app.street_name.trim()) {
+                                    full = full ? full + ', ' + app.street_name.trim() : app.street_name.trim();
+                                }
+                                app.address = full ? full + ', Barangay San Miguel II, Dasmariñas City, Cavite' : '';
+                            },
+                            handleDocSubmit() {
+                                this.validationAlertMsg = '';
+                                const form = this.$refs.docReqForm;
+
+                                const flagMissing = (targetEl, msg) => {
+                                    if (!targetEl) return;
+                                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    if (typeof targetEl.focus === 'function') {
+                                        try { targetEl.focus({ preventScroll: true }); } catch(e){}
+                                    }
+                                    targetEl.classList.remove('input-field-missing');
+                                    void targetEl.offsetWidth;
+                                    targetEl.classList.add('input-field-missing');
+                                    if (typeof targetEl.reportValidity === 'function') {
+                                        try { targetEl.reportValidity(); } catch(e){}
+                                    }
+                                    this.validationAlertMsg = msg || 'Pakisagutan po ang kulang na field bago magpatuloy.';
+                                    setTimeout(() => {
+                                        targetEl.classList.remove('input-field-missing');
+                                    }, 4000);
+                                };
+
+                                if (this.cType === 'authorized') {
+                                    if (!this.$refs.authLetter?.files?.length && !this.authLetterName) {
+                                        flagMissing(this.$refs.authLetterCard, 'Pakilagay po ang Authorization Letter.');
+                                        return;
+                                    }
+                                    if (!this.$refs.authId?.files?.length && !this.authIdName) {
+                                        flagMissing(this.$refs.authIdCard, 'Pakilagay po ang Valid ID ng Authorized Person.');
+                                        return;
+                                    }
+                                    if (!this.$refs.authId2?.files?.length && !this.authId2Name) {
+                                        flagMissing(this.$refs.authId2Card, 'Pakilagay po ang Valid ID ng taong kinakatawan.');
+                                        return;
+                                    }
+
+                                    for (let i = 0; i < this.applicants.length; i++) {
+                                        const app = this.applicants[i];
+                                        if (!app.relation) {
+                                            const el = form.querySelector(`select[name="applicants[${i}][relation]"]`);
+                                            flagMissing(el, `Pakipili po ang relasyon sa Applicant #${i + 1}.`);
+                                            return;
+                                        }
+                                        if (!app.first_name || !app.first_name.trim()) {
+                                            const el = form.querySelector(`input[name="applicants[${i}][first_name]"]`);
+                                            flagMissing(el, `Pakilagay po ang Pangalan (First Name) ng Applicant #${i + 1}.`);
+                                            return;
+                                        }
+                                        if (!app.last_name || !app.last_name.trim()) {
+                                            const el = form.querySelector(`input[name="applicants[${i}][last_name]"]`);
+                                            flagMissing(el, `Pakilagay po ang Apelyido (Last Name) ng Applicant #${i + 1}.`);
+                                            return;
+                                        }
+                                        if (!app.blk_no || !app.blk_no.trim()) {
+                                            const el = form.querySelectorAll('.app-blk-input')[i];
+                                            flagMissing(el, `Pakilagay po ang Block No. ng tirahan sa Brgy. San Miguel II.`);
+                                            return;
+                                        }
+                                        if (!app.lot_no || !app.lot_no.trim()) {
+                                            const el = form.querySelectorAll('.app-lot-input')[i];
+                                            flagMissing(el, `Pakilagay po ang Lot No. ng tirahan sa Brgy. San Miguel II.`);
+                                            return;
+                                        }
+                                        if (!app.purpose || !app.purpose.trim()) {
+                                            const el = form.querySelectorAll('.app-purpose-select')[i];
+                                            flagMissing(el, `Pakipili po ang Layunin (Purpose) ng dokumento.`);
+                                            return;
+                                        }
+                                    }
+                                } else {
+                                    @if(!$isAuth)
+                                    const guestFn = form.querySelector('input[name="guest_first_name"]');
+                                    if (guestFn && !guestFn.value.trim()) {
+                                        flagMissing(guestFn, 'Pakilagay po ang inyong Pangalan (First Name).');
+                                        return;
+                                    }
+                                    const guestLn = form.querySelector('input[name="guest_last_name"]');
+                                    if (guestLn && !guestLn.value.trim()) {
+                                        flagMissing(guestLn, 'Pakilagay po ang inyong Apelyido (Last Name).');
+                                        return;
+                                    }
+                                    const guestEmail = form.querySelector('input[name="guest_email"]');
+                                    if (guestEmail && (!guestEmail.value.trim() || !guestEmail.checkValidity())) {
+                                        flagMissing(guestEmail, 'Pakilagay po ang inyong valid na Gmail address.');
+                                        return;
+                                    }
+                                    @endif
+
+                                    if (!this.isSelfLocked && (!this.selfBlk || !this.selfBlk.trim())) {
+                                        const blkEl = form.querySelector('.self-blk-input');
+                                        flagMissing(blkEl, 'Pakilagay po ang inyong Block No. sa Brgy. San Miguel II.');
+                                        return;
+                                    }
+                                    if (!this.isSelfLocked && (!this.selfLot || !this.selfLot.trim())) {
+                                        const lotEl = form.querySelector('.self-lot-input');
+                                        flagMissing(lotEl, 'Pakilagay po ang inyong Lot No. sa Brgy. San Miguel II.');
+                                        return;
+                                    }
+                                    if (!this.selfFullAddress) {
+                                        this.updateSelfAddress();
+                                    }
+
+                                    if (!this.selfPurpose || !this.selfPurpose.trim()) {
+                                        const purEl = form.querySelector('.self-purpose-select');
+                                        flagMissing(purEl, 'Pakipili po ang inyong Layunin (Purpose).');
+                                        return;
+                                    }
+                                }
+
+                                const visibleInputs = Array.from(form.querySelectorAll('input:required, select:required, textarea:required'));
+                                for (const el of visibleInputs) {
+                                    if (el.type === 'file' && el.style.display === 'none') continue;
+                                    if (el.offsetParent === null) continue;
+                                    if (!el.checkValidity() || !el.value.trim()) {
+                                        flagMissing(el, el.validationMessage || 'Pakisagutan po ang field na ito bago magpatuloy.');
+                                        return;
+                                    }
+                                }
+
+                                this.showDocConfirmModal = true;
+                            },
+                            getPurposes(docKey) {
+                                if (docKey === 'clearance') {
+                                    return [
+                                        'Local Employment',
+                                        'Overseas Employment (Abroad)',
+                                        'Student Enrollment / School Requirement / Scholarship',
+                                        'Postal ID / Passport / Gov ID Application',
+                                        'Bank Account Opening',
+                                        'Police Clearance Requirement',
+                                        'Others'
+                                    ];
+                                } else if (docKey === 'indigency') {
+                                    return [
+                                        'Medical Assistance (DSWD / Malasakit / Hospital)',
+                                        'Financial Assistance',
+                                        'Educational / Scholarship Subsidy',
+                                        'Burial / Funeral Assistance',
+                                        'Legal Aid (PAO)',
+                                        'Others'
+                                    ];
+                                } else if (docKey === 'residency') {
+                                    return [
+                                        'Proof of Address / Residency',
+                                        'Utility Connection (Meralco / Water / Internet)',
+                                        'Loan Application',
+                                        'Bank Requirement',
+                                        'School / University Requirement',
+                                        'Others'
+                                    ];
+                                } else if (docKey === 'business') {
+                                    return [
+                                        'New Business Permit / Mayor\'s Permit',
+                                        'Business Permit Renewal',
+                                        'DTI / SEC Registration',
+                                        'Tricycle / Franchise Permit',
+                                        'Others'
+                                    ];
+                                } else if (docKey === 'jobseeker') {
+                                    return [
+                                        'First-Time Jobseeker Employment (RA 11261)',
+                                        'Government Examination / Pre-Employment',
+                                        'Others'
+                                    ];
+                                } else if (docKey === 'movein' || docKey === 'moveout') {
+                                    return [
+                                        'New Resident Transfer / Relocation',
+                                        'Proof of Residency Transfer',
+                                        'Others'
+                                    ];
+                                }
+                                return [
+                                    'Employment',
+                                    'Scholarship / School Requirement',
+                                    'Financial / Medical Assistance',
+                                    'Loan Application',
+                                    'ID Requirement / Postal / Passport',
+                                    'Proof of Residency',
+                                    'Legal / Court Requirement',
+                                    'Others'
+                                ];
+                            },
+                            init() {
+                                if (selectedDoc === 'jobseeker') {
+                                    this.cType = 'self';
+                                }
+                                if (selectedDoc === 'movein') {
+                                    this.selfPurposeSelect = 'New Resident Transfer / Relocation';
+                                    this.selfPurpose = 'New Resident Transfer / Relocation';
+                                }
+                                if (!this.isSelfLocked && (this.selfBlk || this.selfLot)) {
+                                    this.updateSelfAddress();
+                                }
+                                this.$watch('selectedDoc', val => {
+                                    if (val === 'jobseeker') {
+                                        this.cType = 'self';
+                                    }
+                                    this.selfPurposeSelect = '';
+                                    this.selfPurpose = '';
+                                    this.selfPurposeCustom = '';
+                                    if (val === 'movein') {
+                                        this.selfPurposeSelect = 'New Resident Transfer / Relocation';
+                                        this.selfPurpose = 'New Resident Transfer / Relocation';
+                                    }
+                                });
+                            }
+                         }">
                         @csrf
                         <input type="hidden" name="document_type" :value="selectedDoc">
 
                         {{-- Claimant Selection --}}
                         <div class="sblk">
-                                <div class="sblk-ttl"><i class="fas fa-user-check"></i> Who is claiming this document?</div>
+                                <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user-check"></i> Who is claiming this document?</div>
                                 <div class="fgrid2 fgrp">
-                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--text);">
-                                        <input type="radio" name="claimant_type" value="self" x-model="cType" required style="accent-color:var(--brand);width:14px;height:14px;"> Self (Personal)
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:800;color:var(--text);padding:8px 12px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;">
+                                        <input type="radio" name="claimant_type" value="self" x-model="cType" required style="accent-color:var(--brand);width:16px;height:16px;"> Self (Personal)
                                     </label>
-                                    <label style="display:flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:700;"
-                                           :style="selectedDoc === 'jobseeker' ? 'opacity:0.4;cursor:not-allowed;color:var(--muted);' : 'cursor:pointer;color:var(--text);'">
-                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:14px;height:14px;"> Authorized Person
+                                    <label style="display:flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;font-weight:800;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;"
+                                           :style="selectedDoc === 'jobseeker' ? 'opacity:0.45;cursor:not-allowed;background:#f1f5f9;color:var(--muted);' : 'cursor:pointer;background:#f8fafc;color:var(--text);'">
+                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:16px;height:16px;"> Authorized Person
                                     </label>
                                 </div>
                                 <template x-if="selectedDoc === 'jobseeker'">
-                                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:10px;color:#92400e;font-weight:700;line-height:1.45;">
-                                        <i class="fas fa-exclamation-triangle" style="color:#d97706;"></i> <strong>Personal Appearance Strictly Required (RA 11261):</strong> Bawal po ang Authorized Representative sa First-Time Jobseeker Certificate dahil kailangan pong personal na pirmahan ng aplikante ang Sworn Undertaking sa Barangay Hall.
+                                    <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:12px 15px;margin-top:10px;font-size:13px;color:#78350f;font-weight:700;line-height:1.55;">
+                                        <i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:16px;"></i> <strong>Personal Appearance Strictly Required (RA 11261):</strong> Bawal po ang Authorized Representative sa First-Time Jobseeker Certificate dahil kailangan pong personal na pirmahan ng aplikante ang Sworn Undertaking sa Barangay Hall.
                                     </div>
                                 </template>
                             </div>
                             
                             {{-- AUTHORIZED THEME --}}
                             <div x-show="cType === 'authorized'" x-transition class="auth-blue-box">
-                                <p style="font-size:10px;color:var(--brand);font-weight:900;margin-bottom:12px;text-transform:uppercase;display:flex;align-items:center;gap:6px;">
-                                    <i class="fas fa-shield-alt"></i> Authorization Details
+                                <p style="font-size:13px;color:var(--brand);font-weight:900;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:7px;">
+                                    <i class="fas fa-shield-alt" style="font-size:15px;"></i> Authorization Details
                                 </p>
                                 
                                 <div class="fgrid3 fgrp" style="align-items:stretch;">
                                     <div style="display:flex;flex-direction:column;">
-                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;">Authorization Letter *</label>
-                                        <div class="upload-card" style="flex:1;"
+                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;font-size:12.5px;font-weight:800;">Authorization Letter *</label>
+                                        <div class="upload-card" style="flex:1;" x-ref="authLetterCard"
                                              :style="isDraggingLetter ? 'border-color:var(--brand); background:#eff6ff; transform:scale(1.02);' : (authLetterName ? 'border-color:#10b981; background:#f0fdf4;' : '')"
                                              @click="$refs.authLetter.click()"
                                              @dragover.prevent.stop="isDraggingLetter = true"
                                              @dragenter.prevent.stop="isDraggingLetter = true"
                                              @dragleave.prevent.stop="isDraggingLetter = false"
                                              @drop.prevent.stop="isDraggingLetter = false; if($event.dataTransfer.files.length){ $refs.authLetter.files = $event.dataTransfer.files; authLetterName = $event.dataTransfer.files[0].name; }">
-                                            <i :class="authLetterName ? 'fas fa-check-circle' : 'fas fa-file-signature'" :style="authLetterName ? 'color:#10b981;' : ''"></i>
-                                            <div class="upload-txt" :style="authLetterName ? 'color:#15803d; font-weight:800;' : ''" x-text="authLetterName ? authLetterName : 'Upload Signed Letter'"></div>
-                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authLetterName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here (Max: 5MB)'"></div>
-                                            <div style="font-size:7.5px;color:#1e40af;font-weight:700;margin-top:2px;">Limit: 5MB (JPG, PNG, PDF)</div>
-                                            <input type="file" x-ref="authLetter" name="authorization_letter" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang file ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authLetterName=''; return; } authLetterName = f.name; }">
+                                            <i :class="authLetterName ? 'fas fa-check-circle' : 'fas fa-file-signature'" :style="authLetterName ? 'color:#10b981;' : ''" style="font-size:24px;"></i>
+                                            <div class="upload-txt" :style="authLetterName ? 'color:#15803d; font-weight:800;' : ''" style="font-size:13px;margin-top:4px;" x-text="authLetterName ? authLetterName : 'Upload Signed Letter'"></div>
+                                            <div style="font-size:12px; color:var(--muted); font-weight:600; margin-top:2px;" x-text="authLetterName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
+                                            <div style="font-size:12px;color:#1e40af;font-weight:800;margin-top:3px;background:#dbeafe;padding:2px 8px;border-radius:5px;display:inline-block;">Limit: 5MB (JPG, PNG, PDF)</div>
+                                            <input type="file" x-ref="authLetter" name="authorization_letter" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang file ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authLetterName=''; return; } authLetterName = f.name; }">
                                         </div>
                                     </div>
                                     <div style="display:flex;flex-direction:column;">
-                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;">Valid ID of Authorized Person *</label>
-                                        <div class="upload-card" style="flex:1;"
+                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;font-size:12.5px;font-weight:800;">Valid ID of Authorized Person *</label>
+                                        <div class="upload-card" style="flex:1;" x-ref="authIdCard"
                                              :style="isDraggingId ? 'border-color:var(--brand); background:#eff6ff; transform:scale(1.02);' : (authIdName ? 'border-color:#10b981; background:#f0fdf4;' : '')"
                                              @click="$refs.authId.click()"
                                              @dragover.prevent.stop="isDraggingId = true"
                                              @dragenter.prevent.stop="isDraggingId = true"
                                              @dragleave.prevent.stop="isDraggingId = false"
                                              @drop.prevent.stop="isDraggingId = false; if($event.dataTransfer.files.length){ $refs.authId.files = $event.dataTransfer.files; authIdName = $event.dataTransfer.files[0].name; }">
-                                            <i :class="authIdName ? 'fas fa-check-circle' : 'fas fa-id-card'" :style="authIdName ? 'color:#10b981;' : ''"></i>
-                                            <div class="upload-txt" :style="authIdName ? 'color:#15803d; font-weight:800;' : ''" x-text="authIdName ? authIdName : 'Upload Your Valid ID'"></div>
-                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authIdName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here (Max: 5MB)'"></div>
-                                            <div style="font-size:7.5px;color:#1e40af;font-weight:700;margin-top:2px;">Limit: 5MB (JPG, PNG, PDF)</div>
-                                            <input type="file" x-ref="authId" name="authorized_id" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authIdName=''; return; } authIdName = f.name; }">
+                                            <i :class="authIdName ? 'fas fa-check-circle' : 'fas fa-id-card'" :style="authIdName ? 'color:#10b981;' : ''" style="font-size:24px;"></i>
+                                            <div class="upload-txt" :style="authIdName ? 'color:#15803d; font-weight:800;' : ''" style="font-size:13px;margin-top:4px;" x-text="authIdName ? authIdName : 'Upload Your Valid ID'"></div>
+                                            <div style="font-size:12px; color:var(--muted); font-weight:600; margin-top:2px;" x-text="authIdName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
+                                            <div style="font-size:12px;color:#1e40af;font-weight:800;margin-top:3px;background:#dbeafe;padding:2px 8px;border-radius:5px;display:inline-block;">Limit: 5MB (JPG, PNG, PDF)</div>
+                                            <input type="file" x-ref="authId" name="authorized_id" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authIdName=''; return; } authIdName = f.name; }">
                                         </div>
                                     </div>
                                     <div style="display:flex;flex-direction:column;">
-                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;">Valid ID of Person Being Claimed For *</label>
-                                        <div class="upload-card" style="flex:1;"
+                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;font-size:12.5px;font-weight:800;">Valid ID of Person Being Claimed For *</label>
+                                        <div class="upload-card" style="flex:1;" x-ref="authId2Card"
                                              :style="isDraggingId2 ? 'border-color:var(--brand); background:#eff6ff; transform:scale(1.02);' : (authId2Name ? 'border-color:#10b981; background:#f0fdf4;' : '')"
                                              @click="$refs.authId2.click()"
                                              @dragover.prevent.stop="isDraggingId2 = true"
                                              @dragenter.prevent.stop="isDraggingId2 = true"
                                              @dragleave.prevent.stop="isDraggingId2 = false"
                                              @drop.prevent.stop="isDraggingId2 = false; if($event.dataTransfer.files.length){ $refs.authId2.files = $event.dataTransfer.files; authId2Name = $event.dataTransfer.files[0].name; }">
-                                            <i :class="authId2Name ? 'fas fa-check-circle' : 'fas fa-user-circle'" :style="authId2Name ? 'color:#10b981;' : ''"></i>
-                                            <div class="upload-txt" :style="authId2Name ? 'color:#15803d; font-weight:800;' : ''" x-text="authId2Name ? authId2Name : 'Upload Their Valid ID'"></div>
-                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authId2Name ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here (Max: 5MB)'"></div>
-                                            <div style="font-size:7.5px;color:#1e40af;font-weight:700;margin-top:2px;">Limit: 5MB (JPG, PNG, PDF)</div>
-                                            <input type="file" x-ref="authId2" name="authorized_id2" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authId2Name=''; return; } authId2Name = f.name; }">
+                                            <i :class="authId2Name ? 'fas fa-check-circle' : 'fas fa-user-circle'" :style="authId2Name ? 'color:#10b981;' : ''" style="font-size:24px;"></i>
+                                            <div class="upload-txt" :style="authId2Name ? 'color:#15803d; font-weight:800;' : ''" style="font-size:13px;margin-top:4px;" x-text="authId2Name ? authId2Name : 'Upload Their Valid ID'"></div>
+                                            <div style="font-size:12px; color:var(--muted); font-weight:600; margin-top:2px;" x-text="authId2Name ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
+                                            <div style="font-size:12px;color:#1e40af;font-weight:800;margin-top:3px;background:#dbeafe;padding:2px 8px;border-radius:5px;display:inline-block;">Limit: 5MB (JPG, PNG, PDF)</div>
+                                            <input type="file" x-ref="authId2" name="authorized_id2" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authId2Name=''; return; } authId2Name = f.name; }">
                                         </div>
                                     </div>
                                 </div>
@@ -2309,16 +2496,16 @@ html, body {
                                 <template x-for="(app, index) in applicants" :key="index">
                                     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px dashed #bfdbfe;" :style="index === applicants.length - 1 ? 'border-bottom:none;margin-bottom:0;padding-bottom:0;' : ''">
                                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                                            <p style="font-size:10px;color:var(--brand);font-weight:900;text-transform:uppercase;">
+                                            <p style="font-size:13px;color:var(--brand);font-weight:900;text-transform:uppercase;">
                                                 <i class="fas fa-user"></i> Applicant Details <span x-text="applicants.length > 1 ? '#' + (index + 1) : ''"></span>
                                             </p>
-                                            <button type="button" x-show="applicants.length > 1" @click="applicants.splice(index, 1)" style="font-size:9px;color:var(--danger);font-weight:800;background:none;border:none;cursor:pointer;">
+                                            <button type="button" x-show="applicants.length > 1" @click="applicants.splice(index, 1)" style="font-size:12px;color:var(--danger);font-weight:800;background:none;border:none;cursor:pointer;">
                                                 <i class="fas fa-minus-circle"></i> REMOVE
                                             </button>
                                         </div>
 
                                         <div class="fgrp">
-                                            <label class="flbl">Relationship to Applicant *</label>
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;">Relationship to Applicant *</label>
                                             <select :name="'applicants['+index+'][relation]'" class="finput" :required="cType === 'authorized'" x-model="app.relation">
                                                 <option value="">— Select Relationship —</option>
                                                 <option value="Parent">Parent</option>
@@ -2332,24 +2519,68 @@ html, body {
 
                                         <div class="fgrid3 fgrp">
                                             <div>
-                                                <label class="flbl">First Name * <span style="font-size:8px;opacity:.7;">(Applicant)</span></label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">First Name * <span style="font-size:11px;opacity:.7;">(Applicant)</span></label>
                                                 <input type="text" :name="'applicants['+index+'][first_name]'" class="finput" placeholder="First Name" :required="cType === 'authorized'" x-model="app.first_name">
                                             </div>
                                             <div>
-                                                <label class="flbl">Middle Name</label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Middle Name</label>
                                                 <input type="text" :name="'applicants['+index+'][middle_name]'" class="finput" placeholder="Middle Name" x-model="app.middle_name">
                                             </div>
                                             <div>
-                                                <label class="flbl">Last Name * <span style="font-size:8px;opacity:.7;">(Applicant)</span></label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Last Name * <span style="font-size:11px;opacity:.7;">(Applicant)</span></label>
                                                 <input type="text" :name="'applicants['+index+'][last_name]'" class="finput" placeholder="Last Name" :required="cType === 'authorized'" x-model="app.last_name">
                                             </div>
                                         </div>
 
+                                        {{-- Structured Address: Block & Lot Auto-formatted + Locked Jurisdiction --}}
                                         <div class="fgrp">
-                                            <label class="flbl">Residence Address in Brgy. San Miguel II *</label>
-                                            <input type="text" placeholder="House No. / Block & Lot, Street Name" class="finput" :required="cType === 'authorized'" x-model="app.house_street" @input="app.address = (app.house_street ? app.house_street.trim() + ', Barangay San Miguel II, Dasmariñas City, Cavite' : '')">
-                                            <div style="font-size:9px;color:var(--brand);font-weight:700;margin-top:3px;display:flex;align-items:center;gap:4px;">
-                                                <i class="fas fa-map-marker-alt"></i> Barangay Jurisdiction: <strong>Barangay San Miguel II, Dasmariñas City, Cavite</strong>
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                                                <i class="fas fa-map-marker-alt" style="color:var(--brand);"></i> Residence Address in Barangay San Miguel II *
+                                            </label>
+                                            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:8px;margin-bottom:8px;">
+                                                <div>
+                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Block No. *</label>
+                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
+                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Block</span>
+                                                        <input type="text" 
+                                                               placeholder="e.g. 12" 
+                                                               class="app-blk-input" 
+                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
+                                                               x-model="app.blk_no"
+                                                               @input="updateApplicantAddress(app)"
+                                                               :required="cType === 'authorized'">
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Lot No. *</label>
+                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
+                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Lot</span>
+                                                        <input type="text" 
+                                                               placeholder="e.g. 34" 
+                                                               class="app-lot-input" 
+                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
+                                                               x-model="app.lot_no"
+                                                               @input="updateApplicantAddress(app)"
+                                                               :required="cType === 'authorized'">
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Street / Phase (Optional)</label>
+                                                    <input type="text" 
+                                                           placeholder="e.g. Sampaguita St." 
+                                                           class="finput" 
+                                                           style="padding:8px 10px;font-size:13px;"
+                                                           x-model="app.street_name"
+                                                           @input="updateApplicantAddress(app)">
+                                                </div>
+                                            </div>
+                                            {{-- Locked Barangay and City autofill --}}
+                                            <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                                                <div style="display:flex;align-items:center;gap:8px;">
+                                                    <i class="fas fa-lock" style="color:#0284c7;font-size:13px;"></i>
+                                                    <span style="font-size:12.5px;font-weight:800;color:#0f172a;">Barangay San Miguel II, Dasmariñas City, Cavite</span>
+                                                </div>
+                                                <span style="background:#e0f2fe;color:#0369a1;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:6px;text-transform:uppercase;">Fixed / Locked</span>
                                             </div>
                                             <input type="hidden" :name="'applicants['+index+'][address]'" :value="app.address">
                                         </div>
@@ -2357,36 +2588,36 @@ html, body {
                                         {{-- Conditional Birthday/Age (Only shown when document type requires it) --}}
                                         <div x-show="selectedDoc === 'jobseeker' || selectedDoc === 'latereg'" class="fgrid2 fgrp" style="margin-top:10px;">
                                             <div>
-                                                <label class="flbl">Date of Birth (Applicant)</label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Date of Birth (Applicant)</label>
                                                 <input type="date" :name="'applicants['+index+'][birthday]'" class="finput" x-model="app.birthday" 
                                                        @input="app.age = calculateAge($event.target.value)"
                                                        @change="app.age = calculateAge($event.target.value)">
                                             </div>
                                             <div>
-                                                <label class="flbl">Age (Applicant)</label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Age (Applicant)</label>
                                                 <input type="number" :name="'applicants['+index+'][age]'" class="finput" placeholder="Age" x-model="app.age" readonly style="background:#f1f5f9; cursor:not-allowed;">
                                             </div>
                                         </div>
 
                                         <div class="fgrid2 fgrp">
                                             <div>
-                                                <label class="flbl">Contact Number</label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Contact Number</label>
                                                 <input type="text" :name="'applicants['+index+'][contact]'" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" x-model="app.contact">
                                             </div>
                                             <div>
-                                                <label class="flbl">Purpose *</label>
-                                                <select class="finput fselect" x-model="app.purposeSelect" @change="if(app.purposeSelect !== 'Others') app.purpose = app.purposeSelect; else app.purpose = app.purposeCustom;" :required="cType === 'authorized'">
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Purpose *</label>
+                                                <select class="finput fselect app-purpose-select" x-model="app.purposeSelect" @change="if(app.purposeSelect !== 'Others') app.purpose = app.purposeSelect; else app.purpose = app.purposeCustom;" :required="cType === 'authorized'">
                                                     <option value="">— Select Purpose —</option>
                                                     <template x-for="p in getPurposes(selectedDoc)" :key="p">
                                                         <option :value="p" x-text="p"></option>
                                                     </template>
                                                 </select>
                                                 <div x-show="app.purposeSelect === 'Others'" x-transition style="margin-top:6px;">
-                                                    <input type="text" placeholder="Specify applicant's purpose..." class="finput" x-model="app.purposeCustom" @input="app.purpose = app.purposeCustom" :required="cType === 'authorized' && app.purposeSelect === 'Others'">
+                                                    <input type="text" placeholder="Specify applicant's purpose..." class="finput app-purpose-custom" x-model="app.purposeCustom" @input="app.purpose = app.purposeCustom" :required="cType === 'authorized' && app.purposeSelect === 'Others'">
                                                 </div>
                                                 <input type="hidden" :name="'applicants['+index+'][purpose]'" :value="app.purpose">
-                                                <div x-show="app.purpose && app.purpose.toLowerCase().includes('loan')" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:9.5px;color:#92400e;font-weight:700;line-height:1.4;">
-                                                    <i class="fas fa-coins" style="color:#d97706;"></i> <strong>Paalala sa Bayad:</strong> Ang mga kahilingan para sa Loan / Commercial ay may kaukulang processing fee (₱50.00 / ₱20.00) na babayaran sa cashier ng Barangay Hall sa araw ng pick-up.
+                                                <div x-show="app.purpose && app.purpose.toLowerCase().includes('loan')" style="background:#fef9c3;border:2px solid #eab308;border-radius:9px;padding:12px 14px;margin-top:8px;font-size:13px;color:#854d0e;font-weight:700;line-height:1.5;">
+                                                    <i class="fas fa-coins" style="color:#d97706;font-size:15px;"></i> <strong>Paalala sa Bayad:</strong> Ang mga kahilingan para sa Loan / Commercial ay may kaukulang processing fee (₱50.00 / ₱20.00) na babayaran sa cashier ng Barangay Hall sa araw ng pick-up.
                                                 </div>
                                             </div>
                                         </div>
@@ -2394,13 +2625,13 @@ html, body {
                                 </template>
 
                                 <div x-show="applicants.length < 2" style="margin-top:15px;">
-                                    <button type="button" @click="applicants.push({ first_name: '', middle_name: '', last_name: '', relation: '', house_street: '', address: '', purpose: '', purposeSelect: '', purposeCustom: '', contact: '', age: '', birthday: '' })" class="btn-plain btn-outline btn-sm" style="width:100%;justify-content:center;border-style:dashed;background:#fff;">
+                                    <button type="button" @click="applicants.push({ first_name: '', middle_name: '', last_name: '', relation: '', blk_no: '', lot_no: '', street_name: '', address: '', purpose: '', purposeSelect: '', purposeCustom: '', contact: '', age: '', birthday: '' })" class="btn-plain btn-outline btn-sm" style="width:100%;justify-content:center;border-style:dashed;background:#fff;font-size:13px;padding:10px;">
                                         <i class="fas fa-plus-circle"></i> Add Another Applicant (Max 2)
                                     </button>
                                 </div>
 
-                                <p style="font-size:9px;color:var(--brand);font-weight:700;margin-top:12px;line-height:1.4;opacity:.8;">
-                                    <i class="fas fa-info-circle"></i> Only <strong>2 application requests</strong> per Authorized Representative are allowed at a time.
+                                <p style="font-size:12.5px;color:var(--brand);font-weight:700;margin-top:14px;line-height:1.5;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;">
+                                    <i class="fas fa-info-circle" style="color:#2563eb;"></i> Only <strong>2 application requests</strong> per Authorized Representative are allowed at a time.
                                 </p>
                             </div>
 
@@ -2408,44 +2639,107 @@ html, body {
                             <div x-show="cType === 'self'">
                                 @if(!$isAuth)
                                 <div class="sblk">
-                                    <div class="sblk-ttl"><i class="fas fa-user"></i> Your Details</div>
+                                    <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user"></i> Your Details</div>
                                     <div class="fgrid2 fgrp">
-                                        <div><label class="flbl">First Name *</label><input type="text" name="guest_first_name" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="Juan"></div>
-                                        <div><label class="flbl">Last Name *</label><input type="text" name="guest_last_name" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="Dela Cruz"></div>
+                                        <div><label class="flbl" style="font-size:12.5px;font-weight:800;">First Name *</label><input type="text" name="guest_first_name" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="Juan"></div>
+                                        <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Last Name *</label><input type="text" name="guest_last_name" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="Dela Cruz"></div>
                                     </div>
                                     <div class="fgrp" style="margin-top:8px;">
-                                        <label class="flbl">Email Address * (For pick-up updates & confirmation)</label>
+                                        <label class="flbl" style="font-size:12.5px;font-weight:800;">Email Address * (For pick-up updates & confirmation)</label>
                                         <input type="email" name="guest_email" :required="cType==='self' && !{{ $isAuth ? 'true':'false' }}" class="finput" placeholder="juan@example.com">
                                     </div>
                                 </div>
                                 @endif
                                 <div class="sblk">
-                                    <div class="sblk-ttl"><i class="fas fa-info"></i> Request Details</div>
+                                    <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-info"></i> Request Details</div>
                                     <div class="fgrid2 fgrp" style="margin-bottom: 15px;">
+                                        {{-- Structured Self Address: Block & Lot Auto-formatted + Locked Jurisdiction --}}
                                         <div class="fspan2">
-                                            <label class="flbl">Registered Masterlist Address (Self) *</label>
-                                            <div style="position:relative;">
-                                                <input type="text" name="address" placeholder="Blk/Lot, Street, Brgy. SM2..." class="finput" value="{{ $isAuth ? $authUser?->address : old('address') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;padding-right:32px;' : '' }}>
-                                                @if($isAuth && !in_array($authUser->status, ['pending_verification', 'declined']))
-                                                <i class="fas fa-lock" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#64748b;" title="Auto-filled and locked from verified Masterlist profile"></i>
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;">
+                                                <span style="display:flex;align-items:center;gap:6px;">
+                                                    <i class="fas fa-map-marker-alt" style="color:var(--brand);"></i> Registered Residence Address in Brgy. San Miguel II *
+                                                </span>
+                                                @if($isSelfLocked)
+                                                <span style="font-size:10.5px;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 8px;border-radius:6px;display:flex;align-items:center;gap:4px;">
+                                                    <i class="fas fa-lock"></i> Verified Masterlist Profile
+                                                </span>
                                                 @endif
+                                            </label>
+
+                                            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:8px;margin-bottom:8px;">
+                                                <div>
+                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Block No. *</label>
+                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;" :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''">
+                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Block</span>
+                                                        <input type="text" 
+                                                               placeholder="e.g. 12" 
+                                                               class="self-blk-input" 
+                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
+                                                               :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''"
+                                                               x-model="selfBlk"
+                                                               @input="updateSelfAddress()"
+                                                               :readonly="isSelfLocked"
+                                                               :required="cType === 'self' && !isSelfLocked">
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Lot No. *</label>
+                                                    <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;" :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''">
+                                                        <span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;padding:8px 10px;border-right:1px solid var(--border);user-select:none;">Lot</span>
+                                                        <input type="text" 
+                                                               placeholder="e.g. 34" 
+                                                               class="self-lot-input" 
+                                                               style="border:none;outline:none;padding:8px 10px;width:100%;font-size:13.5px;font-weight:700;"
+                                                               :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''"
+                                                               x-model="selfLot"
+                                                               @input="updateSelfAddress()"
+                                                               :readonly="isSelfLocked"
+                                                               :required="cType === 'self' && !isSelfLocked">
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;">Street / Phase (Optional)</label>
+                                                    <input type="text" 
+                                                           placeholder="e.g. Sampaguita St." 
+                                                           class="finput" 
+                                                           style="padding:8px 10px;font-size:13px;"
+                                                           :style="isSelfLocked ? 'background:#f1f5f9;cursor:not-allowed;' : ''"
+                                                           x-model="selfStreet"
+                                                           @input="updateSelfAddress()"
+                                                           :readonly="isSelfLocked">
+                                                </div>
                                             </div>
+
+                                            {{-- Locked Barangay and City autofill --}}
+                                            <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                                                <div style="display:flex;align-items:center;gap:8px;">
+                                                    <i class="fas fa-lock" style="color:#0284c7;font-size:13px;"></i>
+                                                    <span style="font-size:12.5px;font-weight:800;color:#0f172a;">Barangay San Miguel II, Dasmariñas City, Cavite</span>
+                                                </div>
+                                                <span style="background:#e0f2fe;color:#0369a1;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:6px;text-transform:uppercase;">Fixed / Locked</span>
+                                            </div>
+
+                                            <input type="hidden" name="address" :value="selfFullAddress">
                                         </div>
-                                        <div><label class="flbl">Contact Number</label><input type="text" name="contact" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}></div>
+
                                         <div>
-                                            <label class="flbl">Purpose *</label>
-                                            <select class="finput fselect" x-model="selfPurposeSelect" @change="if(selfPurposeSelect !== 'Others') selfPurpose = selfPurposeSelect; else selfPurpose = selfPurposeCustom;" :required="cType === 'self'">
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;">Contact Number</label>
+                                            <input type="text" name="contact" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}>
+                                        </div>
+                                        <div>
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;">Purpose *</label>
+                                            <select class="finput fselect self-purpose-select" x-model="selfPurposeSelect" @change="if(selfPurposeSelect !== 'Others') selfPurpose = selfPurposeSelect; else selfPurpose = selfPurposeCustom;" :required="cType === 'self'">
                                                 <option value="">— Select Purpose —</option>
                                                 <template x-for="p in getPurposes(selectedDoc)" :key="p">
                                                     <option :value="p" x-text="p"></option>
                                                 </template>
                                             </select>
                                             <div x-show="selfPurposeSelect === 'Others'" x-transition style="margin-top:6px;">
-                                                <input type="text" placeholder="Please specify your purpose..." class="finput" x-model="selfPurposeCustom" @input="selfPurpose = selfPurposeCustom" :required="cType === 'self' && selfPurposeSelect === 'Others'">
+                                                <input type="text" placeholder="Please specify your purpose..." class="finput self-purpose-custom" x-model="selfPurposeCustom" @input="selfPurpose = selfPurposeCustom" :required="cType === 'self' && selfPurposeSelect === 'Others'">
                                             </div>
                                             <input type="hidden" name="purpose" :value="selfPurpose">
-                                            <div x-show="selfPurpose && selfPurpose.toLowerCase().includes('loan')" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:9.5px;color:#92400e;font-weight:700;line-height:1.4;">
-                                                <i class="fas fa-coins" style="color:#d97706;"></i> <strong>Paalala sa Bayad:</strong> Ang mga kahilingan para sa Loan / Commercial ay may kaukulang processing fee (₱50.00 / ₱20.00) na babayaran sa cashier ng Barangay Hall sa araw ng pick-up.
+                                            <div x-show="selfPurpose && selfPurpose.toLowerCase().includes('loan')" style="background:#fef9c3;border:2px solid #eab308;border-radius:9px;padding:12px 14px;margin-top:8px;font-size:13px;color:#854d0e;font-weight:700;line-height:1.5;">
+                                                <i class="fas fa-coins" style="color:#d97706;font-size:15px;"></i> <strong>Paalala sa Bayad:</strong> Ang mga kahilingan para sa Loan / Commercial ay may kaukulang processing fee (₱50.00 / ₱20.00) na babayaran sa cashier ng Barangay Hall sa araw ng pick-up.
                                             </div>
                                         </div>
                                     </div>
@@ -2453,146 +2747,155 @@ html, body {
                                     {{-- Conditional Birthday/Age (Only shown when document type requires it) --}}
                                     <div x-show="selectedDoc === 'jobseeker' || selectedDoc === 'latereg'" class="fgrp" style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 10px;">
                                         <div>
-                                            <label class="flbl">Date of Birth</label>
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;">Date of Birth</label>
                                             <input type="date" name="birthday" class="finput" x-model="birthday" 
                                                    @input="age = calculateAge($event.target.value)"
                                                    @change="age = calculateAge($event.target.value)"
                                                    {{ $isAuth ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}>
                                         </div>
                                         <div>
-                                            <label class="flbl">Age</label>
+                                            <label class="flbl" style="font-size:12.5px;font-weight:800;">Age</label>
                                             <input type="number" name="age" class="finput" x-model="age" placeholder="Min. 15" min="15" readonly style="background:#f1f5f9; cursor:not-allowed;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         <div x-show="selectedDoc==='moveout'||selectedDoc==='movein'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-home"></i> Move Details</div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-home"></i> Move Details</div>
                             <div class="fgrid2 fgrp">
-                                <div><label class="flbl">Block No.</label><input type="text" name="blk" class="finput"></div>
-                                <div><label class="flbl">Lot No.</label><input type="text" name="lot" class="finput"></div>
-                                <div><label class="flbl">Move Date</label><input type="text" name="move_date" placeholder="e.g. March 1, 2026" class="finput"></div>
-                                <div><label class="flbl">Landlord / Owner</label><input type="text" name="landlord" class="finput"></div>
-                                <div class="fspan2"><label class="flbl">Family Members (comma-separated)</label><input type="text" name="family_members" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Block No.</label><input type="text" name="blk" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Lot No.</label><input type="text" name="lot" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Move Date</label><input type="text" name="move_date" placeholder="e.g. March 1, 2026" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Landlord / Owner</label><input type="text" name="landlord" class="finput"></div>
+                                <div class="fspan2"><label class="flbl" style="font-size:12.5px;font-weight:800;">Family Members (comma-separated)</label><input type="text" name="family_members" class="finput"></div>
                             </div>
                         </div>
                         <div x-show="selectedDoc==='guardianship'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-user-shield"></i> Guardianship Details</div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user-shield"></i> Guardianship Details</div>
                             <div class="fgrid2 fgrp">
-                                <div><label class="flbl">Ward's Full Name</label><input type="text" name="ward_name" class="finput"></div>
-                                <div><label class="flbl">Ward's Age</label><input type="text" name="ward_age" class="finput"></div>
-                                <div class="fspan2"><label class="flbl">Relation to Ward</label><input type="text" name="ward_relation" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Ward's Full Name</label><input type="text" name="ward_name" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Ward's Age</label><input type="text" name="ward_age" class="finput"></div>
+                                <div class="fspan2"><label class="flbl" style="font-size:12.5px;font-weight:800;">Relation to Ward</label><input type="text" name="ward_relation" class="finput"></div>
                             </div>
                         </div>
                         <div x-show="selectedDoc==='cohabitation'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-user-friends"></i> Cohabitation Details</div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user-friends"></i> Cohabitation Details</div>
                             <div class="fgrid2 fgrp">
-                                <div class="fspan2"><label class="flbl">Partner's Full Name</label><input type="text" name="partner_name" class="finput"></div>
-                                <div><label class="flbl">Living Together Since</label><input type="text" name="living_since" placeholder="e.g. 2020" class="finput"></div>
+                                <div class="fspan2"><label class="flbl" style="font-size:12.5px;font-weight:800;">Partner's Full Name</label><input type="text" name="partner_name" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Living Together Since</label><input type="text" name="living_since" placeholder="e.g. 2020" class="finput"></div>
                             </div>
                         </div>
                         <div x-show="selectedDoc==='cashgift'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-gift"></i> Cash Gift Details</div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-gift"></i> Cash Gift Details</div>
                             <div class="fgrid2 fgrp">
-                                <div><label class="flbl">Kaano-anuhan</label><input type="text" name="claimant_name" class="finput"></div>
-                                <div><label class="flbl">Relasyon</label><input type="text" name="claimant_relation" class="finput"></div>
-                                <div><label class="flbl">Birthday Month</label><input type="text" name="birth_month" placeholder="e.g. February" class="finput"></div>
-                                <div><label class="flbl">Birthday Year</label><input type="text" name="birth_year" placeholder="e.g. 2025" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Kaano-anuhan</label><input type="text" name="claimant_name" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Relasyon</label><input type="text" name="claimant_relation" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Birthday Month</label><input type="text" name="birth_month" placeholder="e.g. February" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Birthday Year</label><input type="text" name="birth_year" placeholder="e.g. 2025" class="finput"></div>
                             </div>
                         </div>
                         <div x-show="selectedDoc==='latereg'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-clock"></i> Late Registration Details</div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-clock"></i> Late Registration Details</div>
                             <div class="fgrid2 fgrp">
-                                <div class="fspan2"><label class="flbl">Child's Full Name</label><input type="text" name="child_name" class="finput"></div>
-                                <div><label class="flbl">Father's Name</label><input type="text" name="father_name" class="finput"></div>
-                                <div><label class="flbl">Mother's Name</label><input type="text" name="mother_name" class="finput"></div>
-                                <div><label class="flbl">Birth Attendant</label><input type="text" name="birth_attendant" class="finput"></div>
-                                <div><label class="flbl">Place of Birth</label><input type="text" name="born_from" class="finput"></div>
+                                <div class="fspan2"><label class="flbl" style="font-size:12.5px;font-weight:800;">Child's Full Name</label><input type="text" name="child_name" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Father's Name</label><input type="text" name="father_name" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Mother's Name</label><input type="text" name="mother_name" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Birth Attendant</label><input type="text" name="birth_attendant" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Place of Birth</label><input type="text" name="born_from" class="finput"></div>
                             </div>
                         </div>
                         <div x-show="selectedDoc==='endorsement'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-file-export"></i> Endorsement Details</div>
-                            <div><label class="flbl">Residing in Brgy. SM2 Since (Year)</label><input type="text" name="residing_since" placeholder="e.g. 2018" class="finput"></div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-file-export"></i> Endorsement Details</div>
+                            <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Residing in Brgy. SM2 Since (Year)</label><input type="text" name="residing_since" placeholder="e.g. 2018" class="finput"></div>
                         </div>
                         <div x-show="selectedDoc==='business'||selectedDoc==='closure'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-store"></i> Business Details</div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-store"></i> Business Details</div>
                             <div class="fgrid2 fgrp">
-                                <div><label class="flbl">Business / Trade Name</label><input type="text" name="company_name" class="finput"></div>
-                                <div x-show="selectedDoc==='closure'"><label class="flbl">Non-Operational Since</label><input type="text" name="non_op_since" placeholder="mm/dd/yy" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Business / Trade Name</label><input type="text" name="company_name" class="finput"></div>
+                                <div x-show="selectedDoc==='closure'"><label class="flbl" style="font-size:12.5px;font-weight:800;">Non-Operational Since</label><input type="text" name="non_op_since" placeholder="mm/dd/yy" class="finput"></div>
                             </div>
                         </div>
                         <div x-show="selectedDoc==='yumao'" class="sblk">
-                            <div class="sblk-ttl"><i class="fas fa-ribbon"></i> Yumao Details</div>
+                            <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-ribbon"></i> Yumao Details</div>
                             <div class="fgrid2 fgrp">
-                                <div><label class="flbl">Claimant Full Name</label><input type="text" name="claimant_name" class="finput"></div>
-                                <div><label class="flbl">Relasyon sa Yumao</label><input type="text" name="claimant_relation" placeholder="e.g. Asawa, Anak" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Claimant Full Name</label><input type="text" name="claimant_name" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Relasyon sa Yumao</label><input type="text" name="claimant_relation" placeholder="e.g. Asawa, Anak" class="finput"></div>
                             </div>
                         </div>
 
-                        <div x-show="cType === 'authorized'" x-transition style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:12px 13px;margin-bottom:12px;font-size:11px;font-weight:700;color:#1d4ed8;line-height:1.4;">
-                            <div style="margin-bottom:5px;display:flex;align-items:center;gap:6px;"><i class="fas fa-id-card"></i> <strong>IMPORTANT CLAIMING NOTE:</strong></div>
-                            Please <strong>bring your Valid ID</strong> (and the <strong>Authorization Letter</strong> if you are claiming for someone else) when you pick up your documents at the Barangay Hall.
+                        {{-- Highly Readable Claiming Note for PWD and Seniors --}}
+                        <div x-show="cType === 'authorized'" x-transition style="background:#eff6ff;border:2px solid #93c5fd;border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;font-weight:700;color:#1e40af;line-height:1.55;">
+                            <div style="margin-bottom:6px;display:flex;align-items:center;gap:8px;font-size:14px;color:#1e3a8a;"><i class="fas fa-id-card text-blue-600"></i> <strong style="letter-spacing:0.02em;">MAHALAGANG PAALALA SA PAG-CLAIM:</strong></div>
+                            Mangyaring <strong>dalhin ang inyong Valid ID</strong> (at ang orihinal na <strong>Authorization Letter</strong>) kapag kukunin ang dokumento sa Barangay Hall.
                         </div>
 
-                        {{-- Office-Driven Pickup Notification Banner --}}
-                        <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:11px;font-weight:700;color:#0369a1;line-height:1.5;display:flex;align-items:flex-start;gap:8px;">
-                            <i class="fas fa-info-circle" style="color:#0284c7;font-size:14px;margin-top:1px;flex-shrink:0;"></i>
-                            <span x-text="t('office_pickup_notice')">After submitting, the barangay office will process your request and send your assigned pickup date, time window, and reference details via email.</span>
+                        {{-- Highly Readable Office-Driven Pickup Notification Banner --}}
+                        <div style="background:#f0f9ff;border:2px solid #7dd3fc;border-radius:11px;padding:14px 16px;margin-bottom:16px;font-size:13px;font-weight:700;color:#0369a1;line-height:1.55;display:flex;align-items:flex-start;gap:10px;">
+                            <i class="fas fa-info-circle" style="color:#0284c7;font-size:18px;margin-top:2px;flex-shrink:0;"></i>
+                            <span x-text="t('office_pickup_notice')">Pagkatapos isumite, ipoproseso ng Barangay Office ang inyong kahilingan at ipapadala ang itinalagang petsa, oras ng pagkuha, at reference details sa inyong email.</span>
                         </div>
 
-                        <div style="display:flex;justify-content:flex-end;gap:8px;">
-                            <button type="button" @click="selectedDoc=''" class="btn-plain btn-ghost" x-text="t('cancel')">Cancel</button>
-                            <button type="submit" class="btn-grad"><i class="fas fa-paper-plane"></i> <span x-text="t('submit_request')">Submit Request</span></button>
+                        {{-- Validation Alert Notice Banner --}}
+                        <div x-show="validationAlertMsg" x-transition style="background:#fef2f2;border:2px solid #f87171;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;color:#991b1b;font-size:13px;font-weight:800;">
+                            <i class="fas fa-exclamation-triangle" style="font-size:16px;color:#dc2626;flex-shrink:0;"></i>
+                            <span x-text="validationAlertMsg"></span>
                         </div>
 
-                        {{-- ✦ Pre-Submission Review & Confirmation Modal ✦ --}}
+                        <div style="display:flex;justify-content:flex-end;gap:10px;">
+                            <button type="button" @click="selectedDoc=''" class="btn-plain btn-ghost" style="font-size:13px;padding:10px 18px;" x-text="t('cancel')">Cancel</button>
+                            <button type="button" @click="handleDocSubmit()" class="btn-grad" style="font-size:13px;padding:10px 22px;">
+                                <i class="fas fa-paper-plane"></i> <span x-text="t('submit_request')">Submit Request</span>
+                            </button>
+                        </div>
+
+                        {{-- ✦ Pre-Submission Review & Confirmation Modal (PWD & Senior Readable) ✦ --}}
                         <div x-show="showDocConfirmModal" x-cloak class="modal-ov" style="z-index:99999;" x-transition>
-                            <div class="modal-box" style="max-width:440px;" @click.away="showDocConfirmModal=false">
-                                <div class="modal-in">
+                            <div class="modal-box" style="max-width:460px;" @click.away="showDocConfirmModal=false">
+                                <div class="modal-in" style="padding:22px;">
                                     <div class="modal-hd">
                                         <div class="modal-ttl">
-                                            <div class="modal-ico" style="background:#eff6ff;color:var(--brand);"><i class="fas fa-clipboard-check"></i></div>
+                                            <div class="modal-ico" style="background:#eff6ff;color:var(--brand);width:40px;height:40px;font-size:18px;"><i class="fas fa-clipboard-check"></i></div>
                                             <div>
-                                                <div style="font-weight:900;color:var(--text);font-size:13.5px;">Confirm Your Request Details</div>
-                                                <div style="font-size:9.5px;color:var(--muted);font-weight:600;">Sigurado po ba kayo na tama ang lahat ng detalye?</div>
+                                                <div style="font-weight:900;color:var(--text);font-size:15px;">Confirm Your Request Details</div>
+                                                <div style="font-size:12.5px;color:var(--muted);font-weight:700;margin-top:2px;">Sigurado po ba kayo na tama ang lahat ng detalye?</div>
                                             </div>
                                         </div>
-                                        <button type="button" @click="showDocConfirmModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                                        <button type="button" @click="showDocConfirmModal=false" class="modal-close" style="font-size:18px;"><i class="fas fa-times-circle"></i></button>
                                     </div>
 
-                                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
-                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
-                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Document:</span>
-                                            <strong style="font-size:11.5px;color:var(--brand);" x-text="getDocName(selDocObj)"></strong>
+                                    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:8px;">
+                                            <span style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;">Document:</span>
+                                            <strong style="font-size:13.5px;color:var(--brand);" x-text="getDocName(selDocObj)"></strong>
                                         </div>
-                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
-                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Claimant Type:</span>
-                                            <span style="font-size:11px;font-weight:800;color:var(--text);" x-text="cType === 'self' ? 'Self (Personal)' : 'Authorized Representative'"></span>
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:8px;">
+                                            <span style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;">Claimant Type:</span>
+                                            <span style="font-size:13px;font-weight:800;color:var(--text);" x-text="cType === 'self' ? 'Self (Personal)' : 'Authorized Representative'"></span>
                                         </div>
-                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
-                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Purpose:</span>
-                                            <strong style="font-size:11px;color:var(--text);" x-text="cType === 'self' ? (selfPurpose || 'Standard') : (applicants[0]?.purpose || 'Standard')"></strong>
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:8px;">
+                                            <span style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;">Purpose:</span>
+                                            <strong style="font-size:13px;color:var(--text);" x-text="cType === 'self' ? (selfPurpose || 'Standard') : (applicants[0]?.purpose || 'Standard')"></strong>
                                         </div>
                                         <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Jurisdiction:</span>
-                                            <span style="font-size:10.5px;font-weight:700;color:#059669;"><i class="fas fa-check-circle"></i> Brgy. San Miguel II, Dasmariñas</span>
+                                            <span style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;">Jurisdiction:</span>
+                                            <span style="font-size:12.5px;font-weight:800;color:#059669;"><i class="fas fa-check-circle"></i> Brgy. San Miguel II, Dasmariñas</span>
                                         </div>
                                     </div>
 
-                                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-bottom:16px;">
-                                        <div style="font-size:10px;font-weight:800;color:#1e40af;margin-bottom:3px;display:flex;align-items:center;gap:5px;">
+                                    <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-bottom:18px;">
+                                        <div style="font-size:13px;font-weight:900;color:#1e40af;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
                                             <i class="fas fa-clock"></i> <strong>SLA & Processing Notice:</strong>
                                         </div>
-                                        <p style="font-size:9.5px;color:#1e3a8a;line-height:1.45;margin:0;">
+                                        <p style="font-size:12.5px;color:#1e3a8a;line-height:1.55;margin:0;">
                                             Standard processing time is <strong>1 to 2 business days</strong> (Monday to Friday, 8:00 AM – 5:00 PM). If not released within 2 days, you will receive an update notification or you may proceed directly to the Barangay Hall.
                                         </p>
                                     </div>
 
-                                    <div style="display:flex;gap:10px;justify-content:flex-end;">
-                                        <button type="button" @click="showDocConfirmModal=false" class="btn-plain btn-ghost" style="font-size:11px;padding:8px 14px;">
+                                    <div style="display:flex;gap:12px;justify-content:flex-end;">
+                                        <button type="button" @click="showDocConfirmModal=false" class="btn-plain btn-ghost" style="font-size:13px;padding:10px 16px;">
                                             <i class="fas fa-edit"></i> Review Details
                                         </button>
-                                        <button type="button" @click="$refs.docReqForm.submit(); isSubmitting=true;" class="btn-grad" style="font-size:11px;padding:8px 16px;" :disabled="isSubmitting">
+                                        <button type="button" @click="$refs.docReqForm.submit(); isSubmitting=true;" class="btn-grad" style="font-size:13px;padding:10px 20px;font-weight:800;" :disabled="isSubmitting">
                                             <span x-show="!isSubmitting"><i class="fas fa-check-circle"></i> Yes, Submit Request</span>
                                             <span x-show="isSubmitting"><i class="fas fa-spinner fa-spin"></i> Submitting...</span>
                                         </button>

@@ -179,7 +179,7 @@ function officePortal() {
                     return n.includes(q) || (r.code && r.code.toLowerCase().includes(q)) || (r.resident_code && r.resident_code.toLowerCase().includes(q));
                 });
             }
-            return list;
+            return list.slice(0, 50);
         },
         selectDigitalIdResident(r) {
             if (!r) return;
@@ -250,10 +250,8 @@ function officePortal() {
         },
         get paginatedResidents() {
             const maxPage = this.totalMasterlistPages;
-            if (this.masterlistPage > maxPage) {
-                this.masterlistPage = 1;
-            }
-            const start = (this.masterlistPage - 1) * this.masterlistPerPage;
+            const curPage = (this.masterlistPage > maxPage) ? 1 : Math.max(1, this.masterlistPage);
+            const start = (curPage - 1) * this.masterlistPerPage;
             return this.filteredResidents.slice(start, start + this.masterlistPerPage);
         },
         setMasterlistPage(page) {
@@ -313,6 +311,8 @@ function officePortal() {
         },
         init() {
             this.$watch('activeTab', value => localStorage.setItem('brgy_office_tab', value));
+            this.$watch('searchQuery', () => { this.masterlistPage = 1; });
+            this.$watch('activeFilter', () => { this.masterlistPage = 1; });
             
             // Global listeners for header buttons
             window.addEventListener('open-import-modal', () => this.openImportModal = true);
