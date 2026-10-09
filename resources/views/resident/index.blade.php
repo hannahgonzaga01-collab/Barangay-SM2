@@ -1,6 +1,6 @@
 <x-app-layout>
 <style>
-:root{--brand:#0E5393;--brand-dark:#04192D;--brand-darker:#000052;--body-bg:#f1f5f9;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--light:#94a3b8;--danger:#dc2626;--success:#059669;--card-shadow:0 4px 24px rgba(4,25,45,0.13),0 1.5px 6px rgba(0,0,0,0.07);--btn-grad:linear-gradient(135deg,#0E5393 0%,#04192D 100%);--r-card:16px;--r-btn:10px;}
+:root{--brand:#0E5393;--brand-dark:#04192D;--brand-darker:#000052;--body-bg:#f1f5f9;--border:#cbd5e1;--text:#0f172a;--muted:#334155;--light:#475569;--danger:#dc2626;--success:#059669;--card-shadow:0 4px 24px rgba(4,25,45,0.13),0 1.5px 6px rgba(0,0,0,0.07);--btn-grad:linear-gradient(135deg,#0E5393 0%,#04192D 100%);--r-card:16px;--r-btn:10px;}
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -15,6 +15,8 @@ html, body {
     overflow-x: hidden;
     width: 100%;
     max-width: 100vw;
+    font-size: 14px;
+    line-height: 1.5;
 }
 [x-cloak]{display:none!important;}
 
@@ -32,21 +34,21 @@ html, body {
 
 /* PRIVACY */
 .privacy-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,30,.78);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;}
-.privacy-box{background:#fff;border-radius:20px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,52,.4);border-bottom:5px solid var(--brand);overflow:hidden;}
+.privacy-box{background:#fff;border-radius:20px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,52,.4);border-bottom:5px solid var(--brand);overflow:hidden;}
 .privacy-head{background:var(--btn-grad);padding:24px 24px 18px;text-align:center;}
 .privacy-seal{width:64px;height:64px;border-radius:50%;object-fit:contain;margin:0 auto 12px;display:block;border:3px solid rgba(255,255,255,.35);}
-.privacy-head h2{font-size:15px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
-.privacy-head p{font-size:10px;color:rgba(255,255,255,.65);font-weight:600;margin-top:3px;}
+.privacy-head h2{font-size:16px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
+.privacy-head p{font-size:11.5px;color:rgba(255,255,255,.8);font-weight:600;margin-top:3px;}
 .privacy-body{padding:22px 24px;}
-.privacy-body p{font-size:11px;color:var(--muted);line-height:1.75;font-weight:500;}
+.privacy-body p{font-size:12.5px;color:var(--text);line-height:1.75;font-weight:500;}
 .privacy-divider{height:1px;background:var(--border);margin:14px 0;}
 .privacy-check{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;}
-.privacy-check input{accent-color:var(--brand);width:15px;height:15px;flex-shrink:0;margin-top:2px;}
-.privacy-check label{font-size:11px;font-weight:700;color:var(--text);cursor:pointer;line-height:1.5;}
-.privacy-accept{width:100%;padding:13px;background:var(--btn-grad);color:#fff;font-family:inherit;font-size:12px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;transition:all .18s;box-shadow:0 4px 14px rgba(0,0,82,.3);}
+.privacy-check input{accent-color:var(--brand);width:16px;height:16px;flex-shrink:0;margin-top:2px;}
+.privacy-check label{font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;line-height:1.5;}
+.privacy-accept{width:100%;padding:13px;background:var(--btn-grad);color:#fff;font-family:inherit;font-size:13px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;transition:all .18s;box-shadow:0 4px 14px rgba(0,0,82,.3);}
 .privacy-accept:disabled{opacity:.4;cursor:not-allowed;}
 .privacy-accept:not(:disabled):hover{transform:translateY(-1px);}
-.privacy-footer{text-align:center;margin-top:10px;font-size:10px;color:var(--light);font-weight:600;}
+.privacy-footer{text-align:center;margin-top:10px;font-size:11px;color:var(--light);font-weight:600;}
 
 /* HERO */
 .hero-section{background:linear-gradient(135deg,#000052 0%,#04192D 55%,#0E5393 100%);position:relative;}
@@ -72,7 +74,7 @@ html, body {
 
 /* NAVY BOX */
 .navy-box{background:linear-gradient(165deg,#000052 0%,#04192D 60%,#0E5393 100%);border-radius:24px;padding:28px;margin-bottom:24px;box-shadow:var(--card-shadow);border:1px solid rgba(255,255,255,0.1);}
-.section-lbl{font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.section-lbl{font-size:11px;font-weight:900;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
 .service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
 @media(max-width:768px){.service-grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
 @media(max-width:440px){.service-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
@@ -87,12 +89,12 @@ html, body {
 .service-ico i{color:#fff;font-size:20px;}
 .service-card:hover .service-ico{background:var(--brand);transform:scale(1.1);box-shadow:0 0 20px rgba(14,83,147,0.4);}
 .service-name{font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.3;word-break:break-word;overflow-wrap:break-word;}
-.service-sub{font-size:11px;font-weight:500;color:rgba(255,255,255,.8);margin-top:6px;word-break:break-word;overflow-wrap:break-word;}
+.service-sub{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);margin-top:6px;word-break:break-word;overflow-wrap:break-word;}
 
 /* DUTY WIDGET */
 .duty-widget{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px 20px;margin-bottom:20px;backdrop-filter:blur(10px);}
 .duty-widget-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.duty-lbl{font-size:11px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:6px;opacity:0.8;}
+.duty-lbl{font-size:11.5px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:6px;opacity:0.9;}
 .duty-name{font-size:18px;font-weight:900;color:#fff;margin-top:4px;letter-spacing:0.02em;}
 .duty-day-txt{font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;margin-top:2px;background:var(--brand);padding:3px 12px;border-radius:99px;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
 .duty-view-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:800;padding:8px 20px;border-radius:99px;cursor:pointer;font-family:inherit;text-transform:uppercase;transition:all .2s;display:flex;align-items:center;gap:8px;letter-spacing:0.05em;}
@@ -101,34 +103,34 @@ html, body {
 .duty-menu-item{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f8fafc;gap:8px;}
 .duty-menu-item:last-child{border-bottom:none;}
 .duty-menu-item.today-item{background:#eff6ff;}
-.duty-day-lbl{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;width:100px;flex-shrink:0;}
-.duty-name-lbl{font-size:13px;font-weight:800;color:var(--text);flex:1;}
-.duty-badge{font-size:9px;font-weight:900;background:var(--brand);color:#fff;padding:3px 9px;border-radius:99px;text-transform:uppercase;}
+.duty-day-lbl{font-size:11.5px;font-weight:900;color:var(--muted);text-transform:uppercase;width:100px;flex-shrink:0;}
+.duty-name-lbl{font-size:13.5px;font-weight:800;color:var(--text);flex:1;}
+.duty-badge{font-size:10px;font-weight:900;background:var(--brand);color:#fff;padding:3px 9px;border-radius:99px;text-transform:uppercase;}
 
 /* NOTIF BELL */
 .notif-bell-wrap{position:relative;display:inline-block;}
 .notif-bell-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:all .15s;position:relative;}
 .notif-bell-btn:hover{background:rgba(255,255,255,.25);transform:scale(1.05);}
-.notif-bell-badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:9px;font-weight:900;min-width:20px;height:20px;border-radius:99px;display:flex;align-items:center;justify-content:center;border:2px solid #04192D;padding:0 4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
-.notif-dropdown{position:absolute;top:calc(100% + 10px);right:0;width:300px;background:#fff;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,52,.25);border:1px solid var(--border);z-index:300;overflow:hidden;}
+.notif-bell-badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:10px;font-weight:900;min-width:20px;height:20px;border-radius:99px;display:flex;align-items:center;justify-content:center;border:2px solid #04192D;padding:0 4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
+.notif-dropdown{position:absolute;top:calc(100% + 10px);right:0;width:320px;background:#fff;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,52,.25);border:1px solid var(--border);z-index:300;overflow:hidden;}
 .notif-hd{padding:10px 14px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.notif-hlbl{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.notif-hlbl{font-size:10.5px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
 .notif-item{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-bottom:1px solid #f8fafc;transition:all .2s;cursor:pointer;}
 .notif-item:hover{background:#f1f5f9;transform:translateX(3px);}
 .notif-item:last-child{border-bottom:none;}
 .notif-item-unread{background:#eff6ff;}
 .notif-item-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.notif-item-ttl{font-size:11px;font-weight:800;color:var(--text);}
-.notif-item-msg{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;line-height:1.4;}
-.notif-item-time{font-size:9px;color:var(--light);font-weight:600;margin-top:3px;}
+.notif-item-ttl{font-size:12.5px;font-weight:800;color:var(--text);}
+.notif-item-msg{font-size:11.5px;color:#334155;font-weight:600;margin-top:2px;line-height:1.45;}
+.notif-item-time{font-size:10.5px;color:#475569;font-weight:600;margin-top:3px;}
 .notif-ft{padding:9px 14px;text-align:center;background:#f8fafc;border-top:1px solid var(--border);}
 
 /* WCARD */
 .wcard{background:#fff;border-radius:var(--r-card);box-shadow:var(--card-shadow);border:1px solid rgba(4,25,45,.05);margin-bottom:16px;overflow:hidden;}
 .wcard-head{padding:13px 18px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-.wcard-title{font-size:10px;font-weight:900;color:var(--text);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:6px;}
+.wcard-title{font-size:11.5px;font-weight:900;color:var(--text);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:6px;}
 .wcard-title i{color:var(--brand);}
-.wcard-badge{font-size:9px;background:#eff6ff;color:var(--brand);font-weight:900;padding:3px 9px;border-radius:99px;}
+.wcard-badge{font-size:10px;background:#eff6ff;color:var(--brand);font-weight:900;padding:3px 9px;border-radius:99px;}
 
 /* ANNOUNCEMENT CAROUSEL */
 .ann-carousel{position:relative;overflow:hidden;border-radius:0;}
@@ -136,10 +138,10 @@ html, body {
 .ann-slide.active{display:block;}
 .ann-img{width:100%;height:200px;object-fit:cover;}
 .ann-content-box{padding:14px 18px;}
-.ann-tag-pill{font-size:8px;font-weight:900;text-transform:uppercase;padding:2px 8px;border-radius:99px;display:inline-block;margin-bottom:6px;}
+.ann-tag-pill{font-size:9.5px;font-weight:900;text-transform:uppercase;padding:2px 8px;border-radius:99px;display:inline-block;margin-bottom:6px;}
 .ann-title{font-size:15px;font-weight:900;color:var(--text);letter-spacing:.01em;}
-.ann-body{font-size:12px;color:var(--text);font-weight:700;margin-top:4px;line-height:1.6;}
-.ann-date{font-size:9px;color:var(--light);font-weight:600;margin-top:6px;}
+.ann-body{font-size:13px;color:#1e293b;font-weight:600;margin-top:4px;line-height:1.6;}
+.ann-date{font-size:10.5px;color:#475569;font-weight:600;margin-top:6px;}
 .ann-nav{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;}
 .ann-dot{width:7px;height:7px;border-radius:50%;background:#e2e8f0;border:none;cursor:pointer;transition:all .2s;padding:0;}
 .ann-dot.active{background:var(--brand);width:20px;border-radius:99px;}
@@ -148,9 +150,9 @@ html, body {
 .event-item{display:flex;align-items:flex-start;gap:12px;padding:13px 18px;border-bottom:1px solid #f8fafc;}
 .event-item:last-child{border-bottom:none;}
 .event-day-box{background:var(--btn-grad);color:#fff;border-radius:10px;min-width:48px;height:48px;padding:0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
-.event-day-num{font-size:11px;font-weight:900;line-height:1.2;text-align:center;word-break:keep-all;white-space:nowrap;}
-.event-day-sm{font-size:6.5px;font-weight:700;text-transform:uppercase;opacity:.8;text-align:center;}
-.etag{font-size:8px;font-weight:900;text-transform:uppercase;padding:2px 7px;border-radius:99px;display:inline-block;margin-top:4px;}
+.event-day-num{font-size:12px;font-weight:900;line-height:1.2;text-align:center;word-break:keep-all;white-space:nowrap;}
+.event-day-sm{font-size:8px;font-weight:800;text-transform:uppercase;opacity:.9;text-align:center;}
+.etag{font-size:9.5px;font-weight:900;text-transform:uppercase;padding:2px 7px;border-radius:99px;display:inline-block;margin-top:4px;}
 .etag-g{background:#dcfce7;color:#15803d;}
 .etag-b{background:#dbeafe;color:#1d4ed8;}
 .etag-o{background:#ffedd5;color:#ea580c;}
@@ -164,15 +166,15 @@ html, body {
 
 /* ABOUT TABS */
 .about-tabs{display:flex;gap:5px;padding:5px;background:#f8fafc;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.about-tab{padding:7px 14px;border-radius:8px;font-size:10px;font-weight:800;color:var(--muted);border:none;background:transparent;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .15s;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.about-tab{padding:7px 14px;border-radius:8px;font-size:11px;font-weight:800;color:var(--muted);border:none;background:transparent;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .15s;font-family:inherit;white-space:nowrap;flex-shrink:0;}
 .about-tab.active{background:var(--btn-grad);color:#fff;}
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;}
 .about-card{background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 100%);border:1px solid #bfdbfe;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(14,83,147,0.06);transition:all .2s;}
 .about-card:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(14,83,147,0.12);border-color:#93c5fd;}
 .about-ico{width:34px;height:34px;background:var(--btn-grad);border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .about-ico i{color:#fff;font-size:13px;}
-.about-ttl{font-size:11px;font-weight:900;color:var(--brand-dark);margin-bottom:4px;}
-.about-desc{font-size:10px;color:var(--muted);font-weight:600;line-height:1.55;}
+.about-ttl{font-size:12px;font-weight:900;color:var(--brand-dark);margin-bottom:4px;}
+.about-desc{font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.55;}
 
 /* LOGIN PROMPT */
 .login-prompt{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1.5px solid #bfdbfe;border-radius:var(--r-card);padding:22px 20px;margin-bottom:16px;text-align:center;}
@@ -199,7 +201,7 @@ html, body {
 .schedule-modal-scroll::-webkit-scrollbar-thumb{background:#0284c7;border-radius:8px;}
 .schedule-modal-scroll::-webkit-scrollbar-thumb:hover{background:#0369a1;}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:13px;border-bottom:1px solid var(--border);}
-.modal-ttl{font-size:13px;font-weight:900;color:var(--text);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.modal-ttl{font-size:13.5px;font-weight:900;color:var(--text);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
 .modal-ico{width:32px;height:32px;border-radius:8px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .modal-ico i{color:var(--brand);font-size:12px;}
 .modal-ico-red{background:#fee2e2;}
@@ -208,7 +210,7 @@ html, body {
 .modal-close:hover{color:var(--danger);}
 
 /* FORMS */
-.flbl{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
+.flbl{font-size:12px;font-weight:800;color:#1e293b;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
 .finput{width:100%;min-width:0;padding:12px 16px;background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);outline:none;transition:border-color .15s;}
 .finput:focus{border-color:var(--brand);background:#fff;}
 .finput::placeholder{color:var(--light);font-weight:500;}
@@ -219,7 +221,7 @@ html, body {
 .fspan2{grid-column:span 2;}
 .fselect{appearance:auto;-webkit-appearance:menulist;cursor:pointer;}
 .sblk{background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:11px;border:1px solid var(--border);}
-.sblk-ttl{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.sblk-ttl{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
 
 /* DOCU GRID */
 .docu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
@@ -229,14 +231,14 @@ html, body {
 .docu-pick-ico i{color:var(--brand);font-size:11px;transition:color .18s;}
 .docu-pick:hover .docu-pick-ico,.docu-pick.sel .docu-pick-ico{background:rgba(255,255,255,.2);}
 .docu-pick:hover .docu-pick-ico i,.docu-pick.sel .docu-pick-ico i{color:#fff;}
-.docu-pick-lbl{font-size:7.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;transition:color .18s;line-height:1.3;}
+.docu-pick-lbl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;transition:color .18s;line-height:1.3;}
 .docu-pick:hover .docu-pick-lbl,.docu-pick.sel .docu-pick-lbl{color:#fff;}
 
 /* STYLED UPLOAD */
 .upload-card{background:#fff;border:2px dashed #cbd5e1;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:95px;height:100%;}
 .upload-card:hover{border-color:var(--brand);background:#f8fafc;}
 .upload-card i{font-size:20px;color:var(--brand);opacity:.7;}
-.upload-card .upload-txt{font-size:10px;font-weight:700;color:var(--muted);word-break:break-all;}
+.upload-card .upload-txt{font-size:11px;font-weight:700;color:#334155;word-break:break-all;}
 
 /* AUTH BLUE THEME */
 .auth-blue-box{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1.5px solid #bfdbfe;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(14,83,147,0.08);}
@@ -685,15 +687,25 @@ html, body {
                         sched_personnel: 'Personnel:',
 
                         // FAQs Modal
-                        faq_title: 'Frequently Asked Questions',
-                        faq_subtitle: 'Find answers to common inquiries below',
-                        faq_hours_title: 'Office Hours:',
-                        faq_hours_desc: 'Monday to Friday, 8:00 AM to 5:00 PM. We are closed on weekends and regular holidays.',
-                        faq_limits_title: 'Document Limits:',
-                        faq_limits_rep: '• Authorized Reps: Max 2 active requests at a time.',
-                        faq_limits_job: '• Job Seeker Cert: Can only be requested ONCE per person for their lifetime.',
-                        faq_reports_title: 'Incident Reports:',
-                        faq_reports_desc: 'Only one (1) active blotter/report is allowed per resident. You must wait for your current report to be resolved or closed before filing a new one.',
+                        faq_title: 'Frequently Asked Questions & Resident Guide',
+                        faq_subtitle: 'Important reminders, priority procedures, and official service guidelines',
+                        faq_search_ph: 'Search FAQs (e.g. Senior, Representative, Payment, SLA, Hours)...',
+                        faq_senior_title: 'Senior Citizens, PWDs & Pregnant Women Priority Lane:',
+                        faq_senior_desc: 'Special priority counters and assisted service lanes are dedicated for Senior Citizens, Persons with Disabilities (PWDs), and pregnant residents. If you cannot visit in person due to health or mobility concerns, an authorized representative (family member or caregiver) may request and pick up documents on your behalf by presenting your Senior/PWD ID and an authorization note.',
+                        faq_rep_title: 'Authorized Representative Rules:',
+                        faq_rep_desc: 'Family members or authorized representatives may request on a resident\'s behalf. Upon claiming at the Barangay Hall, the representative must present: (1) Their valid Government or Barangay ID, (2) A copy of the requesting resident\'s valid ID, and (3) A signed authorization letter or note. Representatives may have at most two (2) active pending requests concurrently.',
+                        faq_job_title: 'First-Time Jobseeker Act (RA 11261):',
+                        faq_job_desc: 'First-time jobseekers are entitled to one-time free issuance of Barangay Clearance and Oath of Undertaking. Per national law, personal in-person appearance is required at the Barangay Hall to sign the official Oath of Undertaking. This benefit can only be availed ONCE in a lifetime per Filipino citizen.',
+                        faq_fees_title: 'Document Fees & Cashier Payment Guidelines:',
+                        faq_fees_desc: 'Official document fees (e.g., ₱50 for standard clearances, ₱100 for business clearances) are payable ONLY at the Barangay Cashier Counter upon document pickup. The barangay NEVER asks for advance online bank transfers or GCash payments to personal accounts. Always request an Official Receipt (OR). Indigency certificates are 100% FREE.',
+                        faq_sla_title: 'Processing Time & Pickup SLA:',
+                        faq_sla_desc: 'Regular document clearances are processed and ready within 1 to 2 business days. You can track live status in the Live Request Tracker. Once marked "Ready for Pickup", check the pickup schedule note and the designated releasing officer.',
+                        faq_hours_title: 'Barangay Office Hours:',
+                        faq_hours_desc: 'Monday to Friday, 8:00 AM to 5:00 PM. The office is closed on Saturdays, Sundays, and official national/local holidays. The Peace and Order Tanod desk operates 24/7 for community security.',
+                        faq_sos_title: 'Emergency SOS Alert vs 911 / City Rescue:',
+                        faq_sos_desc: 'The Emergency SOS button in the portal immediately alerts and dispatches on-duty Barangay Tanod patrol officers stationed within Barangay San Miguel II. For severe medical emergencies, fires, or incidents outside our barangay boundaries, call 911 or CDRRMO / Dasmariñas Rescue at (046) 481-8000 immediately.',
+                        faq_reports_title: 'Incident Blotter & Dispute Reports:',
+                        faq_reports_desc: 'Each resident is allowed one (1) active blotter or complaint report at a time to ensure timely investigation and resolution. Your report will be handled confidentially by VAWC, Peace & Order, or the Lupon Tagapamayapa.',
                         faq_close: 'Close Guide',
                     },
                     fil: {
@@ -821,15 +833,25 @@ html, body {
                         sched_personnel: 'Mga Tauhan:',
 
                         // FAQs Modal
-                        faq_title: 'Mga Madalas Itanong (FAQs)',
-                        faq_subtitle: 'Alamin ang mga kasagutan sa mga karaniwang katanungan sa ibaba',
-                        faq_hours_title: 'Oras ng Tanggapan:',
-                        faq_hours_desc: 'Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM. Sarado tuwing Sabado, Linggo, at mga opisyal na pista opisyal.',
-                        faq_limits_title: 'Limitasyon sa Dokumento:',
-                        faq_limits_rep: '• Awtorisadong Kinatawan: Hanggang 2 aktibong kahilingan lamang sa bawat pagkakataon.',
-                        faq_limits_job: '• Job Seeker Cert: Maaari lamang hingin nang ISANG BESES sa buong buhay ng bawat residente.',
-                        faq_reports_title: 'Mga Ulat ng Insidente:',
-                        faq_reports_desc: 'Isang (1) aktibong blotter o ulat lamang ang pinapayagan sa bawat residente. Kailangang maresolba o maisara muna ang kasalukuyang ulat bago makapag-file ng bago.',
+                        faq_title: 'Mga Madalas Itanong (FAQs) at Gabay sa Residente',
+                        faq_subtitle: 'Mahalagang paalala, serbisyo para sa Senior/PWD, at mga opisyal na panuntunan',
+                        faq_search_ph: 'Maghanap sa FAQs (hal. Senior, Kinatawan, Bayad, Oras, Responde)...',
+                        faq_senior_title: 'Priority Lane para sa Senior Citizens, PWDs at mga Buntis:',
+                        faq_senior_desc: 'Mayroong espesyal na Priority Counter at mabilisang tulong para sa mga Senior Citizens, Persons with Disabilities (PWDs), at mga buntis sa Barangay Hall. Kung hindi kayang pumunta nang personal dahil sa karamdaman o kapansanan, maaaring kumuha ng dokumento ang inyong awtorisadong kinatawan (kapamilya o caregiver) dala ang inyong Senior/PWD ID at authorization note.',
+                        faq_rep_title: 'Alituntunin para sa Awtorisadong Kinatawan (Representative):',
+                        faq_rep_desc: 'Maaaring humiling ang inyong kapamilya o pinagkakatiwalaang kinatawan. Sa oras ng pagkuha sa Barangay Hall, dalhin ang: (1) Valid ID ng kinatawan, (2) Kopya ng ID ng mismong residenteng may-ari, at (3) Nilagdaang sulat ng awtorisasyon (Authorization Letter). Hanggang 2 aktibong kahilingan lamang ang pinapayagan nang sabay.',
+                        faq_job_title: 'First-Time Jobseeker Act (RA 11261):',
+                        faq_job_desc: 'Ang sertipikasyon para sa mga unang beses maghahanapbuhay ay LIBRE alinsunod sa batas. Kinakailangan ang personal na pagpunta sa Barangay Hall upang lumagda sa opisyal na Oath of Undertaking. Ang benepisyong ito ay maaari lamang ma-avail nang ISANG BESES sa buong buhay ng bawat mamamayan.',
+                        faq_fees_title: 'Bayad sa Dokumento at Panuntunan sa Cashier:',
+                        faq_fees_desc: 'Ang opisyal na bayad sa clearances (₱50 para sa regular clearance, ₱100 para sa business) ay binabayaran LAMANG sa opisyal na Barangay Cashier sa oras ng pagkuha (pickup). HINDI humihingi ang barangay ng advance payment o GCash sa mga personal na numero. Palaging humingi ng Opisyal na Resibo (OR). Ang Indigency Certificate ay 100% LIBRE.',
+                        faq_sla_title: 'Oras ng Pagproseso at Pagkuha (Tracking & SLA):',
+                        faq_sla_desc: 'Karaniwang handa ang regular na clearance sa loob ng 1 hanggang 2 araw ng trabaho. Masusubaybayan ang progreso sa Live Request Tracker. Kapag naging "Ready for Pickup", ipapakita ang petsa at pangalan ng opisyal na maglalabas ng inyong dokumento.',
+                        faq_hours_title: 'Oras ng Tanggapan ng Barangay:',
+                        faq_hours_desc: 'Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM. Sarado tuwing Sabado, Linggo, at mga opisyal na pista opisyal. Ang Tanod Desk ay bukas 24/7 para sa kapayapaan at seguridad ng barangay.',
+                        faq_sos_title: 'Emergency SOS Alert vs 911 / City Rescue Hotline:',
+                        faq_sos_desc: 'Ang Emergency SOS button sa portal ay agarang nagpapadala ng alerto sa mga nagpapatrulyang Barangay Tanod sa loob ng Barangay San Miguel II. Para sa malubhang aksidente, sunog, o mga insidente sa labas ng barangay, tumawag agad sa 911 o CDRRMO / Dasmariñas Rescue sa (046) 481-8000.',
+                        faq_reports_title: 'Mga Ulat ng Insidente at Reklamo:',
+                        faq_reports_desc: 'Isang (1) aktibong blotter o ulat lamang ang pinapayagan sa bawat residente upang masubaybayan nang maayos. Ang inyong ulat ay kompidensiyal na hahawakan ng VAWC, Peace & Order, o Lupon Tagapamayapa.',
                         faq_close: 'Isara ang Gabay',
                     }
                 };
@@ -850,15 +872,19 @@ html, body {
                 return this.activitySlides.length > 0 ? this.activitySlides : this.getDefaultActivities();
             },
 
-            dutySchedule: [
-                { day:'Monday',    name:'Hon. Teresita O. Dulay' },
-                { day:'Tuesday',   name:'Hon. Virginia B. Magno' },
-                { day:'Wednesday', name:'Hon. Rosemarie N. Gutierrez' },
-                { day:'Thursday',  name:'Hon. Raden John V. Galeon' },
-                { day:'Friday',    name:'Hon. Ian S. Punzalan' },
-                { day:'Saturday',  name:'Hon. Edgardo M. Gutierrez' },
-                { day:'Sunday',    name:'Hon. Renato V. Calawin' },
-            ],
+            dutySchedule: @json($kagawadSchedule ?? [
+                ['day' => 'Monday',    'name' => 'Hon. Teresita O. Dulay'],
+                ['day' => 'Tuesday',   'name' => 'Hon. Virginia B. Magno'],
+                ['day' => 'Wednesday', 'name' => 'Hon. Rosemarie N. Gutierrez'],
+                ['day' => 'Thursday',  'name' => 'Hon. Raden John V. Galeon'],
+                ['day' => 'Friday',    'name' => 'Hon. Ian S. Punzalan'],
+                ['day' => 'Saturday',  'name' => 'Hon. Edgardo M. Gutierrez'],
+                ['day' => 'Sunday',    'name' => 'Hon. Renato V. Calawin'],
+            ]),
+            dutyTodayDynamic: @json($activeKagawadTodayName ?? null),
+            isKagawadOverriddenToday: {{ !empty($isKagawadOverriddenToday) ? 'true' : 'false' }},
+            kagawadOverrideReason: @json($kagawadOverrideReason ?? ''),
+            originalKagawadToday: @json($originalKagawadToday ?? ''),
             get todayDayKey(){ return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()]; },
             get todayDay(){ 
                 if (this.lang === 'fil') {
@@ -867,7 +893,11 @@ html, body {
                 }
                 return this.todayDayKey;
             },
-            get dutyToday(){ const d=this.dutySchedule.find(x=>x.day===this.todayDayKey); return d?d.name:'N/A'; },
+            get dutyToday(){ 
+                if (this.dutyTodayDynamic) return this.dutyTodayDynamic;
+                const d=this.dutySchedule.find(x=>x.day===this.todayDayKey); 
+                return d?d.name:'N/A'; 
+            },
             tanodTeams: @json($tanodTeams ?? []),
             tanodWeeklySchedule: @json($tanodWeeklySchedule ?? []),
             isTeamActiveToday(days) { return Array.isArray(days) && days.includes(this.todayDayKey); },
@@ -1284,6 +1314,11 @@ html, body {
                                 <span class="duty-day-txt" style="margin-top:0;" x-text="todayDay"></span>
                             </div>
                             <div class="duty-name" style="font-size:16px; font-weight:900; color:#fff;" x-text="dutyToday"></div>
+                            <template x-if="isKagawadOverriddenToday">
+                                <div style="font-size:10px; color:#fde047; font-weight:800; margin-top:5px; display:inline-flex; align-items:center; gap:5px; background:rgba(250,204,21,0.18); border:1px solid rgba(250,204,21,0.35); padding:2px 8px; border-radius:99px;">
+                                    <i class="fas fa-user-clock"></i> <span>Substitute Duty for <strong x-text="originalKagawadToday"></strong></span>
+                                </div>
+                            </template>
                         </div>
                         <div style="font-size:10.5px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:8px;">
                             <span x-text="t('kagawad_of_day')">Barangay Kagawad of the Day</span>
@@ -1535,9 +1570,20 @@ html, body {
              }"
              @hashchange.window="if(window.location.hash === '#application-history') { isAppHistoryCollapsed = false; }">
             <div class="wcard-head" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;" @click="isAppHistoryCollapsed = !isAppHistoryCollapsed">
-                <div style="display:flex; align-items:center; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <div class="wcard-title"><i class="fas fa-history"></i> <span x-text="t('my_history')">Your Application History</span></div>
                     <div class="wcard-badge">{{ $requests->count() }} <span x-text="t('requests')">requests</span></div>
+                    {{-- Status Dropdown Filter beside Request Tracker --}}
+                    <div @click.stop style="display:inline-flex; align-items:center;">
+                        <select x-model="reqFilter" 
+                                style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; padding:3px 8px; font-size:11.5px; font-weight:800; color:var(--text); cursor:pointer; outline:none; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                            <option value="all">All ({{ $requests->count() }})</option>
+                            <option value="pending">Pending ({{ $requests->where('status', 'pending')->count() }})</option>
+                            <option value="processing">Processing ({{ $requests->where('status', 'processing')->count() }})</option>
+                            <option value="ready">Ready for Pickup ({{ $requests->where('status', 'ready')->count() }})</option>
+                            <option value="released">Released ({{ $requests->where('status', 'released')->count() }})</option>
+                        </select>
+                    </div>
                 </div>
 
                 {{-- Collapse / Hide Arrow Button --}}
@@ -1551,34 +1597,6 @@ html, body {
 
             {{-- Collapsible Body --}}
             <div x-show="!isAppHistoryCollapsed" x-transition:enter.duration.200ms>
-                {{-- Status Filter Pills --}}
-                <div style="display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #f1f5f9;-webkit-overflow-scrolling:touch;">
-                    <button type="button" @click="reqFilter='all'" 
-                            :style="reqFilter==='all' ? 'background:var(--brand);color:#fff;border-color:var(--brand);' : 'background:#f8fafc;color:#64748b;border-color:#e2e8f0;'"
-                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
-                        All ({{ $requests->count() }})
-                    </button>
-                    <button type="button" @click="reqFilter='pending'" 
-                            :style="reqFilter==='pending' ? 'background:#d97706;color:#fff;border-color:#d97706;' : 'background:#fffbeb;color:#b45309;border-color:#fde68a;'"
-                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
-                        Pending ({{ $requests->where('status', 'pending')->count() }})
-                    </button>
-                    <button type="button" @click="reqFilter='processing'" 
-                            :style="reqFilter==='processing' ? 'background:#2563eb;color:#fff;border-color:#2563eb;' : 'background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;'"
-                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
-                        Processing ({{ $requests->where('status', 'processing')->count() }})
-                    </button>
-                    <button type="button" @click="reqFilter='ready'" 
-                            :style="reqFilter==='ready' ? 'background:#059669;color:#fff;border-color:#059669;' : 'background:#ecfdf5;color:#047857;border-color:#a7f3d0;'"
-                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
-                        Ready for Pickup ({{ $requests->where('status', 'ready')->count() }})
-                    </button>
-                    <button type="button" @click="reqFilter='released'" 
-                            :style="reqFilter==='released' ? 'background:#475569;color:#fff;border-color:#475569;' : 'background:#f1f5f9;color:#475569;border-color:#cbd5e1;'"
-                            style="border:1.5px solid;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;">
-                        Released ({{ $requests->where('status', 'released')->count() }})
-                    </button>
-                </div>
 
                 @foreach($requests as $index => $req)
                 <div class="event-item" x-show="(reqFilter === 'all' || reqFilter === '{{ $req->status }}') && (reqFilter !== 'all' || showAllApps || {{ $index }} < 3)" x-transition
@@ -2536,24 +2554,32 @@ html, body {
                                             <label class="flbl" style="font-size:12.5px;font-weight:800;color:var(--text);margin-bottom:6px;">
                                                 Residence Address in Barangay San Miguel II *
                                             </label>
-                                            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;padding:9px 14px;font-size:13px;color:var(--text);font-weight:700;">
+                                            <div style="display:flex;align-items:center;flex-wrap:nowrap;white-space:nowrap;gap:6px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;padding:8px 12px;font-size:12.5px;color:var(--text);font-weight:700;overflow-x:auto;">
                                                 <span>Block</span>
                                                 <input type="text" 
+                                                       inputmode="numeric"
+                                                       pattern="[0-9]*"
+                                                       maxlength="3"
                                                        placeholder="___" 
                                                        class="app-blk-input" 
-                                                       style="width:58px;padding:4px 8px;border:1.5px solid #cbd5e1;border-radius:6px;font-size:13.5px;font-weight:800;text-align:center;background:#fff;color:var(--text);outline:none;"
+                                                       style="width:44px;padding:3px 4px;border:1.5px solid #cbd5e1;border-radius:6px;font-size:13px;font-weight:800;text-align:center;background:#fff;color:var(--text);outline:none;flex-shrink:0;"
                                                        x-model="app.blk_no"
+                                                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3);"
                                                        @input="updateApplicantAddress(app)"
                                                        :required="cType === 'authorized'">
                                                 <span>Lot</span>
                                                 <input type="text" 
+                                                       inputmode="numeric"
+                                                       pattern="[0-9]*"
+                                                       maxlength="3"
                                                        placeholder="___" 
                                                        class="app-lot-input" 
-                                                       style="width:58px;padding:4px 8px;border:1.5px solid #cbd5e1;border-radius:6px;font-size:13.5px;font-weight:800;text-align:center;background:#fff;color:var(--text);outline:none;"
+                                                       style="width:44px;padding:3px 4px;border:1.5px solid #cbd5e1;border-radius:6px;font-size:13px;font-weight:800;text-align:center;background:#fff;color:var(--text);outline:none;flex-shrink:0;"
                                                        x-model="app.lot_no"
+                                                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3);"
                                                        @input="updateApplicantAddress(app)"
                                                        :required="cType === 'authorized'">
-                                                <span style="color:#475569;font-weight:700;">, Barangay San Miguel II, Dasmariñas City, Cavite</span>
+                                                <span style="color:#334155;font-weight:700;flex-shrink:0;">, Barangay San Miguel II, Dasmariñas City, Cavite</span>
                                             </div>
                                             <input type="hidden" :name="'applicants['+index+'][address]'" :value="app.address">
                                         </div>
@@ -3066,38 +3092,119 @@ html, body {
     </div>
 
 {{-- ══ FAQs MODAL ══ --}}
-    <div x-show="faqModal" x-cloak class="modal-ov" x-transition>
-        <div class="modal-box" style="max-width:520px;" @click.away="faqModal=false">
-            <div class="modal-in">
-                <div class="modal-hd">
+    <div x-show="faqModal" x-cloak class="modal-ov" x-transition x-data="{ faqSearch: '' }">
+        <div class="modal-box" style="max-width:640px; max-height:90vh; overflow-y:auto; border-radius:20px;" @click.away="faqModal=false">
+            <div class="modal-in" style="padding:22px 24px;">
+                <div class="modal-hd" style="margin-bottom:14px; padding-bottom:12px;">
                     <div class="modal-ttl">
-                        <div class="modal-ico"><i class="fas fa-question-circle"></i></div>
+                        <div class="modal-ico" style="background:#eff6ff; color:#0E5393; width:36px; height:36px;"><i class="fas fa-circle-question" style="font-size:16px;"></i></div>
                         <div>
-                            <div x-text="t('faq_title')">Frequently Asked Questions</div>
-                            <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;" x-text="t('faq_subtitle')">Find answers to common inquiries below</div>
+                            <div style="font-size:15px; font-weight:900; color:#0f172a; letter-spacing:-0.2px;" x-text="t('faq_title')">Frequently Asked Questions & Resident Guide</div>
+                            <div style="font-size:11.5px; font-weight:600; color:#475569; text-transform:none; margin-top:2px;" x-text="t('faq_subtitle')">Important reminders, priority procedures, and official service guidelines</div>
                         </div>
                     </div>
-                    <button @click="faqModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                    <button type="button" @click="faqModal=false" class="modal-close" style="font-size:22px;"><i class="fas fa-times-circle"></i></button>
                 </div>
 
-                <div style="font-size:12px; color:#334155; line-height:1.6; padding:10px 0;">
-                    <div style="margin-bottom:14px; padding: 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
-                        <div style="font-weight:800; color:#0f172a; margin-bottom: 4px;"><i class="fas fa-clock" style="margin-right:4px; color:#0E5393;"></i> <span x-text="t('faq_hours_title')">Office Hours:</span></div>
-                        <span x-text="t('faq_hours_desc')">Monday to Friday, 8:00 AM to 5:00 PM. We are closed on weekends and regular holidays.</span>
+                {{-- Real-time Search Filter --}}
+                <div style="margin-bottom:16px; position:relative;">
+                    <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#64748b; font-size:13px;"></i>
+                    <input type="text" x-model="faqSearch" :placeholder="t('faq_search_ph')" class="finput" style="padding:10px 14px 10px 38px; font-size:13px; border-radius:10px; background:#f8fafc; border:1.5px solid #cbd5e1;">
+                    <button type="button" x-show="faqSearch" @click="faqSearch=''" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#64748b; cursor:pointer; font-size:12px;"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:12px; padding-bottom:10px;">
+                    {{-- 1. Senior Citizens & PWDs Priority --}}
+                    <div x-show="!faqSearch || (t('faq_senior_title') + ' ' + t('faq_senior_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#1e3a8a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-wheelchair" style="color:#2563eb; font-size:15px;"></i>
+                            <span x-text="t('faq_senior_title')">Senior Citizens, PWDs & Pregnant Women Priority Lane:</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_senior_desc')"></div>
                     </div>
-                    <div style="margin-bottom:14px; padding: 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
-                        <div style="font-weight:800; color:#0f172a; margin-bottom: 4px;"><i class="fas fa-file-alt" style="margin-right:4px; color:#0E5393;"></i> <span x-text="t('faq_limits_title')">Document Limits:</span></div>
-                        <p style="margin-bottom: 4px;" x-text="t('faq_limits_rep')">• Authorized Reps: Max 2 active requests at a time.</p>
-                        <p x-text="t('faq_limits_job')">• Job Seeker Cert: Can only be requested ONCE per person for their lifetime.</p>
+
+                    {{-- 2. Authorized Representative Rules --}}
+                    <div x-show="!faqSearch || (t('faq_rep_title') + ' ' + t('faq_rep_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-user-shield" style="color:#0E5393; font-size:15px;"></i>
+                            <span x-text="t('faq_rep_title')">Authorized Representative Rules:</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_rep_desc')"></div>
                     </div>
-                    <div style="margin-bottom:14px; padding: 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px;">
-                        <div style="font-weight:800; color:#9f1239; margin-bottom: 4px;"><i class="fas fa-exclamation-circle" style="margin-right:4px; color:#be123c;"></i> <span x-text="t('faq_reports_title')">Incident Reports:</span></div>
-                        <span x-text="t('faq_reports_desc')">Only one (1) active blotter/report is allowed per resident. You must wait for your current report to be resolved or closed before filing a new one.</span>
+
+                    {{-- 3. First-Time Jobseeker Act --}}
+                    <div x-show="!faqSearch || (t('faq_job_title') + ' ' + t('faq_job_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#14532d; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-briefcase" style="color:#16a34a; font-size:15px;"></i>
+                            <span x-text="t('faq_job_title')">First-Time Jobseeker Act (RA 11261):</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_job_desc')"></div>
+                    </div>
+
+                    {{-- 4. Document Fees & Cashier Payment Guidelines --}}
+                    <div x-show="!faqSearch || (t('faq_fees_title') + ' ' + t('faq_fees_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#f0fdfa; border:1.5px solid #99f6e4; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#115e59; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-receipt" style="color:#0d9488; font-size:15px;"></i>
+                            <span x-text="t('faq_fees_title')">Document Fees & Cashier Payment Guidelines:</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_fees_desc')"></div>
+                    </div>
+
+                    {{-- 5. Processing SLA & Tracking --}}
+                    <div x-show="!faqSearch || (t('faq_sla_title') + ' ' + t('faq_sla_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-route" style="color:#0E5393; font-size:15px;"></i>
+                            <span x-text="t('faq_sla_title')">Processing Time & Pickup SLA:</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_sla_desc')"></div>
+                    </div>
+
+                    {{-- 6. Office Hours --}}
+                    <div x-show="!faqSearch || (t('faq_hours_title') + ' ' + t('faq_hours_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-clock" style="color:#0E5393; font-size:15px;"></i>
+                            <span x-text="t('faq_hours_title')">Barangay Office Hours:</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_hours_desc')"></div>
+                    </div>
+
+                    {{-- 7. Emergency SOS Alert vs 911 --}}
+                    <div x-show="!faqSearch || (t('faq_sos_title') + ' ' + t('faq_sos_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#fff1f2; border:1.5px solid #fecdd3; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#9f1239; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-truck-medical" style="color:#e11d48; font-size:15px;"></i>
+                            <span x-text="t('faq_sos_title')">Emergency SOS Alert vs 911 / City Rescue:</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_sos_desc')"></div>
+                    </div>
+
+                    {{-- 8. Incident Blotter & Dispute Reports --}}
+                    <div x-show="!faqSearch || (t('faq_reports_title') + ' ' + t('faq_reports_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#fdf2f8; border:1.5px solid #fbcfe8; border-radius:12px;">
+                        <div style="font-size:13.5px; font-weight:900; color:#831843; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-shield-halved" style="color:#db2777; font-size:15px;"></i>
+                            <span x-text="t('faq_reports_title')">Incident Blotter & Dispute Reports:</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_reports_desc')"></div>
                     </div>
                 </div>
 
-                <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-                    <button type="button" @click="faqModal=false" class="btn-plain btn-ghost" x-text="t('faq_close')">Close Guide</button>
+                {{-- Assisted Counter Note for Seniors/PWDs --}}
+                <div style="background:#f1f5f9; border-radius:10px; padding:10px 14px; margin-top:8px; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-headset" style="color:#0E5393; font-size:18px;"></i>
+                    <div style="font-size:12px; color:#334155; line-height:1.4;">
+                        <strong>Need assistance?</strong> Contact the Barangay Tanod / Office Helpdesk at <strong>(046) 416-0283</strong> or visit the Barangay Hall Senior/PWD priority lane.
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                    <button type="button" @click="faqModal=false" class="btn-plain btn-ghost" style="font-size:13px; font-weight:800; padding:8px 20px;" x-text="t('faq_close')">Close Guide</button>
                 </div>
             </div>
         </div>
@@ -3590,10 +3697,22 @@ html, body {
                                 </div>
                                 <div style="min-width:0;">
                                     <div style="font-size:13px; font-weight:800; color:#0f172a; line-height:1.25;" x-text="d.name"></div>
-                                    <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:2px;" x-text="t('kagawad_of_day')">Barangay Kagawad of the Day</div>
+                                    <template x-if="d.is_substitute">
+                                        <div style="font-size:10px; color:#d97706; font-weight:800; margin-top:2px; display:flex; align-items:center; gap:4px;">
+                                            <i class="fas fa-exchange-alt"></i> <span>Substitute Duty for <span x-text="d.original_name"></span></span>
+                                        </div>
+                                    </template>
+                                    <template x-if="!d.is_substitute">
+                                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:2px;" x-text="t('kagawad_of_day')">Barangay Kagawad of the Day</div>
+                                    </template>
                                 </div>
                                 <div style="text-align:right; display:flex; align-items:center; justify-content:flex-end;">
-                                    <template x-if="d.day === todayDayKey">
+                                    <template x-if="d.day === todayDayKey && d.is_substitute">
+                                        <span style="font-size:9.5px; font-weight:900; background:#f59e0b; color:#fff; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(245,158,11,0.25); white-space:nowrap;">
+                                            <i class="fas fa-check-circle" style="font-size:9px;"></i> <span>Substitute Active</span>
+                                        </span>
+                                    </template>
+                                    <template x-if="d.day === todayDayKey && !d.is_substitute">
                                         <span style="font-size:9.5px; font-weight:900; background:#0284c7; color:#fff; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(2,132,199,0.25); white-space:nowrap;">
                                             <i class="fas fa-check-circle" style="font-size:9px;"></i> <span x-text="t('sched_active_today')">Active Today</span>
                                         </span>
@@ -4905,28 +5024,28 @@ html, body {
                                 <span style="font-size:8.5px; font-weight:900; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:99px; letter-spacing:0.04em;">24/7 ACTIVE</span>
                             </div>
                             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:7px;">
-                                <button type="button" @click="callOrCopyHotline('0464160283', '(046) 416-0283', 'Brgy. SM2 Tanod Desk')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
+                                <button type="button" @click="sosModal = false; callOrCopyHotline('0464160283', '(046) 416-0283', 'Brgy. SM2 Tanod Desk')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-shield-alt"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#15803d;font-weight:700;">Brgy. SM2 Tanod Desk</div>
                                         <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0283</div>
                                     </div>
                                 </button>
-                                <button type="button" @click="callOrCopyHotline('09175432100', '0917-543-2100', 'Desk Officer Mobile')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
+                                <button type="button" @click="sosModal = false; callOrCopyHotline('09175432100', '0917-543-2100', 'Desk Officer Mobile')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-mobile-alt"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#15803d;font-weight:700;">Desk Officer Mobile</div>
                                         <div style="font-family:monospace;font-size:10.5px;font-weight:900;">0917-543-2100</div>
                                     </div>
                                 </button>
-                                <button type="button" @click="callOrCopyHotline('0464160278', '(046) 416-0278', 'Dasma PNP Police')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #93c5fd; padding:7px 9px; border-radius:8px; color:#1e3a8a; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'">
+                                <button type="button" @click="sosModal = false; callOrCopyHotline('0464160278', '(046) 416-0278', 'Dasma PNP Police')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #93c5fd; padding:7px 9px; border-radius:8px; color:#1e3a8a; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-building-shield"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#1d4ed8;font-weight:700;">Dasma PNP Police</div>
                                         <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0278</div>
                                     </div>
                                 </button>
-                                <button type="button" @click="callOrCopyHotline('911', '911 / (046) 481-8000', 'CDRRMO / Rescue')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #fca5a5; padding:7px 9px; border-radius:8px; color:#7f1d1d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
+                                <button type="button" @click="sosModal = false; callOrCopyHotline('911', '911 / (046) 481-8000', 'CDRRMO / Rescue')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #fca5a5; padding:7px 9px; border-radius:8px; color:#7f1d1d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
                                     <div style="width:24px;height:24px;border-radius:6px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-ambulance"></i></div>
                                     <div style="overflow:hidden;line-height:1.2;">
                                         <div style="font-size:8.5px;color:#b91c1c;font-weight:700;">CDRRMO / Rescue</div>

@@ -310,6 +310,49 @@ class ResidentPortalController extends Controller
             ? \App\Models\Project::where('is_active', true)->latest()->get()
             : collect([]);
 
+        // Fetch Kagawad Duty Rotation & Daily Substitute
+        $defaultKagawadSchedule = [
+            ['day' => 'Monday',    'name' => 'Hon. Teresita O. Dulay'],
+            ['day' => 'Tuesday',   'name' => 'Hon. Virginia B. Magno'],
+            ['day' => 'Wednesday', 'name' => 'Hon. Rosemarie N. Gutierrez'],
+            ['day' => 'Thursday',  'name' => 'Hon. Raden John V. Galeon'],
+            ['day' => 'Friday',    'name' => 'Hon. Ian S. Punzalan'],
+            ['day' => 'Saturday',  'name' => 'Hon. Edgardo M. Gutierrez'],
+            ['day' => 'Sunday',    'name' => 'Hon. Renato V. Calawin'],
+        ];
+
+        $kagawadScheduleJson = SiteSetting::where('key', 'kagawad_duty_schedule')->value('value');
+        $kagawadSchedule = $kagawadScheduleJson ? json_decode($kagawadScheduleJson, true) : $defaultKagawadSchedule;
+        if (!is_array($kagawadSchedule) || empty($kagawadSchedule)) {
+            $kagawadSchedule = $defaultKagawadSchedule;
+        }
+
+        $kagawadOverrideJson = SiteSetting::where('key', 'kagawad_duty_override')->value('value');
+        $kagawadOverride = $kagawadOverrideJson ? json_decode($kagawadOverrideJson, true) : null;
+
+        $regularKagawadToday = collect($kagawadSchedule)->firstWhere('day', $todayDay)['name'] ?? 'Hon. Kagawad on Duty';
+        $isKagawadOverriddenToday = false;
+        $activeKagawadTodayName = $regularKagawadToday;
+        $kagawadOverrideReason = null;
+        $originalKagawadToday = $regularKagawadToday;
+
+        if ($kagawadOverride && isset($kagawadOverride['date']) && $kagawadOverride['date'] === $todayDate && !empty($kagawadOverride['substitute_name'])) {
+            $isKagawadOverriddenToday = true;
+            $activeKagawadTodayName = $kagawadOverride['substitute_name'];
+            $kagawadOverrideReason = $kagawadOverride['reason'] ?? 'Official on leave';
+            $originalKagawadToday = $kagawadOverride['original_name'] ?? $regularKagawadToday;
+
+            foreach ($kagawadSchedule as &$s) {
+                if ($s['day'] === $todayDay) {
+                    $s['name'] = $activeKagawadTodayName;
+                    $s['is_substitute'] = true;
+                    $s['original_name'] = $originalKagawadToday;
+                    $s['substitute_reason'] = $kagawadOverrideReason;
+                }
+            }
+            unset($s);
+        }
+
         return view('resident.index', compact(
             'requests', 'digitalId', 'resident', 'issueReports', 'sosHistory',
             'announcements', 'events', 'recentUpdates',
@@ -317,7 +360,8 @@ class ResidentPortalController extends Controller
             'carouselSlides', 'orgChartPath',
             'patrolSchedules', 'tanodSchedulesArray', 'activeTanodToday', 'projects',
             'tanodTeams', 'tanodWeeklySchedule', 'activeTanodTeamName', 'activeTanodMembers', 'activeTanodDays',
-            'hasAvailedJobseeker'
+            'hasAvailedJobseeker',
+            'kagawadSchedule', 'activeKagawadTodayName', 'isKagawadOverriddenToday', 'kagawadOverrideReason', 'originalKagawadToday'
         ));
     }
 

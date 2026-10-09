@@ -153,6 +153,38 @@ class AdminController extends Controller
             ->orderByRaw("FIELD(role, 'admin', 'office', 'vawc', 'justice', 'peace')")
             ->get();
 
+        $defaultKagawadSchedule = [
+            ['day' => 'Monday',    'name' => 'Hon. Teresita O. Dulay'],
+            ['day' => 'Tuesday',   'name' => 'Hon. Virginia B. Magno'],
+            ['day' => 'Wednesday', 'name' => 'Hon. Rosemarie N. Gutierrez'],
+            ['day' => 'Thursday',  'name' => 'Hon. Raden John V. Galeon'],
+            ['day' => 'Friday',    'name' => 'Hon. Ian S. Punzalan'],
+            ['day' => 'Saturday',  'name' => 'Hon. Edgardo M. Gutierrez'],
+            ['day' => 'Sunday',    'name' => 'Hon. Renato V. Calawin'],
+        ];
+
+        $kagawadScheduleJson = SiteSetting::where('key', 'kagawad_duty_schedule')->value('value');
+        $kagawadSchedule = $kagawadScheduleJson ? json_decode($kagawadScheduleJson, true) : $defaultKagawadSchedule;
+        if (!is_array($kagawadSchedule) || empty($kagawadSchedule)) {
+            $kagawadSchedule = $defaultKagawadSchedule;
+        }
+
+        $todayDay = now()->format('l');
+        $todayDate = now()->toDateString();
+        $kagawadOverrideJson = SiteSetting::where('key', 'kagawad_duty_override')->value('value');
+        $kagawadOverride = $kagawadOverrideJson ? json_decode($kagawadOverrideJson, true) : null;
+
+        $regularKagawadToday = collect($kagawadSchedule)->firstWhere('day', $todayDay)['name'] ?? 'Hon. Kagawad on Duty';
+        $isKagawadOverriddenToday = false;
+        $activeKagawadTodayName = $regularKagawadToday;
+        $kagawadOverrideReason = null;
+
+        if ($kagawadOverride && isset($kagawadOverride['date']) && $kagawadOverride['date'] === $todayDate && !empty($kagawadOverride['substitute_name'])) {
+            $isKagawadOverriddenToday = true;
+            $activeKagawadTodayName = $kagawadOverride['substitute_name'];
+            $kagawadOverrideReason = $kagawadOverride['reason'] ?? 'Official on leave';
+        }
+
         return view('admin.dashboard', compact(
             'totalResidents', 'totalUsers', 'totalDocs', 'pendingDocs',
             'processingDocs', 'readyDocs', 'totalIssues', 'pendingIssues',
@@ -167,7 +199,9 @@ class AdminController extends Controller
             'resList', 'reportDocs', 'reportIssues',
             'releasedDocsList', 'settledIssuesList',
             'activeResidents', 'activeDocs', 'activeIssues', 'activeHouseholds', 'allPets',
-            'carouselSlides', 'orgChartPath', 'departmentReports', 'staffAccounts'
+            'carouselSlides', 'orgChartPath', 'departmentReports', 'staffAccounts',
+            'kagawadSchedule', 'kagawadOverride', 'regularKagawadToday',
+            'isKagawadOverriddenToday', 'activeKagawadTodayName', 'kagawadOverrideReason'
         ));
     }
 
@@ -703,5 +737,59 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', "Account & Security settings updated successfully for {$user->name} (" . ucfirst($user->role) . " portal).");
+    }
+
+    // ── Kagawad Duty Rotation & Daily Substitute ──
+    public function updateKagawadSchedule(Request $request)
+    {
+        $request->validate([
+            'schedule'        => 'required|array',
+            'schedule.*.day'  => 'required|string',
+            'schedule.*.name' => 'required|string',
+        ]);
+
+        SiteSetting::updateOrCreate(
+            ['key' => 'kagawad_duty_schedule'],
+            ['value' => json_encode(array_values($request->schedule))]
+        );
+
+        return redirect()->back()->with('success', 'Weekly Kagawad duty rotation schedule updated!');
+    }
+
+    public function updateKagawadOverride(Request $request)
+    {
+        $request->validate([
+            'substitute_name' => 'required|string|max:255',
+            'reason'          => 'nullable|string|max:255',
+            'reason_custom'   => 'nullable|string|max:255',
+            'original_name'   => 'nullable|string|max:255',
+        ]);
+
+        $reason = trim($request->reason ?? '');
+        if ($reason === 'Custom' && !empty($request->reason_custom)) {
+            $reason = trim($request->reason_custom);
+        }
+
+        $overrideData = [
+            'date'            => now()->toDateString(),
+            'day'             => now()->format('l'),
+            'original_name'   => $request->original_name,
+            'substitute_name' => trim($request->substitute_name),
+            'reason'          => $reason ?: 'Official on Leave / Absence',
+            'updated_at'      => now()->toDateTimeString(),
+        ];
+
+        SiteSetting::updateOrCreate(
+            ['key' => 'kagawad_duty_override'],
+            ['value' => json_encode($overrideData)]
+        );
+
+        return redirect()->back()->with('success', "Today's Kagawad on duty has been substituted with {$request->substitute_name}!");
+    }
+
+    public function clearKagawadOverride()
+    {
+        SiteSetting::where('key', 'kagawad_duty_override')->delete();
+        return redirect()->back()->with('success', "Today's duty schedule has been reset to the standard weekly rotation.");
     }
 }

@@ -89,6 +89,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/admin/officials/{id}/archive', [AdminController::class, 'archiveOfficial'])->name('admin.officials.archive');
     Route::patch('/admin/officials/{id}/restore', [AdminController::class, 'restoreOfficial'])->name('admin.officials.restore');
     Route::delete('/admin/officials/{id}', [AdminController::class, 'destroyOfficial'])->name('admin.officials.destroy');
+    Route::post('/admin/officials/duty-schedule', [AdminController::class, 'updateKagawadSchedule'])->name('admin.officials.duty_schedule');
+    Route::post('/admin/officials/duty-override', [AdminController::class, 'updateKagawadOverride'])->name('admin.officials.duty_override');
+    Route::post('/admin/officials/duty-override/clear', [AdminController::class, 'clearKagawadOverride'])->name('admin.officials.duty_override.clear');
 
     // ── Admin Announcements ──
     Route::post('/admin/announcements', [AdminController::class, 'storeAnnouncement'])->name('admin.announcements.store');

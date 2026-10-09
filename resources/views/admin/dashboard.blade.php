@@ -2547,6 +2547,211 @@
 
             {{-- ══ OFFICIALS ══ --}}
             <div x-show="tab==='officials'" x-transition>
+
+                {{-- ══ KAGAWAD OFFICER ON DUTY & SUBSTITUTE MANAGER ══ --}}
+                <div x-data="{
+                    editSchedModal: false,
+                    substituteModal: false,
+                    customSub: false,
+                    subName: '{{ $isKagawadOverriddenToday ? $activeKagawadTodayName : '' }}',
+                    subReason: '{{ $isKagawadOverriddenToday ? ($kagawadOverrideReason ?? 'Official on Leave / Absence') : 'Official on Leave / Absence' }}'
+                }" class="card" style="margin-bottom:20px; border-left:5px solid #0E5393; background:#fff;">
+                    <div class="card-head" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:38px; height:38px; border-radius:10px; background:#eff6ff; color:#0E5393; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <div class="card-title" style="margin:0; font-size:14px; font-weight:900; color:#0f172a;">
+                                    Kagawad Officer on Duty (Live Main Page Display)
+                                </div>
+                                <div style="font-size:11px; color:#64748b; font-weight:600;">
+                                    Manage the weekly rotation schedule and set immediate substitute officers when someone is absent.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button type="button" @click="editSchedModal = true" class="btn btn-sm btn-ghost" style="font-size:11px; font-weight:700;">
+                                <i class="fas fa-edit"></i> Edit Weekly Rotation
+                            </button>
+                            <button type="button" @click="substituteModal = true" class="btn btn-sm btn-primary" style="font-size:11px; font-weight:800; background:linear-gradient(135deg,#0E5393,#04192D);">
+                                <i class="fas fa-user-clock"></i> Assign Today's Substitute
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="padding:16px 20px; background:#f8fafc; border-top:1px solid #f1f5f9; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; align-items:center;">
+                        {{-- Today's Status Box --}}
+                        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                                <span style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.06em; color:#0E5393; display:flex; align-items:center; gap:5px;">
+                                    <i class="fas fa-clock"></i> TODAY'S ACTIVE DUTY ({{ now()->format('l, M d, Y') }})
+                                </span>
+                                @if($isKagawadOverriddenToday)
+                                    <span style="font-size:9.5px; font-weight:900; background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:2px 8px; border-radius:99px; text-transform:uppercase;">
+                                        ⚠️ Substitute Active
+                                    </span>
+                                @else
+                                    <span style="font-size:9.5px; font-weight:900; background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; padding:2px 8px; border-radius:99px; text-transform:uppercase;">
+                                        ✓ Regular Schedule
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div style="font-size:16px; font-weight:900; color:#0f172a; margin-top:4px;">
+                                {{ $activeKagawadTodayName }}
+                            </div>
+
+                            @if($isKagawadOverriddenToday)
+                                <div style="font-size:11px; color:#b45309; font-weight:700; margin-top:5px; display:flex; align-items:center; gap:6px;">
+                                    <i class="fas fa-info-circle"></i> 
+                                    <span>Pinch-hitting / Substituted for: <strong>{{ $regularKagawadToday }}</strong> ({{ $kagawadOverrideReason }})</span>
+                                </div>
+                                <div style="margin-top:10px;">
+                                    <form action="{{ route('admin.officials.duty_override.clear') }}" method="POST" style="display:inline;" onsubmit="return confirm('Revert today\'s on-duty officer back to {{ addslashes($regularKagawadToday) }}?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:10.5px; font-weight:800; padding:4px 10px;">
+                                            <i class="fas fa-undo"></i> Reset to Regular ({{ $regularKagawadToday }})
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <div style="font-size:11px; color:#64748b; font-weight:600; margin-top:4px;">
+                                    Regular assigned official for {{ now()->format('l') }}. If absent or on leave, click "Assign Today's Substitute" above.
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Quick Weekly Rotation Preview --}}
+                        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 14px;">
+                            <div style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.06em; color:#475569; margin-bottom:8px;">
+                                Weekly Schedule Rotation
+                            </div>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:6px;">
+                                @foreach($kagawadSchedule as $schedItem)
+                                    @php $isTodayRow = ($schedItem['day'] === now()->format('l')); @endphp
+                                    <div style="font-size:10.5px; padding:5px 8px; border-radius:6px; {{ $isTodayRow ? 'background:#eff6ff; border:1px solid #bfdbfe; font-weight:800; color:#1e40af;' : 'background:#f8fafc; border:1px solid #f1f5f9; color:#475569;' }}">
+                                        <div style="font-weight:800; font-size:9.5px; text-transform:uppercase; color:{{ $isTodayRow ? '#1d4ed8' : '#64748b' }};">
+                                            {{ $schedItem['day'] }} {{ $isTodayRow ? '(Today)' : '' }}
+                                        </div>
+                                        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                            {{ $schedItem['name'] }}
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- MODAL: Assign Substitute for Today --}}
+                    <div x-show="substituteModal" x-cloak class="modal-ov" x-transition style="z-index:99999;">
+                        <div class="modal-box" style="max-width:500px;" @click.away="substituteModal = false">
+                            <div class="modal-in" style="padding:22px;">
+                                <div class="modal-hd" style="margin-bottom:14px;">
+                                    <div class="modal-ttl" style="font-size:14px; font-weight:900; color:#0f172a;">
+                                        <i class="fas fa-user-clock" style="color:#0E5393; margin-right:6px;"></i> Assign Kagawad Substitute for Today
+                                    </div>
+                                    <button type="button" @click="substituteModal = false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                                </div>
+
+                                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 12px; margin-bottom:16px; font-size:11px; color:#1e40af; line-height:1.45;">
+                                    <strong>Regular Officer on Duty:</strong> {{ $regularKagawadToday }} ({{ now()->format('l, F j, Y') }})<br>
+                                    Assigning a substitute will immediately update the Resident Main Portal for today only.
+                                </div>
+
+                                <form action="{{ route('admin.officials.duty_override') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="original_name" value="{{ $regularKagawadToday }}">
+
+                                    <div class="fgrp" style="margin-bottom:14px;">
+                                        <label class="flbl">Substitute Officer on Duty *</label>
+                                        <select class="finput" x-show="!customSub" x-model="subName" name="substitute_name" :required="!customSub">
+                                            <option value="">-- Choose from Active Barangay Officials --</option>
+                                            @foreach($officials as $off)
+                                                <option value="{{ $off->name }}">{{ $off->name }} ({{ $off->position }})</option>
+                                            @endforeach
+                                        </select>
+                                        <input type="text" class="finput" x-show="customSub" placeholder="Enter substitute official's full name" x-model="subName" name="substitute_name" :required="customSub">
+                                        <div style="margin-top:6px; display:flex; justify-content:flex-end;">
+                                            <button type="button" @click="customSub = !customSub; subName=''" style="background:none; border:none; color:#0E5393; font-size:10.5px; font-weight:700; cursor:pointer; text-decoration:underline;">
+                                                <span x-text="customSub ? 'Choose from list of officials' : '+ Or type custom name'"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="fgrp" style="margin-bottom:18px;">
+                                        <label class="flbl">Reason for Substitution / Absence</label>
+                                        <select class="finput" name="reason" x-model="subReason" style="margin-bottom:6px;">
+                                            <option value="Official on Leave / Absence">Official on Leave / Absence</option>
+                                            <option value="Sick Leave">Sick Leave / Health Reason</option>
+                                            <option value="Official Business / Off-site Meeting">Official Business / Off-site Meeting</option>
+                                            <option value="Emergency Duty">Emergency Duty</option>
+                                            <option value="Custom">Other (Specify below)</option>
+                                        </select>
+                                        <input type="text" class="finput" placeholder="Additional details or specific reason..." name="reason_custom" x-show="subReason === 'Custom'">
+                                    </div>
+
+                                    <div style="display:flex; justify-content:flex-end; gap:8px;">
+                                        <button type="button" @click="substituteModal = false" class="btn btn-ghost">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#0E5393,#04192D);">
+                                            <i class="fas fa-check"></i> Save Today's Substitute
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- MODAL: Edit Weekly Rotation Timetable --}}
+                    <div x-show="editSchedModal" x-cloak class="modal-ov" x-transition style="z-index:99999;">
+                        <div class="modal-box" style="max-width:620px; max-height:90vh; overflow-y:auto;" @click.away="editSchedModal = false">
+                            <div class="modal-in" style="padding:22px;">
+                                <div class="modal-hd" style="margin-bottom:14px;">
+                                    <div class="modal-ttl" style="font-size:14px; font-weight:900; color:#0f172a;">
+                                        <i class="fas fa-calendar-alt" style="color:#0E5393; margin-right:6px;"></i> Edit Weekly Kagawad Rotation (Monday – Sunday)
+                                    </div>
+                                    <button type="button" @click="editSchedModal = false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                                </div>
+
+                                <p style="font-size:11.5px; color:#64748b; margin-bottom:16px;">
+                                    Configure which Kagawad is assigned for each day of the week. This sets the regular timetable displayed to all residents on the main portal.
+                                </p>
+
+                                <form action="{{ route('admin.officials.duty_schedule') }}" method="POST">
+                                    @csrf
+                                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+                                        @foreach($kagawadSchedule as $idx => $sched)
+                                            <div style="display:flex; align-items:center; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px;">
+                                                <input type="hidden" name="schedule[{{ $idx }}][day]" value="{{ $sched['day'] }}">
+                                                <div style="width:90px; font-weight:900; font-size:12px; color:#0f172a; text-transform:uppercase;">
+                                                    {{ $sched['day'] }}
+                                                </div>
+                                                <div style="flex:1;">
+                                                    <input type="text" list="officials-list-datalist" name="schedule[{{ $idx }}][name]" value="{{ $sched['name'] }}" required class="finput" style="padding:8px 12px; font-size:12.5px;">
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <datalist id="officials-list-datalist">
+                                        @foreach($officials as $off)
+                                            <option value="{{ $off->name }}">{{ $off->position }}</option>
+                                        @endforeach
+                                    </datalist>
+
+                                    <div style="display:flex; justify-content:flex-end; gap:8px;">
+                                        <button type="button" @click="editSchedModal = false" class="btn btn-ghost">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#0E5393,#04192D);">
+                                            <i class="fas fa-save"></i> Save Weekly Schedule
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div
                     style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
                     <div style="display:flex;align-items:center;gap:8px;">
