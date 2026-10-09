@@ -133,23 +133,15 @@
                             @enderror
                         </div>
                         @else
-                        {{-- Security Question Verification (FOR STAFF) --}}
-                        <div style="background:#eff6ff; padding:20px; border-radius:16px; border:1.5px dashed #0E5393;">
-                            <label style="display:block; font-size:10px; font-weight:900; color:#0E5393; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Security Verification</label>
-                            <p style="font-size:11px; color:#1e40af; font-weight:600; margin-bottom:12px; line-height:1.4;">
-                                <strong>Question:</strong> {{ auth()->user()?->security_question ?? 'Who is the authorized official for system verification?' }}
-                            </p>
-                            <div style="position:relative;">
-                                <i class="fas fa-user-check" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#0E5393; font-size:12px;"></i>
-                                <input type="text" name="security_answer" required
-                                    style="width:100%; padding:12px 12px 12px 40px; background:#fff; border:1.5px solid #0E5393; border-radius:12px; font-size:13px; font-weight:700; color:#0f172a; outline:none; transition:all 0.2s;"
-                                    placeholder="Type the answer here">
+                        {{-- Official Department Account Notification --}}
+                        <div style="background:#eff6ff; padding:16px 20px; border-radius:14px; border:1px solid #bfdbfe; display:flex; align-items:center; gap:12px;">
+                            <div style="width:36px; height:36px; border-radius:10px; background:#0E5393; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="fas fa-shield-alt"></i>
                             </div>
-                            @error('security_answer')
-                                <p style="font-size:10px; color:#dc2626; font-weight:700; margin-top:6px; display:flex; align-items:center; gap:4px;">
-                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
-                                </p>
-                            @enderror
+                            <div>
+                                <div style="font-size:11px; font-weight:800; color:#0E5393; text-transform:uppercase;">Official Department Account Security</div>
+                                <div style="font-size:11px; color:#1e40af; font-weight:600;">Registered Official Email: <strong>{{ auth()->user()?->email }}</strong> (Secured via OTP & Credential Validation)</div>
+                            </div>
                         </div>
                         @endif
 

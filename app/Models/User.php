@@ -46,6 +46,7 @@ class User extends Authenticatable
         'password_history',
         'photo_updated_at',
         'id_type',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -58,6 +59,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'photo_updated_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'birthday' => 'date',
             'is_voter' => 'boolean',

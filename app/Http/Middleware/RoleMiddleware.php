@@ -23,19 +23,15 @@ class RoleMiddleware
         $userRole = Auth::user()->role;
         if (!in_array($userRole, $roles)) {
             if ($request->expectsJson() || $request->ajax()) {
-                return response()->json(['message' => 'Unauthorized access.'], 403);
+                return response()->json([
+                    'error'   => 'Forbidden',
+                    'message' => 'Unauthorized access. You do not have permission to access this portal.'
+                ], 403);
             }
 
-            $redirectRoute = match ($userRole) {
-                'admin'   => 'admin.dashboard',
-                'office'  => 'office.index',
-                'justice' => 'justice.dashboard',
-                'vawc'    => 'vawc.dashboard',
-                'peace'   => 'peace.dashboard',
-                default   => 'resident.index',
-            };
-
-            return redirect()->route($redirectRoute)->with('error', 'Wala kayong pahintulot na buksan ang pahinang ito (Access Denied).');
+            // Server-side HTTP 403 Forbidden — stops execution immediately
+            // Zero portal HTML or sensitive records are transmitted to unauthorized users
+            abort(403, 'Wala kayong pahintulot na buksan ang bahaging ito (Access Denied).');
         }
 
         return $next($request);

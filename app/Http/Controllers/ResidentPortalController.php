@@ -414,6 +414,35 @@ class ResidentPortalController extends Controller
         $lat = $request->latitude;
         $lng = $request->longitude;
         $mapsUrl = ($lat && $lng) ? "https://www.google.com/maps?q={$lat},{$lng}" : null;
+        $residentEmail = $user?->email ?: $request->email;
+
+        // Duplicate-submission prevention / Debounce guard (evaluator recommendation #3)
+        $duplicateWindow = now()->subMinutes(2);
+        $existingAlertQuery = \App\Models\EmergencySosAlert::where('created_at', '>=', $duplicateWindow)
+            ->whereIn('status', ['triggered', 'acknowledged', 'dispatched']);
+
+        if ($user) {
+            $existingAlertQuery->where('user_id', $user->id);
+        } else {
+            $existingAlertQuery->where(function($q) use ($contact, $name, $landmark) {
+                if ($contact && $contact !== 'N/A') {
+                    $q->where('contact_number', $contact);
+                } else {
+                    $q->where('resident_name', $name)->where('landmark', $landmark);
+                }
+            });
+        }
+
+        $recentAlert = $existingAlertQuery->latest()->first();
+        if ($recentAlert) {
+            return response()->json([
+                'success' => true,
+                'is_duplicate' => true,
+                'message' => 'Active emergency SOS is already in progress and Tanods have been alerted. Duplicate submission prevented.',
+                'alert_id' => $recentAlert->id,
+                'resident_email' => $residentEmail,
+            ]);
+        }
 
         $alert = \App\Models\EmergencySosAlert::create([
             'user_id'         => $user?->id,
@@ -447,7 +476,6 @@ class ResidentPortalController extends Controller
             'google_maps_url' => $mapsUrl,
             'dispatched_at'   => now()->format('F d, Y h:i A'),
         ];
-        $residentEmail = $user?->email ?: $request->email;
 
         // 1. Email Alert to Barangay Hall / Peace & Order Tanod On-Duty
         try {

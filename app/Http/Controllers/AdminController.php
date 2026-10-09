@@ -716,11 +716,10 @@ class AdminController extends Controller
     public function updateStaffSecurity(Request $request)
     {
         $request->validate([
-            'user_id'           => 'required|exists:users,id',
-            'name'              => 'required|string|max:255',
-            'email'             => 'required|email|max:255|unique:users,email,' . $request->user_id,
-            'security_question' => 'required|string|max:255',
-            'security_answer'   => 'required|string|max:255',
+            'user_id'  => 'required|exists:users,id',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email,' . $request->user_id,
+            'password' => 'nullable|string|min:8|max:32',
         ]);
 
         $user = User::findOrFail($request->user_id);
@@ -729,12 +728,16 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'Cannot modify security credentials for resident accounts.');
         }
 
-        $user->update([
-            'name'              => trim($request->name),
-            'email'             => trim(strtolower($request->email)),
-            'security_question' => trim($request->security_question),
-            'security_answer'   => trim($request->security_answer),
-        ]);
+        $updateData = [
+            'name'  => trim($request->name),
+            'email' => trim(strtolower($request->email)),
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $user->update($updateData);
 
         return redirect()->back()->with('success', "Account & Security settings updated successfully for {$user->name} (" . ucfirst($user->role) . " portal).");
     }

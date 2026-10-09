@@ -46,12 +46,13 @@ class StaffPasswordController extends Controller
         $isResident = $user->role === 'resident';
 
         $rules = [
-            'security_answer'   => 'required|string',
-            'new_password'      => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed', new \App\Rules\NotRecentPassword($user)],
+            'new_password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed', new \App\Rules\NotRecentPassword($user)],
         ];
 
         if (!$isResident) {
             $rules['current_password'] = 'required';
+        } else {
+            $rules['security_answer'] = 'required';
         }
 
         $request->validate($rules, [
@@ -65,15 +66,10 @@ class StaffPasswordController extends Controller
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);
             }
-
-            // Check security question for staff (custom answer from admin or fallback to system default)
-            $expectedAnswer = !empty($user->security_answer) ? $user->security_answer : self::SECRET_ANSWER;
-            if (strtolower(trim($request->security_answer)) !== strtolower(trim($expectedAnswer))) {
-                return back()->withErrors(['security_answer' => 'Incorrect answer. Please check your security question or contact the Administrator.']);
-            }
         } else {
             // Check OTP for residents
-            if (!$user->otp || strtoupper(trim($request->security_answer)) !== strtoupper($user->otp) || ($user->otp_expires_at && Carbon::now()->isAfter($user->otp_expires_at))) {
+            $inputOtp = $request->input('otp', $request->input('security_answer'));
+            if (!$user->otp || strtoupper(trim($inputOtp)) !== strtoupper($user->otp) || ($user->otp_expires_at && Carbon::now()->isAfter($user->otp_expires_at))) {
                 return back()->withErrors(['security_answer' => 'Invalid or expired OTP. Please try again.']);
             }
 

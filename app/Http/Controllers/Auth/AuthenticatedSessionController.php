@@ -36,6 +36,11 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('login')->with('error', 'Your account is deactivated.');
         }
 
+        // Update last login timestamp for security audit trail
+        try {
+            $user->forceFill(['last_login_at' => now()])->saveQuietly();
+        } catch (\Throwable $e) {}
+
         $request->session()->flash('login_welcome', true);
 
         // Role-Based Redirection — walang intended() para hindi mag-redirect sa maling page
