@@ -246,17 +246,34 @@ html, body {
     .right-col{grid-template-columns:1fr;}
     .duty-widget-row{flex-direction:column;align-items:flex-start;}
     .duty-view-btn{width:100%;justify-content:center;margin-top:8px;}
+    .filter-row, .tab-row {
+        display: flex !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        padding-bottom: 4px !important;
+        gap: 6px !important;
+    }
+    .filter-row::-webkit-scrollbar, .tab-row::-webkit-scrollbar {
+        display: none !important;
+    }
+    .filter-pill, .tab-pill {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+    }
 }
-@media(max-width:540px){
-    .page-wrap{padding:14px 11px;}
-    .header-btn-grad{padding:8px 10px; font-size:11px; flex:1; justify-content:center;}
-    .header-btn-grad span{display:none;}
-    .header-btn-grad i{margin:0; font-size:14px;}
+@media(max-width:640px){
+    .page-wrap{padding:12px 10px;}
+    .header-btn-grad{padding:7px 8px !important; font-size:10px !important; gap:5px !important; justify-content:center !important; width:100% !important;}
+    .header-btn-grad span{display:inline !important; font-size:9.5px !important; font-weight:800 !important; white-space:nowrap !important;}
+    .header-btn-grad i{font-size:11px !important;}
+    .header-notif-btn{width:36px !important; height:36px !important; flex-shrink:0 !important;}
 }
-@media(max-width:400px){
-    .header-btn-grad span{display:none;}
-    .flex-wrap.items-center.gap-2{flex-direction:column; width:100%;}
-    .header-btn-grad{width:100%;}
+@media(max-width:420px){
+    .header-btn-grad{padding:7px 4px !important; font-size:9px !important; gap:3px !important;}
+    .header-btn-grad span{font-size:8.5px !important;}
+    .header-btn-grad i{font-size:10px !important;}
 }
 @keyframes notif-pulse {
     0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
@@ -336,19 +353,19 @@ html, body {
 
         {{-- ══ HEADER ══ --}}
         <x-slot name="header">
-            <div class="flex flex-wrap items-center justify-between gap-y-4">
-                <div class="flex items-center gap-4 min-w-max">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div class="h-10 w-10 rounded-lg flex items-center justify-center text-white shadow-sm flex-shrink-0" style="background:linear-gradient(135deg,#0E5393 0%,#04192D 100%);">
-                        <i class="fas fa-users-cog text-lg"></i>
+                        <i class="fas fa-users-cog text-base sm:text-lg"></i>
                     </div>
-                    <div>
-                        <h2 class="font-black text-xl text-gray-800 leading-tight uppercase tracking-tight">{{ __('Office Administration Portal') }}</h2>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Barangay San Miguel II • Dasmariñas, Cavite</p>
+                    <div class="min-w-0 flex-1">
+                        <h2 class="font-black text-base sm:text-xl text-gray-800 leading-tight uppercase tracking-tight truncate sm:whitespace-normal">{{ __('Office Administration Portal') }}</h2>
+                        <p class="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">Barangay San Miguel II • Dasmariñas, Cavite</p>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3 justify-end flex-1 sm:flex-none w-full sm:w-auto">
-                    <div x-data="{ openNotif: false }" class="relative">
-                        <button @click="openNotif = !openNotif" class="header-notif-btn">
+                <div class="flex items-center gap-2 justify-between sm:justify-end w-full sm:w-auto">
+                    <div x-data="{ openNotif: false }" class="relative flex-shrink-0">
+                        <button @click="openNotif = !openNotif" class="header-notif-btn" title="Pending Tasks">
                             <i class="fas fa-bell"></i>
                             @php
                                 $totalPending = ($pendingDocCount ?? 0) + ($pendingIdCount ?? 0) + ($pendingVotersCount ?? 0) + ($pendingResidentsCount ?? 0) + ($pendingPetVaccines ?? 0);
@@ -448,15 +465,17 @@ html, body {
                     </div>
 
 
-                    <button onclick="window.dispatchEvent(new CustomEvent('open-import-modal'))" class="header-btn-grad">
-                        <i class="fas fa-file-import"></i><span>Import</span>
-                    </button>
-                    <button onclick="window.dispatchEvent(new CustomEvent('open-add-modal'))" class="header-btn-grad">
-                        <i class="fas fa-user-plus"></i><span>Add Resident</span>
-                    </button>
-                    <button onclick="window.dispatchEvent(new CustomEvent('open-digital-id'))" class="header-btn-grad">
-                        <i class="fas fa-id-card"></i><span>Digital ID</span>
-                    </button>
+                    <div class="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial">
+                        <button onclick="window.dispatchEvent(new CustomEvent('open-import-modal'))" class="header-btn-grad">
+                            <i class="fas fa-file-import"></i><span>Import</span>
+                        </button>
+                        <button onclick="window.dispatchEvent(new CustomEvent('open-add-modal'))" class="header-btn-grad">
+                            <i class="fas fa-user-plus"></i><span>Add Resident</span>
+                        </button>
+                        <button onclick="window.dispatchEvent(new CustomEvent('open-digital-id'))" class="header-btn-grad">
+                            <i class="fas fa-id-card"></i><span>Digital ID</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </x-slot>

@@ -420,10 +420,10 @@ class ResidentPortalController extends Controller
         $mapsUrl = ($lat && $lng) ? "https://www.google.com/maps?q={$lat},{$lng}" : null;
         $residentEmail = $user?->email ?: $request->email;
 
-        // Duplicate-submission prevention / Debounce guard (evaluator recommendation #3)
-        $duplicateWindow = now()->subMinutes(2);
+        // Duplicate-submission prevention / Debounce & status update guard (Evaluator Recommendation #3)
+        $duplicateWindow = now()->subMinutes(5);
         $existingAlertQuery = \App\Models\EmergencySosAlert::where('created_at', '>=', $duplicateWindow)
-            ->whereIn('status', ['triggered', 'acknowledged', 'dispatched']);
+            ->whereIn('status', ['triggered', 'acknowledged', 'dispatched', 'responding', 'active']);
 
         if ($user) {
             $existingAlertQuery->where('user_id', $user->id);
@@ -439,10 +439,25 @@ class ResidentPortalController extends Controller
 
         $recentAlert = $existingAlertQuery->latest()->first();
         if ($recentAlert) {
+            // Update details on existing record if newer information provided (evaluator recommendation: i-update na lang ang status at huwag lumikha ng bagong record)
+            $updatePayload = ['updated_at' => now()];
+            if ($landmark && $landmark !== $recentAlert->landmark) {
+                $updatePayload['landmark'] = $landmark;
+            }
+            if ($situationNote && $situationNote !== $recentAlert->message) {
+                $updatePayload['message'] = $situationNote;
+            }
+            if ($lat && $lng) {
+                $updatePayload['latitude'] = $lat;
+                $updatePayload['longitude'] = $lng;
+                $updatePayload['google_maps_url'] = $mapsUrl;
+            }
+            $recentAlert->update($updatePayload);
+
             return response()->json([
                 'success' => true,
                 'is_duplicate' => true,
-                'message' => 'Active emergency SOS is already in progress and Tanods have been alerted. Duplicate submission prevented.',
+                'message' => 'May aktibong emergency SOS signal na naitala sa nakalipas na 3-5 minuto. Na-update ang inyong emergency details at alerto na ang Barangay Tanod responders.',
                 'alert_id' => $recentAlert->id,
                 'resident_email' => $residentEmail,
             ]);
