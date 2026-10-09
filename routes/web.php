@@ -269,19 +269,7 @@ Route::get('/storage/{path}', function ($path) {
 
 require __DIR__ . '/auth.php';
 
-// ── FALLBACK ROUTE FOR UNMATCHED URLS (PREVENT RAW 404) ──
+// ── FALLBACK ROUTE FOR UNMATCHED URLS (HTTP 404 NOT FOUND) ──
 Route::fallback(function () {
-    if (Auth::check()) {
-        $userRole = Auth::user()->role;
-        $targetRoute = match ($userRole) {
-            'admin'   => 'admin.dashboard',
-            'office'  => 'office.index',
-            'justice' => 'justice.dashboard',
-            'vawc'    => 'vawc.dashboard',
-            'peace'   => 'peace.dashboard',
-            default   => 'resident.index',
-        };
-        return redirect()->route($targetRoute)->with('error', 'Ang pahinang hinahanap ay hindi natagpuan (404). Ibinabalik sa iyong portal.');
-    }
-    return redirect()->route('resident.index')->with('error', 'Ang pahinang hinahanap ay hindi natagpuan (404).');
+    abort(404);
 });
