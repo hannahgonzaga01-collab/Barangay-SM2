@@ -32,6 +32,10 @@ class ResidentPortalController extends Controller
             /** @var User $user */
             $user = auth()->user();
 
+            if ($user->role !== 'resident') {
+                abort(403, 'Wala kayong pahintulot na ma-access ang Resident Portal gamit ang Department Staff / Admin account.');
+            }
+
             // ── 1. Already linked by user_id ──
             $resident = Resident::where('user_id', $user->id)->first();
 

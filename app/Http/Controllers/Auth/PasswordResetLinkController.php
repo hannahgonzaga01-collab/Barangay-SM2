@@ -29,12 +29,7 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // If user is an administrative official/staff with a security question,
-        // we intercept the standard email sending process UNLESS they requested an email reset link.
-        $user = \App\Models\User::where('email', $request->email)->first();
-        if ($user && $user->role !== 'resident' && !empty($user->security_question) && !$request->boolean('force_email')) {
-            return redirect()->route('password.security-question')->with('reset_email', $user->email);
-        }
+        // All password resets are sent via official email reset link (NIST SP 800-63B compliant)
 
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we

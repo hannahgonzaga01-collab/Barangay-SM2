@@ -12,6 +12,17 @@ use App\Http\Controllers\AdminController;
 
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        $role = Auth::user()?->role;
+        return match ($role) {
+            'admin'   => redirect()->route('admin.dashboard'),
+            'office'  => redirect()->route('office.index'),
+            'justice' => redirect()->route('justice.dashboard'),
+            'vawc'    => redirect()->route('vawc.dashboard'),
+            'peace'   => redirect()->route('peace.dashboard'),
+            default   => redirect()->route('resident.index'),
+        };
+    }
     return redirect()->route('resident.index');
 });
 
@@ -248,7 +259,7 @@ Route::middleware(['auth', 'verified', 'role:admin,office,justice,vawc,peace'])-
 });
 
 // ── DIRECT /storage REDIRECT TO PREVENT 403 OR DIRECTORY LISTING ──
-Route::get('/storage', fn() => redirect()->route('resident.index'));
+Route::get('/storage', fn() => redirect('/'));
 
 // ── GRACEFUL STORAGE ASSET FALLBACK ROUTE ──
 Route::get('/storage/{path}', function ($path) {
