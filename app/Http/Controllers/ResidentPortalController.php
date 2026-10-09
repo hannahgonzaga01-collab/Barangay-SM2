@@ -1132,17 +1132,7 @@ class ResidentPortalController extends Controller
 
     public function storeIssueReport(Request $request)
     {
-        if (auth()->check()) {
-            $activeReport = IssueReport::where('user_id', auth()->id())
-                ->whereNotIn('status', ['resolved', 'closed', 'dismissed', 'disapproved', 'settled', 'rejected'])
-                ->first();
-
-            if ($activeReport) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'This report cannot be submitted. Please wait for your current report to be settled before filing another. Thank you.');
-            }
-        }
+        // System permits multiple incident reports; confirmed via modal with ₱100 fee and anti-prank warning.
 
         if (!$request->filled('incident_date') && $request->filled('incident_date_only')) {
             $datePart = $request->input('incident_date_only');

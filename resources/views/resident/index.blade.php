@@ -467,6 +467,43 @@ html, body {
     @endphp
 
     <script>
+    function issueEvidenceUploader() {
+        return {
+            evFiles: [],
+            previewUrl: null,
+            previewName: '',
+            previewModal: false,
+            handleFileSelect(e) {
+                const files = Array.from(e.target.files || []);
+                for (let f of files) {
+                    if (f.size > 5 * 1024 * 1024) {
+                        alert('Ang file "' + f.name + '" ay lampas sa 5MB (' + (f.size / 1024 / 1024).toFixed(1) + 'MB)! Ang maximum allowed size ay 5MB bawat file.');
+                        this.evFiles = [];
+                        this.previewUrl = null;
+                        this.previewName = '';
+                        if (this.$refs.evidenceInput) this.$refs.evidenceInput.value = '';
+                        return;
+                    }
+                }
+                this.evFiles = files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    this.previewUrl = URL.createObjectURL(files[0]);
+                    this.previewName = files[0].name;
+                } else {
+                    this.previewUrl = null;
+                    this.previewName = files.length > 0 ? files[0].name : '';
+                }
+            },
+            removeFile(e) {
+                if (e) e.stopPropagation();
+                this.evFiles = [];
+                this.previewUrl = null;
+                this.previewName = '';
+                if (this.$refs.evidenceInput) this.$refs.evidenceInput.value = '';
+            }
+        };
+    }
+
     function residentPortalApp() {
         return {
             dutyOpen: false,
@@ -475,6 +512,8 @@ html, body {
             scheduleTab: 'kagawad',
             docuModal: false,
             issueModal: false,
+            issueConfirmModal: false,
+            confirmData: { offense: '', complainant: '', contact: '', respondent: '', dateTime: '', location: '', description: '' },
             issueStep: 1,
             incidentDatePart: '{{ date('Y-m-d') }}',
             incidentTimePart: '{{ date('H:i') }}',
@@ -686,26 +725,20 @@ html, body {
                         sched_assigned_days: 'Assigned Days:',
                         sched_personnel: 'Personnel:',
 
-                        // FAQs Modal
+                        // FAQs Modal (Concise, Senior/PWD Friendly & Accurate Fees)
                         faq_title: 'Frequently Asked Questions & Resident Guide',
-                        faq_subtitle: 'Important reminders, priority procedures, and official service guidelines',
-                        faq_search_ph: 'Search FAQs (e.g. Senior, Representative, Payment, SLA, Hours)...',
-                        faq_senior_title: 'Senior Citizens, PWDs & Pregnant Women Priority Lane:',
-                        faq_senior_desc: 'Special priority counters and assisted service lanes are dedicated for Senior Citizens, Persons with Disabilities (PWDs), and pregnant residents. If you cannot visit in person due to health or mobility concerns, an authorized representative (family member or caregiver) may request and pick up documents on your behalf by presenting your Senior/PWD ID and an authorization note.',
+                        faq_subtitle: 'Important reminders, priority guidelines, and official fees',
+                        faq_search_ph: 'Search FAQs (e.g. Senior, Representative, Payment, Fees, Hours)...',
+                        faq_senior_title: 'Senior Citizens, PWDs & Priority Lane:',
+                        faq_senior_desc: 'Dedicated priority lane for Seniors, PWDs, and pregnant residents at the Barangay Hall. Authorized representatives may claim documents on their behalf with the Senior/PWD ID and an authorization letter.',
                         faq_rep_title: 'Authorized Representative Rules:',
-                        faq_rep_desc: 'Family members or authorized representatives may request on a resident\'s behalf. Upon claiming at the Barangay Hall, the representative must present: (1) Their valid Government or Barangay ID, (2) A copy of the requesting resident\'s valid ID, and (3) A signed authorization letter or note. Representatives may have at most two (2) active pending requests concurrently.',
-                        faq_job_title: 'First-Time Jobseeker Act (RA 11261):',
-                        faq_job_desc: 'First-time jobseekers are entitled to one-time free issuance of Barangay Clearance and Oath of Undertaking. Per national law, personal in-person appearance is required at the Barangay Hall to sign the official Oath of Undertaking. This benefit can only be availed ONCE in a lifetime per Filipino citizen.',
-                        faq_fees_title: 'Document Fees & Cashier Payment Guidelines:',
-                        faq_fees_desc: 'Official document fees (e.g., ₱50 for standard clearances, ₱100 for business clearances) are payable ONLY at the Barangay Cashier Counter upon document pickup. The barangay NEVER asks for advance online bank transfers or GCash payments to personal accounts. Always request an Official Receipt (OR). Indigency certificates are 100% FREE.',
-                        faq_sla_title: 'Processing Time & Pickup SLA:',
-                        faq_sla_desc: 'Regular document clearances are processed and ready within 1 to 2 business days. You can track live status in the Live Request Tracker. Once marked "Ready for Pickup", check the pickup schedule note and the designated releasing officer.',
-                        faq_hours_title: 'Barangay Office Hours:',
-                        faq_hours_desc: 'Monday to Friday, 8:00 AM to 5:00 PM. The office is closed on Saturdays, Sundays, and official national/local holidays. The Peace and Order Tanod desk operates 24/7 for community security.',
-                        faq_sos_title: 'Emergency SOS Alert vs 911 / City Rescue:',
-                        faq_sos_desc: 'The Emergency SOS button in the portal immediately alerts and dispatches on-duty Barangay Tanod patrol officers stationed within Barangay San Miguel II. For severe medical emergencies, fires, or incidents outside our barangay boundaries, call 911 or CDRRMO / Dasmariñas Rescue at (046) 481-8000 immediately.',
-                        faq_reports_title: 'Incident Blotter & Dispute Reports:',
-                        faq_reports_desc: 'Each resident is allowed one (1) active blotter or complaint report at a time to ensure timely investigation and resolution. Your report will be handled confidentially by VAWC, Peace & Order, or the Lupon Tagapamayapa.',
+                        faq_rep_desc: 'If claiming via representative, bring: (1) Representative\'s valid ID, (2) Copy of the resident\'s valid ID, and (3) Signed authorization letter. Up to 2 requests per representative are allowed.',
+                        faq_fees_title: 'Document Fees (Free vs. Loan Applications):',
+                        faq_fees_desc: 'Barangay Clearance, Certificate of Indigency, Residency, and First-Time Jobseeker are 100% FREE. ONLY Loan Application / Requirements have a document fee, payable strictly at the official Barangay Cashier upon pickup.',
+                        faq_reports_title: 'Incident Reports (₱100 Fee & Multiple Reports):',
+                        faq_reports_desc: 'Residents may submit multiple incident reports. A standard ₱100.00 filing fee is required at the Barangay Hall for official blotter processing. Prank or joke reports are strictly prohibited by law.',
+                        faq_hours_title: 'Barangay Office Hours & 24/7 Tanod Desk:',
+                        faq_hours_desc: 'Office hours: Monday to Friday, 8:00 AM to 5:00 PM. The Barangay Tanod Desk and Emergency SOS dispatch are active 24/7 for community security and emergencies.',
                         faq_close: 'Close Guide',
                     },
                     fil: {
@@ -832,26 +865,20 @@ html, body {
                         sched_assigned_days: 'Mga Nakatakdang Araw:',
                         sched_personnel: 'Mga Tauhan:',
 
-                        // FAQs Modal
+                        // FAQs Modal (Maikli, Madaling Basahin ng Senior/PWD & Tamang Bayarin)
                         faq_title: 'Mga Madalas Itanong (FAQs) at Gabay sa Residente',
-                        faq_subtitle: 'Mahalagang paalala, serbisyo para sa Senior/PWD, at mga opisyal na panuntunan',
-                        faq_search_ph: 'Maghanap sa FAQs (hal. Senior, Kinatawan, Bayad, Oras, Responde)...',
-                        faq_senior_title: 'Priority Lane para sa Senior Citizens, PWDs at mga Buntis:',
-                        faq_senior_desc: 'Mayroong espesyal na Priority Counter at mabilisang tulong para sa mga Senior Citizens, Persons with Disabilities (PWDs), at mga buntis sa Barangay Hall. Kung hindi kayang pumunta nang personal dahil sa karamdaman o kapansanan, maaaring kumuha ng dokumento ang inyong awtorisadong kinatawan (kapamilya o caregiver) dala ang inyong Senior/PWD ID at authorization note.',
-                        faq_rep_title: 'Alituntunin para sa Awtorisadong Kinatawan (Representative):',
-                        faq_rep_desc: 'Maaaring humiling ang inyong kapamilya o pinagkakatiwalaang kinatawan. Sa oras ng pagkuha sa Barangay Hall, dalhin ang: (1) Valid ID ng kinatawan, (2) Kopya ng ID ng mismong residenteng may-ari, at (3) Nilagdaang sulat ng awtorisasyon (Authorization Letter). Hanggang 2 aktibong kahilingan lamang ang pinapayagan nang sabay.',
-                        faq_job_title: 'First-Time Jobseeker Act (RA 11261):',
-                        faq_job_desc: 'Ang sertipikasyon para sa mga unang beses maghahanapbuhay ay LIBRE alinsunod sa batas. Kinakailangan ang personal na pagpunta sa Barangay Hall upang lumagda sa opisyal na Oath of Undertaking. Ang benepisyong ito ay maaari lamang ma-avail nang ISANG BESES sa buong buhay ng bawat mamamayan.',
-                        faq_fees_title: 'Bayad sa Dokumento at Panuntunan sa Cashier:',
-                        faq_fees_desc: 'Ang opisyal na bayad sa clearances (₱50 para sa regular clearance, ₱100 para sa business) ay binabayaran LAMANG sa opisyal na Barangay Cashier sa oras ng pagkuha (pickup). HINDI humihingi ang barangay ng advance payment o GCash sa mga personal na numero. Palaging humingi ng Opisyal na Resibo (OR). Ang Indigency Certificate ay 100% LIBRE.',
-                        faq_sla_title: 'Oras ng Pagproseso at Pagkuha (Tracking & SLA):',
-                        faq_sla_desc: 'Karaniwang handa ang regular na clearance sa loob ng 1 hanggang 2 araw ng trabaho. Masusubaybayan ang progreso sa Live Request Tracker. Kapag naging "Ready for Pickup", ipapakita ang petsa at pangalan ng opisyal na maglalabas ng inyong dokumento.',
-                        faq_hours_title: 'Oras ng Tanggapan ng Barangay:',
-                        faq_hours_desc: 'Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM. Sarado tuwing Sabado, Linggo, at mga opisyal na pista opisyal. Ang Tanod Desk ay bukas 24/7 para sa kapayapaan at seguridad ng barangay.',
-                        faq_sos_title: 'Emergency SOS Alert vs 911 / City Rescue Hotline:',
-                        faq_sos_desc: 'Ang Emergency SOS button sa portal ay agarang nagpapadala ng alerto sa mga nagpapatrulyang Barangay Tanod sa loob ng Barangay San Miguel II. Para sa malubhang aksidente, sunog, o mga insidente sa labas ng barangay, tumawag agad sa 911 o CDRRMO / Dasmariñas Rescue sa (046) 481-8000.',
-                        faq_reports_title: 'Mga Ulat ng Insidente at Reklamo:',
-                        faq_reports_desc: 'Isang (1) aktibong blotter o ulat lamang ang pinapayagan sa bawat residente upang masubaybayan nang maayos. Ang inyong ulat ay kompidensiyal na hahawakan ng VAWC, Peace & Order, o Lupon Tagapamayapa.',
+                        faq_subtitle: 'Mahalagang paalala, serbisyo para sa Senior/PWD, at opisyal na bayarin',
+                        faq_search_ph: 'Maghanap sa FAQs (hal. Senior, Kinatawan, Bayad, Loan, Oras)...',
+                        faq_senior_title: 'Priority Lane para sa Senior Citizens, PWDs at Buntis:',
+                        faq_senior_desc: 'May espesyal na priority lane para sa Seniors, PWDs, at mga buntis sa Barangay Hall. Maaari ding magpadala ng awtorisadong kinatawan dala ang Senior/PWD ID at authorization letter.',
+                        faq_rep_title: 'Panuntunan sa Awtorisadong Kinatawan (Representative):',
+                        faq_rep_desc: 'Kung kinatawan ang kukuha, dalhin sa Barangay Hall ang: (1) Valid ID ng kinatawan, (2) Kopya ng ID ng residente, at (3) Nilagdaang Authorization Letter. Hanggang 2 requests lamang ang pinapayagan.',
+                        faq_fees_title: 'Bayad sa Dokumento (Libre vs. Loan Application):',
+                        faq_fees_desc: 'LIBRE ang Barangay Clearance, Indigency, Residency, at First-Time Jobseeker. Tanging ang Loan Application / Requirements lamang ang may bayad, na binabayaran LAMANG sa opisyal na Barangay Cashier sa oras ng pagkuha.',
+                        faq_reports_title: 'Ulat ng Insidente (₱100 Bayad at Maramihang Ulat):',
+                        faq_reports_desc: 'Pinapayagan ang pagsumite ng maraming ulat ng insidente. May standard na ₱100.00 filing fee sa Barangay Hall para sa opisyal na blotter. Mahigpit na bawal ang mga birong sumbong o prank reports.',
+                        faq_hours_title: 'Oras ng Tanggapan at 24/7 Tanod Desk:',
+                        faq_hours_desc: 'Lunes hanggang Biyernes, 8:00 AM – 5:00 PM ang opisina. Ang Tanod Desk at Emergency SOS ay bukas 24/7 para sa anumang sakuna o emergency.',
                         faq_close: 'Isara ang Gabay',
                     }
                 };
@@ -1091,45 +1118,60 @@ html, body {
                 .catch(() => { this.msgSending = false; this.msgSent = true; });
             },
 
+            focusIssueField(step, inputSelector, errorMsg) {
+                this.issueStep = step;
+                this.issueErrorMsg = errorMsg;
+                this.$nextTick(() => {
+                    const form = document.getElementById('issueReportForm');
+                    if (!form) return;
+                    const el = form.querySelector(inputSelector);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        try { el.focus(); } catch (err) {}
+                        el.style.borderColor = '#ef4444';
+                        el.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+                        setTimeout(() => { 
+                            el.style.borderColor = ''; 
+                            el.style.boxShadow = '';
+                        }, 3500);
+                    }
+                });
+            },
+
             goToIssueStep2() {
                 this.issueErrorMsg = '';
-
                 const form = document.getElementById('issueReportForm');
                 if (!form) return;
 
                 if (!this.selectedOffense) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Pumili po ng Uri ng Reklamo / Offense.' : 'Please select the Type of Offense / Complaint.';
-                    return;
+                    return this.focusIssueField(1, 'select[name="issue_type"]', 
+                        this.lang === 'fil' ? 'Pumili po ng Uri ng Reklamo / Offense.' : 'Please select the Type of Offense / Complaint.');
                 }
                 if (this.selectedOffense === 'Others') {
                     const otherInput = form.querySelector('input[name="issue_type_other"]');
                     if (!otherInput || !otherInput.value.trim()) {
-                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakitukoy ang uri ng reklamo.' : 'Please specify the type of offense.';
-                        otherInput?.focus();
-                        return;
+                        return this.focusIssueField(1, 'input[name="issue_type_other"]', 
+                            this.lang === 'fil' ? 'Pakitukoy ang uri ng reklamo.' : 'Please specify the type of offense.');
                     }
                 }
 
                 const nameInput = form.querySelector('input[name="complainant_name"]');
                 if (!nameInput || !nameInput.value.trim()) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng nagrereklamo.' : 'Please enter complainant full name.';
-                    nameInput?.focus();
-                    return;
+                    return this.focusIssueField(1, 'input[name="complainant_name"]', 
+                        this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng nagrereklamo.' : 'Please enter complainant full name.');
                 }
 
                 const ageInput = form.querySelector('input[name="complainant_age"]');
                 if (!ageInput || !ageInput.value || parseInt(ageInput.value) < 18) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangang 18 taong gulang pataas ang nagrereklamo.' : 'Complainant must be at least 18 years old.';
-                    ageInput?.focus();
-                    return;
+                    return this.focusIssueField(1, 'input[name="complainant_age"]', 
+                        this.lang === 'fil' ? 'Kailangang 18 taong gulang pataas ang nagrereklamo.' : 'Complainant must be at least 18 years old.');
                 }
 
                 const contactInput = form.querySelector('#issueContactInput') || form.querySelector('input[name="contact"]');
                 const rawContact = contactInput ? contactInput.value.replace(/[^0-9]/g, '').trim() : '';
                 if (!contactInput || rawContact.length !== 11 || !rawContact.startsWith('09')) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangang eksaktong 11-digit ang contact number na nagsisimula sa 09 (hal. 09XXXXXXXXX).' : 'Contact number must be exactly 11 digits starting with 09 (e.g. 09XXXXXXXXX).';
-                    contactInput?.focus();
-                    return;
+                    return this.focusIssueField(1, '#issueContactInput', 
+                        this.lang === 'fil' ? 'Kailangang eksaktong 11-digit ang contact number na nagsisimula sa 09 (hal. 09XXXXXXXXX).' : 'Contact number must be exactly 11 digits starting with 09 (e.g. 09XXXXXXXXX).');
                 }
                 contactInput.value = rawContact;
 
@@ -1137,9 +1179,8 @@ html, body {
                     const emailInput = form.querySelector('input[name="guest_email"]');
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailInput || !emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
-                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang wastong email address para sa mga update.' : 'Please enter a valid email address for notifications.';
-                        emailInput?.focus();
-                        return;
+                        return this.focusIssueField(1, 'input[name="guest_email"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang wastong email address para sa mga update.' : 'Please enter a valid email address for notifications.');
                     }
                 }
 
@@ -1149,33 +1190,28 @@ html, body {
                     const victimAge = form.querySelector('input[name="victim_age"]');
                     const victimGender = form.querySelector('select[name="victim_gender"]');
                     const victimRel = form.querySelector('input[name="victim_relationship"]');
-                    if (!victimName?.value.trim()) {
-                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng biktima.' : 'Please enter the victim full name.';
-                        victimName?.focus();
-                        return;
+                    if (!victimName || !victimName.value.trim()) {
+                        return this.focusIssueField(1, 'input[name="victim_name"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng biktima.' : 'Please enter the victim full name.');
                     }
-                    if (!victimAge?.value) {
-                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang edad ng biktima.' : 'Please enter the victim age.';
-                        victimAge?.focus();
-                        return;
+                    if (!victimAge || !victimAge.value) {
+                        return this.focusIssueField(1, 'input[name="victim_age"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang edad ng biktima.' : 'Please enter the victim age.');
                     }
-                    if (!victimGender?.value) {
-                        this.issueErrorMsg = this.lang === 'fil' ? 'Pumili ng kasarian ng biktima.' : 'Please select the victim gender.';
-                        victimGender?.focus();
-                        return;
+                    if (!victimGender || !victimGender.value) {
+                        return this.focusIssueField(1, 'select[name="victim_gender"]', 
+                            this.lang === 'fil' ? 'Pumili ng kasarian ng biktima.' : 'Please select the victim gender.');
                     }
-                    if (!victimRel?.value.trim()) {
-                        this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang relasyon sa nagrereklamo.' : 'Please enter relationship to complainant.';
-                        victimRel?.focus();
-                        return;
+                    if (!victimRel || !victimRel.value.trim()) {
+                        return this.focusIssueField(1, 'input[name="victim_relationship"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang relasyon sa nagrereklamo.' : 'Please enter relationship to complainant.');
                     }
                 }
 
                 const respNameInput = form.querySelector('input[name="respondent_name"]');
                 if (!respNameInput || !respNameInput.value.trim()) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang pangalan ng inirereklamo (Respondent).' : 'Please enter the name of the person being reported (Respondent).';
-                    respNameInput?.focus();
-                    return;
+                    return this.focusIssueField(1, 'input[name="respondent_name"]', 
+                        this.lang === 'fil' ? 'Pakilagay ang pangalan ng inirereklamo (Respondent).' : 'Please enter the name of the person being reported (Respondent).');
                 }
 
                 this.issueStep = 2;
@@ -1187,44 +1223,142 @@ html, body {
                 });
             },
 
-            submitIssueReport(e) {
+            validateAndReviewIssueReport() {
                 this.issueErrorMsg = '';
-
-                const form = document.getElementById('issueReportForm') || e.target;
+                const form = document.getElementById('issueReportForm');
                 if (!form) return;
 
+                // --- Step 1 Validation (Parties & Offense) ---
+                if (!this.selectedOffense) {
+                    return this.focusIssueField(1, 'select[name="issue_type"]', 
+                        this.lang === 'fil' ? 'Pumili po ng Uri ng Reklamo / Offense.' : 'Please select the Type of Offense / Complaint.');
+                }
+                if (this.selectedOffense === 'Others') {
+                    const otherInput = form.querySelector('input[name="issue_type_other"]');
+                    if (!otherInput || !otherInput.value.trim()) {
+                        return this.focusIssueField(1, 'input[name="issue_type_other"]', 
+                            this.lang === 'fil' ? 'Pakitukoy ang uri ng reklamo.' : 'Please specify the type of offense.');
+                    }
+                }
+
+                const nameInput = form.querySelector('input[name="complainant_name"]');
+                if (!nameInput || !nameInput.value.trim()) {
+                    return this.focusIssueField(1, 'input[name="complainant_name"]', 
+                        this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng nagrereklamo.' : 'Please enter complainant full name.');
+                }
+
+                const ageInput = form.querySelector('input[name="complainant_age"]');
+                if (!ageInput || !ageInput.value || parseInt(ageInput.value) < 18) {
+                    return this.focusIssueField(1, 'input[name="complainant_age"]', 
+                        this.lang === 'fil' ? 'Kailangang 18 taong gulang pataas ang nagrereklamo.' : 'Complainant must be at least 18 years old.');
+                }
+
+                const contactInput = form.querySelector('#issueContactInput') || form.querySelector('input[name="contact"]');
+                const rawContact = contactInput ? contactInput.value.replace(/[^0-9]/g, '').trim() : '';
+                if (!contactInput || rawContact.length !== 11 || !rawContact.startsWith('09')) {
+                    return this.focusIssueField(1, '#issueContactInput', 
+                        this.lang === 'fil' ? 'Kailangang eksaktong 11-digit ang contact number na nagsisimula sa 09 (hal. 09XXXXXXXXX).' : 'Contact number must be exactly 11 digits starting with 09 (e.g. 09XXXXXXXXX).');
+                }
+                contactInput.value = rawContact;
+
+                if (!this.isAuth) {
+                    const emailInput = form.querySelector('input[name="guest_email"]');
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailInput || !emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
+                        return this.focusIssueField(1, 'input[name="guest_email"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang wastong email address para sa mga update.' : 'Please enter a valid email address for notifications.');
+                    }
+                }
+
+                const behalfCheckbox = form.querySelector('input[name="is_on_behalf"]');
+                if (behalfCheckbox && behalfCheckbox.checked) {
+                    const victimName = form.querySelector('input[name="victim_name"]');
+                    const victimAge = form.querySelector('input[name="victim_age"]');
+                    const victimGender = form.querySelector('select[name="victim_gender"]');
+                    const victimRel = form.querySelector('input[name="victim_relationship"]');
+                    if (!victimName || !victimName.value.trim()) {
+                        return this.focusIssueField(1, 'input[name="victim_name"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang buong pangalan ng biktima.' : 'Please enter the victim full name.');
+                    }
+                    if (!victimAge || !victimAge.value) {
+                        return this.focusIssueField(1, 'input[name="victim_age"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang edad ng biktima.' : 'Please enter the victim age.');
+                    }
+                    if (!victimGender || !victimGender.value) {
+                        return this.focusIssueField(1, 'select[name="victim_gender"]', 
+                            this.lang === 'fil' ? 'Pumili ng kasarian ng biktima.' : 'Please select the victim gender.');
+                    }
+                    if (!victimRel || !victimRel.value.trim()) {
+                        return this.focusIssueField(1, 'input[name="victim_relationship"]', 
+                            this.lang === 'fil' ? 'Pakilagay ang relasyon sa nagrereklamo.' : 'Please enter relationship to complainant.');
+                    }
+                }
+
+                const respNameInput = form.querySelector('input[name="respondent_name"]');
+                if (!respNameInput || !respNameInput.value.trim()) {
+                    return this.focusIssueField(1, 'input[name="respondent_name"]', 
+                        this.lang === 'fil' ? 'Pakilagay ang pangalan ng inirereklamo (Respondent).' : 'Please enter the name of the person being reported (Respondent).');
+                }
+
+                // --- Step 2 Validation (Incident Details & Legal Notice) ---
+                if (!this.incidentDatePart) {
+                    return this.focusIssueField(2, 'input[name="incident_date_only"]', 
+                        this.lang === 'fil' ? 'Pakilagay ang petsa ng insidente.' : 'Please specify the date of the incident.');
+                }
+
+                const incLoc = form.querySelector('input[name="incident_location"]');
+                if (!incLoc || !incLoc.value.trim()) {
+                    return this.focusIssueField(2, 'input[name="incident_location"]', 
+                        this.lang === 'fil' ? 'Pakilagay ang lokasyon ng insidente.' : 'Please specify the location of the incident.');
+                }
+
+                const desc = form.querySelector('textarea[name="description"]');
+                if (!desc || !desc.value.trim()) {
+                    return this.focusIssueField(2, 'textarea[name="description"]', 
+                        this.lang === 'fil' ? 'Pakilagay ang buong salaysay o detalye ng insidente.' : 'Please provide the incident description / narration.');
+                }
+
+                if (!this.legalAcknowledged) {
+                    return this.focusIssueField(2, 'input[name="legal_acknowledgment"]', 
+                        this.lang === 'fil' ? 'Kailangan ninyong lagyan ng tsek ang legal certification / warning laban sa maling ulat bago magsumite.' : 'You must check the legal certification against false/prank reporting before submitting.');
+                }
+
+                // Sync incident date
                 let incDateVal = this.incidentDatePart ? (this.incidentDatePart + ' ' + (this.incidentTimePart || '12:00')) : '';
                 const incDate = form.querySelector('input[name="incident_date"]');
                 if (incDate && incDateVal) {
                     incDate.value = incDateVal;
                 }
-                if (!this.incidentDatePart) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang petsa ng insidente.' : 'Please specify the date of the incident.';
-                    form.querySelector('input[name="incident_date_only"]')?.focus();
-                    return;
-                }
 
-                const incLoc = form.querySelector('input[name="incident_location"]');
-                if (!incLoc || !incLoc.value.trim()) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang lokasyon ng insidente.' : 'Please specify the location of the incident.';
-                    incLoc?.focus();
-                    return;
-                }
+                const otherInput = form.querySelector('input[name="issue_type_other"]');
+                const offenseDisplayName = (this.selectedOffense === 'Others' && otherInput && otherInput.value.trim())
+                    ? otherInput.value.trim()
+                    : this.selectedOffense;
 
-                const desc = form.querySelector('textarea[name="description"]');
-                if (!desc || !desc.value.trim()) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Pakilagay ang buong salaysay o detalye ng insidente.' : 'Please provide the incident description / narration.';
-                    desc?.focus();
-                    return;
-                }
+                // Prepare confirmation data
+                this.confirmData = {
+                    offense: offenseDisplayName,
+                    complainant: nameInput.value.trim(),
+                    contact: rawContact,
+                    respondent: respNameInput.value.trim(),
+                    dateTime: this.incidentDatePart + (this.incidentTimePart ? (' @ ' + this.incidentTimePart) : ''),
+                    location: incLoc.value.trim(),
+                    description: desc.value.trim().length > 140 ? (desc.value.trim().substring(0, 140) + '...') : desc.value.trim(),
+                };
 
-                if (!this.legalAcknowledged) {
-                    this.issueErrorMsg = this.lang === 'fil' ? 'Kailangan ninyong lagyan ng tsek ang legal certification / warning laban sa maling ulat bago magsumite.' : 'You must check the legal certification against false/prank reporting before submitting.';
-                    return;
-                }
+                // Launch confirmation pop-up modal
+                this.issueConfirmModal = true;
+            },
 
+            finalSubmitIssueReport() {
+                const form = document.getElementById('issueReportForm');
+                if (!form) return;
                 this.isSubmittingReport = true;
-                e.target.submit();
+                form.submit();
+            },
+
+            submitIssueReport(e) {
+                this.validateAndReviewIssueReport();
             },
 
             init(){
@@ -1500,7 +1634,7 @@ html, body {
                     <div class="service-name" x-text="t('faqs')">FAQs</div>
                     <div class="service-sub" x-text="t('faqs_sub')">How to use & portal guide</div>
                 </div>
-                <div class="service-card" @click="issueModal = true; issueStep = 1; issueErrorMsg = ''; legalAcknowledged = false; isSubmittingReport = false;">
+                <div class="service-card" @click="issueModal = true; issueStep = 1; issueErrorMsg = ''; legalAcknowledged = false; isSubmittingReport = false; issueConfirmModal = false;">
                     <div class="service-ico"><i class="fas fa-flag"></i></div>
                     <div class="service-name" x-text="t('report_issue')">Report an Issue</div>
                     <div class="service-sub" x-text="t('report_sub')">Blotter, VAWC & more</div>
@@ -2426,13 +2560,16 @@ html, body {
                         {{-- Claimant Selection --}}
                         <div class="sblk">
                                 <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user-check"></i> Who is claiming this document?</div>
-                                <div class="fgrid2 fgrp">
-                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:800;color:var(--text);padding:8px 12px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;">
-                                        <input type="radio" name="claimant_type" value="self" x-model="cType" @change="validationAlertMsg=''" required style="accent-color:var(--brand);width:16px;height:16px;"> Self (Personal)
+                                <div class="fgrid2 fgrp" style="gap:12px;">
+                                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:800;padding:10px 14px;border-radius:10px;transition:all .15s;"
+                                           :style="cType === 'self' ? 'border:2px solid var(--brand);background:#eff6ff;color:var(--brand);box-shadow:0 2px 6px rgba(14,83,147,0.1);' : 'border:1.5px solid #cbd5e1;background:#fff;color:#334155;'">
+                                        <input type="radio" name="claimant_type" value="self" x-model="cType" @change="validationAlertMsg=''" required style="accent-color:var(--brand);width:17px;height:17px;">
+                                        <span>Self (Personal)</span>
                                     </label>
-                                    <label style="display:flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;font-weight:800;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;"
-                                           :style="selectedDoc === 'jobseeker' ? 'opacity:0.45;cursor:not-allowed;background:#f1f5f9;color:var(--muted);' : 'cursor:pointer;background:#f8fafc;color:var(--text);'">
-                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" @change="validationAlertMsg=''" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:16px;height:16px;"> Authorized Person
+                                    <label style="display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:800;padding:10px 14px;border-radius:10px;transition:all .15s;"
+                                           :style="cType === 'authorized' ? 'border:2px solid var(--brand);background:#eff6ff;color:var(--brand);box-shadow:0 2px 6px rgba(14,83,147,0.1);' : (selectedDoc === 'jobseeker' ? 'opacity:0.45;cursor:not-allowed;background:#f1f5f9;border:1.5px solid #cbd5e1;color:#94a3b8;' : 'cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#334155;')">
+                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" @change="validationAlertMsg=''" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:17px;height:17px;">
+                                        <span>Authorized Person</span>
                                     </label>
                                 </div>
                                 <template x-if="selectedDoc === 'jobseeker'">
@@ -2443,57 +2580,92 @@ html, body {
                             </div>
                             
                             {{-- AUTHORIZED THEME --}}
-                            <div x-show="cType === 'authorized'" x-transition class="auth-blue-box">
-                                <p style="font-size:13px;color:var(--brand);font-weight:900;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:7px;">
-                                    <i class="fas fa-shield-alt" style="font-size:15px;"></i> Authorization Details
-                                </p>
+                            <div x-show="cType === 'authorized'" x-transition class="auth-blue-box" style="background:#f8fafc; border:1.5px solid #bfdbfe; border-radius:14px; padding:16px 18px; margin-top:14px;">
+                                <div style="font-size:13px; color:var(--brand); font-weight:900; margin-bottom:12px; text-transform:uppercase; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+                                    <span style="display:flex; align-items:center; gap:7px;">
+                                        <i class="fas fa-shield-alt" style="font-size:15px;"></i> Authorization Required Files
+                                    </span>
+                                    <span style="font-size:10.5px; font-weight:700; color:#2563eb; background:#eff6ff; border:1px solid #bfdbfe; padding:2px 8px; border-radius:6px;">
+                                        Max 5MB bawat file (JPG, PNG, PDF)
+                                    </span>
+                                </div>
                                 
-                                <div class="fgrid3 fgrp" style="align-items:stretch;">
-                                    <div style="display:flex;flex-direction:column;">
-                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;font-size:12.5px;font-weight:800;">Authorization Letter *</label>
-                                        <div class="upload-card" style="flex:1;" x-ref="authLetterCard"
-                                             :style="isDraggingLetter ? 'border-color:var(--brand); background:#eff6ff; transform:scale(1.02);' : (authLetterName ? 'border-color:#10b981; background:#f0fdf4;' : '')"
-                                             @click="$refs.authLetter.click()"
-                                             @dragover.prevent.stop="isDraggingLetter = true"
-                                             @dragenter.prevent.stop="isDraggingLetter = true"
-                                             @dragleave.prevent.stop="isDraggingLetter = false"
-                                             @drop.prevent.stop="isDraggingLetter = false; if($event.dataTransfer.files.length){ $refs.authLetter.files = $event.dataTransfer.files; authLetterName = $event.dataTransfer.files[0].name; }">
-                                            <i :class="authLetterName ? 'fas fa-check-circle' : 'fas fa-file-signature'" :style="authLetterName ? 'color:#10b981;' : ''" style="font-size:24px;"></i>
-                                            <div class="upload-txt" :style="authLetterName ? 'color:#15803d; font-weight:800;' : ''" style="font-size:13px;margin-top:4px;" x-text="authLetterName ? authLetterName : 'Upload Signed Letter'"></div>
-                                            <div style="font-size:12px; color:var(--muted); font-weight:600; margin-top:2px;" x-text="authLetterName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
-                                            <div style="font-size:12px;color:#1e40af;font-weight:800;margin-top:3px;background:#dbeafe;padding:2px 8px;border-radius:5px;display:inline-block;">Limit: 5MB (JPG, PNG, PDF)</div>
+                                {{-- Compact File Upload Boxes (Standard Clean Horizontal Boxes) --}}
+                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                                    {{-- File 1: Authorization Letter --}}
+                                    <div>
+                                        <label class="flbl" style="font-size:11.5px; font-weight:800; color:#1e293b; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+                                            <span>1. Signed Authorization Letter</span> <span style="color:#dc2626;">*</span>
+                                        </label>
+                                        <div @click="$refs.authLetter.click()" 
+                                             style="width:100%; min-height:42px; padding:6px 12px; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:all .15s; gap:10px;"
+                                             :style="authLetterName ? 'border-color:#10b981; background:#f0fdf4;' : ''">
+                                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                                                <i :class="authLetterName ? 'fas fa-check-circle' : 'fas fa-file-signature'" :style="authLetterName ? 'color:#10b981;' : 'color:var(--brand);'" style="font-size:15px; flex-shrink:0;"></i>
+                                                <span style="font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :style="authLetterName ? 'color:#15803d;' : 'color:#64748b;'" x-text="authLetterName ? authLetterName : 'Pumili ng pirmadong liham ng awtorisasyon...'"></span>
+                                            </div>
+                                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                                <template x-if="authLetterName">
+                                                    <button type="button" @click.stop="$refs.authLetter.value=''; authLetterName=''" style="background:none; border:none; color:#ef4444; font-size:13px; cursor:pointer; padding:2px 4px;" title="Alisin ang file">
+                                                        <i class="fas fa-times-circle"></i>
+                                                    </button>
+                                                </template>
+                                                <span style="font-size:11px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:700;">
+                                                    <span x-text="authLetterName ? 'Palitan' : 'Pumili ng File'">Pumili ng File</span>
+                                                </span>
+                                            </div>
                                             <input type="file" x-ref="authLetter" name="authorization_letter" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang file ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authLetterName=''; return; } authLetterName = f.name; }">
                                         </div>
                                     </div>
-                                    <div style="display:flex;flex-direction:column;">
-                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;font-size:12.5px;font-weight:800;">Valid ID of Authorized Person *</label>
-                                        <div class="upload-card" style="flex:1;" x-ref="authIdCard"
-                                             :style="isDraggingId ? 'border-color:var(--brand); background:#eff6ff; transform:scale(1.02);' : (authIdName ? 'border-color:#10b981; background:#f0fdf4;' : '')"
-                                             @click="$refs.authId.click()"
-                                             @dragover.prevent.stop="isDraggingId = true"
-                                             @dragenter.prevent.stop="isDraggingId = true"
-                                             @dragleave.prevent.stop="isDraggingId = false"
-                                             @drop.prevent.stop="isDraggingId = false; if($event.dataTransfer.files.length){ $refs.authId.files = $event.dataTransfer.files; authIdName = $event.dataTransfer.files[0].name; }">
-                                            <i :class="authIdName ? 'fas fa-check-circle' : 'fas fa-id-card'" :style="authIdName ? 'color:#10b981;' : ''" style="font-size:24px;"></i>
-                                            <div class="upload-txt" :style="authIdName ? 'color:#15803d; font-weight:800;' : ''" style="font-size:13px;margin-top:4px;" x-text="authIdName ? authIdName : 'Upload Your Valid ID'"></div>
-                                            <div style="font-size:12px; color:var(--muted); font-weight:600; margin-top:2px;" x-text="authIdName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
-                                            <div style="font-size:12px;color:#1e40af;font-weight:800;margin-top:3px;background:#dbeafe;padding:2px 8px;border-radius:5px;display:inline-block;">Limit: 5MB (JPG, PNG, PDF)</div>
+
+                                    {{-- File 2: Valid ID of Representative --}}
+                                    <div>
+                                        <label class="flbl" style="font-size:11.5px; font-weight:800; color:#1e293b; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+                                            <span>2. Valid ID ng Awtorisadong Kinatawan (Representative)</span> <span style="color:#dc2626;">*</span>
+                                        </label>
+                                        <div @click="$refs.authId.click()" 
+                                             style="width:100%; min-height:42px; padding:6px 12px; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:all .15s; gap:10px;"
+                                             :style="authIdName ? 'border-color:#10b981; background:#f0fdf4;' : ''">
+                                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                                                <i :class="authIdName ? 'fas fa-check-circle' : 'fas fa-id-card'" :style="authIdName ? 'color:#10b981;' : 'color:var(--brand);'" style="font-size:15px; flex-shrink:0;"></i>
+                                                <span style="font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :style="authIdName ? 'color:#15803d;' : 'color:#64748b;'" x-text="authIdName ? authIdName : 'Pumili ng valid ID ng kinatawan...'"></span>
+                                            </div>
+                                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                                <template x-if="authIdName">
+                                                    <button type="button" @click.stop="$refs.authId.value=''; authIdName=''" style="background:none; border:none; color:#ef4444; font-size:13px; cursor:pointer; padding:2px 4px;" title="Alisin ang file">
+                                                        <i class="fas fa-times-circle"></i>
+                                                    </button>
+                                                </template>
+                                                <span style="font-size:11px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:700;">
+                                                    <span x-text="authIdName ? 'Palitan' : 'Pumili ng File'">Pumili ng File</span>
+                                                </span>
+                                            </div>
                                             <input type="file" x-ref="authId" name="authorized_id" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authIdName=''; return; } authIdName = f.name; }">
                                         </div>
                                     </div>
-                                    <div style="display:flex;flex-direction:column;">
-                                        <label class="flbl" style="min-height:30px;display:flex;align-items:flex-end;font-size:12.5px;font-weight:800;">Valid ID of Person Being Claimed For *</label>
-                                        <div class="upload-card" style="flex:1;" x-ref="authId2Card"
-                                             :style="isDraggingId2 ? 'border-color:var(--brand); background:#eff6ff; transform:scale(1.02);' : (authId2Name ? 'border-color:#10b981; background:#f0fdf4;' : '')"
-                                             @click="$refs.authId2.click()"
-                                             @dragover.prevent.stop="isDraggingId2 = true"
-                                             @dragenter.prevent.stop="isDraggingId2 = true"
-                                             @dragleave.prevent.stop="isDraggingId2 = false"
-                                             @drop.prevent.stop="isDraggingId2 = false; if($event.dataTransfer.files.length){ $refs.authId2.files = $event.dataTransfer.files; authId2Name = $event.dataTransfer.files[0].name; }">
-                                            <i :class="authId2Name ? 'fas fa-check-circle' : 'fas fa-user-circle'" :style="authId2Name ? 'color:#10b981;' : ''" style="font-size:24px;"></i>
-                                            <div class="upload-txt" :style="authId2Name ? 'color:#15803d; font-weight:800;' : ''" style="font-size:13px;margin-top:4px;" x-text="authId2Name ? authId2Name : 'Upload Their Valid ID'"></div>
-                                            <div style="font-size:12px; color:var(--muted); font-weight:600; margin-top:2px;" x-text="authId2Name ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
-                                            <div style="font-size:12px;color:#1e40af;font-weight:800;margin-top:3px;background:#dbeafe;padding:2px 8px;border-radius:5px;display:inline-block;">Limit: 5MB (JPG, PNG, PDF)</div>
+
+                                    {{-- File 3: Valid ID of Resident Being Claimed For --}}
+                                    <div>
+                                        <label class="flbl" style="font-size:11.5px; font-weight:800; color:#1e293b; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+                                            <span>3. Valid ID ng May-ari ng Dokumento (Applicant)</span> <span style="color:#dc2626;">*</span>
+                                        </label>
+                                        <div @click="$refs.authId2.click()" 
+                                             style="width:100%; min-height:42px; padding:6px 12px; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:all .15s; gap:10px;"
+                                             :style="authId2Name ? 'border-color:#10b981; background:#f0fdf4;' : ''">
+                                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                                                <i :class="authId2Name ? 'fas fa-check-circle' : 'fas fa-user-check'" :style="authId2Name ? 'color:#10b981;' : 'color:var(--brand);'" style="font-size:15px; flex-shrink:0;"></i>
+                                                <span style="font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :style="authId2Name ? 'color:#15803d;' : 'color:#64748b;'" x-text="authId2Name ? authId2Name : 'Pumili ng valid ID ng may-ari...'"></span>
+                                            </div>
+                                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                                <template x-if="authId2Name">
+                                                    <button type="button" @click.stop="$refs.authId2.value=''; authId2Name=''" style="background:none; border:none; color:#ef4444; font-size:13px; cursor:pointer; padding:2px 4px;" title="Alisin ang file">
+                                                        <i class="fas fa-times-circle"></i>
+                                                    </button>
+                                                </template>
+                                                <span style="font-size:11px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:700;">
+                                                    <span x-text="authId2Name ? 'Palitan' : 'Pumili ng File'">Pumili ng File</span>
+                                                </span>
+                                            </div>
                                             <input type="file" x-ref="authId2" name="authorized_id2" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authId2Name=''; return; } authId2Name = f.name; }">
                                         </div>
                                     </div>
@@ -2513,31 +2685,35 @@ html, body {
                                             </button>
                                         </div>
 
-                                        <div class="fgrp">
-                                            <label class="flbl" style="font-size:12.5px;font-weight:800;">Relationship to Applicant *</label>
-                                            <select :name="'applicants['+index+'][relation]'" class="finput" :required="cType === 'authorized'" x-model="app.relation">
-                                                <option value="">— Select Relationship —</option>
-                                                <option value="Parent">Parent</option>
-                                                <option value="Spouse">Spouse</option>
-                                                <option value="Child">Child</option>
-                                                <option value="Sibling">Sibling</option>
-                                                <option value="Legal Guardian">Legal Guardian</option>
-                                                <option value="Others">Others</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="fgrid3 fgrp">
+                                        {{-- Row 1: First Name & Last Name (Matching Self tab) --}}
+                                        <div class="fgrid2 fgrp">
                                             <div>
                                                 <label class="flbl" style="font-size:12.5px;font-weight:800;">First Name * <span style="font-size:11px;opacity:.7;">(Applicant)</span></label>
                                                 <input type="text" :name="'applicants['+index+'][first_name]'" class="finput" placeholder="First Name" :required="cType === 'authorized'" x-model="app.first_name">
                                             </div>
                                             <div>
-                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Middle Name</label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Last Name * <span style="font-size:11px;opacity:.7;">(Applicant)</span></label>
+                                                <input type="text" :name="'applicants['+index+'][last_name]'" class="finput" placeholder="Last Name" :required="cType === 'authorized'" x-model="app.last_name">
+                                            </div>
+                                        </div>
+
+                                        {{-- Row 2: Middle Name & Relationship to Applicant --}}
+                                        <div class="fgrid2 fgrp">
+                                            <div>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Middle Name <span style="font-size:11px;opacity:.7;">(Optional)</span></label>
                                                 <input type="text" :name="'applicants['+index+'][middle_name]'" class="finput" placeholder="Middle Name" x-model="app.middle_name">
                                             </div>
                                             <div>
-                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Last Name * <span style="font-size:11px;opacity:.7;">(Applicant)</span></label>
-                                                <input type="text" :name="'applicants['+index+'][last_name]'" class="finput" placeholder="Last Name" :required="cType === 'authorized'" x-model="app.last_name">
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Relationship to Applicant *</label>
+                                                <select :name="'applicants['+index+'][relation]'" class="finput fselect" :required="cType === 'authorized'" x-model="app.relation">
+                                                    <option value="">— Select Relationship —</option>
+                                                    <option value="Parent">Parent</option>
+                                                    <option value="Spouse">Spouse</option>
+                                                    <option value="Child">Child</option>
+                                                    <option value="Sibling">Sibling</option>
+                                                    <option value="Legal Guardian">Legal Guardian</option>
+                                                    <option value="Others">Others</option>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -3109,81 +3285,51 @@ html, body {
                     {{-- 1. Senior Citizens & PWDs Priority --}}
                     <div x-show="!faqSearch || (t('faq_senior_title') + ' ' + t('faq_senior_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
                          style="padding:14px 16px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#1e3a8a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-wheelchair" style="color:#2563eb; font-size:15px;"></i>
-                            <span x-text="t('faq_senior_title')">Senior Citizens, PWDs & Pregnant Women Priority Lane:</span>
+                        <div style="font-size:14px; font-weight:900; color:#1e3a8a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-wheelchair" style="color:#2563eb; font-size:16px;"></i>
+                            <span x-text="t('faq_senior_title')">Senior Citizens, PWDs & Priority Lane:</span>
                         </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_senior_desc')"></div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.6; font-weight:600;" x-text="t('faq_senior_desc')"></div>
                     </div>
 
-                    {{-- 2. Authorized Representative Rules --}}
+                    {{-- 2. Document Fees (Free vs Loan) --}}
+                    <div x-show="!faqSearch || (t('faq_fees_title') + ' ' + t('faq_fees_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px;">
+                        <div style="font-size:14px; font-weight:900; color:#14532d; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-receipt" style="color:#16a34a; font-size:16px;"></i>
+                            <span x-text="t('faq_fees_title')">Document Fees (Free vs. Loan Applications):</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.6; font-weight:600;" x-text="t('faq_fees_desc')"></div>
+                    </div>
+
+                    {{-- 3. Incident Blotter & ₱100 Filing Fee --}}
+                    <div x-show="!faqSearch || (t('faq_reports_title') + ' ' + t('faq_reports_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                         style="padding:14px 16px; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:12px;">
+                        <div style="font-size:14px; font-weight:900; color:#991b1b; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-flag" style="color:#dc2626; font-size:16px;"></i>
+                            <span x-text="t('faq_reports_title')">Incident Reports (₱100 Fee & Multiple Reports):</span>
+                        </div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.6; font-weight:600;" x-text="t('faq_reports_desc')"></div>
+                    </div>
+
+                    {{-- 4. Authorized Representative Rules --}}
                     <div x-show="!faqSearch || (t('faq_rep_title') + ' ' + t('faq_rep_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
                          style="padding:14px 16px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-user-shield" style="color:#0E5393; font-size:15px;"></i>
+                        <div style="font-size:14px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-user-shield" style="color:#0E5393; font-size:16px;"></i>
                             <span x-text="t('faq_rep_title')">Authorized Representative Rules:</span>
                         </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_rep_desc')"></div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.6; font-weight:600;" x-text="t('faq_rep_desc')"></div>
                     </div>
 
-                    {{-- 3. First-Time Jobseeker Act --}}
-                    <div x-show="!faqSearch || (t('faq_job_title') + ' ' + t('faq_job_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
-                         style="padding:14px 16px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#14532d; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-briefcase" style="color:#16a34a; font-size:15px;"></i>
-                            <span x-text="t('faq_job_title')">First-Time Jobseeker Act (RA 11261):</span>
-                        </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_job_desc')"></div>
-                    </div>
-
-                    {{-- 4. Document Fees & Cashier Payment Guidelines --}}
-                    <div x-show="!faqSearch || (t('faq_fees_title') + ' ' + t('faq_fees_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
-                         style="padding:14px 16px; background:#f0fdfa; border:1.5px solid #99f6e4; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#115e59; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-receipt" style="color:#0d9488; font-size:15px;"></i>
-                            <span x-text="t('faq_fees_title')">Document Fees & Cashier Payment Guidelines:</span>
-                        </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_fees_desc')"></div>
-                    </div>
-
-                    {{-- 5. Processing SLA & Tracking --}}
-                    <div x-show="!faqSearch || (t('faq_sla_title') + ' ' + t('faq_sla_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
-                         style="padding:14px 16px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-route" style="color:#0E5393; font-size:15px;"></i>
-                            <span x-text="t('faq_sla_title')">Processing Time & Pickup SLA:</span>
-                        </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_sla_desc')"></div>
-                    </div>
-
-                    {{-- 6. Office Hours --}}
+                    {{-- 5. Office Hours & Tanod Desk --}}
                     <div x-show="!faqSearch || (t('faq_hours_title') + ' ' + t('faq_hours_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
                          style="padding:14px 16px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-clock" style="color:#0E5393; font-size:15px;"></i>
-                            <span x-text="t('faq_hours_title')">Barangay Office Hours:</span>
+                        <div style="font-size:14px; font-weight:900; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-clock" style="color:#0E5393; font-size:16px;"></i>
+                            <span x-text="t('faq_hours_title')">Barangay Office Hours & 24/7 Tanod Desk:</span>
                         </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_hours_desc')"></div>
-                    </div>
-
-                    {{-- 7. Emergency SOS Alert vs 911 --}}
-                    <div x-show="!faqSearch || (t('faq_sos_title') + ' ' + t('faq_sos_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
-                         style="padding:14px 16px; background:#fff1f2; border:1.5px solid #fecdd3; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#9f1239; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-truck-medical" style="color:#e11d48; font-size:15px;"></i>
-                            <span x-text="t('faq_sos_title')">Emergency SOS Alert vs 911 / City Rescue:</span>
-                        </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_sos_desc')"></div>
-                    </div>
-
-                    {{-- 8. Incident Blotter & Dispute Reports --}}
-                    <div x-show="!faqSearch || (t('faq_reports_title') + ' ' + t('faq_reports_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
-                         style="padding:14px 16px; background:#fdf2f8; border:1.5px solid #fbcfe8; border-radius:12px;">
-                        <div style="font-size:13.5px; font-weight:900; color:#831843; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-shield-halved" style="color:#db2777; font-size:15px;"></i>
-                            <span x-text="t('faq_reports_title')">Incident Blotter & Dispute Reports:</span>
-                        </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.65; font-weight:500;" x-text="t('faq_reports_desc')"></div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.6; font-weight:600;" x-text="t('faq_hours_desc')"></div>
                     </div>
                 </div>
 
@@ -3240,7 +3386,7 @@ html, body {
     <div x-show="issueModal" x-cloak class="modal-ov" x-transition style="z-index:9999;" @keydown.window.escape="issueModal=false">
         <div class="modal-box modal-box-red" id="issueReportModalBox" style="max-width:580px; width:100%; max-height:86vh; display:flex; flex-direction:column; overflow:hidden; border-radius:20px; box-shadow:0 25px 60px rgba(0,0,52,0.35); padding:0;" @click.away="issueModal=false">
             
-            <form id="issueReportForm" action="{{ route('resident.issue.report') }}" method="POST" enctype="multipart/form-data" @submit.prevent="submitIssueReport($event)" style="display:flex; flex-direction:column; height:100%; min-height:0; overflow:hidden; margin:0;">
+            <form id="issueReportForm" action="{{ route('resident.issue.report') }}" method="POST" enctype="multipart/form-data" novalidate @submit.prevent="submitIssueReport($event)" style="display:flex; flex-direction:column; height:100%; min-height:0; overflow:hidden; margin:0;">
                 @csrf
 
                 {{-- 1. FIXED MODAL HEADER --}}
@@ -3432,40 +3578,7 @@ html, body {
                                     <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Witness Name (Optional)</label>
                                     <input type="text" name="witness_name" style="width:100%; height:40px; padding:8px 12px; font-size:13px; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Name of witness (if any)">
                                 </div>
-                                <div class="issue-grid-span2" x-data="{ 
-                                        evFiles: [], 
-                                        previewUrl: null, 
-                                        previewName: '', 
-                                        previewModal: false,
-                                        handleFileSelect(e) {
-                                             const files = Array.from(e.target.files || []);
-                                             for (let f of files) {
-                                                 if (f.size > 5 * 1024 * 1024) {
-                                                     alert('Ang file "' + f.name + '" ay lampas sa 5MB (' + (f.size / 1024 / 1024).toFixed(1) + 'MB)! Ang maximum allowed size ay 5MB bawat file.');
-                                                     this.evFiles = [];
-                                                     this.previewUrl = null;
-                                                     this.previewName = '';
-                                                     this.$refs.evidenceInput.value = '';
-                                                     return;
-                                                 }
-                                             }
-                                             this.evFiles = files;
-                                             if (files.length > 0 && files[0].type.startsWith('image/')) {
-                                                 this.previewUrl = URL.createObjectURL(files[0]);
-                                                 this.previewName = files[0].name;
-                                             } else {
-                                                 this.previewUrl = null;
-                                                 this.previewName = files[0] ? files[0].name : '';
-                                             }
-                                        },
-                                        removeFile(e) {
-                                             e.stopPropagation();
-                                             this.evFiles = [];
-                                             this.previewUrl = null;
-                                             this.previewName = '';
-                                             this.$refs.evidenceInput.value = '';
-                                        }
-                                     }">
+                                <div class="issue-grid-span2" x-data="issueEvidenceUploader()">
                                     <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Proof / Evidence (Optional) <span style="font-size:9px;color:var(--brand);font-weight:700;">— Max: 5MB bawat file (JPG, PNG, PDF)</span></label>
                                     
                                     {{-- Responsive upload box matching inputs --}}
@@ -3613,6 +3726,124 @@ html, body {
             </form>
         </div>
     </div>
+
+    {{-- INCIDENT REPORT FINAL CONFIRMATION MODAL --}}
+    <div x-show="issueConfirmModal" x-cloak class="modal-ov" x-transition style="z-index:10000;" @keydown.window.escape="issueConfirmModal=false">
+        <div class="modal-box" style="max-width:540px; width:95%; border-radius:20px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,52,0.4); padding:0; border-top:5px solid #dc2626;" @click.away="issueConfirmModal=false">
+            
+            {{-- Header --}}
+            <div style="padding:18px 22px; background:#fff; border-bottom:1.5px solid #fee2e2; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:38px; height:38px; border-radius:10px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em;" x-text="lang==='fil'?'Kumpirmahin ang Ulat ng Insidente':'Confirm Incident Report'">
+                            Confirm Incident Report
+                        </div>
+                        <div style="font-size:11px; font-weight:600; color:#64748b; margin-top:1px;" x-text="lang==='fil'?'Panghuling pagsusuri ng mga detalye bago opisyal na isumite':'Final review of details before official submission'">
+                            Final review of details before official submission
+                        </div>
+                    </div>
+                </div>
+                <button type="button" @click="issueConfirmModal=false" class="modal-close" style="width:30px; height:30px; font-size:15px;"><i class="fas fa-times"></i></button>
+            </div>
+
+            {{-- Body --}}
+            <div style="padding:20px 22px; max-height:70vh; overflow-y:auto; background:#fff;">
+                
+                {{-- Details Summary Card --}}
+                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:14px 16px; margin-bottom:16px;">
+                    <div style="font-size:11.5px; font-weight:800; color:#334155; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-info-circle" style="color:var(--brand);"></i> <span x-text="lang==='fil'?'Buod ng Impormasyon':'Summary of Information'">Summary of Information</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12px; line-height:1.45;">
+                        <div style="grid-column:span 2; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px;">
+                            <span style="font-size:10.5px; color:#64748b; font-weight:700; display:block;" x-text="lang==='fil'?'URI NG REKLAMO':'OFFENSE TYPE'">OFFENSE TYPE</span>
+                            <span style="font-weight:900; color:#0f172a; font-size:13px;" x-text="confirmData.offense"></span>
+                        </div>
+
+                        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px;">
+                            <span style="font-size:10.5px; color:#64748b; font-weight:700; display:block;" x-text="lang==='fil'?'NAGREREKLAMO':'COMPLAINANT'">COMPLAINANT</span>
+                            <span style="font-weight:800; color:#0f172a;" x-text="confirmData.complainant"></span>
+                            <span style="font-size:11px; color:#475569; display:block;" x-text="confirmData.contact"></span>
+                        </div>
+
+                        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px;">
+                            <span style="font-size:10.5px; color:#64748b; font-weight:700; display:block;" x-text="lang==='fil'?'INIREREKLAMO':'RESPONDENT'">RESPONDENT</span>
+                            <span style="font-weight:800; color:#991b1b;" x-text="confirmData.respondent"></span>
+                        </div>
+
+                        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px;">
+                            <span style="font-size:10.5px; color:#64748b; font-weight:700; display:block;" x-text="lang==='fil'?'PETSA AT ORAS':'DATE & TIME'">DATE & TIME</span>
+                            <span style="font-weight:800; color:#0f172a;" x-text="confirmData.dateTime"></span>
+                        </div>
+
+                        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px;">
+                            <span style="font-size:10.5px; color:#64748b; font-weight:700; display:block;" x-text="lang==='fil'?'LOKASYON':'LOCATION'">LOCATION</span>
+                            <span style="font-weight:800; color:#0f172a; overflow:hidden; text-overflow:ellipsis; display:block; white-space:nowrap;" x-text="confirmData.location"></span>
+                        </div>
+
+                        <div style="grid-column:span 2; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px;">
+                            <span style="font-size:10.5px; color:#64748b; font-weight:700; display:block;" x-text="lang==='fil'?'PAUNANG SALAYSAY':'NARRATION PREVIEW'">NARRATION PREVIEW</span>
+                            <span style="font-weight:600; color:#334155; font-size:11.5px; display:block; font-style:italic;" x-text="confirmData.description"></span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Prominent Warning & ₱100 Filing Fee Box --}}
+                <div style="background:#fef2f2; border:2px solid #f87171; border-radius:12px; padding:14px 16px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                        <i class="fas fa-exclamation-triangle" style="color:#dc2626; font-size:16px;"></i>
+                        <span style="font-size:12.5px; font-weight:900; color:#991b1b; text-transform:uppercase; letter-spacing:0.02em;" x-text="lang==='fil'?'Mahalagang Paunawa & Bayarin sa Blotter':'Important Advisory & Filing Fee'">
+                            Mahalagang Paunawa & Bayarin sa Blotter
+                        </span>
+                    </div>
+
+                    <div style="font-size:11.5px; color:#7f1d1d; line-height:1.55;">
+                        <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:8px;">
+                            <span style="background:#fee2e2; color:#991b1b; font-weight:900; padding:1px 6px; border-radius:4px; font-size:11px; white-space:nowrap;">₱100.00 FEE</span>
+                            <span x-text="lang==='fil'?'May standard na ₱100.00 filing fee na babayaran sa Barangay Hall Cashier sa araw ng opisyal na pagproseso o pagdinig ng reklamo.':'A standard ₱100.00 filing fee is payable at the Barangay Hall Cashier upon official blotter processing or hearing.'">
+                                May standard na ₱100.00 filing fee na babayaran sa Barangay Hall Cashier sa araw ng opisyal na pagproseso o pagdinig ng reklamo.
+                            </span>
+                        </div>
+                        <div style="display:flex; align-items:flex-start; gap:8px;">
+                            <span style="background:#fee2e2; color:#dc2626; font-weight:900; padding:1px 6px; border-radius:4px; font-size:11px; white-space:nowrap;">BAWAL ANG PRANK</span>
+                            <span x-text="lang==='fil'?'Mahigpit na ipinagbabawal ang mga prank, biro, o gawa-gawang ulat. Ang pagsisinungaling sa opisyal na sumbong ay may kaparusahan sa ilalim ng Article 183 ng Revised Penal Code (Perjury) at Barangay Ordinances.':'Strictly no prank or fabricated reports. False testimony or fake complaints are punishable under Article 183 of the Revised Penal Code (Perjury) and Barangay Ordinances.'">
+                                Mahigpit na ipinagbabawal ang mga prank, biro, o gawa-gawang ulat. Ang pagsisinungaling sa opisyal na sumbong ay may kaparusahan sa ilalim ng Article 183 ng Revised Penal Code (Perjury) at Barangay Ordinances.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- Footer Buttons --}}
+            <div style="padding:14px 22px; background:#f8fafc; border-top:1.5px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <button type="button" @click="issueConfirmModal=false" class="btn-plain btn-outline" style="padding:9px 16px; font-size:12px; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fas fa-arrow-left"></i>
+                    <span x-text="lang==='fil'?'Bumalik at I-edit':'Back to Edit'">Bumalik at I-edit</span>
+                </button>
+                <button type="button" @click="finalSubmitIssueReport()" :disabled="isSubmittingReport" class="btn-grad btn-grad-red" style="padding:9px 20px; font-size:12px; font-weight:900; display:inline-flex; align-items:center; gap:6px;">
+                    <template x-if="!isSubmittingReport">
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <i class="fas fa-check-circle"></i>
+                            <span x-text="lang==='fil'?'Oo, Isumite ang Ulat':'Confirm & Submit Report'">Oo, Isumite ang Ulat</span>
+                        </span>
+                    </template>
+                    <template x-if="isSubmittingReport">
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span x-text="lang==='fil'?'Isinusumite...':'Submitting...'">Isinusumite...</span>
+                        </span>
+                    </template>
+                </button>
+            </div>
+
+        </div>
+    </div>
+    {{-- END INCIDENT REPORT FINAL CONFIRMATION MODAL --}}
 
     {{-- VIEW ALL SCHEDULES POP-UP MODAL --}}
     <div x-show="scheduleModal" x-cloak class="modal-ov" x-transition style="z-index:9999;" @keydown.window.escape="scheduleModal=false">
@@ -4766,22 +4997,31 @@ html, body {
                         </div>
                     </div>
 
-                    <div class="fgrid4" style="gap:7px;margin-bottom:12px;">
-                        <div><label class="flbl">Birthday</label>
+                    {{-- Row 3: Birthday & Age --}}
+                    <div class="fgrid2" style="grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:12px;">
+                        <div>
+                            <label class="flbl">Birthday</label>
                             <input type="date" name="birthday" x-model="birthday" required @input="if(birthday){const bd=new Date(birthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;age=a;}" @change="if(birthday){const bd=new Date(birthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;age=a;}" class="finput" style="padding:8px;">
                         </div>
-                        <div><label class="flbl">Age</label>
-                            <input type="number" name="age" x-model="age" readonly class="finput" style="padding:8px;background:#e2e8f0;">
+                        <div>
+                            <label class="flbl">Age</label>
+                            <input type="number" name="age" x-model="age" readonly class="finput" style="padding:8px;background:#e2e8f0;font-weight:700;">
                         </div>
-                        <div><label class="flbl">Voter? (Yes/No)</label>
-                            <select name="is_voter" required class="finput fselect" style="padding:8px;">
+                    </div>
+
+                    {{-- Row 4: Voter Status & Classification (Ample width, never truncated) --}}
+                    <div class="fgrid2" style="gap:10px; margin-bottom:12px;">
+                        <div>
+                            <label class="flbl">Voter? (Yes/No)</label>
+                            <select name="is_voter" required class="finput fselect" style="padding:8px; font-weight:600;">
                                 <option value="0">No (Non-Voter)</option>
-                                <option value="1">Yes (Voter)</option>
+                                <option value="1">Yes (Registered Voter)</option>
                             </select>
                         </div>
-                        <div><label class="flbl">Classification</label>
-                            <select name="classification" x-model="classification" class="finput fselect" style="padding:8px;">
-                                <option value="">None</option>
+                        <div>
+                            <label class="flbl">Classification</label>
+                            <select name="classification" x-model="classification" class="finput fselect" style="padding:8px; font-weight:600;">
+                                <option value="">None / Regular</option>
                                 <option value="PWD">PWD</option>
                                 <option value="Senior">Senior</option>
                                 <option value="Solo Parent">Solo Parent</option>
