@@ -872,15 +872,7 @@ html, body {
                 return this.activitySlides.length > 0 ? this.activitySlides : this.getDefaultActivities();
             },
 
-            dutySchedule: @json($kagawadSchedule ?? [
-                ['day' => 'Monday',    'name' => 'Hon. Teresita O. Dulay'],
-                ['day' => 'Tuesday',   'name' => 'Hon. Virginia B. Magno'],
-                ['day' => 'Wednesday', 'name' => 'Hon. Rosemarie N. Gutierrez'],
-                ['day' => 'Thursday',  'name' => 'Hon. Raden John V. Galeon'],
-                ['day' => 'Friday',    'name' => 'Hon. Ian S. Punzalan'],
-                ['day' => 'Saturday',  'name' => 'Hon. Edgardo M. Gutierrez'],
-                ['day' => 'Sunday',    'name' => 'Hon. Renato V. Calawin'],
-            ]),
+            dutySchedule: @json($kagawadSchedule ?? []),
             dutyTodayDynamic: @json($activeKagawadTodayName ?? null),
             isKagawadOverriddenToday: {{ !empty($isKagawadOverriddenToday) ? 'true' : 'false' }},
             kagawadOverrideReason: @json($kagawadOverrideReason ?? ''),
