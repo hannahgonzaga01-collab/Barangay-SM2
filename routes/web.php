@@ -35,14 +35,11 @@ Route::get('/dashboard', function () {
     return redirect('/');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// 3. Profile & Import (auth only)
+// 3. Profile (auth only)
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::get('/import-residents', [ResidentImportController::class, 'show'])->name('residents.import');
-    Route::post('/import-residents', [ResidentImportController::class, 'store']);
 });
 
 // 4. RESIDENT PORTAL
@@ -77,13 +74,12 @@ Route::middleware(['verified_resident'])->group(function () {
     Route::get('/resident/emergency-sos', fn() => redirect()->route('resident.index'));
 });
 
-// 5. Staff & Admin (auth required)
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    // ── ADMIN DASHBOARD ──
+// 5. ADMIN PORTAL (Admin role only)
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('/admin', fn() => redirect()->route('admin.dashboard'));
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-    // ── Admin Officials ──
+    // Admin Officials
     Route::post('/admin/officials', [AdminController::class, 'storeOfficial'])->name('admin.officials.store');
     Route::put('/admin/officials/{id}', [AdminController::class, 'updateOfficial'])->name('admin.officials.update');
     Route::patch('/admin/officials/{id}/archive', [AdminController::class, 'archiveOfficial'])->name('admin.officials.archive');
@@ -93,49 +89,52 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/officials/duty-override', [AdminController::class, 'updateKagawadOverride'])->name('admin.officials.duty_override');
     Route::post('/admin/officials/duty-override/clear', [AdminController::class, 'clearKagawadOverride'])->name('admin.officials.duty_override.clear');
 
-    // ── Admin Announcements ──
+    // Admin Announcements
     Route::post('/admin/announcements', [AdminController::class, 'storeAnnouncement'])->name('admin.announcements.store');
     Route::put('/admin/announcements/{id}', [AdminController::class, 'updateAnnouncement'])->name('admin.announcements.update');
     Route::patch('/admin/announcements/{id}/archive', [AdminController::class, 'archiveAnnouncement'])->name('admin.announcements.archive');
     Route::patch('/admin/announcements/{id}/restore', [AdminController::class, 'restoreAnnouncement'])->name('admin.announcements.restore');
     Route::delete('/admin/announcements/{id}', [AdminController::class, 'destroyAnnouncement'])->name('admin.announcements.destroy');
 
-    // ── Admin Events ──
+    // Admin Events
     Route::post('/admin/events', [AdminController::class, 'storeEvent'])->name('admin.events.store');
     Route::put('/admin/events/{id}', [AdminController::class, 'updateEvent'])->name('admin.events.update');
     Route::patch('/admin/events/{id}/archive', [AdminController::class, 'archiveEvent'])->name('admin.events.archive');
     Route::patch('/admin/events/{id}/restore', [AdminController::class, 'restoreEvent'])->name('admin.events.restore');
     Route::delete('/admin/events/{id}', [AdminController::class, 'destroyEvent'])->name('admin.events.destroy');
 
-    // ── Admin Projects ──
+    // Admin Projects
     Route::post('/admin/projects', [AdminController::class, 'storeProject'])->name('admin.projects.store');
     Route::put('/admin/projects/{id}', [AdminController::class, 'updateProject'])->name('admin.projects.update');
     Route::patch('/admin/projects/{id}/archive', [AdminController::class, 'archiveProject'])->name('admin.projects.archive');
     Route::patch('/admin/projects/{id}/restore', [AdminController::class, 'restoreProject'])->name('admin.projects.restore');
     Route::delete('/admin/projects/{id}', [AdminController::class, 'destroyProject'])->name('admin.projects.destroy');
-    
-    // ── Admin Carousel ──
+
+    // Admin Carousel
     Route::post('/admin/carousel', [AdminController::class, 'storeCarouselSlide'])->name('admin.carousel.store');
     Route::put('/admin/carousel/{id}', [AdminController::class, 'updateCarouselSlide'])->name('admin.carousel.update');
     Route::delete('/admin/carousel/{id}', [AdminController::class, 'destroyCarouselSlide'])->name('admin.carousel.destroy');
     Route::post('/admin/carousel/link/{type}/{id}', [AdminController::class, 'linkToCarousel'])->name('admin.carousel.link');
 
-    // ── Admin Site Settings ──
+    // Admin Site Settings
     Route::post('/admin/settings', [AdminController::class, 'updateSiteSetting'])->name('admin.settings.update');
 
-    // ── Staff Portal Security & Password Recovery Q&A ──
+    // Staff Security & Password Recovery Q&A
     Route::post('/admin/staff-security/update', [AdminController::class, 'updateStaffSecurity'])->name('admin.staff-security.update');
 
-    // ── Admin Messages ──
+    // Admin Messages
     Route::patch('/admin/messages/{id}/read', [AdminController::class, 'markMessageRead'])->name('admin.message.read');
     Route::post('/admin/messages/{id}/reply', [AdminController::class, 'replyMessage'])->name('admin.message.reply');
 
-    // ── STAFF PASSWORD CHANGE ──
-    Route::get('/staff/change-password', [StaffPasswordController::class, 'show'])->name('staff.password.show');
-    Route::post('/staff/change-password', [StaffPasswordController::class, 'update'])->name('staff.password.update');
-    Route::post('/staff/change-password/otp', [StaffPasswordController::class, 'sendOtp'])->name('staff.password.otp');
+    // Backups & Maintenance
+    Route::get('/admin/backups', [\App\Http\Controllers\BackupController::class, 'index']);
+    Route::post('/admin/backups/run', [\App\Http\Controllers\BackupController::class, 'run']);
+    Route::get('/admin/backups/download/{filename}', [\App\Http\Controllers\BackupController::class, 'download']);
+    Route::delete('/admin/backups/delete/{filename}', [\App\Http\Controllers\BackupController::class, 'destroy']);
+});
 
-    // ── OFFICE ──
+// 6. OFFICE PORTAL (Admin and Office roles)
+Route::middleware(['auth', 'verified', 'role:admin,office'])->group(function () {
     Route::get('/office', [OfficeController::class, 'index'])->name('office.index');
     Route::get('/office/export', [OfficeController::class, 'export'])->name('office.export');
     Route::post('/office', [OfficeController::class, 'store'])->name('office.store');
@@ -146,7 +145,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/office/{id}/restore', [OfficeController::class, 'restore'])->name('office.restore');
     Route::get('/office/family/{id}', [OfficeController::class, 'getFamily'])->name('office.family');
 
-    // ── Office Document Requests & Templates ──
+    // Office Document Requests & Templates
     Route::patch('/office/document-request/{id}/status', [OfficeController::class, 'updateDocumentStatus'])->name('office.document.status');
     Route::get('/office/document-request/{id}/json', [OfficeController::class, 'getDocumentRequest'])->name('office.document.request.json');
     Route::delete('/office/document-request/{id}', [OfficeController::class, 'destroyDocumentRequest'])->name('office.document.destroy');
@@ -155,32 +154,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/office/document-templates/{key}', [\App\Http\Controllers\DocumentTemplateController::class, 'update'])->name('office.document.templates.update');
     Route::post('/office/document-templates/{key}/reset', [\App\Http\Controllers\DocumentTemplateController::class, 'reset'])->name('office.document.templates.reset');
 
-    // ── Office Digital ID ──
+    // Office Digital ID
     Route::post('/office/digital-id/{id}/generate', [OfficeController::class, 'generateDigitalId'])->name('office.digital.id.generate');
     Route::post('/office/digital-id/generate-manual/{resident_id}', [OfficeController::class, 'generateManualDigitalId'])->name('office.digital.id.generate-manual');
 
-    // ── Office Voter Verification & Import ──
+    // Office Voter Verification & Import
     Route::post('/office/import', [OfficeController::class, 'import'])->name('office.import');
     Route::post('/office/voter-verification/{user}/approve', [OfficeController::class, 'approveVoter'])->name('office.voter.approve');
     Route::post('/office/voter-verification/{user}/decline', [OfficeController::class, 'declineVoter'])->name('office.voter.decline');
 
-    // ── Office Resident Verification ──
+    // Office Resident Verification
     Route::post('/office/resident-verification/{id}/approve', [OfficeController::class, 'approveResident'])->name('office.resident.approve');
     Route::post('/office/resident-verification/{id}/reject', [OfficeController::class, 'rejectResident'])->name('office.resident.reject');
 
-    // ── Office Smart Masterlist Registrant Verification ──
+    // Office Smart Masterlist Registrant Verification
     Route::post('/office/verifications/{id}/approve', [OfficeController::class, 'approveVerification'])->name('office.verification.approve');
     Route::post('/office/verifications/{id}/reject', [OfficeController::class, 'rejectVerification'])->name('office.verification.reject');
 
+    // Office Resident Import
+    Route::get('/import-residents', [ResidentImportController::class, 'show'])->name('residents.import');
+    Route::post('/import-residents', [ResidentImportController::class, 'store']);
 
-    // ── PETS ──
+    // PETS
     Route::post('/pets/store', [OfficeController::class, 'storePet'])->name('pets.store');
     Route::delete('/pets/{id}', [OfficeController::class, 'destroyPet'])->name('pets.destroy');
     Route::patch('/pets/{id}/restore', [OfficeController::class, 'restorePet'])->name('pets.restore');
     Route::patch('/pets/{id}/status', [OfficeController::class, 'updatePetStatus'])->name('pets.status');
     Route::post('/pets/{id}/approve-vaccine', [OfficeController::class, 'approvePetVaccine'])->name('office.pets.approve-vaccine');
+});
 
-    // ── JUSTICE ──
+// 7. JUSTICE PORTAL (Admin and Justice roles)
+Route::middleware(['auth', 'verified', 'role:admin,justice'])->group(function () {
     Route::get('/justice', [\App\Http\Controllers\JusticeController::class, 'dashboard'])->name('justice.dashboard');
     Route::post('/justice/blotter', [\App\Http\Controllers\JusticeController::class, 'storeBlotter'])->name('justice.blotter.store');
     Route::patch('/justice/blotter/{id}/status', [\App\Http\Controllers\JusticeController::class, 'updateStatus']);
@@ -188,8 +192,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/justice/export', [\App\Http\Controllers\JusticeController::class, 'export'])->name('justice.export');
     Route::post('/justice/import', [\App\Http\Controllers\JusticeController::class, 'importBlotter'])->name('justice.import');
     Route::get('/justice/sample-template', [\App\Http\Controllers\JusticeController::class, 'sampleTemplate'])->name('justice.sample.template');
+});
 
-    // ── VAWC ──
+// 8. VAWC PORTAL (Admin and VAWC roles)
+Route::middleware(['auth', 'verified', 'role:admin,vawc'])->group(function () {
     Route::get('/vawc', [\App\Http\Controllers\VawcController::class, 'index'])->name('vawc.dashboard');
     Route::patch('/vawc/issues/{id}/status', [\App\Http\Controllers\VawcController::class, 'updateStatus']);
     Route::patch('/vawc/issues/{id}/summary', [\App\Http\Controllers\VawcController::class, 'updateSummary']);
@@ -204,9 +210,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/vawc/import', [\App\Http\Controllers\VawcController::class, 'importBlotter'])->name('vawc.import');
     Route::get('/vawc/sample-template', [\App\Http\Controllers\VawcController::class, 'sampleTemplate'])->name('vawc.sample.template');
     Route::get('/vawc/audit-logs', [\App\Http\Controllers\VawcController::class, 'getAuditLogs'])->name('vawc.audit.logs');
+});
 
-    // ── PEACE AND ORDER ──
-    Route::get('/peace',   [\App\Http\Controllers\PeaceController::class, 'dashboard'])->name('peace.dashboard');
+// 9. PEACE & ORDER PORTAL (Admin and Peace roles)
+Route::middleware(['auth', 'verified', 'role:admin,peace'])->group(function () {
+    Route::get('/peace', [\App\Http\Controllers\PeaceController::class, 'dashboard'])->name('peace.dashboard');
     Route::post('/peace/blotter', [\App\Http\Controllers\PeaceController::class, 'storeBlotter'])->name('peace.blotter.store');
     Route::post('/peace/patrol', [\App\Http\Controllers\PeaceController::class, 'storePatrol'])->name('peace.patrol.store');
     Route::match(['put', 'patch'], '/peace/patrol/{id}', [\App\Http\Controllers\PeaceController::class, 'updatePatrol'])->name('peace.patrol.update');
@@ -224,25 +232,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/peace/export', [\App\Http\Controllers\PeaceController::class, 'export'])->name('peace.export');
     Route::post('/peace/import', [\App\Http\Controllers\PeaceController::class, 'importBlotter'])->name('peace.import');
     Route::get('/peace/sample-template', [\App\Http\Controllers\PeaceController::class, 'sampleTemplate'])->name('peace.sample.template');
+});
 
-    // ── DEPARTMENT SUBMITTED REPORTS ──
+// 10. STAFF GENERAL (Admin and all Staff roles)
+Route::middleware(['auth', 'verified', 'role:admin,office,justice,vawc,peace'])->group(function () {
+    Route::get('/staff/change-password', [StaffPasswordController::class, 'show'])->name('staff.password.show');
+    Route::post('/staff/change-password', [StaffPasswordController::class, 'update'])->name('staff.password.update');
+    Route::post('/staff/change-password/otp', [StaffPasswordController::class, 'sendOtp'])->name('staff.password.otp');
+
+    // Department Submitted Reports
     Route::post('/department-reports/submit', [DepartmentReportController::class, 'submit'])->name('department.reports.submit');
     Route::get('/department-reports/{id}', [DepartmentReportController::class, 'show'])->name('department.reports.show');
     Route::post('/department-reports/template-upload', [DepartmentReportController::class, 'uploadTemplate'])->name('department.reports.upload_template');
     Route::match(['delete', 'post'], '/department-reports/template-delete', [DepartmentReportController::class, 'deleteTemplate'])->name('department.reports.delete_template');
-
-    // ── BACKUP & MAINTENANCE ──
-    Route::get('/admin/backups', [\App\Http\Controllers\BackupController::class, 'index']);
-    Route::post('/admin/backups/run', [\App\Http\Controllers\BackupController::class, 'run']);
-    Route::get('/admin/backups/download/{filename}', [\App\Http\Controllers\BackupController::class, 'download']);
-    Route::delete('/admin/backups/delete/{filename}', [\App\Http\Controllers\BackupController::class, 'destroy']);
 });
 
+// ── DIRECT /storage REDIRECT TO PREVENT 403 OR DIRECTORY LISTING ──
+Route::get('/storage', fn() => redirect()->route('resident.index'));
+
 // ── GRACEFUL STORAGE ASSET FALLBACK ROUTE ──
-// Ensures uploaded images or lost ephemeral files never show broken image icons
 Route::get('/storage/{path}', function ($path) {
     $fullPath = storage_path('app/public/' . $path);
-    if (file_exists($fullPath)) {
+    if (file_exists($fullPath) && !is_dir($fullPath)) {
         return response()->file($fullPath);
     }
     // If it is a user, resident, or voter photo, fall back to clean avatar instead of cleanup photo
@@ -253,7 +264,24 @@ Route::get('/storage/{path}', function ($path) {
     if (file_exists($imgFallback)) {
         return response()->file($imgFallback);
     }
-    abort(404);
+    return redirect()->route('resident.index');
 })->where('path', '.*');
 
 require __DIR__ . '/auth.php';
+
+// ── FALLBACK ROUTE FOR UNMATCHED URLS (PREVENT RAW 404) ──
+Route::fallback(function () {
+    if (Auth::check()) {
+        $userRole = Auth::user()->role;
+        $targetRoute = match ($userRole) {
+            'admin'   => 'admin.dashboard',
+            'office'  => 'office.index',
+            'justice' => 'justice.dashboard',
+            'vawc'    => 'vawc.dashboard',
+            'peace'   => 'peace.dashboard',
+            default   => 'resident.index',
+        };
+        return redirect()->route($targetRoute)->with('error', 'Ang pahinang hinahanap ay hindi natagpuan (404). Ibinabalik sa iyong portal.');
+    }
+    return redirect()->route('resident.index')->with('error', 'Ang pahinang hinahanap ay hindi natagpuan (404).');
+});

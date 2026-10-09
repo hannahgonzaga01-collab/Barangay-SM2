@@ -814,6 +814,10 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--body-bg);
             min-height: 100vh;
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden !important;
+            position: relative;
         }
 
         [x-cloak] {
@@ -1114,6 +1118,17 @@
             margin: 0 auto;
             padding: var(--pad);
             padding-bottom: 48px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        canvas {
+            max-width: 100% !important;
+        }
+
+        .chart-box, .stat-card, .sg > *, .demo-grid > *, .off-grid > * {
+            min-width: 0;
+            max-width: 100%;
         }
 
         /* GREETING */
@@ -1360,12 +1375,19 @@
             align-items: stretch;
         }
 
+        .chart-grid.doughnut-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--gap);
+        }
+
         .chart-box {
             background: #fff;
             border-radius: var(--r);
             box-shadow: var(--card-shadow);
             padding: 20px;
             border: 1px solid rgba(4, 25, 45, .04);
+            min-width: 0;
+            overflow: hidden;
         }
 
         .chart-title {
@@ -2061,10 +2083,14 @@
             .demo-grid, .off-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
+            .chart-grid.doughnut-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
         }
 
         @media(max-width:1024px) {
-            .chart-grid {
+            .chart-grid:not(.doughnut-grid) {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
             }
@@ -2081,8 +2107,15 @@
                 display: none !important;
             }
 
+            .tb-inner {
+                padding: 0 12px;
+                max-width: 100vw;
+            }
+
             .dash-wrap {
-                padding: 14px 12px 32px;
+                padding: 12px 10px 32px;
+                max-width: 100vw;
+                overflow-x: hidden;
             }
 
             .sg {
@@ -2090,9 +2123,15 @@
                 gap: 10px;
             }
 
-            .chart-grid {
+            .chart-grid,
+            .chart-grid.doughnut-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
+            }
+
+            .chart-box {
+                padding: 14px;
+                min-width: 0;
             }
 
             .demo-grid, .off-grid {
@@ -2101,6 +2140,10 @@
 
             .g-stats {
                 gap: 12px;
+            }
+
+            .greeting {
+                padding: 16px 18px;
             }
 
             .greeting h1 {
@@ -2115,6 +2158,8 @@
                 gap: 3px;
                 overflow-x: auto;
                 flex-wrap: nowrap;
+                max-width: 100%;
+                -webkit-overflow-scrolling: touch;
             }
 
             .tab-btn {
@@ -2418,24 +2463,22 @@
                         </div>
                     </button>
                 </div>
-                <div class="chart-grid">
+                <div class="chart-grid doughnut-grid">
                     <div class="chart-box">
                         <div class="chart-title"><i class="fas fa-file-invoice"></i> Document Requests</div>
-                        <div style="position:relative;height:220px;width:100%;"><canvas id="docChart"></canvas></div>
+                        <div style="position:relative;height:190px;width:100%;"><canvas id="docChart"></canvas></div>
                     </div>
                     <div class="chart-box">
                         <div class="chart-title"><i class="fas fa-flag"></i> Issues by Department</div>
-                        <div style="position:relative;height:220px;width:100%;"><canvas id="issueChart"></canvas></div>
+                        <div style="position:relative;height:190px;width:100%;"><canvas id="issueChart"></canvas></div>
                     </div>
-                </div>
-                <div class="chart-grid">
                     <div class="chart-box">
                         <div class="chart-title"><i class="fas fa-paw"></i> Pet Vaccination Status</div>
-                        <div style="position:relative;height:220px;width:100%;"><canvas id="petChart"></canvas></div>
+                        <div style="position:relative;height:190px;width:100%;"><canvas id="petChart"></canvas></div>
                     </div>
                     <div class="chart-box">
                         <div class="chart-title"><i class="fas fa-venus-mars"></i> Gender Distribution</div>
-                        <div style="position:relative;height:220px;width:100%;"><canvas id="genderChart"></canvas></div>
+                        <div style="position:relative;height:190px;width:100%;"><canvas id="genderChart"></canvas></div>
                     </div>
                 </div>
             </div>

@@ -13,12 +13,29 @@ class RoleMiddleware
     {
         // 1. Check kung logged in ang user
         if (!Auth::check()) {
-            return redirect()->route('login');
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+            return redirect()->route('login')->with('error', 'Mangyaring mag-log in muna upang ma-access ang pahinang ito.');
         }
 
         // 2. Check kung ang role ng user ay kasama sa allowed roles
-        if (!in_array(Auth::user()->role, $roles)) {
-            abort(403, 'Unauthorized access.');
+        $userRole = Auth::user()->role;
+        if (!in_array($userRole, $roles)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Unauthorized access.'], 403);
+            }
+
+            $redirectRoute = match ($userRole) {
+                'admin'   => 'admin.dashboard',
+                'office'  => 'office.index',
+                'justice' => 'justice.dashboard',
+                'vawc'    => 'vawc.dashboard',
+                'peace'   => 'peace.dashboard',
+                default   => 'resident.index',
+            };
+
+            return redirect()->route($redirectRoute)->with('error', 'Wala kayong pahintulot na buksan ang pahinang ito (Access Denied).');
         }
 
         return $next($request);

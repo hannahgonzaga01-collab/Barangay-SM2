@@ -6,23 +6,23 @@
         }
 
         .flbl {
-            font-size: 9px;
+            font-size: 8.5px;
             font-weight: 800;
             color: #64748b;
             text-transform: uppercase;
             letter-spacing: .06em;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .finput {
             width: 100%;
-            padding: 10px 14px 10px 38px;
+            padding: 9px 12px 9px 36px;
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
             border-radius: 9px;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 600;
             color: #0f172a;
             outline: none;
@@ -76,14 +76,14 @@
         }
 
         .fgrp {
-            margin-bottom: 14px;
+            margin-bottom: 11px;
         }
 
         .err-msg {
             font-size: 10px;
             font-weight: 700;
             color: #dc2626;
-            margin-top: 4px;
+            margin-top: 3px;
             display: flex;
             align-items: center;
             gap: 4px;
@@ -91,20 +91,20 @@
 
         .btn-login {
             width: 100%;
-            padding: 12px;
+            padding: 10px 14px;
             background: linear-gradient(135deg, #0E5393 0%, #04192D 100%);
             color: #fff;
             font-family: inherit;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 900;
             letter-spacing: .06em;
             text-transform: uppercase;
             border: none;
-            border-radius: 10px;
+            border-radius: 9px;
             cursor: pointer;
             transition: all .18s;
             box-shadow: 0 4px 14px rgba(0, 0, 82, .3);
-            margin-top: 6px;
+            margin-top: 0;
         }
 
         .btn-login:hover {
@@ -139,7 +139,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
         }
 
         .remember-lbl {
@@ -174,8 +174,8 @@
 
         .register-row {
             text-align: center;
-            margin-top: 16px;
-            padding-top: 16px;
+            margin-top: 10px;
+            padding-top: 10px;
             border-top: 1px solid #f1f5f9;
         }
 

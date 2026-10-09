@@ -5498,6 +5498,70 @@ html, body {
 
     </div>{{-- /main x-data --}}
 
+    {{-- Auto Draft Persistence System for Resident Forms (Document Requests & Incident Reports) --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function setupFormDraft(formId, storageKey) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            // Restore draft if available
+            try {
+                const savedData = localStorage.getItem(storageKey);
+                if (savedData) {
+                    const parsed = JSON.parse(savedData);
+                    let restoredCount = 0;
+                    Object.keys(parsed).forEach(fieldName => {
+                        const input = form.querySelector(`[name="${fieldName}"]`);
+                        if (input && input.type !== 'file' && input.type !== 'password' && input.type !== 'hidden') {
+                            if (!input.value) {
+                                input.value = parsed[fieldName];
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                                restoredCount++;
+                            }
+                        }
+                    });
+                }
+            } catch(e) {}
+
+            // Auto-save on input or change
+            let timeout;
+            form.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(saveDraft, 400);
+            });
+            form.addEventListener('change', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(saveDraft, 400);
+            });
+
+            function saveDraft() {
+                try {
+                    const formData = new FormData(form);
+                    const dataObj = {};
+                    formData.forEach((value, key) => {
+                        if (key !== '_token' && !(value instanceof File)) {
+                            dataObj[key] = value;
+                        }
+                    });
+                    localStorage.setItem(storageKey, JSON.stringify(dataObj));
+                } catch(e) {}
+            }
+
+            // Clear draft when form is submitted
+            form.addEventListener('submit', function() {
+                setTimeout(() => {
+                    localStorage.removeItem(storageKey);
+                }, 3000);
+            });
+        }
+
+        setupFormDraft('docReqForm', 'brgy_doc_request_draft');
+        setupFormDraft('issueReportForm', 'brgy_issue_report_draft');
+    });
+    </script>
+
     <footer style="text-align:center;padding:16px;font-size:10px;color:var(--light);font-weight:600;background:var(--body-bg);border-top:1px solid var(--border);">
         © {{ date('Y') }} Barangay San Miguel II, Dasmariñas City ,Cavite. All rights reserved.
     </footer>
