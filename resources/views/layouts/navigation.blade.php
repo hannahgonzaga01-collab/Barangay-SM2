@@ -184,39 +184,7 @@
                             </button>
                             @endif
 
-                            @if($navUser?->role === 'admin')
-                            <a href="/admin/dashboard" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-tachometer-alt w-4 text-center" style="color:#0E5393;"></i> Admin Dashboard
-                            </a>
-                            <a href="/office" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-building w-4 text-center" style="color:#0E5393;"></i> Office Portal
-                            </a>
-                            <a href="/justice" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-gavel w-4 text-center" style="color:#0E5393;"></i> Justice Portal
-                            </a>
-                            <a href="/vawc" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-shield-alt w-4 text-center" style="color:#0E5393;"></i> VAWC Portal
-                            </a>
-                            <a href="/peace" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-balance-scale w-4 text-center" style="color:#0E5393;"></i> Peace & Order
-                            </a>
-                            @endif
 
-                            @if($navUser?->role === 'office')
-                            <a href="/office" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-building w-4 text-center" style="color:#0E5393;"></i> Office Portal
-                            </a>
-                            @endif
-                            @if($navUser?->role === 'justice')
-                            <a href="/justice" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-gavel w-4 text-center" style="color:#0E5393;"></i> Justice Portal
-                            </a>
-                            @endif
-                            @if($navUser?->role === 'peace')
-                            <a href="/peace" class="sm:hidden flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                                <i class="fas fa-shield w-4 text-center" style="color:#0E5393;"></i> Peace & Order Portal
-                            </a>
-                            @endif
 
                             @if($navUser?->role === 'office')
                             <div class="px-4 py-3 bg-blue-50/50 border-t border-gray-100" x-data="{

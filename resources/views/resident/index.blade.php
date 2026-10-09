@@ -5302,45 +5302,45 @@ html, body {
                         </div>
 
                         {{-- ONE-TAP DIRECT EMERGENCY HOTLINES (Enlarged & Senior/PWD Readable) --}}
-                        <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:14px; padding:14px 16px; margin-bottom:16px; box-shadow:0 2px 10px rgba(22,101,52,0.08);">
+                        <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:14px; padding:12px 14px; margin-bottom:16px; box-shadow:0 2px 10px rgba(22,101,52,0.08); width:100%; box-sizing:border-box; overflow:hidden;">
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
-                                <div style="font-size:12.5px; font-weight:900; color:#14532d; display:flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.02em;">
-                                    <i class="fas fa-phone-volume" style="color:#16a34a; font-size:15px;"></i>
+                                <div style="font-size:12px; font-weight:900; color:#14532d; display:flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.02em;">
+                                    <i class="fas fa-phone-volume" style="color:#16a34a; font-size:14px;"></i>
                                     <span>Direct Emergency Hotlines (24/7)</span>
                                 </div>
-                                <span style="font-size:9.5px; font-weight:900; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:2px 8px; border-radius:99px; letter-spacing:0.04em;">DIAL O COPY-PASTE</span>
+                                <span style="font-size:9px; font-weight:900; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:2px 8px; border-radius:99px; letter-spacing:0.04em;">DIAL O COPY-PASTE</span>
                             </div>
-                            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap:8px; width:100%; box-sizing:border-box;">
                                 {{-- Hotline 1 --}}
-                                <button type="button" @click="callOrCopyHotline('0464160283', '(046) 416-0283', 'Brgy. SM2 Tanod Desk')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #86efac; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#dcfce7';this.style.borderColor='#16a34a';" onmouseout="this.style.background='#fff';this.style.borderColor='#86efac';">
-                                    <div style="width:34px;height:34px;border-radius:8px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-shield-alt"></i></div>
-                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
-                                        <div style="font-size:11px;color:#15803d;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Brgy. Tanod Desk</div>
-                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">(046) 416-0283</div>
+                                <button type="button" @click="callOrCopyHotline('0464160283', '(046) 416-0283', 'Brgy. SM2 Tanod Desk')" style="text-align:left; display:flex; align-items:center; gap:9px; background:#fff; border:1.5px solid #86efac; padding:9px 11px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05); width:100%; box-sizing:border-box; min-width:0; overflow:hidden;" onmouseover="this.style.background='#dcfce7';this.style.borderColor='#16a34a';" onmouseout="this.style.background='#fff';this.style.borderColor='#86efac';">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;"><i class="fas fa-shield-alt"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;flex:1;">
+                                        <div style="font-size:10.5px;color:#15803d;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Brgy. Tanod Desk</div>
+                                        <div style="font-family:monospace;font-size:12.5px;font-weight:900;color:#0f172a;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">(046) 416-0283</div>
                                     </div>
                                 </button>
                                 {{-- Hotline 2 --}}
-                                <button type="button" @click="callOrCopyHotline('09175432100', '0917-543-2100', 'Desk Officer Mobile')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #86efac; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#dcfce7';this.style.borderColor='#16a34a';" onmouseout="this.style.background='#fff';this.style.borderColor='#86efac';">
-                                    <div style="width:34px;height:34px;border-radius:8px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-mobile-alt"></i></div>
-                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
-                                        <div style="font-size:11px;color:#15803d;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Desk Officer Mobile</div>
-                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">0917-543-2100</div>
+                                <button type="button" @click="callOrCopyHotline('09175432100', '0917-543-2100', 'Desk Officer Mobile')" style="text-align:left; display:flex; align-items:center; gap:9px; background:#fff; border:1.5px solid #86efac; padding:9px 11px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05); width:100%; box-sizing:border-box; min-width:0; overflow:hidden;" onmouseover="this.style.background='#dcfce7';this.style.borderColor='#16a34a';" onmouseout="this.style.background='#fff';this.style.borderColor='#86efac';">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;"><i class="fas fa-mobile-alt"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;flex:1;">
+                                        <div style="font-size:10.5px;color:#15803d;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Desk Officer Mobile</div>
+                                        <div style="font-family:monospace;font-size:12.5px;font-weight:900;color:#0f172a;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">0917-543-2100</div>
                                     </div>
                                 </button>
                                 {{-- Hotline 3 --}}
-                                <button type="button" @click="callOrCopyHotline('0464160278', '(046) 416-0278', 'Dasma PNP Police')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #93c5fd; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#eff6ff';this.style.borderColor='#2563eb';" onmouseout="this.style.background='#fff';this.style.borderColor='#93c5fd';">
-                                    <div style="width:34px;height:34px;border-radius:8px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-building-shield"></i></div>
-                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
-                                        <div style="font-size:11px;color:#1d4ed8;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Dasma PNP Police</div>
-                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">(046) 416-0278</div>
+                                <button type="button" @click="callOrCopyHotline('0464160278', '(046) 416-0278', 'Dasma PNP Police')" style="text-align:left; display:flex; align-items:center; gap:9px; background:#fff; border:1.5px solid #93c5fd; padding:9px 11px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05); width:100%; box-sizing:border-box; min-width:0; overflow:hidden;" onmouseover="this.style.background='#eff6ff';this.style.borderColor='#2563eb';" onmouseout="this.style.background='#fff';this.style.borderColor='#93c5fd';">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;"><i class="fas fa-building-shield"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;flex:1;">
+                                        <div style="font-size:10.5px;color:#1d4ed8;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Dasma PNP Police</div>
+                                        <div style="font-family:monospace;font-size:12.5px;font-weight:900;color:#0f172a;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">(046) 416-0278</div>
                                     </div>
                                 </button>
                                 {{-- Hotline 4 --}}
-                                <button type="button" @click="callOrCopyHotline('911', '911 / (046) 481-8000', 'CDRRMO / Rescue')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #fca5a5; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#fee2e2';this.style.borderColor='#dc2626';" onmouseout="this.style.background='#fff';this.style.borderColor='#fca5a5';">
-                                    <div style="width:34px;height:34px;border-radius:8px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-ambulance"></i></div>
-                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
-                                        <div style="font-size:11px;color:#b91c1c;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">CDRRMO Rescue</div>
-                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">911 / 481-8000</div>
+                                <button type="button" @click="callOrCopyHotline('911', '911 / (046) 481-8000', 'CDRRMO / Rescue')" style="text-align:left; display:flex; align-items:center; gap:9px; background:#fff; border:1.5px solid #fca5a5; padding:9px 11px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05); width:100%; box-sizing:border-box; min-width:0; overflow:hidden;" onmouseover="this.style.background='#fee2e2';this.style.borderColor='#dc2626';" onmouseout="this.style.background='#fff';this.style.borderColor='#fca5a5';">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;"><i class="fas fa-ambulance"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;flex:1;">
+                                        <div style="font-size:10.5px;color:#b91c1c;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">CDRRMO Rescue</div>
+                                        <div style="font-family:monospace;font-size:12.5px;font-weight:900;color:#0f172a;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">911 / 481-8000</div>
                                     </div>
                                 </button>
                             </div>

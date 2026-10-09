@@ -2605,7 +2605,7 @@
                         </div>
                     </div>
 
-                    <div style="padding:16px 20px; background:#f8fafc; border-top:1px solid #f1f5f9; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; align-items:center;">
+                    <div style="padding:16px 20px; background:#f8fafc; border-top:1px solid #f1f5f9; display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap:14px; align-items:center;">
                         {{-- Today's Status Box --}}
                         <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px;">
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
@@ -2956,19 +2956,19 @@
             {{-- ══ NEWS & EVENTS ══ --}}
             <div x-show="tab==='announcements'" x-transition>
                 <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:10px;max-width:100%;flex:1;min-width:240px;">
                         <i class="fas fa-search" style="color:var(--light); font-size: 14px;"></i>
                         <input type="text" x-model="searchAnn" @input="searchEvt = searchAnn; searchProj = searchAnn" placeholder="Search news, events & projects..." class="finput"
-                            style="width:300px;padding:7px 12px;font-size:11px;">
+                            style="width:min(100%, 300px);padding:7px 12px;font-size:11px;">
                     </div>
-                    <div style="display:flex;gap:8px;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
                         <button @click="addProjModal=true" class="btn btn-primary" style="background:linear-gradient(135deg,#0E5393,#04192D);box-shadow:0 4px 12px rgba(14,83,147,0.3);"><i class="fas fa-hammer"></i> New Project</button>
                         <button @click="addEvtModal=true;evtPhotoPreview=null" class="btn btn-primary"><i class="fas fa-calendar-plus"></i> New Event</button>
                         <button @click="addAnnModal=true;annPhotoPreview=null" class="btn btn-primary"><i class="fas fa-bullhorn"></i> New Announcement</button>
                     </div>
                 </div>
 
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(450px, 1fr));gap:var(--gap);align-items:start;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr));gap:var(--gap);align-items:start;">
                     
                     {{-- LEFT COLUMN: EVENTS --}}
                     <div>
@@ -3128,15 +3128,15 @@
                                     <span class="cbadge" style="background:#f1f5f9;color:#64748b;">{{ $archivedEvents->count() }}</span>
                                 </div>
                                 @foreach($archivedEvents as $evt)
-                                    <div class="evt-item" style="opacity:.6;">
-                                        <div style="flex:1;">
-                                            <div style="font-size:12px;font-weight:800;color:var(--muted);">{{ $evt->title }}</div>
+                                    <div class="evt-item" style="opacity:.6;display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0;box-sizing:border-box;">
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="font-size:12px;font-weight:800;color:var(--muted);overflow-wrap:break-word;word-break:break-word;">{{ $evt->title }}</div>
                                             <div style="font-size:9px;color:var(--light);">Archived {{ $evt->archived_at?->format('M d, Y') }}</div>
                                         </div>
-                                        <div style="display:flex;gap:5px;">
+                                        <div style="display:flex;gap:5px;flex-shrink:0;">
                                             <form action="{{ route('admin.events.restore', $evt->id) }}" method="POST">
                                                 @csrf @method('PATCH')
-                                                <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-undo"></i> Restore</button>
+                                                <button type="submit" class="btn btn-sm btn-success" style="white-space:nowrap;padding:6px 12px;"><i class="fas fa-undo"></i> Restore</button>
                                             </form>
                                         </div>
                                     </div>
@@ -3287,15 +3287,15 @@
                                     <span class="cbadge" style="background:#f1f5f9;color:#64748b;">{{ $archivedAnnouncements->count() }}</span>
                                 </div>
                                 @foreach($archivedAnnouncements as $ann)
-                                    <div class="ann-item" style="opacity:.6;">
-                                        <div style="flex:1;">
-                                            <div class="ann-title" style="color:var(--muted);">{{ $ann->title }}</div>
+                                    <div class="ann-item" style="opacity:.6;display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0;box-sizing:border-box;">
+                                        <div style="flex:1;min-width:0;">
+                                            <div class="ann-title" style="color:var(--muted);overflow-wrap:break-word;word-break:break-word;">{{ $ann->title }}</div>
                                             <div class="ann-date">Archived {{ $ann->archived_at?->format('M d, Y') }}</div>
                                         </div>
-                                        <div style="display:flex;gap:5px;">
+                                        <div style="display:flex;gap:5px;flex-shrink:0;">
                                             <form action="{{ route('admin.announcements.restore', $ann->id) }}" method="POST">
                                                 @csrf @method('PATCH')
-                                                <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-undo"></i> Restore</button>
+                                                <button type="submit" class="btn btn-sm btn-success" style="white-space:nowrap;padding:6px 12px;"><i class="fas fa-undo"></i> Restore</button>
                                             </form>
                                         </div>
                                     </div>
@@ -3317,7 +3317,7 @@
                     @if($projects->isEmpty())
                         <div class="empty-st"><i class="fas fa-project-diagram"></i><p>No active projects posted. Click "New Project" to add one.</p></div>
                     @else
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));gap:14px;padding:14px;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(min(100%, 280px), 1fr));gap:14px;padding:14px;">
                             @foreach($projects as $proj)
                                 @php
                                     $pStatBadges = [
@@ -3799,7 +3799,7 @@
 
             {{-- ══ WEBSITE CONTENT ══ --}}
             <div x-show="tab==='website'" x-transition>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(450px, 1fr));gap:var(--gap);align-items:start;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr));gap:var(--gap);align-items:start;">
                     
                     {{-- CAROUSEL MANAGEMENT --}}
                     <div>
@@ -4011,8 +4011,8 @@
                                 </form>
                             </div>
 
-                            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:15px; overflow:hidden;">
-                                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:15px; overflow-x:auto;">
+                                <table style="width:100%; border-collapse:collapse; font-size:12px; min-width:450px;">
                                     <thead style="background:#fff;">
                                         <tr>
                                             <th style="padding:15px; text-align:left; color:var(--muted); text-transform:uppercase; font-size:10px;">Backup Filename</th>
@@ -4093,7 +4093,7 @@
                             </div>
                             <div>
                                 <span style="font-weight:900;color:var(--text);font-size:14px;">Staff & Department Portal Accounts Management</span>
-                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;">Manage assigned officer names, registered official emails, and password recovery security questions per department portal</div>
+                                <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;">Manage assigned officer names, registered official emails, and password recovery credentials per department portal</div>
                             </div>
                         </div>
                         <span class="cbadge" style="background:#eff6ff;color:#0E5393;border:1px solid #bfdbfe;font-weight:800;font-size:10px;">
@@ -4102,11 +4102,6 @@
                     </div>
 
                     <div style="padding:20px;">
-                        {{-- Informational Banner --}}
-                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;">
-                            <i class="fas fa-shield-check" style="color:#16a34a;font-size:16px;margin-top:2px;"></i>
-                            <div style="font-size:11px;color:#166534;line-height:1.5;">
-                                <strong style="font-weight:900;">Recovery Question Protection:</strong>
                         {{-- Informational Banner --}}
                         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;">
                             <i class="fas fa-shield-check" style="color:#16a34a;font-size:16px;margin-top:2px;"></i>

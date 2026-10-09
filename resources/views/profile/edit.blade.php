@@ -37,7 +37,7 @@
                 </div>
                 <div class="p-6">
                     <p style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:14px;line-height:1.6;">
-                        To protect barangay system security, changing your password requires answering a security question that only authorized barangay officials know. This ensures only verified staff can update their credentials.
+                        To protect barangay system security, changing your password requires verifying your current credentials or registered email verification code. This ensures only authorized account owners can update access credentials.
                     </p>
                     <a href="{{ route('staff.password.show') }}"
                        style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:linear-gradient(135deg,#0E5393 0%,#04192D 100%);color:#fff;font-family:inherit;font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,82,.28);">
