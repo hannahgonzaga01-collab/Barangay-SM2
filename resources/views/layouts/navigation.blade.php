@@ -70,7 +70,65 @@
                 </div>
                 @endif
                 @auth
-                @php $navUser = Auth::user(); @endphp
+                @php
+                    $navUser = Auth::user();
+                    $navUnreadCount = $navUser->unreadNotifications()->count();
+                    $navNotifications = $navUser->notifications()->latest()->take(10)->get();
+                @endphp
+                {{-- Notification Bell (Between Language Toggle and User Profile) --}}
+                <div class="relative" x-data="{ notifOpen: false }" @click.away="notifOpen=false">
+                    <button @click="notifOpen=!notifOpen; if(notifOpen) { fetch('{{ route('resident.notifications.read') }}', { method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Content-Type':'application/json'} }); }"
+                            class="relative flex items-center justify-center w-8 h-8 rounded-lg transition"
+                            style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;"
+                            title="Notifications">
+                        <i class="fas fa-bell text-xs"></i>
+                        @if($navUnreadCount > 0)
+                        <span class="absolute -top-1.5 -right-1.5 bg-red-600 text-white font-black text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center border-2 border-slate-900 px-1">
+                            {{ $navUnreadCount }}
+                        </span>
+                        @endif
+                    </button>
+
+                    <div x-show="notifOpen" x-cloak x-transition
+                         class="absolute right-0 mt-2 w-72 sm:w-80 rounded-xl shadow-2xl border overflow-hidden bg-white"
+                         style="border-color:#e2e8f0;z-index:9999;">
+                        <div class="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                            <span class="text-xs font-black text-slate-800 uppercase tracking-wide">Notifications</span>
+                            @if($navUnreadCount > 0)
+                            <span class="text-[9px] bg-red-100 text-red-600 font-extrabold px-2 py-0.5 rounded-full">{{ $navUnreadCount }} unread</span>
+                            @endif
+                        </div>
+                        <div class="max-h-72 overflow-y-auto">
+                            @forelse($navNotifications as $notif)
+                            @php 
+                                $isUnread = is_null($notif->read_at); 
+                                $type = $notif->data['type'] ?? '';
+                                $targetId = (str_contains($type, 'sos')) ? 'sos-history' : ((str_contains($type, 'document') || str_contains($type, 'reminder') || str_contains($type, 'appointment')) ? 'application-history' : 'incident-reports');
+                            @endphp
+                            <div class="flex items-start gap-2.5 px-3.5 py-2.5 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition {{ $isUnread ? 'bg-blue-50/60' : '' }}"
+                                 @click="notifOpen=false; document.getElementById('{{ $targetId }}')?.scrollIntoView({behavior:'smooth'})">
+                                <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 {{ $isUnread ? (str_contains($type, 'sos') ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-700') : 'bg-slate-100 text-slate-400' }}">
+                                    <i class="fas {{ str_contains($type, 'sos') ? 'fa-ambulance' : (str_contains($type, 'reminder') || str_contains($type, 'appointment') ? 'fa-clock' : ($type === 'document_received' ? 'fa-file-alt' : 'fa-bell')) }} text-xs"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold text-slate-800 leading-tight">{{ $notif->data['title'] ?? 'Notification' }}</div>
+                                    <div class="text-[11px] text-slate-600 font-medium mt-0.5 line-clamp-2 leading-snug">{{ $notif->data['message'] ?? '' }}</div>
+                                    <div class="text-[9px] text-slate-400 font-semibold mt-1">{{ $notif->created_at->diffForHumans() }}</div>
+                                </div>
+                            </div>
+                            @empty
+                            <div class="py-7 text-center text-slate-400">
+                                <i class="fas fa-bell text-xl block mb-1.5 opacity-30"></i>
+                                <p class="text-xs font-bold">No notifications yet.</p>
+                            </div>
+                            @endforelse
+                        </div>
+                        <div class="px-3 py-2 text-center bg-slate-50 border-t border-slate-200">
+                            <span class="text-[10px] text-slate-500 font-medium">Notifications are cleared after 30 days.</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen=false">
                     <button @click="profileOpen=!profileOpen"
                             class="flex items-center gap-2 rounded-lg transition px-2 py-1.5"
@@ -212,20 +270,29 @@
                 @endif
 
                 @else
-                {{-- Guest --}}
+                {{-- Guest Login Button --}}
                 <div class="relative" x-data="{ guestOpen: false }" @click.away="guestOpen=false">
-                    <button @click="guestOpen=!guestOpen"
-                            class="flex items-center justify-center w-9 h-9 rounded-full transition"
-                            style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);"
-                            title="Login / Register">
-                        <i class="fas fa-user-circle" style="color:#fff;font-size:18px;"></i>
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                        <a href="{{ route('login') }}"
+                           class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider text-white transition hover:bg-white/25 border shadow-sm"
+                           style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35);"
+                           title="Login to Barangay Portal">
+                            <i class="fas fa-user" style="font-size:12px;"></i>
+                            <span>Login</span>
+                        </a>
+                        <button type="button" @click="guestOpen=!guestOpen"
+                                class="flex items-center justify-center w-7 h-7 rounded-lg transition hover:bg-white/20 text-white/80"
+                                title="More account options">
+                            <i class="fas fa-chevron-down text-[9px]" :style="guestOpen?'transform:rotate(180deg);transition:.2s':''"></i>
+                        </button>
+                    </div>
+
                     <div x-show="guestOpen" x-cloak x-transition
                          class="absolute right-0 mt-2 w-52 rounded-xl shadow-2xl border overflow-hidden"
                          style="background:#fff;border-color:#e2e8f0;z-index:9999;">
                         <div class="px-4 py-3 border-b" style="background:#f8fafc;border-color:#e2e8f0;">
                             <p class="text-xs font-black text-gray-700 uppercase tracking-wide">Welcome!</p>
-                            <p class="text-[10px] text-gray-500 font-semibold mt-0.5">Sign in to access your account</p>
+                            <p class="text-[10px] text-gray-500 font-semibold mt-0.5">Sign in or register your account</p>
                         </div>
                         <div class="py-1">
                             <a href="{{ route('login') }}"

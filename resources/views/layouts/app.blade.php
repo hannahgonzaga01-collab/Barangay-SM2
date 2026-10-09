@@ -19,6 +19,7 @@
         html, body{font-family:'Plus Jakarta Sans', sans-serif !important;background:#f1f5f9;margin:0;display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;width:100%;max-width:100vw;}
         input, button, select, textarea{font-family:inherit;}
         main{flex:1;width:100%;max-width:100vw;overflow-x:hidden;}
+        .swal2-container{z-index:999999 !important;}
     </style>
     <script>
         // Styled Toast notification helper

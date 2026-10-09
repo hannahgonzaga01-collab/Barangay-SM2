@@ -727,14 +727,14 @@ html, body {
 
                         // FAQs Modal (Concise, Senior/PWD Friendly & Accurate Fees)
                         faq_title: 'Frequently Asked Questions & Resident Guide',
-                        faq_subtitle: 'Important reminders, priority guidelines, and official fees',
-                        faq_search_ph: 'Search FAQs (e.g. Senior, Representative, Payment, Fees, Hours)...',
-                        faq_senior_title: 'Senior Citizens, PWDs & Priority Lane:',
-                        faq_senior_desc: 'Dedicated priority lane for Seniors, PWDs, and pregnant residents at the Barangay Hall. Authorized representatives may claim documents on their behalf with the Senior/PWD ID and an authorization letter.',
+                        faq_subtitle: 'Important reminders, document fees, and emergency guidelines',
+                        faq_search_ph: 'Search FAQs (e.g. Jobseeker, Representative, Hotlines, Payment, Fees)...',
+                        faq_hotline_title: 'Slow or No Internet Connection (Direct Hotlines):',
+                        faq_hotline_desc: 'If you have slow or no internet connection, you can directly call or copy-paste the Barangay Hotlines: Tanod Desk & Emergency at (046) 416-0283, Desk Officer Mobile at 0917-543-2100, or National Emergency 911 for immediate response.',
                         faq_rep_title: 'Authorized Representative Rules:',
                         faq_rep_desc: 'If claiming via representative, bring: (1) Representative\'s valid ID, (2) Copy of the resident\'s valid ID, and (3) Signed authorization letter. Up to 2 requests per representative are allowed.',
-                        faq_fees_title: 'Document Fees (Free vs. Loan Applications):',
-                        faq_fees_desc: 'Barangay Clearance, Certificate of Indigency, Residency, and First-Time Jobseeker are 100% FREE. ONLY Loan Application / Requirements have a document fee, payable strictly at the official Barangay Cashier upon pickup.',
+                        faq_fees_title: 'Document Fees (Free vs. Loan Applications & Jobseeker):',
+                        faq_fees_desc: 'Barangay Clearance, Certificate of Indigency, and Residency are 100% FREE. First-Time Jobseeker (RA 11261) is also FREE and strictly ONE-TIME ONLY in a lifetime. ONLY Loan Applications have a processing fee, payable strictly at the official Barangay Cashier upon pickup.',
                         faq_reports_title: 'Incident Reports (₱100 Fee & Multiple Reports):',
                         faq_reports_desc: 'Residents may submit multiple incident reports. A standard ₱100.00 filing fee is required at the Barangay Hall for official blotter processing. Prank or joke reports are strictly prohibited by law.',
                         faq_hours_title: 'Barangay Office Hours & 24/7 Tanod Desk:',
@@ -867,14 +867,14 @@ html, body {
 
                         // FAQs Modal (Maikli, Madaling Basahin ng Senior/PWD & Tamang Bayarin)
                         faq_title: 'Mga Madalas Itanong (FAQs) at Gabay sa Residente',
-                        faq_subtitle: 'Mahalagang paalala, serbisyo para sa Senior/PWD, at opisyal na bayarin',
-                        faq_search_ph: 'Maghanap sa FAQs (hal. Senior, Kinatawan, Bayad, Loan, Oras)...',
-                        faq_senior_title: 'Priority Lane para sa Senior Citizens, PWDs at Buntis:',
-                        faq_senior_desc: 'May espesyal na priority lane para sa Seniors, PWDs, at mga buntis sa Barangay Hall. Maaari ding magpadala ng awtorisadong kinatawan dala ang Senior/PWD ID at authorization letter.',
+                        faq_subtitle: 'Mahalagang paalala, bayarin sa dokumento, at emergency guidelines',
+                        faq_search_ph: 'Maghanap sa FAQs (hal. Jobseeker, Kinatawan, Hotline, Bayad, Oras)...',
+                        faq_hotline_title: 'Mabagal o Walang Internet (Direktang Hotline):',
+                        faq_hotline_desc: 'Kung walang internet o mabagal ang inyong koneksyon, maaari ninyong direktang tawagan o kopyahin (copy-paste) ang mga opisyal na numero ng Barangay: Tanod Desk & Emergency sa (046) 416-0283, Desk Officer Mobile sa 0917-543-2100, o National Emergency 911 para sa agarang tulong.',
                         faq_rep_title: 'Panuntunan sa Awtorisadong Kinatawan (Representative):',
                         faq_rep_desc: 'Kung kinatawan ang kukuha, dalhin sa Barangay Hall ang: (1) Valid ID ng kinatawan, (2) Kopya ng ID ng residente, at (3) Nilagdaang Authorization Letter. Hanggang 2 requests lamang ang pinapayagan.',
-                        faq_fees_title: 'Bayad sa Dokumento (Libre vs. Loan Application):',
-                        faq_fees_desc: 'LIBRE ang Barangay Clearance, Indigency, Residency, at First-Time Jobseeker. Tanging ang Loan Application / Requirements lamang ang may bayad, na binabayaran LAMANG sa opisyal na Barangay Cashier sa oras ng pagkuha.',
+                        faq_fees_title: 'Bayad sa Dokumento (Libre vs. Loan Application at Jobseeker):',
+                        faq_fees_desc: 'LIBRE ang Barangay Clearance, Indigency, at Residency. Ang First-Time Jobseeker (RA 11261) ay LIBRE rin at ISANG BESES LAMANG (ONE-TIME ONLY) sa buong buhay. Tanging ang Loan Application / Requirements lamang ang may bayad, na binabayaran LAMANG sa opisyal na Barangay Cashier sa oras ng pagkuha.',
                         faq_reports_title: 'Ulat ng Insidente (₱100 Bayad at Maramihang Ulat):',
                         faq_reports_desc: 'Pinapayagan ang pagsumite ng maraming ulat ng insidente. May standard na ₱100.00 filing fee sa Barangay Hall para sa opisyal na blotter. Mahigpit na bawal ang mga birong sumbong o prank reports.',
                         faq_hours_title: 'Oras ng Tanggapan at 24/7 Tanod Desk:',
@@ -1477,58 +1477,10 @@ html, body {
                 </div>
             </div>
 
-            <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
                 <div class="section-lbl" style="margin-bottom:0; color:#fff; font-size:14px; text-transform:uppercase; letter-spacing:0.15em;">
                     <i class="fas fa-th-large" style="margin-right:8px; opacity:0.7;"></i> <span x-text="t('our_services')">Our Services</span>
                 </div>
-
-                @if($isAuth)
-                <div class="notif-bell-wrap" @click.away="notifOpen=false">
-                    <button class="notif-bell-btn" @click="notifOpen=!notifOpen; if(notifOpen) markNotifRead()" style="width:38px; height:38px; font-size:16px;">
-                        <i class="fas fa-bell"></i>
-                        @if($unreadNotifications->count() > 0)
-                        <span class="notif-bell-badge" style="width:18px; height:18px; font-size:8px; top:-4px; right:-4px;">{{ $unreadNotifications->count() }}</span>
-                        @endif
-                    </button>
-                    <div x-show="notifOpen" x-cloak x-transition class="notif-dropdown">
-                        <div class="notif-hd">
-                            <span class="notif-hlbl" x-text="t('notifications')">Notifications</span>
-                            @if($unreadNotifications->count() > 0)
-                            <span style="font-size:8px;background:#fee2e2;color:#dc2626;font-weight:900;padding:2px 7px;border-radius:99px;">{{ $unreadNotifications->count() }} unread</span>
-                            @endif
-                        </div>
-                        <div style="max-height:280px;overflow-y:auto;">
-                            @forelse($allNotifications as $notif)
-                            @php 
-                                $isUnread = is_null($notif->read_at); 
-                                $type = $notif->data['type'] ?? '';
-                                $targetId = (str_contains($type, 'sos')) ? 'sos-history' : ((str_contains($type, 'document') || str_contains($type, 'reminder') || str_contains($type, 'appointment')) ? 'application-history' : 'incident-reports');
-                            @endphp
-                            <div class="notif-item {{ $isUnread ? 'notif-item-unread' : '' }}" 
-                                 style="cursor:pointer;"
-                                 @click="notifOpen=false; document.getElementById('{{ $targetId }}')?.scrollIntoView({behavior:'smooth'})">
-                                 <div class="notif-item-ico" style="background:{{ $isUnread ? (str_contains($type, 'sos') ? '#fee2e2' : '#dbeafe') : '#f1f5f9' }};">
-                                    <i class="fas {{ str_contains($type, 'sos') ? 'fa-ambulance' : (str_contains($type, 'reminder') || str_contains($type, 'appointment') ? 'fa-clock' : ($type === 'document_received' ? 'fa-file-alt' : 'fa-bell')) }}" style="color:{{ $isUnread ? (str_contains($type, 'sos') ? '#dc2626' : '#0E5393') : '#94a3b8' }};font-size:11px;"></i>
-                                </div>
-                                <div style="flex:1;min-width:0;">
-                                    <div class="notif-item-ttl">{{ $notif->data['title'] ?? 'Notification' }}</div>
-                                    <div class="notif-item-msg">{{ $notif->data['message'] ?? '' }}</div>
-                                    <div class="notif-item-time">{{ $notif->created_at->diffForHumans() }}</div>
-                                </div>
-                            </div>
-                            @empty
-                            <div style="padding:30px;text-align:center;color:var(--light);">
-                                <i class="fas fa-bell" style="font-size:24px;display:block;margin-bottom:7px;opacity:.2;"></i>
-                                <p style="font-size:11px;font-weight:700;" x-text="t('no_notifications')">No notifications yet.</p>
-                            </div>
-                            @endforelse
-                        </div>
-                        <div class="notif-ft">
-                            <span style="font-size:9px;color:var(--muted);font-weight:600;">Notifications are cleared after 30 days.</span>
-                        </div>
-                    </div>
-                </div>
-                @endif
             </div>
 
             @if($isAuth && ($authUser?->status === 'declined' || $authUser?->voter_status === 'declined'))
@@ -2354,8 +2306,20 @@ html, body {
                                 this.cType = currentClaimant;
 
                                 const flagMissing = (targetEl, msg) => {
+                                    this.validationAlertMsg = msg || 'Pakisagutan po ang kulang na field bago magpatuloy.';
                                     if (!targetEl) return;
-                                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    
+                                    // Smoothly scroll the modal-box container directly to the missing element!
+                                    const modalBox = targetEl.closest('.modal-box') || document.querySelector('.modal-box');
+                                    if (modalBox) {
+                                        const boxRect = modalBox.getBoundingClientRect();
+                                        const elRect = targetEl.getBoundingClientRect();
+                                        const targetScrollTop = modalBox.scrollTop + (elRect.top - boxRect.top) - (modalBox.clientHeight / 2) + (elRect.height / 2);
+                                        modalBox.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
+                                    } else {
+                                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+
                                     if (typeof targetEl.focus === 'function') {
                                         try { targetEl.focus({ preventScroll: true }); } catch(e){}
                                     }
@@ -2365,7 +2329,6 @@ html, body {
                                     if (typeof targetEl.reportValidity === 'function') {
                                         try { targetEl.reportValidity(); } catch(e){}
                                     }
-                                    this.validationAlertMsg = msg || 'Pakisagutan po ang kulang na field bago magpatuloy.';
                                     setTimeout(() => {
                                         targetEl.classList.remove('input-field-missing');
                                     }, 4000);
@@ -2442,10 +2405,87 @@ html, body {
                                     }
                                     @endif
 
-                                    if (!this.selfPurpose || !this.selfPurpose.trim()) {
-                                        const purEl = form.querySelector('.self-purpose-select');
-                                        flagMissing(purEl, 'Pakipili po ang inyong Layunin (Purpose).');
+                                    if (!this.selfPurpose || !this.selfPurpose.trim() || (this.selfPurposeSelect === 'Others' && (!this.selfPurposeCustom || !this.selfPurposeCustom.trim()))) {
+                                        const purEl = this.selfPurposeSelect === 'Others' ? form.querySelector('.self-purpose-custom') : form.querySelector('.self-purpose-select');
+                                        flagMissing(purEl, 'Pakipili o isulat po ang inyong Layunin (Purpose).');
                                         return;
+                                    }
+
+                                    if (this.selectedDoc === 'jobseeker') {
+                                        const bdayInput = form.querySelector('input[name="birthday"]');
+                                        if (!this.birthday || (bdayInput && !bdayInput.value)) {
+                                            flagMissing(bdayInput, 'Pakilagay po ang petsa ng kapanganakan para sa First-Time Jobseeker.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'movein' || this.selectedDoc === 'moveout') {
+                                        const blkInput = form.querySelector('input[name="blk"]');
+                                        if (blkInput && !blkInput.value.trim()) {
+                                            flagMissing(blkInput, 'Pakilagay po ang Block No. para sa move details.');
+                                            return;
+                                        }
+                                        const lotInput = form.querySelector('input[name="lot"]');
+                                        if (lotInput && !lotInput.value.trim()) {
+                                            flagMissing(lotInput, 'Pakilagay po ang Lot No. para sa move details.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'business' || this.selectedDoc === 'closure') {
+                                        const compInput = form.querySelector('input[name="company_name"]');
+                                        if (compInput && !compInput.value.trim()) {
+                                            flagMissing(compInput, 'Pakilagay po ang Business / Trade Name.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'guardianship') {
+                                        const wName = form.querySelector('input[name="ward_name"]');
+                                        if (wName && !wName.value.trim()) {
+                                            flagMissing(wName, 'Pakilagay po ang buong pangalan ng Ward.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'cohabitation') {
+                                        const pName = form.querySelector('input[name="partner_name"]');
+                                        if (pName && !pName.value.trim()) {
+                                            flagMissing(pName, 'Pakilagay po ang pangalan ng partner.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'cashgift') {
+                                        const cName = form.querySelector('input[name="claimant_name"]');
+                                        if (cName && !cName.value.trim()) {
+                                            flagMissing(cName, 'Pakilagay po ang pangalan ng kaano-ano.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'latereg') {
+                                        const chName = form.querySelector('input[name="child_name"]');
+                                        if (chName && !chName.value.trim()) {
+                                            flagMissing(chName, 'Pakilagay po ang buong pangalan ng anak.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'yumao') {
+                                        const yName = form.querySelector('input[name="claimant_name"]');
+                                        if (yName && !yName.value.trim()) {
+                                            flagMissing(yName, 'Pakilagay po ang buong pangalan ng claimant.');
+                                            return;
+                                        }
+                                    }
+
+                                    if (this.selectedDoc === 'endorsement') {
+                                        const resSince = form.querySelector('input[name="residing_since"]');
+                                        if (resSince && !resSince.value.trim()) {
+                                            flagMissing(resSince, 'Pakilagay po ang taon mula nang nanirahan sa Brgy. SM2.');
+                                            return;
+                                        }
                                     }
                                 }
 
@@ -2590,84 +2630,87 @@ html, body {
                                     </span>
                                 </div>
                                 
-                                {{-- Compact File Upload Boxes (Standard Clean Horizontal Boxes) --}}
-                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-                                    {{-- File 1: Authorization Letter --}}
-                                    <div>
-                                        <label class="flbl" style="font-size:11.5px; font-weight:800; color:#1e293b; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
-                                            <span>1. Signed Authorization Letter</span> <span style="color:#dc2626;">*</span>
-                                        </label>
-                                        <div @click="$refs.authLetter.click()" 
-                                             style="width:100%; min-height:42px; padding:6px 12px; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:all .15s; gap:10px;"
-                                             :style="authLetterName ? 'border-color:#10b981; background:#f0fdf4;' : ''">
-                                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-                                                <i :class="authLetterName ? 'fas fa-check-circle' : 'fas fa-file-signature'" :style="authLetterName ? 'color:#10b981;' : 'color:var(--brand);'" style="font-size:15px; flex-shrink:0;"></i>
-                                                <span style="font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :style="authLetterName ? 'color:#15803d;' : 'color:#64748b;'" x-text="authLetterName ? authLetterName : 'Pumili ng pirmadong liham ng awtorisasyon...'"></span>
+                                {{-- 3 Equal Row Boxes for Authorization Uploads (Aligned in a Row, Label Inside, Equal Height) --}}
+                                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:16px;">
+                                    {{-- Box 1: Authorization Letter --}}
+                                    <div x-ref="authLetterCard"
+                                         @click="$refs.authLetter.click()" 
+                                         style="background:#fff; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:140px; height:100%; box-sizing:border-box; transition:all .2s;"
+                                         :style="authLetterName ? 'border:1.5px solid #10b981; background:#f0fdf4;' : 'border-color:#cbd5e1;'">
+                                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;">
+                                            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                                 :style="authLetterName ? 'background:#dcfce7; color:#15803d;' : 'background:#eff6ff; color:var(--brand);'">
+                                                <i :class="authLetterName ? 'fas fa-check' : 'fas fa-file-signature'" style="font-size:15px;"></i>
                                             </div>
-                                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                                <template x-if="authLetterName">
-                                                    <button type="button" @click.stop="$refs.authLetter.value=''; authLetterName=''" style="background:none; border:none; color:#ef4444; font-size:13px; cursor:pointer; padding:2px 4px;" title="Alisin ang file">
-                                                        <i class="fas fa-times-circle"></i>
-                                                    </button>
-                                                </template>
-                                                <span style="font-size:11px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:700;">
-                                                    <span x-text="authLetterName ? 'Palitan' : 'Pumili ng File'">Pumili ng File</span>
-                                                </span>
+                                            <div style="font-size:11.5px; font-weight:800; color:#1e293b; line-height:1.25;">
+                                                1. Authorization Letter <span style="color:#dc2626;">*</span>
                                             </div>
-                                            <input type="file" x-ref="authLetter" name="authorization_letter" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang file ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authLetterName=''; return; } authLetterName = f.name; }">
+                                            <div style="font-size:10px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
+                                                 :style="authLetterName ? 'color:#15803d; font-weight:700;' : ''"
+                                                 x-text="authLetterName ? authLetterName : 'Pirmadong liham ng awtorisasyon'">
+                                            </div>
                                         </div>
+                                        <div style="margin-top:8px; width:100%;">
+                                            <span style="font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
+                                                  :style="authLetterName ? 'background:#dcfce7; color:#15803d; border-color:#86efac;' : 'background:#f1f5f9; color:#334155;'"
+                                                  x-text="authLetterName ? 'Palitan File' : 'Pumili ng File'">
+                                            </span>
+                                        </div>
+                                        <input type="file" x-ref="authLetter" name="authorization_letter" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang file ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authLetterName=''; return; } authLetterName = f.name; }">
                                     </div>
 
-                                    {{-- File 2: Valid ID of Representative --}}
-                                    <div>
-                                        <label class="flbl" style="font-size:11.5px; font-weight:800; color:#1e293b; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
-                                            <span>2. Valid ID ng Awtorisadong Kinatawan (Representative)</span> <span style="color:#dc2626;">*</span>
-                                        </label>
-                                        <div @click="$refs.authId.click()" 
-                                             style="width:100%; min-height:42px; padding:6px 12px; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:all .15s; gap:10px;"
-                                             :style="authIdName ? 'border-color:#10b981; background:#f0fdf4;' : ''">
-                                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-                                                <i :class="authIdName ? 'fas fa-check-circle' : 'fas fa-id-card'" :style="authIdName ? 'color:#10b981;' : 'color:var(--brand);'" style="font-size:15px; flex-shrink:0;"></i>
-                                                <span style="font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :style="authIdName ? 'color:#15803d;' : 'color:#64748b;'" x-text="authIdName ? authIdName : 'Pumili ng valid ID ng kinatawan...'"></span>
+                                    {{-- Box 2: Valid ID of Representative --}}
+                                    <div x-ref="authIdCard"
+                                         @click="$refs.authId.click()" 
+                                         style="background:#fff; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:140px; height:100%; box-sizing:border-box; transition:all .2s;"
+                                         :style="authIdName ? 'border:1.5px solid #10b981; background:#f0fdf4;' : 'border-color:#cbd5e1;'">
+                                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;">
+                                            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                                 :style="authIdName ? 'background:#dcfce7; color:#15803d;' : 'background:#eff6ff; color:var(--brand);'">
+                                                <i :class="authIdName ? 'fas fa-check' : 'fas fa-id-card'" style="font-size:15px;"></i>
                                             </div>
-                                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                                <template x-if="authIdName">
-                                                    <button type="button" @click.stop="$refs.authId.value=''; authIdName=''" style="background:none; border:none; color:#ef4444; font-size:13px; cursor:pointer; padding:2px 4px;" title="Alisin ang file">
-                                                        <i class="fas fa-times-circle"></i>
-                                                    </button>
-                                                </template>
-                                                <span style="font-size:11px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:700;">
-                                                    <span x-text="authIdName ? 'Palitan' : 'Pumili ng File'">Pumili ng File</span>
-                                                </span>
+                                            <div style="font-size:11.5px; font-weight:800; color:#1e293b; line-height:1.25;">
+                                                2. Valid ID ng Kinatawan <span style="color:#dc2626;">*</span>
                                             </div>
-                                            <input type="file" x-ref="authId" name="authorized_id" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authIdName=''; return; } authIdName = f.name; }">
+                                            <div style="font-size:10px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
+                                                 :style="authIdName ? 'color:#15803d; font-weight:700;' : ''"
+                                                 x-text="authIdName ? authIdName : 'Valid ID ng Authorized Person'">
+                                            </div>
                                         </div>
+                                        <div style="margin-top:8px; width:100%;">
+                                            <span style="font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
+                                                  :style="authIdName ? 'background:#dcfce7; color:#15803d; border-color:#86efac;' : 'background:#f1f5f9; color:#334155;'"
+                                                  x-text="authIdName ? 'Palitan File' : 'Pumili ng File'">
+                                            </span>
+                                        </div>
+                                        <input type="file" x-ref="authId" name="authorized_id" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authIdName=''; return; } authIdName = f.name; }">
                                     </div>
 
-                                    {{-- File 3: Valid ID of Resident Being Claimed For --}}
-                                    <div>
-                                        <label class="flbl" style="font-size:11.5px; font-weight:800; color:#1e293b; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
-                                            <span>3. Valid ID ng May-ari ng Dokumento (Applicant)</span> <span style="color:#dc2626;">*</span>
-                                        </label>
-                                        <div @click="$refs.authId2.click()" 
-                                             style="width:100%; min-height:42px; padding:6px 12px; background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-sizing:border-box; transition:all .15s; gap:10px;"
-                                             :style="authId2Name ? 'border-color:#10b981; background:#f0fdf4;' : ''">
-                                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-                                                <i :class="authId2Name ? 'fas fa-check-circle' : 'fas fa-user-check'" :style="authId2Name ? 'color:#10b981;' : 'color:var(--brand);'" style="font-size:15px; flex-shrink:0;"></i>
-                                                <span style="font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :style="authId2Name ? 'color:#15803d;' : 'color:#64748b;'" x-text="authId2Name ? authId2Name : 'Pumili ng valid ID ng may-ari...'"></span>
+                                    {{-- Box 3: Valid ID of Resident Being Claimed For --}}
+                                    <div x-ref="authId2Card"
+                                         @click="$refs.authId2.click()" 
+                                         style="background:#fff; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:140px; height:100%; box-sizing:border-box; transition:all .2s;"
+                                         :style="authId2Name ? 'border:1.5px solid #10b981; background:#f0fdf4;' : 'border-color:#cbd5e1;'">
+                                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;">
+                                            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                                 :style="authId2Name ? 'background:#dcfce7; color:#15803d;' : 'background:#eff6ff; color:var(--brand);'">
+                                                <i :class="authId2Name ? 'fas fa-check' : 'fas fa-user-check'" style="font-size:15px;"></i>
                                             </div>
-                                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                                <template x-if="authId2Name">
-                                                    <button type="button" @click.stop="$refs.authId2.value=''; authId2Name=''" style="background:none; border:none; color:#ef4444; font-size:13px; cursor:pointer; padding:2px 4px;" title="Alisin ang file">
-                                                        <i class="fas fa-times-circle"></i>
-                                                    </button>
-                                                </template>
-                                                <span style="font-size:11px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:700;">
-                                                    <span x-text="authId2Name ? 'Palitan' : 'Pumili ng File'">Pumili ng File</span>
-                                                </span>
+                                            <div style="font-size:11.5px; font-weight:800; color:#1e293b; line-height:1.25;">
+                                                3. Valid ID ng May-ari <span style="color:#dc2626;">*</span>
                                             </div>
-                                            <input type="file" x-ref="authId2" name="authorized_id2" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authId2Name=''; return; } authId2Name = f.name; }">
+                                            <div style="font-size:10px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
+                                                 :style="authId2Name ? 'color:#15803d; font-weight:700;' : ''"
+                                                 x-text="authId2Name ? authId2Name : 'Valid ID ng taong kinakatawan'">
+                                            </div>
                                         </div>
+                                        <div style="margin-top:8px; width:100%;">
+                                            <span style="font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
+                                                  :style="authId2Name ? 'background:#dcfce7; color:#15803d; border-color:#86efac;' : 'background:#f1f5f9; color:#334155;'"
+                                                  x-text="authId2Name ? 'Palitan File' : 'Pumili ng File'">
+                                            </span>
+                                        </div>
+                                        <input type="file" x-ref="authId2" name="authorized_id2" accept="image/*,.pdf" style="display:none;" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authId2Name=''; return; } authId2Name = f.name; }">
                                     </div>
                                 </div>
 
@@ -3282,14 +3325,14 @@ html, body {
                 </div>
 
                 <div style="display:flex; flex-direction:column; gap:12px; padding-bottom:10px;">
-                    {{-- 1. Senior Citizens & PWDs Priority --}}
-                    <div x-show="!faqSearch || (t('faq_senior_title') + ' ' + t('faq_senior_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
+                    {{-- 1. Offline Hotlines & Direct Call (When No Internet) --}}
+                    <div x-show="!faqSearch || (t('faq_hotline_title') + ' ' + t('faq_hotline_desc')).toLowerCase().includes(faqSearch.toLowerCase())"
                          style="padding:14px 16px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:12px;">
                         <div style="font-size:14px; font-weight:900; color:#1e3a8a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-wheelchair" style="color:#2563eb; font-size:16px;"></i>
-                            <span x-text="t('faq_senior_title')">Senior Citizens, PWDs & Priority Lane:</span>
+                            <i class="fas fa-phone-volume" style="color:#2563eb; font-size:16px;"></i>
+                            <span x-text="t('faq_hotline_title')">Slow or No Internet Connection (Direct Hotlines):</span>
                         </div>
-                        <div style="font-size:13px; color:#1e293b; line-height:1.6; font-weight:600;" x-text="t('faq_senior_desc')"></div>
+                        <div style="font-size:13px; color:#1e293b; line-height:1.6; font-weight:600;" x-text="t('faq_hotline_desc')"></div>
                     </div>
 
                     {{-- 2. Document Fees (Free vs Loan) --}}
@@ -3334,10 +3377,10 @@ html, body {
                 </div>
 
                 {{-- Assisted Counter Note for Seniors/PWDs --}}
-                <div style="background:#f1f5f9; border-radius:10px; padding:10px 14px; margin-top:8px; display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-headset" style="color:#0E5393; font-size:18px;"></i>
-                    <div style="font-size:12px; color:#334155; line-height:1.4;">
-                        <strong>Need assistance?</strong> Contact the Barangay Tanod / Office Helpdesk at <strong>(046) 416-0283</strong> or visit the Barangay Hall Senior/PWD priority lane.
+                <div style="background:#f1f5f9; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 16px; margin-top:10px; display:flex; align-items:center; gap:12px;">
+                    <i class="fas fa-headset" style="color:#0E5393; font-size:22px; flex-shrink:0;"></i>
+                    <div style="font-size:12.5px; color:#0f172a; line-height:1.45; font-weight:700;">
+                        <strong>Kailangan ng tulong o impormasyon?</strong> Tawagan ang Barangay Tanod / Office Desk sa <strong>(046) 416-0283</strong> o pumunta sa Barangay Hall (Lunes – Biyernes, 8:00 AM – 5:00 PM).
                     </div>
                 </div>
 
@@ -5195,111 +5238,130 @@ html, body {
     {{-- EMERGENCY SOS MODAL --}}
     <script>
     window.callOrCopyHotline = function(num, formattedNum, name) {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
-            window.location.href = 'tel:' + num;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(num).catch(() => {});
         } else {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(num).catch(() => {});
-            }
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: name,
-                    html: '<div style="font-size:18px;margin:10px 0;color:#0E5393;font-weight:900;letter-spacing:0.5px;">' + formattedNum + '</div>' +
-                          '<p style="font-size:12px;color:#64748b;margin:0;">Nakopya ang numero sa iyong clipboard! Maaari mo itong tawagan gamit ang iyong mobile phone o landline.</p>',
-                    icon: 'info',
-                    confirmButtonColor: '#0E5393',
-                    confirmButtonText: 'Naiintindihan Ko'
-                });
-            } else if (typeof showToast === 'function') {
-                showToast('Copied ' + formattedNum + ' to clipboard!', 'info');
-            } else {
-                alert('Hotline ' + name + ': ' + formattedNum + ' (Copied to clipboard)');
-            }
+            const ta = document.createElement('textarea');
+            ta.value = num;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch(e){}
+            document.body.removeChild(ta);
+        }
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: `<span style="font-size:20px; font-weight:900; color:#0f172a; text-transform:uppercase;">${name}</span>`,
+                html: `
+                    <div style="background:#eff6ff; border:2px solid #3b82f6; border-radius:14px; padding:16px 12px; margin:16px 0; text-align:center;">
+                        <div style="font-size:12px; font-weight:800; color:#1d4ed8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Hotline Number:</div>
+                        <div style="font-size:26px; font-weight:900; color:#0f172a; font-family:monospace; letter-spacing:1px;">${formattedNum}</div>
+                    </div>
+                    <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:12px 14px; margin-bottom:14px; text-align:left;">
+                        <p style="font-size:13.5px; color:#14532d; font-weight:800; margin:0; line-height:1.5;">
+                            ✓ <strong>Nakopya na sa clipboard!</strong> Pwede mo itong i-paste o tawagan agad kahit mabagal o walang internet.
+                        </p>
+                    </div>
+                    <div style="display:flex; justify-content:center; gap:10px; margin-top:8px;">
+                        <a href="tel:${num}" style="display:inline-flex; align-items:center; gap:8px; background:#16a34a; color:#fff; padding:12px 24px; border-radius:10px; font-weight:900; font-size:14px; text-decoration:none; box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+                            <i class="fas fa-phone-alt"></i> <span>Tawagan Agad (Call Now)</span>
+                        </a>
+                    </div>
+                `,
+                icon: 'success',
+                showConfirmButton: true,
+                confirmButtonColor: '#0E5393',
+                confirmButtonText: 'Sige, Naintindihan ko',
+                customClass: {
+                    container: 'swal2-high-zindex',
+                    popup: 'rounded-2xl shadow-2xl border border-slate-200'
+                }
+            });
+        } else if (typeof showToast === 'function') {
+            showToast('Nakopya ang numero: ' + formattedNum, 'info');
+        } else {
+            alert('Hotline ' + name + ': ' + formattedNum + ' (Nakopya sa clipboard)');
         }
     };
     </script>
     <div x-show="sosModal" x-cloak class="modal-ov" x-transition style="z-index:10000;" @keydown.window.escape="if(!sosLoading) sosModal=false">
-        <div class="modal-box" style="max-width:500px; max-height:90vh; overflow-y:auto; border-top:5px solid #e11d48; border-radius:20px;" @click.away="if(!sosLoading) sosModal=false">
-            <div class="modal-in" style="padding:18px 20px;">
-                {{-- STEP 1: FILL OUT & DETAILS (with Serious Advisory Note before dispatch) --}}
+        <div class="modal-box" style="max-width:520px; max-height:90vh; overflow-y:auto; border-top:5px solid #e11d48; border-radius:20px;" @click.away="if(!sosLoading) sosModal=false">
+            <div class="modal-in" style="padding:20px 22px;">
+                {{-- STEP 1: FILL OUT & DETAILS --}}
                 <template x-if="!sosSuccess && !sosConfirmStep">
                     <div>
-                        <div class="modal-hd" style="margin-bottom:14px;">
+                        <div class="modal-hd" style="margin-bottom:16px;">
                             <div class="modal-ttl">
-                                <div class="modal-ico" style="background:rgba(225,29,72,0.1);color:#e11d48;"><i class="fas fa-truck-medical"></i></div>
+                                <div class="modal-ico" style="background:rgba(225,29,72,0.1);color:#e11d48;width:38px;height:38px;"><i class="fas fa-truck-medical" style="font-size:17px;"></i></div>
                                 <div>
-                                    <div style="color:var(--text);font-weight:900;font-size:15px;letter-spacing:-0.2px;" x-text="t('sos_modal_title')">EMERGENCY SOS ALERT</div>
-                                    <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:none;" x-text="t('sos_modal_sub')">Direct Dispatch to Barangay Peace & Order Patrol</div>
+                                    <div style="color:var(--text);font-weight:900;font-size:16px;letter-spacing:-0.2px;" x-text="t('sos_modal_title')">EMERGENCY SOS ALERT</div>
+                                    <div style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:none;margin-top:1px;" x-text="t('sos_modal_sub')">Direct Dispatch to Barangay Peace & Order Patrol</div>
                                 </div>
                             </div>
                             <button type="button" @click="sosModal=false" class="modal-close" :disabled="sosLoading"><i class="fas fa-times-circle"></i></button>
                         </div>
 
-                        {{-- STRICT ADVISORY NOTE (THE ONLY RED ELEMENT) --}}
-                        <div style="background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #e11d48;border-radius:10px;padding:9px 13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:9px;">
-                            <i class="fas fa-triangle-exclamation" style="color:#e11d48;font-size:14px;margin-top:2px;flex-shrink:0;"></i>
-                            <div style="font-size:11px;color:#881337;line-height:1.45;">
-                                <strong style="color:#9f1239;text-transform:uppercase;letter-spacing:0.3px;" x-text="t('sos_advisory_title')">⚠️ IMPORTANT REMINDER:</strong><br>
-                                <span x-text="t('sos_advisory_desc')">Emergency SOS is strictly for genuine emergencies within the territorial jurisdiction of Barangay San Miguel II. On-duty Tanod patrols can only respond within our barangay. If an accident or emergency occurs in another barangay or city, please call 911, PNP, or the respective local emergency hotline immediately.</span><br>
-                                <span style="font-size:10px;color:#be123c;display:block;margin-top:3px;" x-text="t('sos_advisory_penalty')">Pranks or false alarms are strictly prohibited and punishable by law.</span>
-                            </div>
-                        </div>
-
-                        {{-- ONE-TAP DIRECT EMERGENCY HOTLINES --}}
-                        <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:11px 13px; margin-bottom:14px; box-shadow:0 2px 8px rgba(22,101,52,0.06);">
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                                <div style="font-size:10.5px; font-weight:900; color:#14532d; display:flex; align-items:center; gap:5px; text-transform:uppercase;">
-                                    <i class="fas fa-phone-volume" style="color:#16a34a;"></i>
-                                    <span>Direct Emergency Hotlines</span>
+                        {{-- ONE-TAP DIRECT EMERGENCY HOTLINES (Enlarged & Senior/PWD Readable) --}}
+                        <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:14px; padding:14px 16px; margin-bottom:16px; box-shadow:0 2px 10px rgba(22,101,52,0.08);">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+                                <div style="font-size:12.5px; font-weight:900; color:#14532d; display:flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.02em;">
+                                    <i class="fas fa-phone-volume" style="color:#16a34a; font-size:15px;"></i>
+                                    <span>Direct Emergency Hotlines (24/7)</span>
                                 </div>
-                                <span style="font-size:8.5px; font-weight:900; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:99px; letter-spacing:0.04em;">24/7 ACTIVE</span>
+                                <span style="font-size:9.5px; font-weight:900; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:2px 8px; border-radius:99px; letter-spacing:0.04em;">DIAL O COPY-PASTE</span>
                             </div>
-                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:7px;">
-                                <button type="button" @click="sosModal = false; callOrCopyHotline('0464160283', '(046) 416-0283', 'Brgy. SM2 Tanod Desk')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
-                                    <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-shield-alt"></i></div>
-                                    <div style="overflow:hidden;line-height:1.2;">
-                                        <div style="font-size:8.5px;color:#15803d;font-weight:700;">Brgy. SM2 Tanod Desk</div>
-                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0283</div>
+                            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">
+                                {{-- Hotline 1 --}}
+                                <button type="button" @click="callOrCopyHotline('0464160283', '(046) 416-0283', 'Brgy. SM2 Tanod Desk')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #86efac; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#dcfce7';this.style.borderColor='#16a34a';" onmouseout="this.style.background='#fff';this.style.borderColor='#86efac';">
+                                    <div style="width:34px;height:34px;border-radius:8px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-shield-alt"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
+                                        <div style="font-size:11px;color:#15803d;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Brgy. Tanod Desk</div>
+                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">(046) 416-0283</div>
                                     </div>
                                 </button>
-                                <button type="button" @click="sosModal = false; callOrCopyHotline('09175432100', '0917-543-2100', 'Desk Officer Mobile')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
-                                    <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-mobile-alt"></i></div>
-                                    <div style="overflow:hidden;line-height:1.2;">
-                                        <div style="font-size:8.5px;color:#15803d;font-weight:700;">Desk Officer Mobile</div>
-                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">0917-543-2100</div>
+                                {{-- Hotline 2 --}}
+                                <button type="button" @click="callOrCopyHotline('09175432100', '0917-543-2100', 'Desk Officer Mobile')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #86efac; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#dcfce7';this.style.borderColor='#16a34a';" onmouseout="this.style.background='#fff';this.style.borderColor='#86efac';">
+                                    <div style="width:34px;height:34px;border-radius:8px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-mobile-alt"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
+                                        <div style="font-size:11px;color:#15803d;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Desk Officer Mobile</div>
+                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">0917-543-2100</div>
                                     </div>
                                 </button>
-                                <button type="button" @click="sosModal = false; callOrCopyHotline('0464160278', '(046) 416-0278', 'Dasma PNP Police')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #93c5fd; padding:7px 9px; border-radius:8px; color:#1e3a8a; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'">
-                                    <div style="width:24px;height:24px;border-radius:6px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-building-shield"></i></div>
-                                    <div style="overflow:hidden;line-height:1.2;">
-                                        <div style="font-size:8.5px;color:#1d4ed8;font-weight:700;">Dasma PNP Police</div>
-                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0278</div>
+                                {{-- Hotline 3 --}}
+                                <button type="button" @click="callOrCopyHotline('0464160278', '(046) 416-0278', 'Dasma PNP Police')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #93c5fd; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#eff6ff';this.style.borderColor='#2563eb';" onmouseout="this.style.background='#fff';this.style.borderColor='#93c5fd';">
+                                    <div style="width:34px;height:34px;border-radius:8px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-building-shield"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
+                                        <div style="font-size:11px;color:#1d4ed8;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Dasma PNP Police</div>
+                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">(046) 416-0278</div>
                                     </div>
                                 </button>
-                                <button type="button" @click="sosModal = false; callOrCopyHotline('911', '911 / (046) 481-8000', 'CDRRMO / Rescue')" style="text-align:left; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #fca5a5; padding:7px 9px; border-radius:8px; color:#7f1d1d; font-weight:800; font-size:10.5px; cursor:pointer; transition:all .15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
-                                    <div style="width:24px;height:24px;border-radius:6px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-ambulance"></i></div>
-                                    <div style="overflow:hidden;line-height:1.2;">
-                                        <div style="font-size:8.5px;color:#b91c1c;font-weight:700;">CDRRMO / Rescue</div>
-                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">911 / 481-8000</div>
+                                {{-- Hotline 4 --}}
+                                <button type="button" @click="callOrCopyHotline('911', '911 / (046) 481-8000', 'CDRRMO / Rescue')" style="text-align:left; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #fca5a5; padding:10px 12px; border-radius:10px; color:#0f172a; cursor:pointer; transition:all .15s; box-shadow:0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#fee2e2';this.style.borderColor='#dc2626';" onmouseout="this.style.background='#fff';this.style.borderColor='#fca5a5';">
+                                    <div style="width:34px;height:34px;border-radius:8px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;"><i class="fas fa-ambulance"></i></div>
+                                    <div style="overflow:hidden;line-height:1.25;min-width:0;">
+                                        <div style="font-size:11px;color:#b91c1c;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">CDRRMO Rescue</div>
+                                        <div style="font-family:monospace;font-size:13.5px;font-weight:900;color:#0f172a;letter-spacing:0.3px;">911 / 481-8000</div>
                                     </div>
                                 </button>
                             </div>
                         </div>
 
                         {{-- Registered Address info --}}
-                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
-                            <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text);">
-                                <i class="fas fa-home" style="color:var(--brand);"></i>
-                                <span x-text="lang==='fil' ? 'Nakatala na Tirahan:' : 'Registered Address:'">Registered Address:</span>
-                                <strong style="color:var(--text);margin-left:auto;">{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
+                        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+                            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text);flex-wrap:wrap;">
+                                <i class="fas fa-home" style="color:var(--brand);font-size:14px;"></i>
+                                <span style="color:#475569;" x-text="lang==='fil' ? 'Nakatala na Tirahan:' : 'Registered Address:'">Registered Address:</span>
+                                <strong style="color:#0f172a;margin-left:auto;font-weight:900;">{{ $authUser?->resident?->address ?? ($authUser?->address ?? 'Barangay San Miguel II') }}</strong>
                             </div>
                         </div>
 
-                        {{-- Emergency type selector --}}
-                        <div class="fgrp">
-                            <label class="flbl"><span x-text="t('sos_nature_label')">Emergency Nature / Reason</span> <span style="color:#dc2626;">*</span></label>
-                            <select x-model="sosEmergencyType" class="finput fselect" style="font-weight:700;">
+                        {{-- Emergency type selector (Enlarged & Bold for Senior/PWD) --}}
+                        <div class="fgrp" style="margin-bottom:14px;">
+                            <label class="flbl" style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                                <i class="fas fa-exclamation-triangle" style="color:#e11d48;"></i>
+                                <span x-text="t('sos_nature_label')">Uri ng Emergency / Emergency Nature</span> <span style="color:#dc2626;">*</span>
+                            </label>
+                            <select x-model="sosEmergencyType" class="finput fselect" style="font-size:13.5px; font-weight:800; padding:12px 14px; border:2px solid #cbd5e1; border-radius:10px; color:#0f172a; background:#fff;">
                                 <option value="general" x-text="lang==='fil' ? '🚨 Pangkalahatang Emergency / Saklolo ng Tanod' : '🚨 General Emergency / Tanod Assistance'"></option>
                                 <option value="security" x-text="lang==='fil' ? '🛡️ Banta sa Seguridad / Kaguluhan / Estranghero' : '🛡️ Security Threat / Disturbance / Intruder'"></option>
                                 <option value="medical" x-text="lang==='fil' ? '🚑 Serbisyong Medikal / Unang Lunas' : '🚑 Medical Emergency / First Responder'"></option>
@@ -5309,30 +5371,34 @@ html, body {
                         </div>
 
                         {{-- Dedicated Incident Landmark / Location Input --}}
-                        <div class="fgrp">
-                            <label class="flbl"><span x-text="t('sos_landmark_label')">Exact Landmark / Incident Location</span> <span style="color:#dc2626;">*</span></label>
+                        <div class="fgrp" style="margin-bottom:16px;">
+                            <label class="flbl" style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                                <i class="fas fa-map-marker-alt" style="color:#0E5393;"></i>
+                                <span x-text="t('sos_landmark_label')">Exact Landmark / Incident Location</span> <span style="color:#dc2626;">*</span>
+                            </label>
                             <input type="text" x-model="sosLandmark" 
                                    @input="if(sosLandmark.trim().length >= 3) { sosLandmarkError = false; sosError = null; }"
                                    class="finput" 
+                                   style="font-size:13.5px; font-weight:700; padding:12px 14px; border:2px solid #cbd5e1; border-radius:10px;"
                                    :placeholder="t('sos_landmark_ph')" 
                                    :style="sosLandmarkError ? 'border-color:#dc2626 !important; background:#fff1f2 !important;' : ''">
-                            <div style="font-size:10px;color:var(--muted);margin-top:3px;" x-text="t('sos_landmark_hint')">
+                            <div style="font-size:11px;color:#475569;font-weight:600;margin-top:4px;" x-text="t('sos_landmark_hint')">
                                 Saan mismong lugar nagaganap ang emergency? Ilagay ang landmark lalo na kung wala sa inyong bahay.
                             </div>
                             <template x-if="sosLandmarkError">
-                                <div style="color:#dc2626;font-size:10.5px;font-weight:700;margin-top:4px;">
+                                <div style="color:#dc2626;font-size:11.5px;font-weight:800;margin-top:5px;">
                                     <i class="fas fa-exclamation-circle"></i> <span x-text="t('sos_landmark_err')">Kinakailangan ilagay ang eksaktong landmark o lokasyon bago mag-dispatch.</span>
                                 </div>
                             </template>
                         </div>
 
                         <template x-if="sosError">
-                            <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-bottom:12px;" x-text="sosError"></div>
+                            <div style="background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:800;margin-bottom:14px;" x-text="sosError"></div>
                         </template>
 
-                        <div style="display:flex;gap:10px;margin-top:16px;">
-                            <button type="button" @click="sosModal=false" class="btn-plain btn-ghost" style="flex:1;" :disabled="sosLoading" x-text="t('cancel')">Cancel</button>
-                            <button type="button" @click="proceedToConfirm()" class="sos-btn" style="flex:2;justify-content:center;padding:12px;" :disabled="sosLoading">
+                        <div style="display:flex;gap:12px;margin-top:16px;">
+                            <button type="button" @click="sosModal=false" class="btn-plain btn-ghost" style="flex:1;font-size:13px;font-weight:800;padding:12px;" :disabled="sosLoading" x-text="t('cancel')">Cancel</button>
+                            <button type="button" @click="proceedToConfirm()" class="sos-btn" style="flex:2;justify-content:center;padding:14px;font-size:14px;font-weight:900;letter-spacing:0.04em;" :disabled="sosLoading">
                                 <span><i class="fas fa-bullhorn"></i> <span x-text="t('sos_btn_dispatch')">DISPATCH NOW</span></span>
                             </button>
                         </div>
@@ -5391,24 +5457,37 @@ html, body {
                 {{-- Success State --}}
                 <template x-if="sosSuccess">
                     <div style="text-align:center;padding:10px 0;">
-                        <div style="width:64px;height:64px;background:#dcfce7;color:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;box-shadow:0 0 0 8px rgba(220,38,38,0.15);">
+                        <div style="width:68px;height:68px;background:#dcfce7;color:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px;box-shadow:0 0 0 8px rgba(22,163,74,0.15);">
                             <i class="fas fa-check"></i>
                         </div>
-                        <h3 style="font-size:16px;font-weight:900;color:#166534;margin-bottom:6px;" x-text="t('sos_success_title')">DISPATCH ALERT TRANSMITTED</h3>
-                        <p style="font-size:11px;color:#1e293b;font-weight:600;line-height:1.6;margin-bottom:14px;" x-text="t('sos_success_desc')">
+                        <h3 style="font-size:18px;font-weight:900;color:#14532d;margin-bottom:6px;text-transform:uppercase;" x-text="t('sos_success_title')">DISPATCH ALERT TRANSMITTED</h3>
+                        <p style="font-size:13px;color:#1e293b;font-weight:700;line-height:1.6;margin-bottom:14px;" x-text="t('sos_success_desc')">
                             Your emergency SOS has been received with <strong>HIGHEST PRIORITY</strong> by the on-duty Barangay Police (Tanod) & Peace and Order Command.
                         </p>
+
+                        {{-- IMPORTANT REMINDER & JURISDICTION NOTES (MOVED HERE AS REQUESTED) --}}
+                        <div style="background:#fff1f2;border:1.5px solid #fecdd3;border-left:5px solid #e11d48;border-radius:12px;padding:12px 16px;margin-bottom:14px;text-align:left;">
+                            <div style="font-size:12px;font-weight:900;color:#9f1239;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                                <i class="fas fa-triangle-exclamation" style="color:#e11d48;font-size:15px;"></i>
+                                <span x-text="t('sos_advisory_title')">⚠️ IMPORTANT REMINDER:</span>
+                            </div>
+                            <div style="font-size:12px;color:#881337;line-height:1.55;font-weight:600;">
+                                <span x-text="t('sos_advisory_desc')">Emergency SOS is strictly for genuine emergencies within the territorial jurisdiction of Barangay San Miguel II. On-duty Tanod patrols can only respond within our barangay. If an accident or emergency occurs in another barangay or city, please call 911, PNP, or the respective local emergency hotline immediately.</span>
+                                <span style="font-size:11px;color:#be123c;display:block;margin-top:4px;font-weight:800;" x-text="t('sos_advisory_penalty')">Pranks or false alarms are strictly prohibited and punishable by law.</span>
+                            </div>
+                        </div>
+
                         <template x-if="sosResidentEmail || @json($authUser?->email)">
-                            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;font-weight:700;text-align:left;">
-                                <i class="fas fa-envelope-circle-check" style="color:var(--brand);margin-right:4px;"></i>
+                            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#1e40af;font-weight:700;text-align:left;">
+                                <i class="fas fa-envelope-circle-check" style="color:var(--brand);margin-right:6px;"></i>
                                 <span x-text="t('sos_email_sent_to')">Confirmation receipt sent to:</span> <strong style="color:#0E5393;margin-left:4px;" x-text="sosResidentEmail || @json($authUser?->email)"></strong>
                             </div>
                         </template>
-                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:10.5px;color:#475569;font-weight:700;margin-bottom:20px;text-align:left;">
-                            <div><i class="fas fa-shield-alt" style="color:var(--brand);margin-right:4px;"></i> <span x-text="t('sos_notice_1')">On-duty patrol units are being notified.</span></div>
-                            <div style="margin-top:4px;"><i class="fas fa-phone-alt" style="color:var(--brand);margin-right:4px;"></i> <span x-text="t('sos_notice_2')">Keep your line open for Tanod dispatch verification.</span></div>
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-size:12px;color:#334155;font-weight:700;margin-bottom:20px;text-align:left;line-height:1.6;">
+                            <div><i class="fas fa-shield-alt" style="color:var(--brand);margin-right:6px;"></i> <span x-text="t('sos_notice_1')">On-duty patrol units are being notified.</span></div>
+                            <div style="margin-top:6px;"><i class="fas fa-phone-alt" style="color:var(--brand);margin-right:6px;"></i> <span x-text="t('sos_notice_2')">Keep your line open for Tanod dispatch verification.</span></div>
                         </div>
-                        <button type="button" @click="sosModal=false; sosSuccess=false; sosConfirmStep=false; window.location.href='#sos-history'; window.location.reload();" class="btn-grad" style="width:100%;justify-content:center;padding:10px;" x-text="t('sos_btn_close')">
+                        <button type="button" @click="sosModal=false; sosSuccess=false; sosConfirmStep=false; window.location.href='#sos-history'; window.location.reload();" class="btn-grad" style="width:100%;justify-content:center;padding:12px;font-size:14px;font-weight:800;" x-text="t('sos_btn_close')">
                             Understood & Close
                         </button>
                     </div>
