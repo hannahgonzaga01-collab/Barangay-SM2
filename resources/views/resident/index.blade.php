@@ -538,6 +538,14 @@ html, body {
             aboutTab: 'about',
             rescheduleModal: false,
             activeReq: {},
+            trackerModal: false,
+            selectedTrackerReq: null,
+            openTrackerModal(req) {
+                this.selectedTrackerReq = req;
+                this.trackerModal = true;
+            },
+            jobseekerLockedModal: false,
+            hasAvailedJobseeker: {{ $hasAvailedJobseeker ? 'true' : 'false' }},
             isAuth: {{ $isAuth ? 'true' : 'false' }},
             isVoter: {{ ($isAuth && $authUser?->is_voter) ? 'true' : 'false' }},
             isPendingVerification: {{ ($isAuth && in_array($authUser?->status, ['pending_verification', 'declined'])) ? 'true' : 'false' }},
@@ -582,7 +590,7 @@ html, body {
                         about_us: 'About Barangay SM2',
                         about_tab: 'About',
                         past_updates_tab: 'Past Updates',
-                        my_history: 'Your Application History',
+                        my_history: 'Request Tracker',
                         requests: 'requests',
                         no_announcements: 'No active announcements at the moment.',
                         no_events: 'No scheduled events at the moment.',
@@ -718,7 +726,7 @@ html, body {
                         about_us: 'Tungkol sa Barangay SM2',
                         about_tab: 'Tungkol sa Barangay',
                         past_updates_tab: 'Mga Nakaraang Update',
-                        my_history: 'Kasaysayan ng Aplikasyon',
+                        my_history: 'Tagasubaybay ng Kahilingan (Tracker)',
                         requests: 'mga kahilingan',
                         no_announcements: 'Walang aktibong anunsyo sa ngayon.',
                         no_events: 'Walang nakatakdang programa sa ngayon.',
@@ -1225,7 +1233,9 @@ html, body {
     <div class="hero-section">
         <div class="hero-carousel">
             <div class="carousel-slide active">
-                <img src="{{ asset('images/circlelogo.png') }}" style="width:54px;height:54px;border-radius:50%;object-fit:contain;margin:0 auto 10px;display:block;opacity:.9;" onerror="this.style.display='none'">
+                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;" title="Barangay San Miguel II">
+                    <img src="{{ asset('images/circlelogo.png') }}" style="width:62px;height:62px;border-radius:50%;object-fit:contain;margin:0 auto 10px;display:block;opacity:.95;box-shadow:0 4px 16px rgba(0,0,0,0.25);transition:transform .2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onerror="this.style.display='none'">
+                </a>
                 <span class="slide-tag" x-text="t('welcome')">Welcome</span>
                 <h2 x-text="t('hero_title')">Barangay San Miguel II</h2>
                 <p x-text="t('hero_subtitle')">Your community. Our commitment. Serving residents of Dasmariñas, Cavite.</p>
@@ -1538,13 +1548,19 @@ html, body {
             {{-- Collapsible Body --}}
             <div x-show="!isAppHistoryCollapsed" x-transition:enter.duration.200ms>
                 @foreach($requests as $index => $req)
-                <div class="event-item" x-show="showAllApps || {{ $index }} < 3" x-transition>
+                <div class="event-item" x-show="showAllApps || {{ $index }} < 3" x-transition
+                     @click="openTrackerModal({{ json_encode($req) }})"
+                     style="cursor:pointer; transition:all .15s; border-radius:10px; padding:10px 12px; margin-bottom:8px;"
+                     onmouseover="this.style.background='#f0fdf4'; this.style.borderColor='#86efac';" onmouseout="this.style.background='#fff'; this.style.borderColor='var(--border)';">
                     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                         <i class="fas fa-file-invoice" style="color:var(--brand);font-size:13px;"></i>
                     </div>
                     <div style="flex:1;min-width:0;">
-                        <div style="font-size:12px;font-weight:800;color:var(--text);">{{ ucwords(str_replace('_',' ',$req->document_type)) }}</div>
-                        <div style="font-size:10px;color:var(--muted);font-weight:600;">
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <span style="font-family:monospace;font-size:9.5px;font-weight:900;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;padding:1px 5px;border-radius:4px;">REQ-{{ $req->created_at->format('Y') }}-{{ str_pad($req->id, 5, '0', STR_PAD_LEFT) }}</span>
+                            <div style="font-size:12px;font-weight:800;color:var(--text);">{{ ucwords(str_replace('_',' ',$req->document_type)) }}</div>
+                        </div>
+                        <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;">
                             Purpose: {{ $req->purpose ?? 'N/A' }} •
                             Status: <span class="s-{{ $req->status }}">{{ ucfirst($req->status) }}</span>
                         </div>
@@ -1567,9 +1583,12 @@ html, body {
                     </div>
                     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
                         <span style="font-size:10px;font-weight:700;color:var(--light);white-space:nowrap;">{{ $req->created_at->format('M d') }}</span>
+                        <span style="font-size:9px;font-weight:800;color:var(--brand);display:flex;align-items:center;gap:3px;">
+                            <i class="fas fa-external-link-alt" style="font-size:8px;"></i> Track
+                        </span>
                         @if($req->status !== 'disapproved' && $req->status !== 'released' && $req->reschedule_count < 1 && $req->appointment_date)
-                        <button type="button" @click="activeReq={{ json_encode($req) }}; rescheduleModal=true" 
-                                style="background:none;border:none;color:var(--brand);font-size:9.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;padding:2px 4px;border-radius:4px;"
+                        <button type="button" @click.stop="activeReq={{ json_encode($req) }}; rescheduleModal=true" 
+                                style="background:none;border:none;color:var(--brand);font-size:9.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;padding:2px 4px;border-radius:4px;margin-top:2px;"
                                 onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                             <i class="fas fa-calendar-edit"></i> Reschedule
                         </button>
@@ -2048,21 +2067,29 @@ html, body {
                     <div class="docu-grid">
                         <template x-for="doc in docs" :key="doc.key">
                             <div class="docu-pick" 
-                                 @click="(isPendingVerification && doc.key !== 'movein') ? pendingLockModal=true : selectedDoc=doc.key" 
+                                 @click="
+                                     if (isPendingVerification && doc.key !== 'movein') { pendingLockModal=true; return; }
+                                     if (doc.key === 'jobseeker' && hasAvailedJobseeker) { jobseekerLockedModal=true; return; }
+                                     selectedDoc=doc.key;
+                                 " 
                                  :class="[
                                      selectedDoc===doc.key ? 'sel' : '',
                                      (isPendingVerification && doc.key !== 'movein') ? 'docu-pick-locked' : '',
+                                     (doc.key === 'jobseeker' && hasAvailedJobseeker) ? 'docu-pick-locked' : '',
                                      (isPendingVerification && doc.key === 'movein') ? 'docu-pick-open' : ''
                                  ]"
-                                 :style="(isPendingVerification && doc.key !== 'movein') ? 'opacity:0.55; position:relative;' : ((isPendingVerification && doc.key === 'movein') ? 'border:2px solid #059669; background:#ecfdf5; position:relative;' : '')">
+                                 :style="(isPendingVerification && doc.key !== 'movein') ? 'opacity:0.55; position:relative;' : ((doc.key === 'jobseeker' && hasAvailedJobseeker) ? 'opacity:0.6; position:relative; background:#fff1f2;' : ((isPendingVerification && doc.key === 'movein') ? 'border:2px solid #059669; background:#ecfdf5; position:relative;' : ''))">
                                 <template x-if="isPendingVerification && doc.key !== 'movein'">
                                     <div style="position:absolute; top:4px; right:4px; font-size:8px; color:#94a3b8;"><i class="fas fa-lock"></i></div>
+                                </template>
+                                <template x-if="doc.key === 'jobseeker' && hasAvailedJobseeker">
+                                    <div style="position:absolute; top:3px; right:3px; background:#dc2626; color:#fff; font-size:7px; font-weight:900; padding:1px 5px; border-radius:4px; text-transform:uppercase;">1x Used</div>
                                 </template>
                                 <template x-if="isPendingVerification && doc.key === 'movein'">
                                     <div style="position:absolute; top:3px; right:3px; background:#059669; color:#fff; font-size:7px; font-weight:900; padding:1px 5px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;">Open</div>
                                 </template>
-                                <div class="docu-pick-ico" :style="(isPendingVerification && doc.key === 'movein') ? 'background:#d1fae5;' : ''">
-                                    <i class="fas" :class="doc.icon" :style="(isPendingVerification && doc.key === 'movein') ? 'color:#059669;' : ''"></i>
+                                <div class="docu-pick-ico" :style="(isPendingVerification && doc.key === 'movein') ? 'background:#d1fae5;' : ((doc.key === 'jobseeker' && hasAvailedJobseeker) ? 'background:#fee2e2;color:#dc2626;' : '')">
+                                    <i class="fas" :class="doc.icon" :style="(isPendingVerification && doc.key === 'movein') ? 'color:#059669;' : ((doc.key === 'jobseeker' && hasAvailedJobseeker) ? 'color:#dc2626;' : '')"></i>
                                 </div>
                                 <div class="docu-pick-lbl" :style="(isPendingVerification && doc.key === 'movein') ? 'color:#065f46; font-weight:900;' : ''" x-text="getDocName(doc)"></div>
                             </div>
@@ -2073,11 +2100,16 @@ html, body {
                 <div x-show="selectedDoc" x-transition>
                     <button @click="selectedDoc=''" class="btn-plain btn-ghost btn-sm" style="margin-bottom:12px;"><i class="fas fa-arrow-left"></i> <span x-text="lang==='fil'?'Bumalik':'Back'">Back</span></button>
                         <form action="{{ route('resident.document.request') }}" method="POST" enctype="multipart/form-data" 
+                              x-ref="docReqForm"
+                              id="docReqForm"
+                              @submit.prevent="if($refs.docReqForm.reportValidity()){ showDocConfirmModal = true; }"
                               x-data="{ 
                                 cType: 'self', 
                                 selfPurpose: '',
                                 selfPurposeSelect: '',
                                 selfPurposeCustom: '',
+                                showDocConfirmModal: false,
+                                isSubmitting: false,
                                 age: '{{ $isAuth ? ($resident->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : "")) : "" }}',
                                 birthday: '{{ $isAuth ? ($resident->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format("Y-m-d") : "")) : "" }}',
                                 authLetterName: '',
@@ -2091,6 +2123,7 @@ html, body {
                                     middle_name: '', 
                                     last_name: '', 
                                     relation: '', 
+                                    house_street: '',
                                     address: '', 
                                     purpose: '', 
                                     purposeSelect: '',
@@ -2108,15 +2141,85 @@ html, body {
                                      if(m < 0 || (m === 0 && today.getDate() < bd.getDate())) a--;
                                      return a;
                                  },
+                                 getPurposes(docKey) {
+                                     if (docKey === 'clearance') {
+                                         return [
+                                             'Local Employment',
+                                             'Overseas Employment (Abroad)',
+                                             'Student Enrollment / School Requirement / Scholarship',
+                                             'Postal ID / Passport / Gov ID Application',
+                                             'Bank Account Opening',
+                                             'Police Clearance Requirement',
+                                             'Others'
+                                         ];
+                                     } else if (docKey === 'indigency') {
+                                         return [
+                                             'Medical Assistance (DSWD / Malasakit / Hospital)',
+                                             'Financial Assistance',
+                                             'Educational / Scholarship Subsidy',
+                                             'Burial / Funeral Assistance',
+                                             'Legal Aid (PAO)',
+                                             'Others'
+                                         ];
+                                     } else if (docKey === 'residency') {
+                                         return [
+                                             'Proof of Address / Residency',
+                                             'Utility Connection (Meralco / Water / Internet)',
+                                             'Loan Application',
+                                             'Bank Requirement',
+                                             'School / University Requirement',
+                                             'Others'
+                                         ];
+                                     } else if (docKey === 'business') {
+                                         return [
+                                             'New Business Permit / Mayor\'s Permit',
+                                             'Business Permit Renewal',
+                                             'DTI / SEC Registration',
+                                             'Tricycle / Franchise Permit',
+                                             'Others'
+                                         ];
+                                     } else if (docKey === 'jobseeker') {
+                                         return [
+                                             'First-Time Jobseeker Employment (RA 11261)',
+                                             'Government Examination / Pre-Employment',
+                                             'Others'
+                                         ];
+                                     } else if (docKey === 'movein' || docKey === 'moveout') {
+                                         return [
+                                             'New Resident Transfer / Relocation',
+                                             'Proof of Residency Transfer',
+                                             'Others'
+                                         ];
+                                     }
+                                     return [
+                                         'Employment',
+                                         'Scholarship / School Requirement',
+                                         'Financial / Medical Assistance',
+                                         'Loan Application',
+                                         'ID Requirement / Postal / Passport',
+                                         'Proof of Residency',
+                                         'Legal / Court Requirement',
+                                         'Others'
+                                     ];
+                                 },
                                  init() {
+                                     if (selectedDoc === 'jobseeker') {
+                                         this.cType = 'self';
+                                     }
                                      if (selectedDoc === 'movein') {
-                                         this.selfPurposeSelect = 'New Resident / Move-In';
-                                         this.selfPurpose = 'New Resident / Move-In';
+                                         this.selfPurposeSelect = 'New Resident Transfer / Relocation';
+                                         this.selfPurpose = 'New Resident Transfer / Relocation';
                                      }
                                      this.$watch('selectedDoc', val => {
-                                         if (val === 'movein' && !this.selfPurposeSelect) {
-                                             this.selfPurposeSelect = 'New Resident / Move-In';
-                                             this.selfPurpose = 'New Resident / Move-In';
+                                         if (val === 'jobseeker') {
+                                             this.cType = 'self';
+                                         }
+                                         this.selfPurposeSelect = '';
+                                         this.selfPurpose = '';
+                                         this.selfPurposeCustom = '';
+                                         if (val === 'movein') {
+                                             this.selfPurposeSelect = 'New Resident Transfer / Relocation';
+                                             this.selfPurpose = 'New Resident Transfer / Relocation';
                                          }
                                      });
                                  }
@@ -2129,12 +2232,18 @@ html, body {
                                 <div class="sblk-ttl"><i class="fas fa-user-check"></i> Who is claiming this document?</div>
                                 <div class="fgrid2 fgrp">
                                     <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--text);">
-                                        <input type="radio" name="claimant_type" value="self" x-model="cType" required style="accent-color:var(--brand);width:14px;height:14px;"> Self
+                                        <input type="radio" name="claimant_type" value="self" x-model="cType" required style="accent-color:var(--brand);width:14px;height:14px;"> Self (Personal)
                                     </label>
-                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--text);">
-                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" required style="accent-color:var(--brand);width:14px;height:14px;"> Authorized Person
+                                    <label style="display:flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:700;"
+                                           :style="selectedDoc === 'jobseeker' ? 'opacity:0.4;cursor:not-allowed;color:var(--muted);' : 'cursor:pointer;color:var(--text);'">
+                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:14px;height:14px;"> Authorized Person
                                     </label>
                                 </div>
+                                <template x-if="selectedDoc === 'jobseeker'">
+                                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:10px;color:#92400e;font-weight:700;line-height:1.45;">
+                                        <i class="fas fa-exclamation-triangle" style="color:#d97706;"></i> <strong>Personal Appearance Strictly Required (RA 11261):</strong> Bawal po ang Authorized Representative sa First-Time Jobseeker Certificate dahil kailangan pong personal na pirmahan ng aplikante ang Sworn Undertaking sa Barangay Hall.
+                                    </div>
+                                </template>
                             </div>
                             
                             {{-- AUTHORIZED THEME --}}
@@ -2155,8 +2264,9 @@ html, body {
                                              @drop.prevent.stop="isDraggingLetter = false; if($event.dataTransfer.files.length){ $refs.authLetter.files = $event.dataTransfer.files; authLetterName = $event.dataTransfer.files[0].name; }">
                                             <i :class="authLetterName ? 'fas fa-check-circle' : 'fas fa-file-signature'" :style="authLetterName ? 'color:#10b981;' : ''"></i>
                                             <div class="upload-txt" :style="authLetterName ? 'color:#15803d; font-weight:800;' : ''" x-text="authLetterName ? authLetterName : 'Upload Signed Letter'"></div>
-                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authLetterName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
-                                            <input type="file" x-ref="authLetter" name="authorization_letter" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ authLetterName = $event.target.files[0].name; }">
+                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authLetterName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here (Max: 5MB)'"></div>
+                                            <div style="font-size:7.5px;color:#1e40af;font-weight:700;margin-top:2px;">Limit: 5MB (JPG, PNG, PDF)</div>
+                                            <input type="file" x-ref="authLetter" name="authorization_letter" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang file ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authLetterName=''; return; } authLetterName = f.name; }">
                                         </div>
                                     </div>
                                     <div style="display:flex;flex-direction:column;">
@@ -2170,8 +2280,9 @@ html, body {
                                              @drop.prevent.stop="isDraggingId = false; if($event.dataTransfer.files.length){ $refs.authId.files = $event.dataTransfer.files; authIdName = $event.dataTransfer.files[0].name; }">
                                             <i :class="authIdName ? 'fas fa-check-circle' : 'fas fa-id-card'" :style="authIdName ? 'color:#10b981;' : ''"></i>
                                             <div class="upload-txt" :style="authIdName ? 'color:#15803d; font-weight:800;' : ''" x-text="authIdName ? authIdName : 'Upload Your Valid ID'"></div>
-                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authIdName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
-                                            <input type="file" x-ref="authId" name="authorized_id" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ authIdName = $event.target.files[0].name; }">
+                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authIdName ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here (Max: 5MB)'"></div>
+                                            <div style="font-size:7.5px;color:#1e40af;font-weight:700;margin-top:2px;">Limit: 5MB (JPG, PNG, PDF)</div>
+                                            <input type="file" x-ref="authId" name="authorized_id" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authIdName=''; return; } authIdName = f.name; }">
                                         </div>
                                     </div>
                                     <div style="display:flex;flex-direction:column;">
@@ -2185,8 +2296,9 @@ html, body {
                                              @drop.prevent.stop="isDraggingId2 = false; if($event.dataTransfer.files.length){ $refs.authId2.files = $event.dataTransfer.files; authId2Name = $event.dataTransfer.files[0].name; }">
                                             <i :class="authId2Name ? 'fas fa-check-circle' : 'fas fa-user-circle'" :style="authId2Name ? 'color:#10b981;' : ''"></i>
                                             <div class="upload-txt" :style="authId2Name ? 'color:#15803d; font-weight:800;' : ''" x-text="authId2Name ? authId2Name : 'Upload Their Valid ID'"></div>
-                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authId2Name ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here'"></div>
-                                            <input type="file" x-ref="authId2" name="authorized_id2" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ authId2Name = $event.target.files[0].name; }">
+                                            <div style="font-size:8px; color:var(--light); font-weight:600;" x-text="authId2Name ? 'File selected (Click or drag new to change)' : 'Click or Drag & Drop file here (Max: 5MB)'"></div>
+                                            <div style="font-size:7.5px;color:#1e40af;font-weight:700;margin-top:2px;">Limit: 5MB (JPG, PNG, PDF)</div>
+                                            <input type="file" x-ref="authId2" name="authorized_id2" accept="image/*,.pdf" style="display:none;" :required="cType === 'authorized'" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; authId2Name=''; return; } authId2Name = f.name; }">
                                         </div>
                                     </div>
                                 </div>
@@ -2234,8 +2346,12 @@ html, body {
                                         </div>
 
                                         <div class="fgrp">
-                                            <label class="flbl">Complete Address (Applicant) *</label>
-                                            <input type="text" :name="'applicants['+index+'][address]'" placeholder="Blk/Lot, Street, Brgy. SM2..." class="finput" :required="cType === 'authorized'" x-model="app.address">
+                                            <label class="flbl">Residence Address in Brgy. San Miguel II *</label>
+                                            <input type="text" placeholder="House No. / Block & Lot, Street Name" class="finput" :required="cType === 'authorized'" x-model="app.house_street" @input="app.address = (app.house_street ? app.house_street.trim() + ', Barangay San Miguel II, Dasmariñas City, Cavite' : '')">
+                                            <div style="font-size:9px;color:var(--brand);font-weight:700;margin-top:3px;display:flex;align-items:center;gap:4px;">
+                                                <i class="fas fa-map-marker-alt"></i> Barangay Jurisdiction: <strong>Barangay San Miguel II, Dasmariñas City, Cavite</strong>
+                                            </div>
+                                            <input type="hidden" :name="'applicants['+index+'][address]'" :value="app.address">
                                         </div>
 
                                         {{-- Conditional Birthday/Age (Only shown when document type requires it) --}}
@@ -2261,31 +2377,24 @@ html, body {
                                                 <label class="flbl">Purpose *</label>
                                                 <select class="finput fselect" x-model="app.purposeSelect" @change="if(app.purposeSelect !== 'Others') app.purpose = app.purposeSelect; else app.purpose = app.purposeCustom;" :required="cType === 'authorized'">
                                                     <option value="">— Select Purpose —</option>
-                                                    <option value="New Resident / Move-In">New Resident / Move-In</option>
-                                                    <option value="Employment">Employment</option>
-                                                    <option value="Scholarship / School Requirement">Scholarship / School Requirement</option>
-                                                    <option value="Financial / Medical Assistance">Financial / Medical Assistance</option>
-                                                    <option value="Loan Application">Loan Application</option>
-                                                    <option value="ID Requirement / Postal / Passport">ID Requirement / Postal / Passport</option>
-                                                    <option value="Legal / Court Requirement">Legal / Court Requirement</option>
-                                                    <option value="Business Permit / Registration">Business Permit / Registration</option>
-                                                    <option value="Proof of Residency">Proof of Residency</option>
-                                                    <option value="Senior Citizen / PWD Benefit">Senior Citizen / PWD Benefit</option>
-                                                    <option value="Local / Travel Requirement">Local / Travel Requirement</option>
-                                                    <option value="Others">Others (Please Specify)</option>
+                                                    <template x-for="p in getPurposes(selectedDoc)" :key="p">
+                                                        <option :value="p" x-text="p"></option>
+                                                    </template>
                                                 </select>
                                                 <div x-show="app.purposeSelect === 'Others'" x-transition style="margin-top:6px;">
                                                     <input type="text" placeholder="Specify applicant's purpose..." class="finput" x-model="app.purposeCustom" @input="app.purpose = app.purposeCustom" :required="cType === 'authorized' && app.purposeSelect === 'Others'">
                                                 </div>
                                                 <input type="hidden" :name="'applicants['+index+'][purpose]'" :value="app.purpose">
-                                                <div x-show="app.purpose && app.purpose.toLowerCase().includes('loan')" style="font-size:9px;color:var(--warn);margin-top:4px;font-weight:700;"><i class="fas fa-info-circle"></i> Note: Document requests for Loan purposes may have an associated fee.</div>
+                                                <div x-show="app.purpose && app.purpose.toLowerCase().includes('loan')" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:9.5px;color:#92400e;font-weight:700;line-height:1.4;">
+                                                    <i class="fas fa-coins" style="color:#d97706;"></i> <strong>Paalala sa Bayad:</strong> Ang mga kahilingan para sa Loan / Commercial ay may kaukulang processing fee (₱50.00 / ₱20.00) na babayaran sa cashier ng Barangay Hall sa araw ng pick-up.
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </template>
 
                                 <div x-show="applicants.length < 2" style="margin-top:15px;">
-                                    <button type="button" @click="applicants.push({ first_name: '', middle_name: '', last_name: '', relation: '', address: '', purpose: '', purposeSelect: '', purposeCustom: '', contact: '', age: '', birthday: '' })" class="btn-plain btn-outline btn-sm" style="width:100%;justify-content:center;border-style:dashed;background:#fff;">
+                                    <button type="button" @click="applicants.push({ first_name: '', middle_name: '', last_name: '', relation: '', house_street: '', address: '', purpose: '', purposeSelect: '', purposeCustom: '', contact: '', age: '', birthday: '' })" class="btn-plain btn-outline btn-sm" style="width:100%;justify-content:center;border-style:dashed;background:#fff;">
                                         <i class="fas fa-plus-circle"></i> Add Another Applicant (Max 2)
                                     </button>
                                 </div>
@@ -2313,30 +2422,31 @@ html, body {
                                 <div class="sblk">
                                     <div class="sblk-ttl"><i class="fas fa-info"></i> Request Details</div>
                                     <div class="fgrid2 fgrp" style="margin-bottom: 15px;">
-                                        <div class="fspan2"><label class="flbl">Complete Address</label><input type="text" name="address" placeholder="Blk/Lot, Street, Brgy. SM2..." class="finput" value="{{ $isAuth ? $authUser?->address : old('address') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}></div>
+                                        <div class="fspan2">
+                                            <label class="flbl">Registered Masterlist Address (Self) *</label>
+                                            <div style="position:relative;">
+                                                <input type="text" name="address" placeholder="Blk/Lot, Street, Brgy. SM2..." class="finput" value="{{ $isAuth ? $authUser?->address : old('address') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;padding-right:32px;' : '' }}>
+                                                @if($isAuth && !in_array($authUser->status, ['pending_verification', 'declined']))
+                                                <i class="fas fa-lock" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#64748b;" title="Auto-filled and locked from verified Masterlist profile"></i>
+                                                @endif
+                                            </div>
+                                        </div>
                                         <div><label class="flbl">Contact Number</label><input type="text" name="contact" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput" value="{{ $isAuth ? $authUser?->contact_number : old('contact') }}" {{ ($isAuth && !in_array($authUser->status, ['pending_verification', 'declined'])) ? 'readonly style=background:#f1f5f9;cursor:not-allowed;' : '' }}></div>
                                         <div>
                                             <label class="flbl">Purpose *</label>
                                             <select class="finput fselect" x-model="selfPurposeSelect" @change="if(selfPurposeSelect !== 'Others') selfPurpose = selfPurposeSelect; else selfPurpose = selfPurposeCustom;" :required="cType === 'self'">
                                                 <option value="">— Select Purpose —</option>
-                                                <option value="New Resident / Move-In">New Resident / Move-In</option>
-                                                <option value="Employment">Employment</option>
-                                                <option value="Scholarship / School Requirement">Scholarship / School Requirement</option>
-                                                <option value="Financial / Medical Assistance">Financial / Medical Assistance</option>
-                                                <option value="Loan Application">Loan Application</option>
-                                                <option value="ID Requirement / Postal / Passport">ID Requirement / Postal / Passport</option>
-                                                <option value="Legal / Court Requirement">Legal / Court Requirement</option>
-                                                <option value="Business Permit / Registration">Business Permit / Registration</option>
-                                                <option value="Proof of Residency">Proof of Residency</option>
-                                                <option value="Senior Citizen / PWD Benefit">Senior Citizen / PWD Benefit</option>
-                                                <option value="Local / Travel Requirement">Local / Travel Requirement</option>
-                                                <option value="Others">Others (Please Specify)</option>
+                                                <template x-for="p in getPurposes(selectedDoc)" :key="p">
+                                                    <option :value="p" x-text="p"></option>
+                                                </template>
                                             </select>
                                             <div x-show="selfPurposeSelect === 'Others'" x-transition style="margin-top:6px;">
                                                 <input type="text" placeholder="Please specify your purpose..." class="finput" x-model="selfPurposeCustom" @input="selfPurpose = selfPurposeCustom" :required="cType === 'self' && selfPurposeSelect === 'Others'">
                                             </div>
                                             <input type="hidden" name="purpose" :value="selfPurpose">
-                                            <div x-show="selfPurpose.toLowerCase().includes('loan')" style="font-size:9px;color:var(--warn);margin-top:4px;font-weight:700;"><i class="fas fa-info-circle"></i> Note: Document requests for Loan purposes may have an associated fee.</div>
+                                            <div x-show="selfPurpose && selfPurpose.toLowerCase().includes('loan')" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:9.5px;color:#92400e;font-weight:700;line-height:1.4;">
+                                                <i class="fas fa-coins" style="color:#d97706;"></i> <strong>Paalala sa Bayad:</strong> Ang mga kahilingan para sa Loan / Commercial ay may kaukulang processing fee (₱50.00 / ₱20.00) na babayaran sa cashier ng Barangay Hall sa araw ng pick-up.
+                                            </div>
                                         </div>
                                     </div>
 
@@ -2434,11 +2544,205 @@ html, body {
                             <button type="button" @click="selectedDoc=''" class="btn-plain btn-ghost" x-text="t('cancel')">Cancel</button>
                             <button type="submit" class="btn-grad"><i class="fas fa-paper-plane"></i> <span x-text="t('submit_request')">Submit Request</span></button>
                         </div>
+
+                        {{-- ✦ Pre-Submission Review & Confirmation Modal ✦ --}}
+                        <div x-show="showDocConfirmModal" x-cloak class="modal-ov" style="z-index:99999;" x-transition>
+                            <div class="modal-box" style="max-width:440px;" @click.away="showDocConfirmModal=false">
+                                <div class="modal-in">
+                                    <div class="modal-hd">
+                                        <div class="modal-ttl">
+                                            <div class="modal-ico" style="background:#eff6ff;color:var(--brand);"><i class="fas fa-clipboard-check"></i></div>
+                                            <div>
+                                                <div style="font-weight:900;color:var(--text);font-size:13.5px;">Confirm Your Request Details</div>
+                                                <div style="font-size:9.5px;color:var(--muted);font-weight:600;">Sigurado po ba kayo na tama ang lahat ng detalye?</div>
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="showDocConfirmModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                                    </div>
+
+                                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Document:</span>
+                                            <strong style="font-size:11.5px;color:var(--brand);" x-text="getDocName(selDocObj)"></strong>
+                                        </div>
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Claimant Type:</span>
+                                            <span style="font-size:11px;font-weight:800;color:var(--text);" x-text="cType === 'self' ? 'Self (Personal)' : 'Authorized Representative'"></span>
+                                        </div>
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Purpose:</span>
+                                            <strong style="font-size:11px;color:var(--text);" x-text="cType === 'self' ? (selfPurpose || 'Standard') : (applicants[0]?.purpose || 'Standard')"></strong>
+                                        </div>
+                                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                                            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">Jurisdiction:</span>
+                                            <span style="font-size:10.5px;font-weight:700;color:#059669;"><i class="fas fa-check-circle"></i> Brgy. San Miguel II, Dasmariñas</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-bottom:16px;">
+                                        <div style="font-size:10px;font-weight:800;color:#1e40af;margin-bottom:3px;display:flex;align-items:center;gap:5px;">
+                                            <i class="fas fa-clock"></i> <strong>SLA & Processing Notice:</strong>
+                                        </div>
+                                        <p style="font-size:9.5px;color:#1e3a8a;line-height:1.45;margin:0;">
+                                            Standard processing time is <strong>1 to 2 business days</strong> (Monday to Friday, 8:00 AM – 5:00 PM). If not released within 2 days, you will receive an update notification or you may proceed directly to the Barangay Hall.
+                                        </p>
+                                    </div>
+
+                                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                                        <button type="button" @click="showDocConfirmModal=false" class="btn-plain btn-ghost" style="font-size:11px;padding:8px 14px;">
+                                            <i class="fas fa-edit"></i> Review Details
+                                        </button>
+                                        <button type="button" @click="$refs.docReqForm.submit(); isSubmitting=true;" class="btn-grad" style="font-size:11px;padding:8px 16px;" :disabled="isSubmitting">
+                                            <span x-show="!isSubmitting"><i class="fas fa-check-circle"></i> Yes, Submit Request</span>
+                                            <span x-show="isSubmitting"><i class="fas fa-spinner fa-spin"></i> Submitting...</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- ✦ Jobseeker Locked Modal (Statutory Once-in-a-Lifetime Limit) ✦ --}}
+    <div x-show="jobseekerLockedModal" x-cloak class="modal-ov" style="z-index:99999;" x-transition>
+        <div class="modal-box" style="max-width:440px;" @click.away="jobseekerLockedModal=false">
+            <div class="modal-in">
+                <div class="modal-hd">
+                    <div class="modal-ttl">
+                        <div class="modal-ico" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-ban"></i></div>
+                        <div>
+                            <div style="font-weight:900;color:var(--text);font-size:14px;">Statutory Limit Reached</div>
+                            <div style="font-size:9.5px;color:var(--muted);font-weight:600;">RA 11261 (First-Time Jobseekers Assistance Act)</div>
+                        </div>
+                    </div>
+                    <button type="button" @click="jobseekerLockedModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                </div>
+                <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+                    <p style="font-size:11px;color:#9f1239;line-height:1.5;margin:0;font-weight:700;">
+                        <i class="fas fa-exclamation-triangle" style="margin-right:4px;"></i>
+                        Paalala: Na-avail niyo na po dati ang inyong First-Time Jobseeker Certificate. Alinsunod sa probisyon ng Batas Republika Blg. 11261, ang pribilehiyong ito ay maaaring gamitin nang <strong>ISANG (1) BESES LAMANG</strong> sa buong buhay.
+                    </p>
+                    <p style="font-size:10px;color:#881337;line-height:1.45;margin-top:8px;margin-bottom:0;">
+                        Kung kailangan niyo po ng legal na dokumento para sa bagong trabaho o school requirement, mangyaring piliin ang <strong>Barangay Clearance</strong> o <strong>Certificate of Residency</strong>.
+                    </p>
+                </div>
+                <div style="display:flex;justify-content:flex-end;">
+                    <button type="button" @click="jobseekerLockedModal=false" class="btn-grad" style="padding:8px 16px;font-size:11px;">Naiintindihan Ko</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ✦ Live Request Tracker Modal ✦ --}}
+    <div x-show="trackerModal" x-cloak class="modal-ov" style="z-index:99999;" x-transition>
+        <div class="modal-box" style="max-width:480px;" @click.away="trackerModal=false">
+            <div class="modal-in" x-show="selectedTrackerReq">
+                <div class="modal-hd">
+                    <div class="modal-ttl">
+                        <div class="modal-ico" style="background:#eff6ff;color:var(--brand);"><i class="fas fa-search-location"></i></div>
+                        <div>
+                            <div style="font-weight:900;color:var(--text);font-size:14px;">Live Request Tracker</div>
+                            <div style="font-size:9.5px;color:var(--muted);font-weight:600;" x-text="'Tracking Code: REQ-' + (selectedTrackerReq?.created_at ? new Date(selectedTrackerReq.created_at).getFullYear() : '2026') + '-' + (selectedTrackerReq?.id ? String(selectedTrackerReq.id).padStart(5,'0') : '')"></div>
+                        </div>
+                    </div>
+                    <button type="button" @click="trackerModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                </div>
+
+                {{-- Document Summary Header --}}
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                        <div>
+                            <div style="font-size:13px;font-weight:900;color:var(--text);" x-text="(selectedTrackerReq?.document_type || '').toUpperCase().replace(/_/g,' ')"></div>
+                            <div style="font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px;">
+                                Purpose: <strong style="color:var(--text);" x-text="selectedTrackerReq?.purpose || 'N/A'"></strong>
+                            </div>
+                        </div>
+                        <span style="font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:99px;text-transform:uppercase;"
+                              :class="'s-' + selectedTrackerReq?.status"
+                              x-text="selectedTrackerReq?.status"></span>
+                    </div>
+                </div>
+
+                {{-- 4-Step Progress Indicator --}}
+                <div style="padding:10px 6px;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
+                        <div style="position:absolute;top:14px;left:20px;right:20px;height:3px;background:#e2e8f0;z-index:1;"></div>
+                        
+                        {{-- Step 1: Submitted --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;background:#059669;color:#fff;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span style="font-size:9px;font-weight:800;color:var(--text);margin-top:5px;text-align:center;">Submitted</span>
+                        </div>
+
+                        {{-- Step 2: Processing --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="['processing','ready','released'].includes(selectedTrackerReq?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="['processing','ready','released'].includes(selectedTrackerReq?.status) ? 'fa-check' : 'fa-hourglass-half'"></i>
+                            </div>
+                            <span style="font-size:9px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="['processing','ready','released'].includes(selectedTrackerReq?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Processing</span>
+                        </div>
+
+                        {{-- Step 3: Ready for Pickup --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="['ready','released'].includes(selectedTrackerReq?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="['ready','released'].includes(selectedTrackerReq?.status) ? 'fa-check' : 'fa-calendar-check'"></i>
+                            </div>
+                            <span style="font-size:9px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="['ready','released'].includes(selectedTrackerReq?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Ready</span>
+                        </div>
+
+                        {{-- Step 4: Released --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="selectedTrackerReq?.status === 'released' ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="selectedTrackerReq?.status === 'released' ? 'fa-check' : 'fa-box-open'"></i>
+                            </div>
+                            <span style="font-size:9px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="selectedTrackerReq?.status === 'released' ? 'color:var(--text);' : 'color:#94a3b8;'">Released</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Pickup Details Card --}}
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+                    <div style="font-size:10.5px;font-weight:800;color:#1e40af;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-building"></i> Barangay Office Pickup Schedule:
+                    </div>
+                    <div style="font-size:11px;color:#1e3a8a;line-height:1.55;">
+                        <div><strong>Hours:</strong> 8:00 AM – 5:00 PM (Monday to Friday, Fixed Office Hours)</div>
+                        <div x-show="selectedTrackerReq?.pickup_date">
+                            <strong>Date Assigned:</strong> <span style="color:#0E5393;font-weight:800;" x-text="selectedTrackerReq?.pickup_date"></span>
+                        </div>
+                        <div x-show="selectedTrackerReq?.personnel_in_charge">
+                            <strong>Duty Personnel:</strong> <span x-text="selectedTrackerReq?.personnel_in_charge"></span>
+                        </div>
+                        <div x-show="selectedTrackerReq?.alternate_personnel">
+                            <strong>Alternate Personnel:</strong> <span x-text="selectedTrackerReq?.alternate_personnel"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <template x-if="selectedTrackerReq?.status === 'disapproved' && selectedTrackerReq?.disapproval_reason">
+                    <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#dc2626;font-weight:700;">
+                        <i class="fas fa-exclamation-circle"></i> Reason for Disapproval: <span x-text="selectedTrackerReq?.disapproval_reason"></span>
+                    </div>
+                </template>
+
+                <div style="display:flex;justify-content:flex-end;">
+                    <button type="button" @click="trackerModal=false" class="btn-plain btn-ghost" style="font-size:11px;padding:6px 16px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {{-- ══ FAQs MODAL ══ --}}
     <div x-show="faqModal" x-cloak class="modal-ov" x-transition>
         <div class="modal-box" style="max-width:520px;" @click.away="faqModal=false">
@@ -2714,6 +3018,16 @@ html, body {
                                         previewModal: false,
                                         handleFileSelect(e) {
                                              const files = Array.from(e.target.files || []);
+                                             for (let f of files) {
+                                                 if (f.size > 5 * 1024 * 1024) {
+                                                     alert('Ang file "' + f.name + '" ay lampas sa 5MB (' + (f.size / 1024 / 1024).toFixed(1) + 'MB)! Ang maximum allowed size ay 5MB bawat file.');
+                                                     this.evFiles = [];
+                                                     this.previewUrl = null;
+                                                     this.previewName = '';
+                                                     this.$refs.evidenceInput.value = '';
+                                                     return;
+                                                 }
+                                             }
                                              this.evFiles = files;
                                              if (files.length > 0 && files[0].type.startsWith('image/')) {
                                                  this.previewUrl = URL.createObjectURL(files[0]);
@@ -2731,7 +3045,7 @@ html, body {
                                              this.$refs.evidenceInput.value = '';
                                         }
                                      }">
-                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Proof / Evidence (Optional)</label>
+                                    <label class="flbl" style="font-size:10.5px; font-weight:700; color:#334155; margin-bottom:4px;">Proof / Evidence (Optional) <span style="font-size:9px;color:var(--brand);font-weight:700;">— Max: 5MB bawat file (JPG, PNG, PDF)</span></label>
                                     
                                     {{-- Responsive upload box matching inputs --}}
                                     <div @click="evFiles.length > 0 && previewUrl ? previewModal = true : $refs.evidenceInput.click()" 
@@ -3211,12 +3525,12 @@ html, body {
                         </div>
                         @if($canUpdatePhoto)
                         <button style="position:absolute;bottom:-4px;right:-4px;background:var(--brand);color:#fff;border:none;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,0.3);z-index:10;"
-                                @click="warningType='profile'; warningNextDate='{{ now()->addMonths(6)->format('M d, Y') }}'; photoWarningModal=true;" title="Change Profile Picture">
+                                @click="warningType='profile'; warningNextDate='{{ now()->addMonths(6)->format('M d, Y') }}'; photoWarningModal=true;" title="Change Profile Picture (Max: 5MB)">
                             <i class="fas fa-camera" style="font-size:11px;"></i>
                         </button>
                         <form id="profilePhotoForm" action="{{ route('resident.profile.photo') }}" method="POST" enctype="multipart/form-data" style="display:none;">
                             @csrf
-                            <input type="file" name="photo" id="profilePhotoInput" accept="image/*" @change="document.getElementById('profilePhotoForm').submit()">
+                            <input type="file" name="photo" id="profilePhotoInput" accept="image/*" @change="if($event.target.files.length){ const f=$event.target.files[0]; if(f.size > 5*1024*1024){ alert('Masyadong malaki ang larawan ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.'); $event.target.value=''; return; } document.getElementById('profilePhotoForm').submit(); }">
                         </form>
                         @endif
                     </div>
@@ -3471,7 +3785,7 @@ html, body {
                                                     <i class="fas fa-camera" style="font-size:10px;"></i>
                                                 </button>
                                                 <input type="file" name="pet_photo" id="petPhotoInput" style="display:none;" accept="image/*"
-                                                       @change="const f=$event.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>petPhotoPreview=e.target.result; r.readAsDataURL(f); }">
+                                                       @change="const f=$event.target.files[0]; if(f){ if(f.size > 5*1024*1024){ alert('File exceeds 5MB limit. Please upload an image under 5MB.'); $event.target.value=''; return; } const r=new FileReader(); r.onload=e=>petPhotoPreview=e.target.result; r.readAsDataURL(f); }">
                                             </div>
                                             <div>
                                                 <div style="font-size:15px;font-weight:900;color:var(--text);" x-text="editingPet.pet_name"></div>
@@ -3521,8 +3835,9 @@ html, body {
                                             </select>
                                             
                                             <div x-show="vStatusUpdate === 'pending'" style="margin-top:10px;">
-                                                <label class="flbl">Upload Vaccine Proof *</label>
-                                                <input type="file" name="vaccine_proof" class="finput" accept="image/*,.pdf" :required="vStatusUpdate === 'pending'">
+                                                <label class="flbl">Upload Vaccine Proof * <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB — JPG, PNG, PDF)</span></label>
+                                                <input type="file" name="vaccine_proof" class="finput" accept="image/*,.pdf" :required="vStatusUpdate === 'pending'"
+                                                       @change="if($event.target.files[0] && $event.target.files[0].size > 5*1024*1024){ alert('File exceeds 5MB limit. Please upload a file under 5MB.'); $event.target.value=''; }">
                                                 <p style="font-size:8px;color:var(--muted);margin-top:4px;">New proof will be reviewed by the office.</p>
                                             </div>
                                         </div>
@@ -3624,12 +3939,20 @@ html, body {
                     <div style="margin-bottom:18px;">
                         <label class="flbl" style="font-size:10.5px; font-weight:800; color:#1e293b; margin-bottom:6px; display:block;">
                             2. Upload Photo of ID / Document <span style="color:#e11d48;">*</span>
+                            <span style="font-size:9.5px;color:var(--brand);font-weight:700;margin-left:6px;">(Max: 5MB — JPG, PNG, WEBP)</span>
                         </label>
                         <input type="file" name="voter_id_photo" x-ref="idModalFileInput" id="idModalFileInput" required accept="image/*" style="display:none;" 
                                @change="if($event.target.files[0]) {
+                                   let f = $event.target.files[0];
+                                   if(f.size > 5*1024*1024){
+                                       alert('Masyadong malaki ang litrato ng ID ('+(f.size/1024/1024).toFixed(1)+'MB)! Ang maximum allowed size ay 5MB lamang.');
+                                       $event.target.value='';
+                                       idPreviewUrl=null;
+                                       return;
+                                   }
                                    let reader = new FileReader();
                                    reader.onload = (e) => { idPreviewUrl = e.target.result; };
-                                   reader.readAsDataURL($event.target.files[0]);
+                                   reader.readAsDataURL(f);
                                }">
 
                         <div @click="$refs.idModalFileInput.click()" 
@@ -3685,13 +4008,13 @@ html, body {
                     <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;">
                         {{-- Pet Photo --}}
                         <div style="flex-shrink:0;" x-data="{ isDragging: false }">
-                            <label class="flbl">Pet Photo (1x1)</label>
+                            <label class="flbl">Pet Photo (1x1) <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB)</span></label>
                             <label style="cursor:pointer;display:block;">
                                 <div style="width:70px;height:70px;border-radius:10px;background:#f8fafc;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;"
                                      :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
                                      @dragover.prevent="isDragging = true"
                                      @dragleave.prevent="isDragging = false"
-                                     @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.petPhotoInput.files = $event.dataTransfer.files; $refs.petPhotoInput.dispatchEvent(new Event('change')); }">
+                                     @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 5*1024*1024){ alert('File exceeds 5MB limit. Please upload an image under 5MB.'); return; } $refs.petPhotoInput.files = $event.dataTransfer.files; $refs.petPhotoInput.dispatchEvent(new Event('change')); }">
                                     <template x-if="petPhotoPreview">
                                         <img :src="petPhotoPreview" style="width:100%;height:100%;object-fit:cover;">
                                     </template>
@@ -3703,7 +4026,7 @@ html, body {
                                     </template>
                                 </div>
                                 <input type="file" name="pet_photo" x-ref="petPhotoInput" accept="image/*" style="display:none;" 
-                                       @change="const f=$event.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>petPhotoPreview=e.target.result; r.readAsDataURL(f) }">
+                                       @change="const f=$event.target.files[0]; if(f){ if(f.size > 5*1024*1024){ alert('File exceeds 5MB limit. Please upload an image under 5MB.'); $event.target.value=''; return; } const r=new FileReader(); r.onload=e=>petPhotoPreview=e.target.result; r.readAsDataURL(f) }">
                             </label>
                         </div>
                         <div style="flex:1;">
@@ -3743,13 +4066,13 @@ html, body {
                             <option value="pending">Vaccinated (Need Verification)</option>
                         </select>
                         <div x-show="vStatus === 'pending'" x-transition style="margin-top:10px;" x-data="{ isDragging: false }">
-                            <label class="flbl">Upload Vaccine Proof (Card/Record) *</label>
+                            <label class="flbl">Upload Vaccine Proof (Card/Record) * <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB — JPG, PNG, PDF)</span></label>
                             <label style="cursor:pointer;display:block;">
                                 <div style="height:100px;border-radius:10px;background:#f8fafc;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;"
                                      :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
                                      @dragover.prevent="isDragging = true"
                                      @dragleave.prevent="isDragging = false"
-                                     @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.vaccineInput.files = $event.dataTransfer.files; $refs.vaccineInput.dispatchEvent(new Event('change')); }">
+                                     @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 5*1024*1024){ alert('File exceeds 5MB limit. Please upload a file under 5MB.'); return; } $refs.vaccineInput.files = $event.dataTransfer.files; $refs.vaccineInput.dispatchEvent(new Event('change')); }">
                                     <template x-if="vaccineProofPreview">
                                         <img :src="vaccineProofPreview" style="width:100%;height:100%;object-fit:contain;">
                                     </template>
@@ -3761,7 +4084,7 @@ html, body {
                                     </template>
                                 </div>
                                 <input type="file" name="vaccine_proof" x-ref="vaccineInput" accept="image/*,.pdf" style="display:none;" :required="vStatus === 'pending'"
-                                       @change="const f=$event.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>vaccineProofPreview=e.target.result; r.readAsDataURL(f) }">
+                                       @change="const f=$event.target.files[0]; if(f){ if(f.size > 5*1024*1024){ alert('File exceeds 5MB limit. Please upload a file under 5MB.'); $event.target.value=''; return; } const r=new FileReader(); r.onload=e=>vaccineProofPreview=e.target.result; r.readAsDataURL(f) }">
                             </label>
                             <p style="font-size:8px;color:var(--muted);margin-top:5px;"><i class="fas fa-info-circle"></i> The status will remain 'Pending' until the office verifies the record.</p>
                         </div>
@@ -4214,6 +4537,47 @@ html, body {
                                 <strong style="color:#9f1239;text-transform:uppercase;letter-spacing:0.3px;" x-text="t('sos_advisory_title')">⚠️ IMPORTANT REMINDER:</strong><br>
                                 <span x-text="t('sos_advisory_desc')">Emergency SOS is strictly for genuine emergencies within the territorial jurisdiction of Barangay San Miguel II. On-duty Tanod patrols can only respond within our barangay. If an accident or emergency occurs in another barangay or city, please call 911, PNP, or the respective local emergency hotline immediately.</span><br>
                                 <span style="font-size:10px;color:#be123c;display:block;margin-top:3px;" x-text="t('sos_advisory_penalty')">Pranks or false alarms are strictly prohibited and punishable by law.</span>
+                            </div>
+                        </div>
+
+                        {{-- ONE-TAP DIRECT EMERGENCY HOTLINES --}}
+                        <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:11px 13px; margin-bottom:14px; box-shadow:0 2px 8px rgba(22,101,52,0.06);">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                <div style="font-size:10.5px; font-weight:900; color:#14532d; display:flex; align-items:center; gap:5px; text-transform:uppercase;">
+                                    <i class="fas fa-phone-volume" style="color:#16a34a;"></i>
+                                    <span>Direct Emergency Hotlines (One-Tap Call)</span>
+                                </div>
+                                <span style="font-size:8.5px; font-weight:900; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:99px; letter-spacing:0.04em;">24/7 ACTIVE</span>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
+                                <a href="tel:0464160283" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
+                                    <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-shield-alt"></i></div>
+                                    <div style="overflow:hidden;line-height:1.2;">
+                                        <div style="font-size:8.5px;color:#15803d;font-weight:700;">Brgy. SM2 Tanod Desk</div>
+                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0283</div>
+                                    </div>
+                                </a>
+                                <a href="tel:09175432100" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #86efac; padding:7px 9px; border-radius:8px; color:#14532d; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#fff'">
+                                    <div style="width:24px;height:24px;border-radius:6px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-mobile-alt"></i></div>
+                                    <div style="overflow:hidden;line-height:1.2;">
+                                        <div style="font-size:8.5px;color:#15803d;font-weight:700;">Desk Officer Mobile</div>
+                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">0917-543-2100</div>
+                                    </div>
+                                </a>
+                                <a href="tel:0464160278" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #93c5fd; padding:7px 9px; border-radius:8px; color:#1e3a8a; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'">
+                                    <div style="width:24px;height:24px;border-radius:6px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-building-shield"></i></div>
+                                    <div style="overflow:hidden;line-height:1.2;">
+                                        <div style="font-size:8.5px;color:#1d4ed8;font-weight:700;">Dasma PNP Police</div>
+                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">(046) 416-0278</div>
+                                    </div>
+                                </a>
+                                <a href="tel:911" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #fca5a5; padding:7px 9px; border-radius:8px; color:#7f1d1d; font-weight:800; font-size:10.5px; transition:all .15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
+                                    <div style="width:24px;height:24px;border-radius:6px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;"><i class="fas fa-ambulance"></i></div>
+                                    <div style="overflow:hidden;line-height:1.2;">
+                                        <div style="font-size:8.5px;color:#b91c1c;font-weight:700;">CDRRMO / Rescue</div>
+                                        <div style="font-family:monospace;font-size:10.5px;font-weight:900;">911 / 481-8000</div>
+                                    </div>
+                                </a>
                             </div>
                         </div>
 

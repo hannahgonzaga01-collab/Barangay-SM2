@@ -72,6 +72,7 @@ class RegisteredUserController extends Controller
             'password.min' => 'Password must be at least 8 characters.',
             'password.max' => 'Password must not exceed 16 characters.',
             'password.not_regex' => 'Password must be one word and cannot contain spaces.',
+            'voter_id_photo.max' => 'Ang ID / patunay ay hindi dapat lumagpas sa 5MB (Max: 5MB).',
         ]);
 
         // Build full name

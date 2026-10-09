@@ -90,6 +90,8 @@ function officePortal() {
         docFilter: 'all',
         docStatusFilter: 'all',
         masterlistSubView: 'active',
+        masterlistPage: 1,
+        masterlistPerPage: 25,
         searchArchivedRes: '',
         filterArchivedResGender: '',
         filterArchivedResClass: '',
@@ -242,6 +244,23 @@ function officePortal() {
             else if (this.activeFilter === 'kdbm') list = list.filter(r => r.memberships && r.memberships.includes('KDBM'));
             else if (this.activeFilter === 'any_membership') list = list.filter(r => r.memberships && r.memberships.length > 0);
             return list;
+        },
+        get totalMasterlistPages() {
+            return Math.max(1, Math.ceil(this.filteredResidents.length / this.masterlistPerPage));
+        },
+        get paginatedResidents() {
+            const maxPage = this.totalMasterlistPages;
+            if (this.masterlistPage > maxPage) {
+                this.masterlistPage = 1;
+            }
+            const start = (this.masterlistPage - 1) * this.masterlistPerPage;
+            return this.filteredResidents.slice(start, start + this.masterlistPerPage);
+        },
+        setMasterlistPage(page) {
+            const maxPage = this.totalMasterlistPages;
+            if (page >= 1 && page <= maxPage) {
+                this.masterlistPage = page;
+            }
         },
         selectSuggestion(r) {
             this.searchQuery = r.name;

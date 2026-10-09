@@ -171,11 +171,57 @@ class PeaceController extends Controller
         return redirect()->back()->with('success', 'Patrol Schedule for ' . $validated['team_name'] . ' officially recorded.');
     }
 
+    public function updatePatrol(Request $request, $id)
+    {
+        $patrol = PatrolSchedule::findOrFail($id);
+
+        $validated = $request->validate([
+            'team_name'          => 'required|string|max:50',
+            'personnel_names'    => 'required|string|max:255',
+            'schedule_date'      => 'required|date',
+            'patrol_time'        => 'nullable|string|max:100',
+            'status'             => 'nullable|string|max:50',
+        ]);
+
+        $patrol->update($validated);
+
+        return redirect()->back()->with('success', 'Tanod Patrol Schedule updated successfully and synced with the main portal.');
+    }
+
+    public function updateQuickDuty(Request $request)
+    {
+        $validated = $request->validate([
+            'team_name'       => 'required|string|max:50',
+            'personnel_names' => 'required|string|max:255',
+            'schedule_date'   => 'nullable|date',
+        ]);
+
+        $date = $validated['schedule_date'] ?: now()->toDateString();
+
+        PatrolSchedule::updateOrCreate(
+            [
+                'team_name'     => $validated['team_name'],
+                'schedule_date' => $date,
+            ],
+            [
+                'title'           => 'DAILY TANOD DUTY ROSTER',
+                'personnel_names' => $validated['personnel_names'],
+                'patrol_time'     => '8:00 PM - 4:00 AM',
+                'status'          => 'Scheduled',
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Today\'s Tanod Duty Schedule successfully posted to the main page.');
+    }
+
     public function updatePatrolProof(Request $request, $id)
     {
         $request->validate([
             'roving_photo' => 'required|array|min:1|max:6',
             'roving_photo.*' => 'image|max:5120',
+        ], [
+            'roving_photo.max' => 'Hanggang 6 na larawan lamang ang maaaring i-upload.',
+            'roving_photo.*.max' => 'Ang bawat larawan ay hindi dapat lumagpas sa 5MB.',
         ]);
 
         $patrol = PatrolSchedule::findOrFail($id);

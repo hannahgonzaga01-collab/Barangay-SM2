@@ -209,6 +209,7 @@
                 {{-- Status Dropdown Filter --}}
                 <select x-model="docStatusFilter" class="fselect" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:8px; border:1.5px solid var(--border); background:#fff; color:var(--text); outline:none; cursor:pointer; width:auto;">
                     <option value="all">🔍 Active Requests</option>
+                    <option value="overdue">⚠️ Overdue (> 48h)</option>
                     <option value="pending">⏳ Pending</option>
                     <option value="processing">🔄 Processing</option>
                     <option value="ready">✅ Ready for Pickup</option>
@@ -284,13 +285,15 @@
                         $isToday = $req->appointment_date === date('Y-m-d');
                         $isFuture = $req->appointment_date > date('Y-m-d');
                         $isOldReleased = $req->status === 'released' && $req->updated_at && $req->updated_at < now()->subDays(30);
+                        $isOverdue = $req->status === 'pending' && $req->created_at < now()->subHours(48);
                     @endphp
                     <tr id="doc-req-{{ $req->id }}" 
                         x-show="(docFilter==='all' || (docFilter==='today' && '{{ $isToday ? '1':'0' }}' === '1')) && (
                             (docStatusFilter==='all' && '{{ $isOldReleased ? '1':'0' }}' === '0') ||
+                            (docStatusFilter==='overdue' && '{{ $isOverdue ? '1':'0' }}' === '1') ||
                             (docStatusFilter==='released' && '{{ $req->status==='released' && !$isOldReleased ? '1':'0' }}' === '1') ||
                             (docStatusFilter==='released_archive' && '{{ $isOldReleased ? '1':'0' }}' === '1') ||
-                            (docStatusFilter==='{{ $req->status }}' && docStatusFilter!=='released' && docStatusFilter!=='all' && docStatusFilter!=='released_archive')
+                            (docStatusFilter==='{{ $req->status }}' && docStatusFilter!=='released' && docStatusFilter!=='all' && docStatusFilter!=='released_archive' && docStatusFilter!=='overdue')
                         )"
                         style="transition: background-color 0.5s;">
                         <td data-label="Resident">
@@ -322,6 +325,9 @@
                         </td>
                         <td data-label="Document">
                             <div style="font-size:11px;font-weight:800;color:var(--text);">{{ ucwords(str_replace('_',' ',$req->document_type)) }}</div>
+                            <div style="font-family:monospace;font-size:9.5px;color:var(--brand);font-weight:800;letter-spacing:0.3px;margin-top:1px;">
+                                REQ-{{ $req->created_at->format('Y') }}-{{ str_pad($req->id, 5, '0', STR_PAD_LEFT) }}
+                            </div>
                             @if($req->claimant_type === 'authorized')
                                 <div style="margin-top:4px;">
                                     <span style="font-size:8px;background:#eff6ff;color:#1e40af;padding:1px 6px;border-radius:99px;font-weight:800;" title="Relationship: {{ $req->claimant_relation }}">
@@ -367,15 +373,22 @@
                         </td>
                         <td data-label="Status">
                             @if($req->status === 'pending')
-                                <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;">
-                                    @csrf @method('PATCH')
-                                    <input type="hidden" name="status" value="processing">
-                                    <button type="submit" 
-                                            title="Click to advance status: Pending ➡️ Processing"
-                                            style="font-size:9.5px;font-weight:900;background:#fef3c7;color:#b45309;border:1.5px solid #fde68a;padding:4px 10px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .18s;box-shadow:0 1px 3px rgba(180,83,9,0.12);white-space:nowrap;">
-                                        <i class="fas fa-hourglass-half"></i> <span>Pending</span> <i class="fas fa-arrow-right" style="font-size:7px;opacity:0.7;"></i>
-                                    </button>
-                                </form>
+                                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;">
+                                    <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="status" value="processing">
+                                        <button type="submit" 
+                                                title="Click to advance status: Pending ➡️ Processing"
+                                                style="font-size:9.5px;font-weight:900;background:#fef3c7;color:#b45309;border:1.5px solid #fde68a;padding:4px 10px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .18s;box-shadow:0 1px 3px rgba(180,83,9,0.12);white-space:nowrap;">
+                                            <i class="fas fa-hourglass-half"></i> <span>Pending</span> <i class="fas fa-arrow-right" style="font-size:7px;opacity:0.7;"></i>
+                                        </button>
+                                    </form>
+                                    @if($isOverdue)
+                                        <span style="font-size:7.5px;background:#ef4444;color:#fff;padding:1px 6px;border-radius:4px;font-weight:900;display:inline-flex;align-items:center;gap:3px;" title="This request has been pending for over 48 hours without action">
+                                            <i class="fas fa-exclamation-circle"></i> OVERDUE
+                                        </span>
+                                    @endif
+                                </div>
                             @elseif($req->status === 'processing')
                                 <button type="button" 
                                         @click="showReadyModal = true; selectedReq = { id: {{ $req->id }}, type: '{{ ucwords(str_replace('_',' ',$req->document_type)) }}', name: '{{ addslashes($displayName) }}', date: '{{ $req->appointment_date ?? date('Y-m-d') }}', time: '{{ $req->appointment_time ? \Carbon\Carbon::parse($req->appointment_time)->format('H:i') : '08:00' }}' }"
@@ -470,16 +483,16 @@
                                 
                                 @if($isOldReleased || in_array($req->status, ['released', 'disapproved']))
                                     <form action="{{ route('office.document.destroy', $req->id) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang request record na ito? Hindi na ito maibabalik.');">
+                                          onsubmit="return confirm('Kumpirmahin: Nais mo bang i-archive ang request record na ito?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="tbl-btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;width:auto;padding:0 8px;font-size:9.5px;gap:3px;" title="Delete this record">
-                                            <i class="fas fa-trash-alt"></i> Delete
+                                        <button type="submit" class="tbl-btn" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;width:auto;padding:0 8px;font-size:9.5px;gap:3px;" title="Archive this record">
+                                            <i class="fas fa-archive"></i> Archive
                                         </button>
                                     </form>
                                 @endif
                                 
-                                @if(!in_array($req->status, ['released', 'disapproved']))
+                                @if(in_array($req->status, ['pending', 'processing']))
                                     <div x-data="{ showDisapprove: false, reasonSelect: '', reasonCustom: '' }" style="display:inline;">
                                         <button @click="showDisapprove = !showDisapprove" type="button" class="tbl-btn" style="background:#fee2e2;color:var(--danger);width:auto;padding:0 8px;font-size:9px;gap:3px;" title="Disapprove Request">
                                             <i class="fas fa-times"></i> Disapprove

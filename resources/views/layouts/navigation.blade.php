@@ -4,15 +4,15 @@
         <div class="flex justify-between h-14">
 
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-3">
+                <a href="{{ url('/') }}" class="flex items-center gap-3 transition-opacity hover:opacity-90" title="Barangay San Miguel II">
                     <img src="{{ asset('images/circlelogo.png') }}"
-                         class="h-9 w-9 rounded-full object-contain border-2"
-                         style="border-color:rgba(255,255,255,.4);"
+                         class="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-contain border-2 shadow-sm"
+                         style="border-color:rgba(255,255,255,.45);"
                          onerror="this.style.display='none'">
-                    <span class="font-black text-white text-sm uppercase tracking-widest hidden sm:block">
+                    <span class="font-black text-white text-sm sm:text-base uppercase tracking-widest hidden sm:block">
                         Brgy. San Miguel II
                     </span>
-                </div>
+                </a>
             </div>
 
             @auth

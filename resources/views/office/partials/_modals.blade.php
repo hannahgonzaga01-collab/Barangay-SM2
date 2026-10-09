@@ -21,18 +21,22 @@
                     <label class="flbl">Scheduled Pickup Date *</label>
                     <input type="date" name="pickup_date" x-model="selectedReq.date" required class="finput" :min="new Date().toISOString().split('T')[0]">
                 </div>
+                <div class="fgrp">
+                    <label class="flbl">Pickup Schedule Window</label>
+                    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-clock" style="color:#0E5393;"></i>
+                        <span>8:00 AM – 5:00 PM (Barangay Hall Office Hours)</span>
+                    </div>
+                    <input type="hidden" name="pickup_time" value="08:00:00">
+                </div>
                 <div class="fgrid2">
                     <div class="fgrp">
-                        <label class="flbl">Pickup Time *</label>
-                        <input type="time" name="pickup_time" x-model="selectedReq.time" required class="finput">
+                        <label class="flbl">Personnel in Charge *</label>
+                        <input type="text" name="personnel_in_charge" :value="docIssuedBy || '{{ Auth::user() ? trim(Auth::user()->first_name . ' ' . Auth::user()->last_name) : 'Barangay Duty Staff' }}'" required class="finput" placeholder="e.g. Secretary Name">
                     </div>
                     <div class="fgrp">
-                        <label class="flbl">Personnel in Charge *</label>
-                        <input type="text" name="personnel_in_charge" required class="finput" placeholder="e.g. Secretary Name">
-                    </div>
-                    <div class="fspan2 fgrp" style="margin-top:-6px;">
                         <label class="flbl">Alternate Personnel (Optional)</label>
-                        <input type="text" name="alternate_personnel" class="finput" placeholder="e.g. Any available staff (Barangay San Miguel II Hall, Dasmariñas City, Cavite)">
+                        <input type="text" name="alternate_personnel" class="finput" placeholder="e.g. Kagawad on Duty / Any staff">
                     </div>
                 </div>
                 
@@ -319,8 +323,8 @@ $docConfigs = [
 
                         <div class="fgrid2" style="gap:10px; margin-bottom:12px;">
                             <div>
-                                <label class="flbl"><i class="fas fa-image"></i> Upload Official Letterhead / Template Image (PNG/JPG)</label>
-                                <input type="file" name="custom_bg" accept="image/png,image/jpeg,image/jpg" class="finput" style="padding:5px;">
+                                <label class="flbl"><i class="fas fa-image"></i> Upload Official Letterhead / Template Image <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB — PNG, JPG)</span></label>
+                                <input type="file" name="custom_bg" accept="image/png,image/jpeg,image/jpg" class="finput" style="padding:5px;" onchange="if(this.files[0] && this.files[0].size > 5*1024*1024){ alert('File exceeds 5MB limit. Please upload an image under 5MB.'); this.value=''; }">
                                 @if(!empty($curTpl['custom_bg_path']))
                                     <div style="font-size:9px; color:#15803d; margin-top:3px; display:flex; align-items:center; gap:4px;">
                                         <i class="fas fa-check"></i> Uploaded header/background: <a href="{{ asset('storage/'.$curTpl['custom_bg_path']) }}" target="_blank" style="text-decoration:underline; font-weight:700;">View Letterhead</a>
@@ -382,12 +386,12 @@ $docConfigs = [
                     <p style="text-indent:40px;margin-top:6px;">This certification is being issued upon request of <strong><span x-text="docOwnerName||'______________________________'"></span></strong> for <strong><span x-text="docPurpose||'______________________________'"></span></strong> purpose only.</p>
                     @elseif($doc['body']==='clearance')
                     <div style="overflow:hidden;">
-                        <label style="float:right;cursor:pointer;margin-left:12px;" title="Click to upload photo">
+                        <label style="float:right;cursor:pointer;margin-left:12px;" title="Click to upload photo (Max: 5MB)">
                             <div style="border:1px solid #000;border-radius:8px;width:78px;height:88px;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;position:relative;background:#f5f5f5;">
                                 <img x-show="docClearancePhoto" :src="docClearancePhoto" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">
-                                <div x-show="!docClearancePhoto" style="text-align:center;font-size:8px;color:#999;">📷<br>Upload</div>
+                                <div x-show="!docClearancePhoto" style="text-align:center;font-size:8px;color:#999;">📷<br>Upload<br><span style="font-size:7px;">(Max 5MB)</span></div>
                             </div>
-                            <input type="file" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f){const r=new FileReader();r.onload=e=>docClearancePhoto=e.target.result;r.readAsDataURL(f)}">
+                            <input type="file" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f){ if(f.size > 5*1024*1024){ alert('File exceeds 5MB limit.'); $event.target.value=''; return; } const r=new FileReader();r.onload=e=>docClearancePhoto=e.target.result;r.readAsDataURL(f)}">
                         </label>
                         <p>To whom it may concern,</p>
                         <p style="text-indent:30px;">This is to certify that the person whose name, picture, signature and thumb mark appear below has requested a Barangay Clearance from this office.</p>
@@ -1053,23 +1057,23 @@ $docConfigs = [
                     <div style="display:flex;gap:15px;margin-bottom:15px;align-items:flex-start;">
                         {{-- Pet Photo --}}
                         <div style="flex-shrink:0;" x-data="{ isDragging: false }">
-                            <label class="flbl">Pet Photo (1x1)</label>
+                            <label class="flbl">Pet Photo (1x1) <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB)</span></label>
                             <label class="photo-up" style="width:100px;height:100px;border-radius:12px;"
                                    :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
                                    @dragover.prevent="isDragging = true"
                                    @dragleave.prevent="isDragging = false"
-                                   @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.petPhotoInput.files = $event.dataTransfer.files; $refs.petPhotoInput.dispatchEvent(new Event('change')); }">
+                                   @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 5*1024*1024){ alert('File exceeds 5MB limit.'); return; } $refs.petPhotoInput.files = $event.dataTransfer.files; $refs.petPhotoInput.dispatchEvent(new Event('change')); }">
                                 <template x-if="petPhotoPreview">
                                     <img :src="petPhotoPreview" style="width:100%;height:100%;object-fit:cover;">
                                 </template>
                                 <template x-if="!petPhotoPreview">
                                     <div style="text-align:center;">
                                         <i class="fas fa-camera" style="font-size:20px;color:var(--light);margin-bottom:4px;"></i>
-                                        <div style="font-size:8px;font-weight:800;color:var(--light);text-transform:uppercase;">Click or Drag</div>
+                                        <div style="font-size:8px;font-weight:800;color:var(--light);text-transform:uppercase;">Click or Drag<br>(Max 5MB)</div>
                                     </div>
                                 </template>
                                 <input type="file" name="pet_photo" x-ref="petPhotoInput" accept="image/*" style="display:none;" 
-                                       @change="const f=$event.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>petPhotoPreview=e.target.result; r.readAsDataURL(f) }">
+                                       @change="const f=$event.target.files[0]; if(f){ if(f.size > 5*1024*1024){ alert('File exceeds 5MB limit.'); $event.target.value=''; return; } const r=new FileReader(); r.onload=e=>petPhotoPreview=e.target.result; r.readAsDataURL(f) }">
                             </label>
                         </div>
                         <div style="flex:1;">
@@ -1101,14 +1105,14 @@ $docConfigs = [
                     </div>
 
                     <div class="fgrp">
-                        <label class="flbl">Vaccination Record</label>
+                        <label class="flbl">Vaccination Record <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB — JPG, PNG, PDF)</span></label>
                         <div style="display:flex; gap:10px; align-items:flex-start;">
                             <label class="photo-up" style="width:120px; height:50px; border-radius:8px; border-style:dashed; flex-shrink:0;"
                                    x-data="{ isDragging: false }"
                                    :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
                                    @dragover.prevent="isDragging = true"
                                    @dragleave.prevent="isDragging = false"
-                                   @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.vaccineInput.files = $event.dataTransfer.files; $refs.vaccineInput.dispatchEvent(new Event('change')); }">
+                                   @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 5*1024*1024){ alert('File exceeds 5MB limit.'); return; } $refs.vaccineInput.files = $event.dataTransfer.files; $refs.vaccineInput.dispatchEvent(new Event('change')); }">
                                 <template x-if="vaccineProofPreview">
                                     <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--success);color:#fff;font-size:9px;font-weight:900;">
                                         <i class="fas fa-check-circle" style="margin-right:4px;"></i> SELECTED
@@ -1121,7 +1125,7 @@ $docConfigs = [
                                     </div>
                                 </template>
                                 <input type="file" name="vaccine_proof" x-ref="vaccineInput" accept="image/*,application/pdf" style="display:none;" 
-                                       @change="const f=$event.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>vaccineProofPreview=e.target.result; r.readAsDataURL(f) }">
+                                       @change="const f=$event.target.files[0]; if(f){ if(f.size > 5*1024*1024){ alert('File exceeds 5MB limit.'); $event.target.value=''; return; } const r=new FileReader(); r.onload=e=>vaccineProofPreview=e.target.result; r.readAsDataURL(f) }">
                             </label>
                             <div style="flex:1;">
                                 <select name="vaccination_status" class="finput fselect">
@@ -1166,10 +1170,10 @@ $docConfigs = [
                          @click="$refs.importInput.click()"
                          @dragover.prevent="isDragging = true"
                          @dragleave.prevent="isDragging = false"
-                         @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.importInput.files = $event.dataTransfer.files; fileName = $refs.importInput.files[0].name; }">
+                         @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 10*1024*1024){ alert('File exceeds 10MB limit.'); return; } $refs.importInput.files = $event.dataTransfer.files; fileName = $refs.importInput.files[0].name; }">
                         <i class="fas fa-file-excel" style="font-size:24px; color:var(--brand); margin-bottom:8px;"></i>
                         <div style="font-size:12px; font-weight:700;" x-text="fileName || 'Click or Drag Excel/CSV File Here'"></div>
-                        <input type="file" name="file" x-ref="importInput" accept=".xlsx,.xls,.csv" required style="display:none;" @change="fileName = $event.target.files[0]?.name || ''">
+                        <input type="file" name="file" x-ref="importInput" accept=".xlsx,.xls,.csv" required style="display:none;" @change="if($event.target.files[0] && $event.target.files[0].size > 10*1024*1024){ alert('File exceeds 10MB limit.'); $event.target.value=''; fileName=''; return; } fileName = $event.target.files[0]?.name || ''">
                     </div>
                     <p style="font-size:10px;color:var(--light);margin-top:6px;"><i class="fas fa-info-circle"></i> Accepts .xlsx or .csv files up to 10MB.</p>
                 </div>
@@ -1200,11 +1204,11 @@ $docConfigs = [
                              :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
                              @dragover.prevent="isDragging = true"
                              @dragleave.prevent="isDragging = false"
-                             @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.addPhotoInput.files = $event.dataTransfer.files; $refs.addPhotoInput.dispatchEvent(new Event('change')); }">
+                             @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 5*1024*1024){ alert('Photo exceeds 5MB limit.'); return; } $refs.addPhotoInput.files = $event.dataTransfer.files; $refs.addPhotoInput.dispatchEvent(new Event('change')); }">
                             <img x-show="photoPreview" :src="photoPreview" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:11px;">
-                            <div x-show="!photoPreview" style="text-align:center;position:relative;z-index:1;"><i class="fas fa-camera" style="font-size:20px;color:var(--light);display:block;margin-bottom:3px;"></i><span style="font-size:8px;font-weight:700;color:var(--light);text-transform:uppercase;">Click or Drag</span></div>
+                            <div x-show="!photoPreview" style="text-align:center;position:relative;z-index:1;"><i class="fas fa-camera" style="font-size:20px;color:var(--light);display:block;margin-bottom:3px;"></i><span style="font-size:8px;font-weight:700;color:var(--light);text-transform:uppercase;">Click or Drag<br>(Max 5MB)</span></div>
                         </div>
-                        <input type="file" name="photo" x-ref="addPhotoInput" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f){const reader=new FileReader();reader.onload=function(ev){photoPreview=ev.target.result;};reader.readAsDataURL(f);}">
+                        <input type="file" name="photo" x-ref="addPhotoInput" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f){ if(f.size > 5*1024*1024){ alert('Photo exceeds 5MB limit.'); $event.target.value=''; return; } const reader=new FileReader();reader.onload=function(ev){photoPreview=ev.target.result;};reader.readAsDataURL(f);}">
                     </label>
                 </div>
                 <div style="display:grid;grid-template-columns:2fr 1fr 2fr 1fr;gap:11px;margin-bottom:12px;">
@@ -1302,11 +1306,11 @@ $docConfigs = [
                              :style="isDragging ? 'border-color:var(--brand); background:#eff6ff;' : ''"
                              @dragover.prevent="isDragging = true"
                              @dragleave.prevent="isDragging = false"
-                             @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.editPhotoInput.files = $event.dataTransfer.files; $refs.editPhotoInput.dispatchEvent(new Event('change')); }">
+                             @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 5*1024*1024){ alert('Photo exceeds 5MB limit.'); return; } $refs.editPhotoInput.files = $event.dataTransfer.files; $refs.editPhotoInput.dispatchEvent(new Event('change')); }">
                             <img x-show="editPhotoPreview" :src="editPhotoPreview" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:11px;">
-                            <div x-show="!editPhotoPreview" style="text-align:center;position:relative;z-index:1;"><i class="fas fa-camera" style="font-size:20px;color:var(--light);display:block;margin-bottom:3px;"></i><span style="font-size:8px;font-weight:700;color:var(--light);text-transform:uppercase;">Click or Drag</span></div>
+                            <div x-show="!editPhotoPreview" style="text-align:center;position:relative;z-index:1;"><i class="fas fa-camera" style="font-size:20px;color:var(--light);display:block;margin-bottom:3px;"></i><span style="font-size:8px;font-weight:700;color:var(--light);text-transform:uppercase;">Click or Drag<br>(Max 5MB)</span></div>
                         </div>
-                        <input type="file" name="photo" x-ref="editPhotoInput" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f){const reader=new FileReader();reader.onload=function(ev){editPhotoPreview=ev.target.result;};reader.readAsDataURL(f);}">
+                        <input type="file" name="photo" x-ref="editPhotoInput" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f){ if(f.size > 5*1024*1024){ alert('Photo exceeds 5MB limit.'); $event.target.value=''; return; } const reader=new FileReader();reader.onload=function(ev){editPhotoPreview=ev.target.result;};reader.readAsDataURL(f);}">
                     </label>
                 </div>
                 <div style="display:grid;grid-template-columns:2fr 1fr 2fr 1fr;gap:11px;margin-bottom:12px;">
@@ -1514,12 +1518,12 @@ $docConfigs = [
                     <div style="display:flex;gap:16px;align-items:flex-start;margin-top:2px;">
                         {{-- Left: 1x1 Photo + 1-Line ID Number (Top aligned with Resident Name) --}}
                         <div style="width:110px;flex-shrink:0;text-align:center;padding-top:13px;">
-                            <label style="cursor:pointer;" title="Click or Drag photo to upload" x-data="{ isDragging: false }">
+                            <label style="cursor:pointer;" title="Click or Drag photo to upload (Max: 5MB)" x-data="{ isDragging: false }">
                                 <div style="width:95px;height:95px;aspect-ratio:1/1;border:1px solid #000;border-radius:0;overflow:hidden;background:#e2e8f0;position:relative;display:flex;align-items:center;justify-content:center;margin:0 auto;"
                                      :style="isDragging ? 'border-color:#1a5276; background:#eff6ff;' : ''"
                                      @dragover.prevent="isDragging = true"
                                      @dragleave.prevent="isDragging = false"
-                                     @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ $refs.idPhotoInput.files = $event.dataTransfer.files; $refs.idPhotoInput.dispatchEvent(new Event('change')); }">
+                                     @drop.prevent="isDragging = false; if($event.dataTransfer.files[0]){ if($event.dataTransfer.files[0].size > 5*1024*1024){ alert('Photo exceeds 5MB limit.'); return; } $refs.idPhotoInput.files = $event.dataTransfer.files; $refs.idPhotoInput.dispatchEvent(new Event('change')); }">
                                     <template x-if="digitalIdResident && digitalIdResident.photo">
                                         <img :src="digitalIdResident.photo" style="width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;display:block;">
                                     </template>
@@ -1529,7 +1533,7 @@ $docConfigs = [
                                         </div>
                                     </template>
                                 </div>
-                                <input type="file" x-ref="idPhotoInput" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f&&digitalIdResident){const rd=new FileReader();rd.onload=e=>{digitalIdResident={...digitalIdResident,photo:e.target.result}};rd.readAsDataURL(f)}">
+                                <input type="file" x-ref="idPhotoInput" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f&&digitalIdResident){ if(f.size > 5*1024*1024){ alert('Photo exceeds 5MB limit.'); $event.target.value=''; return; } const rd=new FileReader();rd.onload=e=>{digitalIdResident={...digitalIdResident,photo:e.target.result}};rd.readAsDataURL(f)}">
                             </label>
                             <div style="font-size:7px;font-weight:900;color:#000;text-transform:uppercase;margin-top:3px;letter-spacing:0.04em;">BARANGAY ID NO.</div>
                             <div style="font-size:8.5px;font-weight:900;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;margin:1px auto 0;" x-text="digitalIdResident ? (digitalIdResident.digital_id_number || digitalIdResident.code) : 'BSM2-26-11-008'"></div>
@@ -1655,7 +1659,7 @@ $docConfigs = [
                     <div style="font-size:12px;font-weight:800;color:var(--text);" x-ref="customTemplateTxt">Click to select new template file</div>
                     <div style="font-size:9px;color:var(--muted);margin-top:4px;">Supported: PDF, XLSX, DOCX, PNG, JPG (Max: 15MB)</div>
                     <input type="file" x-ref="customTemplateInput" name="template_file" style="display:none;" required
-                           @change="$refs.customTemplateTxt.innerText = $event.target.files[0]?.name || 'File selected'">
+                           @change="const f=$event.target.files[0]; if(f){ if(f.size > 15*1024*1024){ alert('File exceeds 15MB limit.'); $event.target.value=''; $refs.customTemplateTxt.innerText='Click to select new template file'; return; } $refs.customTemplateTxt.innerText = f.name; }">
                 </div>
 
                 <div style="display:flex;justify-content:flex-end;gap:8px;">

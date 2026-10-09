@@ -269,8 +269,24 @@ class ResidentPortalController extends Controller
             return false;
         }) ?? $patrolSchedules->where('status', '!=', 'Completed')->first() ?? $patrolSchedules->first();
 
-        // Fetch Active Projects
-        $projects = \App\Models\Project::where('is_active', true)->latest()->get();
+        // Check if there is a specific patrol schedule created for today's date
+        $todaySpecificPatrol = $patrolSchedules->first(function($p) use ($todayDate) {
+            return !empty($p->schedule_date) && \Carbon\Carbon::parse($p->schedule_date)->toDateString() === $todayDate;
+        });
+
+        if ($todaySpecificPatrol) {
+            $activeTanodTeamName = $todaySpecificPatrol->team_name;
+            $activeTanodMembers  = $todaySpecificPatrol->personnel_names;
+            $activeTanodDays     = ($activeTanodTeamName === 'Team A') ? 'Monday, Wednesday, Friday' : 'Tuesday, Thursday, Saturday, Sunday';
+        }
+
+        // Check if current user has already availed First-Time Jobseeker certificate (RA 11261 Lifetime Limit)
+        $hasAvailedJobseeker = auth()->check()
+            ? \App\Models\DocumentRequest::where('user_id', auth()->id())
+                ->where('document_type', 'jobseeker')
+                ->whereIn('status', ['pending', 'processing', 'ready', 'released'])
+                ->exists()
+            : false;
 
         return view('resident.index', compact(
             'requests', 'digitalId', 'resident', 'issueReports', 'sosHistory',
@@ -278,7 +294,8 @@ class ResidentPortalController extends Controller
             'unreadNotifications', 'allNotifications',
             'carouselSlides', 'orgChartPath',
             'patrolSchedules', 'tanodSchedulesArray', 'activeTanodToday', 'projects',
-            'tanodTeams', 'tanodWeeklySchedule', 'activeTanodTeamName', 'activeTanodMembers', 'activeTanodDays'
+            'tanodTeams', 'tanodWeeklySchedule', 'activeTanodTeamName', 'activeTanodMembers', 'activeTanodDays',
+            'hasAvailedJobseeker'
         ));
     }
 
@@ -840,23 +857,34 @@ class ResidentPortalController extends Controller
                 'claimant_type' => 'required|in:self,authorized',
                 'authorization_letter' => 'exclude_unless:claimant_type,authorized|required|file|mimes:jpeg,png,jpg,pdf|max:5120',
                 'authorized_id' => 'exclude_unless:claimant_type,authorized|required|file|mimes:jpeg,png,jpg,pdf|max:5120',
+                'authorized_id2' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
                 'applicants' => 'exclude_unless:claimant_type,authorized|required|array|min:1|max:2',
                 'applicants.*.first_name' => 'exclude_unless:claimant_type,authorized|required|string|max:255',
                 'applicants.*.last_name'  => 'exclude_unless:claimant_type,authorized|required|string|max:255',
                 'applicants.*.relation'   => 'exclude_unless:claimant_type,authorized|required|string|max:255',
+            ], [
+                'authorization_letter.max' => 'Ang Authorization Letter ay hindi dapat lumagpas sa 5MB.',
+                'authorized_id.max'        => 'Ang Valid ID ng Authorized Person ay hindi dapat lumagpas sa 5MB.',
+                'authorized_id2.max'       => 'Ang Valid ID ng Ikalawang Authorized Person ay hindi dapat lumagpas sa 5MB.',
             ]);
 
-            // JOBSEEKER LIFETIME LIMIT (for self)
-            if ($request->document_type === 'jobseeker' && $request->claimant_type === 'self') {
+            // JOBSEEKER RESTRICTIONS (RA 11261 - First-Time Jobseekers Assistance Act)
+            if ($request->document_type === 'jobseeker') {
+                if ($request->claimant_type === 'authorized') {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', '⚠️ Ang First-Time Jobseeker Certificate (RA 11261) ay maaari lamang asikasuhin nang personal ng aplikante para sa legal na pagpirma ng Sworn Undertaking. Bawal ang Authorized Representative para sa dokumentong ito.');
+                }
+
                 $exists = DocumentRequest::where('user_id', auth()->id())
                     ->where('document_type', 'jobseeker')
-                    ->where('claimant_type', 'self')
+                    ->whereIn('status', ['pending', 'processing', 'ready', 'released'])
                     ->exists();
                 
                 if ($exists) {
                     return redirect()->back()
                         ->withInput()
-                        ->with('error', '⚠️ You have already requested a 1st Time Job Seeker certificate before. This document can only be requested once per person.');
+                        ->with('error', '⚠️ Na-avail niyo na po dati ang First-Time Jobseeker Certificate. Alinsunod sa RA 11261, ang pribilehiyong ito ay maaari lamang gamitin nang ISANG (1) BESES sa buong buhay.');
                 }
             }
 
@@ -1065,13 +1093,18 @@ class ResidentPortalController extends Controller
             'respondent_name'  => 'required|string|max:255',
             'description'      => 'required|string',
             'incident_date'    => 'required|date|after_or_equal:' . now()->subMonths(6)->toDateString(),
+            'evidence'         => 'nullable|array|max:5',
+            'evidence.*'       => 'file|max:5120',
         ];
 
         if (!auth()->check()) {
             $rules['guest_email'] = 'required|email|max:255';
         }
 
-        $request->validate($rules);
+        $request->validate($rules, [
+            'evidence.max'   => 'Hanggang 5 files lamang ang maaaring i-upload bilang ebidensya.',
+            'evidence.*.max' => 'Ang bawat file ng ebidensya ay hindi dapat lumagpas sa 5MB.',
+        ]);
 
         $guestFirst = null;
         $guestLast = null;
@@ -1333,6 +1366,14 @@ class ResidentPortalController extends Controller
     public function updatePet(Request $request, $id)
     {
         $pet = Pet::where('id', $id)->where('resident_id', auth()->user()->resident->id)->firstOrFail();
+
+        $request->validate([
+            'pet_photo'     => 'nullable|image|max:5120',
+            'vaccine_proof' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+        ], [
+            'pet_photo.max'     => 'Ang larawan ng alaga ay hindi dapat lumagpas sa 5MB.',
+            'vaccine_proof.max' => 'Ang vaccine proof ay hindi dapat lumagpas sa 5MB.',
+        ]);
 
         $data = [];
         if ($request->has('status')) {

@@ -642,6 +642,13 @@
         handleFileSelect(e) {
             const file = e.target.files && e.target.files[0];
             if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File exceeds 5MB limit. Please upload an ID / document under 5MB.');
+                    e.target.value = '';
+                    this.fileName = '';
+                    this.filePreview = null;
+                    return;
+                }
                 this.fileName = file.name;
                 if (file.type && file.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -876,7 +883,7 @@
                     {{-- Registered Voter Fields (Shows ONLY when Yes, I am is selected) --}}
                     <div x-show="isVoter == '1'" x-cloak style="margin-bottom:14px;">
                         <div style="margin-bottom:6px;">
-                            <label class="flbl" for="id_type">Valid ID / Proof of Voter Registration *</label>
+                            <label class="flbl" for="id_type">Valid ID / Proof of Voter Registration * <span style="font-size:10px;color:#64748b;font-weight:600;">(Max: 5MB — JPG, PNG, PDF)</span></label>
                             <div class="fwrap" :style="step1Errors.file ? 'border-color:#ef4444;background:#fef2f2;' : ''">
                                 <i class="fas fa-id-card ficon" style="color:#0E5393;"></i>
                                 <select id="id_type" name="id_type" class="finput" x-model="idType" @change="triggerUpload()" style="cursor:pointer; appearance:none;">
@@ -906,7 +913,7 @@
                                 </div>
 
                                 <div x-show="!fileName" style="margin-top:5px; font-size:9px; font-weight:600; color:#64748b;">
-                                    Selecting an ID opens photo picker. <a href="javascript:void(0)" @click.prevent="triggerUpload()" style="color:#0E5393; text-decoration:underline; font-weight:800; cursor:pointer;">(Choose Photo)</a>
+                                    Selecting an ID opens photo picker (Max: 5MB). <a href="javascript:void(0)" @click.prevent="triggerUpload()" style="color:#0E5393; text-decoration:underline; font-weight:800; cursor:pointer;">(Choose Photo)</a>
                                 </div>
 
                                 <template x-if="step1Errors.file">

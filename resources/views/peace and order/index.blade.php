@@ -423,6 +423,21 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         activeIssue: null,
         patrolTeam: '',
         patrolModal: false,
+        editPatrolModal: false,
+        editingPatrol: { id: null, team_name: '', personnel_names: '', schedule_date: '', patrol_time: '', status: 'Scheduled' },
+        openEditPatrol(patrol) {
+            this.editingPatrol = {
+                id: patrol.id,
+                team_name: patrol.team_name,
+                personnel_names: patrol.personnel_names,
+                schedule_date: patrol.schedule_date,
+                patrol_time: patrol.patrol_time || '',
+                status: patrol.status || 'Scheduled'
+            };
+            this.editPatrolModal = true;
+        },
+        quickDutyModal: false,
+        quickDutyData: { team_name: 'Team A', personnel_names: '', schedule_date: '{{ date('Y-m-d') }}' },
         personnelList: [''],
         proofModal: false,
         activePatrolId: null,
@@ -1065,9 +1080,10 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
             <div class="card">
                 <div class="card-head">
                     <div class="card-title"><i class="fas fa-calendar-alt"></i> Team Assignments & Roving Logs</div>
-                    <div style="display:flex;gap:7px;">
-                        <button @click="patrolTeam='Team A'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#1d4ed8;"><i class="fas fa-plus"></i> Assign Team A (Monday, Wednesday, Friday)</button>
-                        <button @click="patrolTeam='Team B'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#0369a1;"><i class="fas fa-plus"></i> Assign Team B (Tuesday, Thursday, Saturday, Sunday)</button>
+                    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                        <button type="button" @click="quickDutyModal=true" class="btn btn-primary btn-sm" style="background:#059669;box-shadow:0 2px 6px rgba(5,150,105,0.25);"><i class="fas fa-bullhorn"></i> Sync Duty Roster to Main Page</button>
+                        <button type="button" @click="patrolTeam='Team A'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#1d4ed8;"><i class="fas fa-plus"></i> Assign Team A (Mon, Wed, Fri)</button>
+                        <button type="button" @click="patrolTeam='Team B'; patrolModal=true" class="btn btn-primary btn-sm" style="background:#0369a1;"><i class="fas fa-plus"></i> Assign Team B (Tue, Thu, Sat, Sun)</button>
                     </div>
                 </div>
 
@@ -1144,10 +1160,10 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                     @endphp
                                     <div style="display:flex;align-items:center;gap:6px;">
                                         <div @click="openProofPreview('{{ $firstImgUrl }}', '{{ addslashes($patrol->team_name) }} — Patrol Proof', '{{ \Carbon\Carbon::parse($patrol->schedule_date)->format('M d, Y') }} • {{ addslashes($patrol->personnel_names) }}')" 
-                                             style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;"
-                                             onmouseover="this.style.borderColor='var(--brand)';this.style.background='#eff6ff';"
-                                             onmouseout="this.style.borderColor='var(--border)';this.style.background='#f8fafc';"
-                                             title="Click to preview proof">
+                                              style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;"
+                                              onmouseover="this.style.borderColor='var(--brand)';this.style.background='#eff6ff';"
+                                              onmouseout="this.style.borderColor='var(--border)';this.style.background='#f8fafc';"
+                                              title="Click to preview proof">
                                             <img src="{{ $firstImgUrl }}" 
                                                  onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
                                                  style="width:26px;height:26px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0;flex-shrink:0;">
@@ -1167,6 +1183,13 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                 </td>
                                 <td style="text-align:right;">
                                     <div style="display:flex;justify-content:flex-end;gap:5px;align-items:center;">
+                                        <button type="button" 
+                                                @click="openEditPatrol({ id: {{ $patrol->id }}, team_name: '{{ addslashes($patrol->team_name) }}', personnel_names: '{{ addslashes($patrol->personnel_names) }}', schedule_date: '{{ $patrol->schedule_date }}', patrol_time: '{{ addslashes($patrol->patrol_time ?? '') }}', status: '{{ $patrol->status }}' })" 
+                                                class="btn-icon" 
+                                                style="color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;" 
+                                                title="Edit Schedule & Sync">
+                                            <i class="fas fa-edit" style="font-size:10px;"></i>
+                                        </button>
                                         <form action="{{ route('peace.patrol.status', $patrol->id) }}" method="POST" style="margin:0;">
                                             @csrf @method('PATCH')
                                             <select name="status" onchange="this.form.submit()" style="font-size:9px;padding:2px 4px;border-radius:4px;border:1px solid var(--border);background:#fff;font-weight:700;color:var(--text);cursor:pointer;">
@@ -1814,7 +1837,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                 <div class="fgrp"><label class="flbl">Location *</label><input type="text" name="incident_location" required class="finput" placeholder="Purok, Street..."></div>
                                 <div class="fgrp fspan2"><label class="flbl">Description *</label><textarea name="description" required rows="3" class="finput" style="resize:vertical;" placeholder="Describe the incident..."></textarea></div>
                                 <div class="fgrp"><label class="flbl">Witness Name (Optional)</label><input type="text" name="witness_name" class="finput" placeholder="Name of witness"></div>
-                                <div class="fgrp"><label class="flbl">Upload Proof (Optional)</label><input type="file" name="evidence[]" multiple accept="image/*,video/*,.pdf" class="finput" style="padding:6px;"></div>
+                                <div class="fgrp"><label class="flbl">Upload Proof (Optional) <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB bawat file)</span></label><input type="file" name="evidence[]" multiple accept="image/*,video/*,.pdf" class="finput" style="padding:6px;" onchange="for(let f of this.files){ if(f.size > 5*1024*1024){ alert('Ang file na ' + f.name + ' ay lagpas sa 5MB. Mangyaring mag-upload ng file na 5MB pababa.'); this.value=''; break; } }"></div>
                             </div>
                         </div>
                         <input type="hidden" name="department" value="Peace & Order">
@@ -2008,11 +2031,124 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
             </div>
         </div>
 
+        {{-- ══ EDIT PATROL SCHEDULE MODAL ══ --}}
+        <div x-show="editPatrolModal" x-cloak class="modal-ov" x-transition>
+            <div class="modal-box" style="max-width:440px;" @click.away="editPatrolModal=false">
+                <div class="modal-in">
+                    <div class="modal-hd">
+                        <div class="modal-ttl">
+                            <div class="modal-ico" style="background:#eff6ff;"><i class="fas fa-edit" style="color:var(--brand);"></i></div>
+                            <div>
+                                <div>Edit Patrol Schedule</div>
+                                <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:none;">Changes automatically reflect on the Resident Main Portal</div>
+                            </div>
+                        </div>
+                        <button @click="editPatrolModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                    </div>
+                    <form :action="'/peace/patrol/' + editingPatrol.id" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="fgrp">
+                            <label class="flbl">Team Name *</label>
+                            <select name="team_name" x-model="editingPatrol.team_name" required class="finput">
+                                <option value="Team A">Team A (Monday, Wednesday, Friday)</option>
+                                <option value="Team B">Team B (Tuesday, Thursday, Saturday, Sunday)</option>
+                            </select>
+                        </div>
+
+                        <div class="fgrp">
+                            <label class="flbl">Assigned Personnel (Comma-separated) *</label>
+                            <textarea name="personnel_names" x-model="editingPatrol.personnel_names" required class="finput" rows="2" placeholder="e.g. Danilo Cruz, Ramon Santos, Ernesto Reyes"></textarea>
+                        </div>
+
+                        <div class="fgrid2">
+                            <div class="fgrp">
+                                <label class="flbl">Schedule Date *</label>
+                                <input type="date" name="schedule_date" x-model="editingPatrol.schedule_date" required class="finput">
+                            </div>
+                            <div class="fgrp">
+                                <label class="flbl">Patrol Hours</label>
+                                <input type="text" name="patrol_time" x-model="editingPatrol.patrol_time" class="finput" placeholder="e.g. 8:00 PM - 4:00 AM">
+                            </div>
+                        </div>
+
+                        <div class="fgrp">
+                            <label class="flbl">Roving Status</label>
+                            <select name="status" x-model="editingPatrol.status" class="finput">
+                                <option value="Scheduled">Scheduled</option>
+                                <option value="On-Roving">On-Roving</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:15px;">
+                            <button type="button" @click="editPatrolModal=false" class="btn btn-ghost">Cancel</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save & Sync to Main Page</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- ══ QUICK DUTY ROSTER MODAL (SYNC TO MAIN PAGE) ══ --}}
+        <div x-show="quickDutyModal" x-cloak class="modal-ov" x-transition>
+            <div class="modal-box" style="max-width:440px;" @click.away="quickDutyModal=false">
+                <div class="modal-in">
+                    <div class="modal-hd">
+                        <div class="modal-ttl">
+                            <div class="modal-ico" style="background:#ecfdf5;"><i class="fas fa-bullhorn" style="color:#059669;"></i></div>
+                            <div>
+                                <div>Sync Tanod Duty to Main Page</div>
+                                <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:none;">Post today's active Tanod roster to the resident portal landing page</div>
+                            </div>
+                        </div>
+                        <button @click="quickDutyModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                    </div>
+                    <form action="{{ route('peace.patrol.quick-duty') }}" method="POST">
+                        @csrf
+                        
+                        <div class="fgrp">
+                            <label class="flbl">On-Duty Team *</label>
+                            <select name="team_name" x-model="quickDutyData.team_name" required class="finput">
+                                <option value="Team A">Team A (Monday, Wednesday, Friday)</option>
+                                <option value="Team B">Team B (Tuesday, Thursday, Saturday, Sunday)</option>
+                            </select>
+                        </div>
+
+                        <div class="fgrp">
+                            <label class="flbl">Duty Date</label>
+                            <input type="date" name="schedule_date" x-model="quickDutyData.schedule_date" required class="finput">
+                        </div>
+
+                        <div class="fgrp">
+                            <label class="flbl">Tanod Force on Duty (Names separated by comma) *</label>
+                            <textarea name="personnel_names" x-model="quickDutyData.personnel_names" required class="finput" rows="3" placeholder="e.g. Danilo Cruz, Ramon Santos, Ernesto Reyes, Juan Dela Cruz"></textarea>
+                            <div style="font-size:8.5px;color:var(--muted);margin-top:3px;">
+                                <i class="fas fa-info-circle"></i> These names will immediately appear under "On-Duty Tanod Patrol" on the resident landing page.
+                            </div>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:15px;">
+                            <button type="button" @click="quickDutyModal=false" class="btn btn-ghost">Cancel</button>
+                            <button type="submit" class="btn btn-primary" style="background:#059669;"><i class="fas fa-paper-plane"></i> Publish to Main Page</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         {{-- ══ ROVING PROOF MODAL ══ --}}
         <div x-show="proofModal" x-cloak class="modal-ov" x-transition x-data="{
             localProofPreviews: [],
             handleFiles(files) {
                 if(files.length > 6) { alert('Maximum 6 photos allowed.'); return; }
+                for(let i=0; i<files.length; i++) {
+                    if (files[i].size > 5 * 1024 * 1024) {
+                        alert('Ang photo na "' + files[i].name + '" ay lagpas sa 5MB. Mangyaring mag-upload ng 5MB pababa.');
+                        return;
+                    }
+                }
                 this.localProofPreviews = [];
                 for(let i=0; i<files.length; i++) {
                     const r = new FileReader();
@@ -2036,7 +2172,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                     <form :action="'/peace/patrol/'+activePatrolId+'/proof'" method="POST" enctype="multipart/form-data">
                         @csrf @method('PATCH')
                         <div class="fgrp">
-                            <label class="flbl">Upload Roving Photos (Max 6)</label>
+                            <label class="flbl">Upload Roving Photos <span style="font-size:9.5px;color:var(--muted);font-weight:600;">(Max: 6 photos, 5MB each)</span></label>
                             <label style="cursor:pointer;display:block;"
                                 @dragover.prevent="$refs.dzr.style.border='2px solid var(--brand)';$refs.dzr.style.background='#eff6ff'"
                                 @dragleave.prevent="$refs.dzr.style.border='2px dashed var(--border)';$refs.dzr.style.background='#f8fafc'"
@@ -2050,7 +2186,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                     <div x-show="localProofPreviews.length === 0" style="text-align:center;">
                                         <i class="fas fa-images" style="font-size:24px;color:var(--light);margin-bottom:6px;"></i>
                                         <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Upload Roving Photos</div>
-                                        <div style="font-size:9px;font-weight:600;color:var(--light);">Click or Drag & Drop (Up to 6)</div>
+                                        <div style="font-size:9px;font-weight:600;color:var(--light);">Click or Drag & Drop (Up to 6, Max: 5MB each)</div>
                                     </div>
                                 </div>
                                 <input type="file" name="roving_photo[]" accept="image/*" multiple style="display:none;" x-ref="filer" required @change="const f=$event.target.files;if(f.length){handleFiles(f)}">
@@ -2211,7 +2347,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                 <i class="fas fa-file-excel" style="font-size:26px;color:#16a34a;margin-bottom:4px;"></i>
                                 <div class="upload-txt" style="font-size:11px;font-weight:800;color:var(--text);" x-text="importFileName ? importFileName : 'Click to browse or drag & drop file here'"></div>
                                 <div style="font-size:8.5px;font-weight:600;color:var(--muted);margin-top:2px;">Supported formats: .xlsx, .xls, .csv, .txt (Max: 10MB)</div>
-                                <input type="file" x-ref="importFileInput" name="import_file" accept=".csv,.xlsx,.xls,.txt" style="display:none;" required @change="importCount = $event.target.files.length; importFileName = $event.target.files[0]?.name || ''">
+                                <input type="file" x-ref="importFileInput" name="import_file" accept=".csv,.xlsx,.xls,.txt" style="display:none;" required @change="const f=$event.target.files[0]; if(f){ if(f.size > 10*1024*1024){ alert('File exceeds 10MB limit.'); $event.target.value=''; importFileName=''; return; } importCount=1; importFileName=f.name; }">
                             </div>
                         </div>
 
@@ -2296,7 +2432,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                             <div style="font-size:12px;font-weight:800;color:var(--text);" x-ref="customTemplateTxt">Click to select new template file</div>
                             <div style="font-size:9px;color:var(--muted);margin-top:4px;">Supported: PDF, XLSX, DOCX, PNG, JPG (Max: 15MB)</div>
                             <input type="file" x-ref="customTemplateInput" name="template_file" style="display:none;" required
-                                   @change="$refs.customTemplateTxt.innerText = $event.target.files[0]?.name || 'File selected'">
+                                   @change="const f=$event.target.files[0]; if(f){ if(f.size > 15*1024*1024){ alert('File exceeds 15MB limit.'); $event.target.value=''; $refs.customTemplateTxt.innerText='Click to select new template file'; return; } $refs.customTemplateTxt.innerText = f.name; }">
                         </div>
 
                         <div style="display:flex;justify-content:flex-end;gap:8px;">

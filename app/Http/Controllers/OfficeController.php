@@ -776,6 +776,12 @@ class OfficeController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'photo' => 'nullable|image|max:5120',
+        ], [
+            'photo.max' => 'Ang larawan ng residente ay hindi dapat lumagpas sa 5MB.',
+        ]);
+
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('residents/photos', 'public');
@@ -864,6 +870,12 @@ class OfficeController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'photo' => 'nullable|image|max:5120',
+        ], [
+            'photo.max' => 'Ang larawan ng residente ay hindi dapat lumagpas sa 5MB.',
+        ]);
+
         $resident = Resident::findOrFail($id);
         $photoPath = $resident->photo;
 
@@ -976,9 +988,14 @@ class OfficeController extends Controller
         }
 
         $request->validate([
-            'resident_id' => 'required|exists:residents,id',
-            'pet_name' => 'required|string|max:255',
-            'pet_type' => 'required|string',
+            'resident_id'    => 'required|exists:residents,id',
+            'pet_name'       => 'required|string|max:255',
+            'pet_type'       => 'required|string',
+            'pet_photo'      => 'nullable|image|max:5120',
+            'vaccine_proof'  => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+        ], [
+            'pet_photo.max'     => 'Ang larawan ng alaga ay hindi dapat lumagpas sa 5MB.',
+            'vaccine_proof.max' => 'Ang vaccine proof ay hindi dapat lumagpas sa 5MB.',
         ]);
 
         $type = ($request->pet_type === 'Others') ? $request->pet_type_other : $request->pet_type;

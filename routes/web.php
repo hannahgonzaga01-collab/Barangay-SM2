@@ -206,6 +206,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/peace',   [\App\Http\Controllers\PeaceController::class, 'dashboard'])->name('peace.dashboard');
     Route::post('/peace/blotter', [\App\Http\Controllers\PeaceController::class, 'storeBlotter'])->name('peace.blotter.store');
     Route::post('/peace/patrol', [\App\Http\Controllers\PeaceController::class, 'storePatrol'])->name('peace.patrol.store');
+    Route::match(['put', 'patch'], '/peace/patrol/{id}', [\App\Http\Controllers\PeaceController::class, 'updatePatrol'])->name('peace.patrol.update');
+    Route::post('/peace/patrol/quick-duty', [\App\Http\Controllers\PeaceController::class, 'updateQuickDuty'])->name('peace.patrol.quick-duty');
     Route::patch('/peace/patrol/{id}/proof', [\App\Http\Controllers\PeaceController::class, 'updatePatrolProof'])->name('peace.patrol.proof');
     Route::patch('/peace/patrol/{id}/status', [\App\Http\Controllers\PeaceController::class, 'updatePatrolStatus'])->name('peace.patrol.status');
     Route::delete('/peace/patrol/{id}', [\App\Http\Controllers\PeaceController::class, 'destroyPatrol'])->name('peace.patrol.destroy');

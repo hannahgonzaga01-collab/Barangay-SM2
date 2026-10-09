@@ -94,6 +94,8 @@ class DepartmentReportController extends Controller
         $request->validate([
             'department'    => 'required|string',
             'template_file' => 'required|file|max:15360', // 15MB max
+        ], [
+            'template_file.max' => 'Ang template file ay hindi dapat lumagpas sa 15MB.',
         ]);
 
         $file = $request->file('template_file');

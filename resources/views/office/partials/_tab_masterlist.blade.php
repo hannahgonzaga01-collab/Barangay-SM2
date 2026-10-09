@@ -27,7 +27,8 @@
                 <thead>
                     <template x-if="activeFilter !== 'heads'">
                         <tr>
-                            <th>Photo</th>
+                            <th style="width:45px;text-align:center;">#</th>
+                            <th style="text-align:center;">Photo</th>
                             <th>Resident Details</th>
                             <th>Classification</th>
                             <th>Digital ID</th>
@@ -36,7 +37,8 @@
                     </template>
                     <template x-if="activeFilter === 'heads'">
                         <tr>
-                            <th>Photo</th>
+                            <th style="width:45px;text-align:center;">#</th>
+                            <th style="text-align:center;">Photo</th>
                             <th>Head's Name</th>
                             <th>Household ID</th>
                             <th>Member Count</th>
@@ -46,16 +48,17 @@
                 </thead>
                 <template x-if="filteredResidents.length === 0">
                     <tbody>
-                        <tr><td colspan="5"><div class="empty-st"><i class="fas fa-users"></i><p>No record found</p></div></td></tr>
+                        <tr><td colspan="6"><div class="empty-st"><i class="fas fa-users"></i><p>No record found</p></div></td></tr>
                     </tbody>
                 </template>
-                <template x-for="r in filteredResidents" :key="r.id">
+                <template x-for="(r, index) in paginatedResidents" :key="r.id">
                     <tbody style="border-bottom:1px solid var(--border);">
                         <template x-if="activeFilter !== 'heads'">
                             <tr :id="'res-' + r.id"
                                 :style="r.is_household_head ? 'background:#f8fafc; cursor:pointer;' : ''"
                                 @click="if(r.is_household_head) viewFamily(r)"
                                 class="res-row-hover">
+                                <td style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);" x-text="(masterlistPage - 1) * masterlistPerPage + index + 1"></td>
                                 <td style="text-align:center;">
                                      <img :src="r.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
                                          x-on:error="$el.src='https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
@@ -107,6 +110,7 @@
                                 style="cursor:pointer;transition:background .15s;"
                                 onmouseover="this.style.background='#eff6ff'"
                                 onmouseout="this.style.background=''">
+                                <td style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);" x-text="(masterlistPage - 1) * masterlistPerPage + index + 1"></td>
                                 <td style="text-align:center;">
                                     <img :src="r.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
                                          x-on:error="$el.src='https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
@@ -132,6 +136,31 @@
                     </tbody>
                 </template>
             </table>
+            {{-- Masterlist Pagination Toolbar --}}
+            <div x-show="totalMasterlistPages > 1" style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px;background:#f8fafc;">
+                <div style="font-size:11px;color:var(--muted);font-weight:700;">
+                    Showing <span style="color:var(--text);font-weight:900;" x-text="filteredResidents.length > 0 ? ((masterlistPage - 1) * masterlistPerPage) + 1 : 0"></span> to 
+                    <span style="color:var(--text);font-weight:900;" x-text="Math.min(masterlistPage * masterlistPerPage, filteredResidents.length)"></span> of 
+                    <span style="color:var(--text);font-weight:900;" x-text="filteredResidents.length"></span> residents
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <button type="button" @click="setMasterlistPage(masterlistPage - 1)" :disabled="masterlistPage <= 1"
+                            class="btn-plain btn-sm"
+                            :style="masterlistPage <= 1 ? 'opacity:0.4;cursor:not-allowed;' : 'cursor:pointer;'"
+                            style="padding:5px 12px;font-size:11px;font-weight:800;background:#fff;border:1.5px solid var(--border);border-radius:6px;color:#0E5393;">
+                        <i class="fas fa-chevron-left"></i> Prev
+                    </button>
+                    <div style="font-size:11px;font-weight:800;color:var(--text);padding:0 8px;">
+                        Page <span x-text="masterlistPage"></span> of <span x-text="totalMasterlistPages"></span>
+                    </div>
+                    <button type="button" @click="setMasterlistPage(masterlistPage + 1)" :disabled="masterlistPage >= totalMasterlistPages"
+                            class="btn-plain btn-sm"
+                            :style="masterlistPage >= totalMasterlistPages ? 'opacity:0.4;cursor:not-allowed;' : 'cursor:pointer;'"
+                            style="padding:5px 12px;font-size:11px;font-weight:800;background:#fff;border:1.5px solid var(--border);border-radius:6px;color:#0E5393;">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

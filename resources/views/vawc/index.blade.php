@@ -1959,7 +1959,7 @@ html, body {
                         </div>
                         <div class="fgrid2 fgrp">
                             <div><label class="flbl">Witness Name (Optional)</label><input type="text" name="witness_name" class="finput" placeholder="Name of witness"></div>
-                            <div><label class="flbl">Upload Proof / Documents (Optional)</label><input type="file" name="evidence[]" multiple accept="image/*,video/*,.pdf" class="finput" style="padding:6px;"></div>
+                            <div><label class="flbl">Upload Proof / Documents (Optional) <span style="font-size:9px;color:var(--muted);font-weight:600;">(Max: 5MB bawat file)</span></label><input type="file" name="evidence[]" multiple accept="image/*,video/*,.pdf" class="finput" style="padding:6px;" onchange="for(let f of this.files){ if(f.size > 5*1024*1024){ alert('Ang file na ' + f.name + ' ay lagpas sa 5MB. Mangyaring mag-upload ng file na 5MB pababa.'); this.value=''; break; } }"></div>
                         </div>
 
                         <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px 13px;margin-bottom:14px;font-size:11px;font-weight:700;color:#7f1d1d;">
