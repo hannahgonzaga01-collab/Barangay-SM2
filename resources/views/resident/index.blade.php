@@ -4638,15 +4638,25 @@ html, body {
                 </button>
             </div>
             <div style="padding: 18px; text-align: center; background: #0b1120; min-height: 240px; display: flex; align-items: center; justify-content: center;">
-                <img :src="photoModalUrl" alt="ID Proof" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+                <template x-if="photoModalUrl && photoModalUrl.toLowerCase().split('?')[0].endsWith('.pdf')">
+                    <iframe :src="photoModalUrl" style="width: 100%; height: 65vh; border: none; border-radius: 8px; background: #fff;"></iframe>
+                </template>
+                <template x-if="!photoModalUrl || !photoModalUrl.toLowerCase().split('?')[0].endsWith('.pdf')">
+                    <img :src="photoModalUrl" alt="ID Proof" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+                </template>
             </div>
             <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <span style="font-size: 11px; color: #64748b; font-weight: 600;">
                     <i class="fas fa-shield-alt" style="color:var(--brand);"></i> Verification Document Preview
                 </span>
-                <button type="button" @click="viewPhotoModal = false" class="btn-plain btn-ghost btn-sm" style="background:#e2e8f0; color:#1e293b; font-weight:800; padding:6px 16px; border-radius:8px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fas fa-arrow-left"></i> Close / Bumalik
-                </button>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a :href="photoModalUrl" target="_blank" class="btn-plain btn-ghost btn-sm" style="background:#eff6ff; color:#0E5393; font-weight:800; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
+                        <i class="fas fa-external-link-alt"></i> Open Tab
+                    </a>
+                    <button type="button" @click="viewPhotoModal = false" class="btn-plain btn-ghost btn-sm" style="background:#e2e8f0; color:#1e293b; font-weight:800; padding:6px 16px; border-radius:8px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-arrow-left"></i> Close / Bumalik
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -1718,18 +1718,51 @@ $docConfigs = [
 </div>
 
 {{-- ══ PHOTO LIGHTBOX MODAL ══ --}}
-<div id="photo-lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;">
-    <div onclick="event.stopPropagation()" style="position:relative;max-width:90vw;max-height:90vh;display:flex;flex-direction:column;align-items:center;">
+<div id="photo-lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;">
+    <div onclick="event.stopPropagation()" style="position:relative;max-width:92vw;max-height:92vh;display:flex;flex-direction:column;align-items:center;">
         <button type="button" onclick="closeLightbox()" title="Close (Esc)"
-                style="position:absolute;top:10px;right:10px;z-index:100;background:#ffffff;color:#0f172a;border:2px solid #ffffff;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,0.5);transition:all .15s;"
+                style="position:absolute;top:-10px;right:-10px;z-index:100;background:#ffffff;color:#0f172a;border:2px solid #ffffff;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,0.5);transition:all .15s;"
                 onmouseover="this.style.background='#dc2626';this.style.color='#ffffff';this.style.borderColor='#dc2626';"
                 onmouseout="this.style.background='#ffffff';this.style.color='#0f172a';this.style.borderColor='#ffffff';">
             <i class="fas fa-times"></i>
         </button>
-        <img id="photo-lightbox-img" src="" alt="Preview" style="display:block;max-width:85vw;max-height:78vh;object-fit:contain;border-radius:14px;box-shadow:0 25px 60px rgba(0,0,0,0.6);">
-        <button type="button" onclick="closeLightbox()" style="margin-top:12px;background:#ffffff;color:#0f172a;border:none;border-radius:8px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all .15s;"
-                onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
-            <i class="fas fa-arrow-left"></i> Close / Bumalik
-        </button>
+
+        {{-- Direct Image Display --}}
+        <img id="photo-lightbox-img" src="" alt="Proof Preview"
+             style="display:block;max-width:85vw;max-height:74vh;object-fit:contain;border-radius:14px;box-shadow:0 25px 60px rgba(0,0,0,0.6);"
+             onerror="handleLightboxError(this)">
+
+        {{-- Direct PDF Display --}}
+        <iframe id="photo-lightbox-pdf" src="" style="display:none;width:85vw;max-width:920px;height:74vh;border:none;border-radius:14px;background:#ffffff;box-shadow:0 25px 60px rgba(0,0,0,0.6);"></iframe>
+
+        {{-- Graceful Fallback Card when image is not directly displayable --}}
+        <div id="photo-lightbox-fallback" style="display:none;max-width:480px;width:90vw;background:#ffffff;border-radius:16px;padding:26px 20px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.6);">
+            <div style="width:54px;height:54px;border-radius:50%;background:#eff6ff;color:#0E5393;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div style="font-size:13.5px;font-weight:900;color:#0f172a;margin-bottom:6px;" id="photo-lightbox-fallback-title">Dokumento / Patunay</div>
+            <p style="font-size:11px;color:#64748b;line-height:1.5;margin-bottom:16px;">
+                Naka-attach ang patunay o dokumentong ito sa talaan. Maaari itong buksan o i-download sa hiwalay na tab:
+            </p>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+                <a id="photo-lightbox-fallback-open" href="#" target="_blank" class="btn-grad" style="padding:7px 16px;font-size:11px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="fas fa-external-link-alt"></i> Buksan sa Bagong Tab
+                </a>
+                <a id="photo-lightbox-fallback-dl" href="#" download class="btn-plain btn-edit" style="padding:7px 16px;font-size:11px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="fas fa-download"></i> I-download File
+                </a>
+            </div>
+        </div>
+
+        {{-- Bottom Controls --}}
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
+            <a id="photo-lightbox-action-btn" href="#" target="_blank" style="background:#0E5393;color:#ffffff;border:none;border-radius:8px;padding:7px 16px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);text-decoration:none;">
+                <i class="fas fa-external-link-alt"></i> Buksan sa Bagong Tab
+            </a>
+            <button type="button" onclick="closeLightbox()" style="background:#ffffff;color:#0f172a;border:none;border-radius:8px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all .15s;"
+                    onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+                <i class="fas fa-arrow-left"></i> Close / Bumalik
+            </button>
+        </div>
     </div>
 </div>

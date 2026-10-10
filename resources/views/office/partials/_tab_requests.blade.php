@@ -114,7 +114,11 @@
                             </div>
                             @endif
                             @if($pv->voter_id_photo)
-                            <button type="button" onclick="viewPhoto('{{ asset('storage/'.$pv->voter_id_photo) }}')" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#f1f5f9;border-radius:4px;font-size:10px;font-weight:700;color:var(--brand);border:none;cursor:pointer;"><i class="fas fa-image"></i> View ID</button>
+                            @php
+                                $vip = $pv->voter_id_photo;
+                                $vipUrl = str_starts_with($vip, 'http') ? $vip : (str_starts_with($vip, 'storage/') ? asset($vip) : asset('storage/' . ltrim($vip, '/')));
+                            @endphp
+                            <button type="button" onclick="viewPhoto('{{ $vipUrl }}', 'Voter Registration / COMELEC Stub ID')" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#f1f5f9;border-radius:4px;font-size:10px;font-weight:700;color:var(--brand);border:none;cursor:pointer;"><i class="fas fa-image"></i> View ID</button>
                             @else
                             <span style="font-size:9px;color:var(--light);font-weight:600;background:#f1f5f9;padding:4px 8px;border-radius:4px;">No ID Uploaded</span>
                             @endif
@@ -348,12 +352,29 @@
                                     </span>
                                     <div style="display:flex;gap:4px;margin-top:2px;">
                                         @if($req->authorization_letter_path)
-                                        <button type="button" onclick="viewPhoto('{{ asset('storage/'.$req->authorization_letter_path) }}')" class="btn-plain btn-ghost" style="padding:2px 5px;font-size:8px;border:1px solid #bfdbfe;color:#1e40af;cursor:pointer;"><i class="fas fa-file-alt"></i> Letter</button>
+                                        @php
+                                            $alP = $req->authorization_letter_path;
+                                            $alUrl = str_starts_with($alP, 'http') ? $alP : (str_starts_with($alP, 'storage/') ? asset($alP) : asset('storage/' . ltrim($alP, '/')));
+                                        @endphp
+                                        <button type="button" onclick="viewPhoto('{{ $alUrl }}', 'Authorization Letter ({{ addslashes($req->claimant_name ?: 'Representative') }})')" class="btn-plain btn-ghost" style="padding:2px 5px;font-size:8px;border:1px solid #bfdbfe;color:#1e40af;cursor:pointer;"><i class="fas fa-file-alt"></i> Letter</button>
                                         @endif
                                         @if($req->authorized_id_path)
-                                        <button type="button" onclick="viewPhoto('{{ asset('storage/'.$req->authorized_id_path) }}')" class="btn-plain btn-ghost" style="padding:2px 5px;font-size:8px;border:1px solid #bfdbfe;color:#1e40af;cursor:pointer;"><i class="fas fa-id-card"></i> ID</button>
+                                        @php
+                                            $aidP = $req->authorized_id_path;
+                                            $aidUrl = str_starts_with($aidP, 'http') ? $aidP : (str_starts_with($aidP, 'storage/') ? asset($aidP) : asset('storage/' . ltrim($aidP, '/')));
+                                        @endphp
+                                        <button type="button" onclick="viewPhoto('{{ $aidUrl }}', 'Authorized Representative ID')" class="btn-plain btn-ghost" style="padding:2px 5px;font-size:8px;border:1px solid #bfdbfe;color:#1e40af;cursor:pointer;"><i class="fas fa-id-card"></i> ID</button>
                                         @endif
                                     </div>
+                                </div>
+                            @endif
+                            @if($req->id_proof)
+                                @php
+                                    $idp = $req->id_proof;
+                                    $idpUrl = str_starts_with($idp, 'http') ? $idp : (str_starts_with($idp, 'storage/') ? asset($idp) : asset('storage/' . ltrim($idp, '/')));
+                                @endphp
+                                <div style="margin-top:3px;">
+                                    <button type="button" onclick="viewPhoto('{{ $idpUrl }}', 'Submitted ID Proof')" class="btn-plain btn-ghost" style="padding:2px 5px;font-size:8px;border:1px solid #bfdbfe;color:#1e40af;cursor:pointer;"><i class="fas fa-id-card"></i> Valid ID</button>
                                 </div>
                             @endif
                         </td>

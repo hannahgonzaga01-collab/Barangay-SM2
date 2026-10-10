@@ -135,26 +135,14 @@
                                                     </span>
                                                 </div>
                                             @endif
-                                            <button type="button" @click="openImg = true" 
+                                            @php
+                                                $vip = $pv->voter_id_photo;
+                                                $vipUrl = str_starts_with($vip, 'http') ? $vip : (str_starts_with($vip, 'storage/') ? asset($vip) : asset('storage/' . ltrim($vip, '/')));
+                                            @endphp
+                                            <button type="button" onclick="viewPhoto('{{ $vipUrl }}', 'Voter Registration ID')" 
                                                     style="display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #eff6ff; border: 1.5px solid #bfdbfe; color: #0E5393; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all .15s;">
                                                 <i class="fas fa-image"></i> View ID
                                             </button>
-
-                                            {{-- ID Photo Modal Preview --}}
-                                            <div x-show="openImg" x-cloak class="modal-ov" style="z-index: 99999;" @click.self="openImg = false">
-                                                <div class="modal-box" style="max-width: 520px; background: #fff; border-radius: 16px; overflow: hidden;">
-                                                    <div class="modal-hd" style="background: linear-gradient(135deg,#0E5393 0%,#000052 100%); padding: 14px 18px; color: #fff; display: flex; align-items: center; justify-content: space-between;">
-                                                        <span style="font-size: 12px; font-weight: 900; text-transform: uppercase;"><i class="fas fa-id-card"></i> Uploaded ID Image</span>
-                                                        <button type="button" @click="openImg = false" style="background: none; border: none; color: #fff; font-size: 16px; cursor: pointer;">&times;</button>
-                                                    </div>
-                                                    <div style="padding: 16px; text-align: center; background: #0f172a;">
-                                                        <img src="{{ asset('storage/' . $pv->voter_id_photo) }}" alt="Registrant ID" style="max-width: 100%; max-height: 480px; border-radius: 8px; object-fit: contain; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-                                                    </div>
-                                                    <div style="padding: 12px 16px; background: #f8fafc; text-align: right;">
-                                                        <button type="button" @click="openImg = false" class="btn-plain btn-ghost btn-sm">Close</button>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                     @else
                                         <span style="font-size: 9px; font-weight: 700; color: #94a3b8; font-style: italic;">No ID uploaded</span>

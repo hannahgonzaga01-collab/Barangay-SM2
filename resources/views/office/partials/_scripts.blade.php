@@ -500,15 +500,69 @@ function printDoc(elementId){
     win.document.close();
     setTimeout(()=>{ win.print(); },700);
 }
-// ── Photo Lightbox ──
-function viewPhoto(url) {
-    document.getElementById('photo-lightbox-img').src = url;
-    document.getElementById('photo-lightbox').style.display = 'flex';
+// ── Photo / Document Lightbox ──
+function viewPhoto(url, title = 'Patunay / Dokumento') {
+    if (!url) {
+        alert('Walang naka-attach na patunay para sa rekord na ito.');
+        return;
+    }
+
+    const box = document.getElementById('photo-lightbox');
+    const img = document.getElementById('photo-lightbox-img');
+    const pdf = document.getElementById('photo-lightbox-pdf');
+    const fallback = document.getElementById('photo-lightbox-fallback');
+    const actionBtn = document.getElementById('photo-lightbox-action-btn');
+    const fbOpen = document.getElementById('photo-lightbox-fallback-open');
+    const fbDl = document.getElementById('photo-lightbox-fallback-dl');
+    const fbTitle = document.getElementById('photo-lightbox-fallback-title');
+
+    if (actionBtn) actionBtn.href = url;
+    if (fbOpen) fbOpen.href = url;
+    if (fbDl) fbDl.href = url;
+    if (fbTitle) fbTitle.innerText = title;
+
+    const cleanUrl = url.split('?')[0].split('#')[0].toLowerCase();
+    const isPdf = cleanUrl.endsWith('.pdf');
+
+    if (isPdf) {
+        if (img) { img.src = ''; img.style.display = 'none'; }
+        if (fallback) fallback.style.display = 'none';
+        if (pdf) {
+            pdf.src = url;
+            pdf.style.display = 'block';
+        }
+    } else {
+        if (pdf) {
+            pdf.src = '';
+            pdf.style.display = 'none';
+        }
+        if (fallback) fallback.style.display = 'none';
+        if (img) {
+            img.style.display = 'block';
+            img.src = url;
+        }
+    }
+
+    if (box) box.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
+
+function handleLightboxError(imgEl) {
+    if (!imgEl) return;
+    imgEl.style.display = 'none';
+    const fallback = document.getElementById('photo-lightbox-fallback');
+    if (fallback) fallback.style.display = 'block';
+}
+
 function closeLightbox() {
-    document.getElementById('photo-lightbox').style.display = 'none';
-    document.getElementById('photo-lightbox-img').src = '';
+    const box = document.getElementById('photo-lightbox');
+    if (box) box.style.display = 'none';
+    const img = document.getElementById('photo-lightbox-img');
+    if (img) { img.src = ''; img.style.display = 'none'; }
+    const pdf = document.getElementById('photo-lightbox-pdf');
+    if (pdf) { pdf.src = ''; pdf.style.display = 'none'; }
+    const fallback = document.getElementById('photo-lightbox-fallback');
+    if (fallback) fallback.style.display = 'none';
     document.body.style.overflow = '';
 }
 document.addEventListener('keydown', function(e) {
