@@ -57,8 +57,8 @@
                     <tbody style="border-bottom:1px solid var(--border);">
                         <template x-if="activeFilter !== 'heads'">
                             <tr :id="'res-' + r.id"
-                                :style="r.is_household_head ? 'background:#f8fafc; cursor:pointer;' : ''"
-                                @click="if(r.is_household_head) viewFamily(r)"
+                                @click="openProfile(r)"
+                                style="cursor:pointer; transition:background .15s;"
                                 class="res-row-hover">
                                 <td data-label="#" style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);" x-text="(masterlistPage - 1) * masterlistPerPage + index + 1"></td>
                                 <td data-label="Photo" style="text-align:center;">
@@ -109,7 +109,6 @@
                                 <td data-label="Actions" style="text-align:right;">
                                     <div class="tbl-acts">
                                         <button type="button" @click.stop="openProfile(r)" class="tbl-btn tbl-view" title="View"><i class="fas fa-eye"></i></button>
-                                        <button type="button" @click.stop="openAddPetModal=true; petTypeSelection=''; selectedUser=r; petPhotoPreview=null; vaccineProofPreview=null;" class="tbl-btn tbl-pet" title="Pet"><i class="fas fa-paw"></i></button>
                                         <button type="button" @click.stop="openEdit(r.id)" class="tbl-btn tbl-edit" title="Edit"><i class="fas fa-edit"></i></button>
                                         <button type="button"
                                                 @click.stop="archiveTarget={id:r.id,name:r.name}; archiveModal=true"

@@ -270,13 +270,17 @@ Route::get('/storage', fn() => redirect('/'));
 // ── GRACEFUL STORAGE ASSET FALLBACK ROUTE ──
 Route::get('/storage/{path}', function ($path) {
     $cleanPath = preg_replace('#^storage/#', '', $path);
-    $fullPath = storage_path('app/public/' . $cleanPath);
-    if (file_exists($fullPath) && !is_dir($fullPath)) {
-        return response()->file($fullPath);
-    }
-    $pubPath = public_path('storage/' . $cleanPath);
-    if (file_exists($pubPath) && !is_dir($pubPath)) {
-        return response()->file($pubPath);
+    $candidates = [
+        storage_path('app/public/' . $cleanPath),
+        public_path('storage/' . $cleanPath),
+        storage_path('app/' . $cleanPath),
+        storage_path('app/private/' . $cleanPath),
+    ];
+    foreach ($candidates as $cand) {
+        if (file_exists($cand) && !is_dir($cand)) {
+            $mime = @mime_content_type($cand) ?: 'application/octet-stream';
+            return response()->file($cand, ['Content-Type' => $mime]);
+        }
     }
 
     // Avatar / Resident photo fallback

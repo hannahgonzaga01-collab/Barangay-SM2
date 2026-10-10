@@ -990,11 +990,13 @@ class OfficeController extends Controller
 
     public function edit($id)
     {
-        $resident = Resident::with('householdMembers')->findOrFail($id);
+        $resident = Resident::with(['householdMembers', 'user'])->findOrFail($id);
 
         // Include photo URL for preview in edit modal
         $data = $resident->toArray();
         $data['photo'] = $resident->photo ? asset('storage/' . $resident->photo) : null;
+        $voterIdRaw = $resident->user?->voter_id_photo ?? $resident->voter_id_photo ?? null;
+        $data['voter_id_photo'] = $voterIdRaw ? asset('storage/' . ltrim($voterIdRaw, '/')) : null;
         $data['family_members'] = $resident->householdMembers;
 
         return response()->json($data);

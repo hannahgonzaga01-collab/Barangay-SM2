@@ -2258,6 +2258,11 @@ html, body {
                                 this.$watch('selectedDoc', (val) => {
                                     if (val === 'yumao') {
                                         this.cType = 'authorized';
+                                        if (Array.isArray(this.applicants)) {
+                                            this.applicants.forEach(app => {
+                                                if (app.relation === 'Others') app.relation = '';
+                                            });
+                                        }
                                     } else if (val === 'movein' || val === 'moveout' || val === 'jobseeker') {
                                         this.cType = 'self';
                                     }
@@ -2660,27 +2665,30 @@ html, body {
                                 </div>
                                 
                                 {{-- 3 Equal Row Boxes for Authorization Uploads (Aligned in a Row, Label Inside, Equal Height) --}}
-                                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:16px;">
+                                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:16px;">
                                     {{-- Box 1: Authorization Letter --}}
                                     <div x-ref="authLetterCard"
                                          @click="$refs.authLetter.click()" 
-                                         style="background:#fff; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:140px; height:100%; box-sizing:border-box; transition:all .2s;"
-                                         :style="authLetterName ? 'border:1.5px solid #10b981; background:#f0fdf4;' : 'border-color:#cbd5e1;'">
+                                         style="background:#ffffff; border:2px dashed #94a3b8; border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:145px; height:100%; box-sizing:border-box; transition:all .2s ease-in-out;"
+                                         :style="authLetterName ? 'border:2px solid #10b981 !important; background:#f0fdf4 !important;' : ''"
+                                         onmouseover="if(!this.getAttribute('data-has-file')){ this.style.borderColor='var(--brand,#0E5393)'; this.style.background='#eff6ff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(14,83,147,0.15)'; }"
+                                         onmouseout="if(!this.getAttribute('data-has-file')){ this.style.borderColor='#94a3b8'; this.style.background='#ffffff'; this.style.transform='none'; this.style.boxShadow='none'; }"
+                                         :data-has-file="authLetterName ? '1' : ''">
                                         <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;">
-                                            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                            <div style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s;"
                                                  :style="authLetterName ? 'background:#dcfce7; color:#15803d;' : 'background:#eff6ff; color:var(--brand);'">
-                                                <i :class="authLetterName ? 'fas fa-check' : 'fas fa-file-signature'" style="font-size:15px;"></i>
+                                                <i :class="authLetterName ? 'fas fa-check' : 'fas fa-file-signature'" style="font-size:16px;"></i>
                                             </div>
-                                            <div style="font-size:11.5px; font-weight:800; color:#1e293b; line-height:1.25;">
+                                            <div style="font-size:12px; font-weight:800; color:#1e293b; line-height:1.25;">
                                                 1. Authorization Letter <span style="color:#dc2626;">*</span>
                                             </div>
-                                            <div style="font-size:10px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
+                                            <div style="font-size:10.5px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
                                                  :style="authLetterName ? 'color:#15803d; font-weight:700;' : ''"
                                                  x-text="authLetterName ? authLetterName : 'Pirmadong liham ng awtorisasyon'">
                                             </div>
                                         </div>
-                                        <div style="margin-top:8px; width:100%;">
-                                            <span style="font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
+                                        <div style="margin-top:10px; width:100%;">
+                                            <span style="font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
                                                   :style="authLetterName ? 'background:#dcfce7; color:#15803d; border-color:#86efac;' : 'background:#f1f5f9; color:#334155;'"
                                                   x-text="authLetterName ? 'Palitan File' : 'Pumili ng File'">
                                             </span>
@@ -2691,23 +2699,26 @@ html, body {
                                     {{-- Box 2: Valid ID of Representative --}}
                                     <div x-ref="authIdCard"
                                          @click="$refs.authId.click()" 
-                                         style="background:#fff; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:140px; height:100%; box-sizing:border-box; transition:all .2s;"
-                                         :style="authIdName ? 'border:1.5px solid #10b981; background:#f0fdf4;' : 'border-color:#cbd5e1;'">
+                                         style="background:#ffffff; border:2px dashed #94a3b8; border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:145px; height:100%; box-sizing:border-box; transition:all .2s ease-in-out;"
+                                         :style="authIdName ? 'border:2px solid #10b981 !important; background:#f0fdf4 !important;' : ''"
+                                         onmouseover="if(!this.getAttribute('data-has-file')){ this.style.borderColor='var(--brand,#0E5393)'; this.style.background='#eff6ff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(14,83,147,0.15)'; }"
+                                         onmouseout="if(!this.getAttribute('data-has-file')){ this.style.borderColor='#94a3b8'; this.style.background='#ffffff'; this.style.transform='none'; this.style.boxShadow='none'; }"
+                                         :data-has-file="authIdName ? '1' : ''">
                                         <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;">
-                                            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                            <div style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s;"
                                                  :style="authIdName ? 'background:#dcfce7; color:#15803d;' : 'background:#eff6ff; color:var(--brand);'">
-                                                <i :class="authIdName ? 'fas fa-check' : 'fas fa-id-card'" style="font-size:15px;"></i>
+                                                <i :class="authIdName ? 'fas fa-check' : 'fas fa-id-card'" style="font-size:16px;"></i>
                                             </div>
-                                            <div style="font-size:11.5px; font-weight:800; color:#1e293b; line-height:1.25;">
+                                            <div style="font-size:12px; font-weight:800; color:#1e293b; line-height:1.25;">
                                                 2. Valid ID ng Kinatawan <span style="color:#dc2626;">*</span>
                                             </div>
-                                            <div style="font-size:10px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
+                                            <div style="font-size:10.5px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
                                                  :style="authIdName ? 'color:#15803d; font-weight:700;' : ''"
                                                  x-text="authIdName ? authIdName : 'Valid ID ng Authorized Person'">
                                             </div>
                                         </div>
-                                        <div style="margin-top:8px; width:100%;">
-                                            <span style="font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
+                                        <div style="margin-top:10px; width:100%;">
+                                            <span style="font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
                                                   :style="authIdName ? 'background:#dcfce7; color:#15803d; border-color:#86efac;' : 'background:#f1f5f9; color:#334155;'"
                                                   x-text="authIdName ? 'Palitan File' : 'Pumili ng File'">
                                             </span>
@@ -2718,23 +2729,26 @@ html, body {
                                     {{-- Box 3: Valid ID of Resident Being Claimed For --}}
                                     <div x-ref="authId2Card"
                                          @click="$refs.authId2.click()" 
-                                         style="background:#fff; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:140px; height:100%; box-sizing:border-box; transition:all .2s;"
-                                         :style="authId2Name ? 'border:1.5px solid #10b981; background:#f0fdf4;' : 'border-color:#cbd5e1;'">
+                                         style="background:#ffffff; border:2px dashed #94a3b8; border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:145px; height:100%; box-sizing:border-box; transition:all .2s ease-in-out;"
+                                         :style="authId2Name ? 'border:2px solid #10b981 !important; background:#f0fdf4 !important;' : ''"
+                                         onmouseover="if(!this.getAttribute('data-has-file')){ this.style.borderColor='var(--brand,#0E5393)'; this.style.background='#eff6ff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(14,83,147,0.15)'; }"
+                                         onmouseout="if(!this.getAttribute('data-has-file')){ this.style.borderColor='#94a3b8'; this.style.background='#ffffff'; this.style.transform='none'; this.style.boxShadow='none'; }"
+                                         :data-has-file="authId2Name ? '1' : ''">
                                         <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;">
-                                            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                            <div style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s;"
                                                  :style="authId2Name ? 'background:#dcfce7; color:#15803d;' : 'background:#eff6ff; color:var(--brand);'">
-                                                <i :class="authId2Name ? 'fas fa-check' : 'fas fa-user-check'" style="font-size:15px;"></i>
+                                                <i :class="authId2Name ? 'fas fa-check' : 'fas fa-user-check'" style="font-size:16px;"></i>
                                             </div>
-                                            <div style="font-size:11.5px; font-weight:800; color:#1e293b; line-height:1.25;">
+                                            <div style="font-size:12px; font-weight:800; color:#1e293b; line-height:1.25;">
                                                 3. Valid ID ng May-ari <span style="color:#dc2626;">*</span>
                                             </div>
-                                            <div style="font-size:10px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
+                                            <div style="font-size:10.5px; font-weight:600; color:#64748b; line-height:1.25; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"
                                                  :style="authId2Name ? 'color:#15803d; font-weight:700;' : ''"
                                                  x-text="authId2Name ? authId2Name : 'Valid ID ng taong kinakatawan'">
                                             </div>
                                         </div>
-                                        <div style="margin-top:8px; width:100%;">
-                                            <span style="font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
+                                        <div style="margin-top:10px; width:100%;">
+                                            <span style="font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:6px; display:inline-block; border:1px solid #cbd5e1;"
                                                   :style="authId2Name ? 'background:#dcfce7; color:#15803d; border-color:#86efac;' : 'background:#f1f5f9; color:#334155;'"
                                                   x-text="authId2Name ? 'Palitan File' : 'Pumili ng File'">
                                             </span>
@@ -2786,7 +2800,7 @@ html, body {
                                                     <option value="Child">Child</option>
                                                     <option value="Sibling">Sibling</option>
                                                     <option value="Legal Guardian">Legal Guardian</option>
-                                                    <option value="Others">Others</option>
+                                                    <option value="Others" x-show="selectedDoc !== 'yumao'" :disabled="selectedDoc === 'yumao'">Others</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -3001,9 +3015,9 @@ html, body {
                         </div>
                         <div x-show="selectedDoc==='yumao'" class="sblk">
                             <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-ribbon"></i> Yumao Details</div>
-                            <div class="fgrid2 fgrp">
-                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Claimant Full Name</label><input type="text" name="claimant_name" class="finput"></div>
-                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Relasyon sa Yumao</label><input type="text" name="claimant_relation" placeholder="e.g. Asawa, Anak" class="finput"></div>
+                            <div class="fgrp">
+                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Claimant Full Name</label>
+                                <input type="text" name="claimant_name" class="finput" placeholder="Buong pangalan ng kukuha ng dokumento">
                             </div>
                         </div>
 
@@ -4649,14 +4663,9 @@ html, body {
                 <span style="font-size: 11px; color: #64748b; font-weight: 600;">
                     <i class="fas fa-shield-alt" style="color:var(--brand);"></i> Verification Document Preview
                 </span>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <a :href="photoModalUrl" target="_blank" class="btn-plain btn-ghost btn-sm" style="background:#eff6ff; color:#0E5393; font-weight:800; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
-                        <i class="fas fa-external-link-alt"></i> Open Tab
-                    </a>
-                    <button type="button" @click="viewPhotoModal = false" class="btn-plain btn-ghost btn-sm" style="background:#e2e8f0; color:#1e293b; font-weight:800; padding:6px 16px; border-radius:8px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
-                        <i class="fas fa-arrow-left"></i> Close / Bumalik
-                    </button>
-                </div>
+                <button type="button" @click="viewPhotoModal = false" class="btn-plain btn-ghost btn-sm" style="background:#e2e8f0; color:#1e293b; font-weight:800; padding:6px 16px; border-radius:8px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fas fa-arrow-left"></i> Close / Bumalik
+                </button>
             </div>
         </div>
     </div>

@@ -14,6 +14,7 @@ function officePortal() {
         openPetTracker: false,
         openArchivedPetsModal: false,
         templateUploadModal: false,
+        digitalIdStatusFilter: 'all',
         officeRep: {
             province: 'Cavite',
             city: 'Dasmariñas',
@@ -177,6 +178,11 @@ function officePortal() {
         },
         get digitalIdSuggestions() {
             let list = this.allResidents;
+            if (this.digitalIdStatusFilter === 'has_id') {
+                list = list.filter(r => r.digital_id_generated);
+            } else if (this.digitalIdStatusFilter === 'no_id') {
+                list = list.filter(r => !r.digital_id_generated);
+            }
             if (this.digitalIdSearch && this.digitalIdSearch.trim().length > 0) {
                 const q = this.digitalIdSearch.toLowerCase().trim();
                 list = list.filter(r => {
@@ -250,6 +256,8 @@ function officePortal() {
             else if (this.activeFilter === 'kdbm') list = list.filter(r => r.memberships && r.memberships.includes('KDBM'));
             else if (this.activeFilter === 'official') list = list.filter(r => r.memberships && r.memberships.includes('Barangay Official'));
             else if (this.activeFilter === 'any_membership') list = list.filter(r => r.memberships && r.memberships.length > 0);
+            else if (this.activeFilter === 'has_digital_id') list = list.filter(r => r.digital_id_generated);
+            else if (this.activeFilter === 'no_digital_id') list = list.filter(r => !r.digital_id_generated);
             return list;
         },
         get totalMasterlistPages() {
@@ -278,10 +286,18 @@ function officePortal() {
             this.showProfile = true;
         },
         openEdit(id) {
+            const found = this.allResidents.find(x => x.id === id);
+            if (found) {
+                this.editUser = Object.assign({}, found);
+                this.editPhotoPreview = found.photo || null;
+                this.openEditModal = true;
+            }
             fetch('/office/' + id + '/edit').then(r => r.json()).then(data => {
                 this.editUser = data;
                 this.editPhotoPreview = data.photo || null;
                 this.openEditModal = true;
+            }).catch(err => {
+                console.error('Error fetching edit data:', err);
             });
         },
         viewFamily(r) {

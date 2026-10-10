@@ -524,6 +524,46 @@ $docConfigs = [
                     </button>
                 </div>
             </div>
+
+            {{-- Submitted / Approved Valid ID Proof Section --}}
+            <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:11px;padding:13px;margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <div style="font-size:9.5px;font-weight:900;color:var(--brand-dark);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-id-card" style="color:var(--brand);"></i> Submitted Valid ID / Verification Proof
+                    </div>
+                    <span x-show="selectedUser.id_type" class="pill" style="background:#eff6ff;color:var(--brand);font-size:9px;font-weight:800;" x-text="selectedUser.id_type"></span>
+                </div>
+                
+                <template x-if="selectedUser.voter_id_photo">
+                    <div style="display:flex;align-items:center;gap:12px;background:#fff;padding:8px 12px;border-radius:9px;border:1px solid #e2e8f0;cursor:pointer;transition:all .15s;"
+                         @click="viewPhoto(selectedUser.voter_id_photo, selectedUser.name + ' - ' + (selectedUser.id_type || 'Valid ID'))"
+                         onmouseover="this.style.borderColor='var(--brand)';this.style.background='#f0f7ff';"
+                         onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#fff';"
+                         title="I-click upang suriin sa buong laki">
+                        <img :src="selectedUser.voter_id_photo"
+                             style="width:52px;height:38px;border-radius:6px;object-fit:cover;border:1px solid #cbd5e1;flex-shrink:0;"
+                             alt="Valid ID">
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:11.5px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                <i class="fas fa-check-circle" style="color:#10b981;"></i> Naka-attach na Valid ID
+                            </div>
+                            <div style="font-size:10px;font-weight:600;color:#64748b;">
+                                I-click ang preview upang masuri ang dokumento
+                            </div>
+                        </div>
+                        <button type="button" class="btn-plain btn-ghost" style="font-size:11px;font-weight:800;color:var(--brand);padding:4px 10px;border-radius:6px;background:#eff6ff;pointer-events:none;">
+                            <i class="fas fa-search-plus"></i> View ID
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="!selectedUser.voter_id_photo">
+                    <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:#94a3b8;padding:4px 2px;">
+                        <i class="fas fa-info-circle"></i> Walang naka-upload na kopya ng Valid ID para sa residente na ito.
+                    </div>
+                </template>
+            </div>
+
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;">
                 <button class="btn-plain btn-edit" style="justify-content:center;"><i class="fas fa-print"></i> Print</button>
                 <button @click="openEdit(selectedUser.id);showProfile=false" class="btn-grad" style="justify-content:center;"><i class="fas fa-edit"></i> Edit</button>
@@ -1485,9 +1525,32 @@ $docConfigs = [
 
             {{-- 1. SCROLLABLE RESIDENTS LIST (Shown when no resident is currently selected) --}}
             <div x-show="!digitalIdResident" style="margin-top:12px;">
+                {{-- Digital ID Status Filter Buttons --}}
+                <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap;">
+                    <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-right:2px;">Filter:</span>
+                    <button type="button" @click="digitalIdStatusFilter='all'" 
+                            class="pill"
+                            :style="digitalIdStatusFilter==='all' ? 'background:#0E5393;color:#fff;border:1px solid #0E5393;' : 'background:#fff;color:#64748b;border:1px solid #cbd5e1;'"
+                            style="cursor:pointer;padding:4px 11px;font-size:10px;font-weight:800;border-radius:99px;transition:all .15s;">
+                        All (<span x-text="allResidents.length"></span>)
+                    </button>
+                    <button type="button" @click="digitalIdStatusFilter='has_id'" 
+                            class="pill"
+                            :style="digitalIdStatusFilter==='has_id' ? 'background:#15803d;color:#fff;border:1px solid #15803d;' : 'background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;'"
+                            style="cursor:pointer;padding:4px 11px;font-size:10px;font-weight:800;border-radius:99px;transition:all .15s;">
+                        <i class="fas fa-check-circle"></i> With Digital ID (<span x-text="allResidents.filter(r => r.digital_id_generated).length"></span>)
+                    </button>
+                    <button type="button" @click="digitalIdStatusFilter='no_id'" 
+                            class="pill"
+                            :style="digitalIdStatusFilter==='no_id' ? 'background:#d97706;color:#fff;border:1px solid #d97706;' : 'background:#fffbeb;color:#b45309;border:1px solid #fde68a;'"
+                            style="cursor:pointer;padding:4px 11px;font-size:10px;font-weight:800;border-radius:99px;transition:all .15s;">
+                        <i class="fas fa-clock"></i> No Digital ID Yet (<span x-text="allResidents.filter(r => !r.digital_id_generated).length"></span>)
+                    </button>
+                </div>
+
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px;">
                     <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">
-                        All Residents (<span x-text="digitalIdSuggestions.length"></span>)
+                        Filtered Residents (<span x-text="digitalIdSuggestions.length"></span>)
                     </div>
                     <div style="font-size:9px;color:var(--light);font-weight:600;">Click any resident below to view or generate ID</div>
                 </div>
@@ -1745,9 +1808,6 @@ $docConfigs = [
                 Naka-attach ang patunay o dokumentong ito sa talaan. Maaari itong buksan o i-download sa hiwalay na tab:
             </p>
             <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-                <a id="photo-lightbox-fallback-open" href="#" target="_blank" class="btn-grad" style="padding:7px 16px;font-size:11px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                    <i class="fas fa-external-link-alt"></i> Buksan sa Bagong Tab
-                </a>
                 <a id="photo-lightbox-fallback-dl" href="#" download class="btn-plain btn-edit" style="padding:7px 16px;font-size:11px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
                     <i class="fas fa-download"></i> I-download File
                 </a>
@@ -1756,9 +1816,6 @@ $docConfigs = [
 
         {{-- Bottom Controls --}}
         <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
-            <a id="photo-lightbox-action-btn" href="#" target="_blank" style="background:#0E5393;color:#ffffff;border:none;border-radius:8px;padding:7px 16px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);text-decoration:none;">
-                <i class="fas fa-external-link-alt"></i> Buksan sa Bagong Tab
-            </a>
             <button type="button" onclick="closeLightbox()" style="background:#ffffff;color:#0f172a;border:none;border-radius:8px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all .15s;"
                     onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
                 <i class="fas fa-arrow-left"></i> Close / Bumalik

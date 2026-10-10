@@ -322,12 +322,19 @@ html, body {
 
     @php
         $allResidents = $users->map(function($u) {
+            $userObj = $u->user;
+            if (!$userObj && !empty($u->resident_code)) {
+                $userObj = \App\Models\User::where('resident_code', $u->resident_code)->first();
+            }
+            $voterIdRaw = $userObj?->voter_id_photo ?? $u->voter_id_photo ?? null;
+            $voterIdUrl = $voterIdRaw ? asset('storage/' . ltrim($voterIdRaw, '/')) : null;
             return [
                 'id'               => $u->id,
                 'first_name'       => $u->first_name,
                 'last_name'        => $u->last_name,
                 'name'             => $u->first_name . ' ' . $u->last_name,
                 'code'             => $u->resident_code ?? 'NO-CODE',
+                'resident_code'    => $u->resident_code ?? 'NO-CODE',
                 'address'          => $u->address ?? '',
                 'birthday'         => $u->birthday ?? '',
                 'gender'           => $u->gender ?? '',
@@ -350,12 +357,15 @@ html, body {
                 'relationship'     => $u->relationship ?? 'Member',
                 'verification_status'=> $u->verification_status ?? 'verified',
                 'memberships'      => is_array($u->memberships) ? $u->memberships : (is_string($u->memberships) ? json_decode($u->memberships, true) : []),
-                'email'            => $u->user ? $u->user->email : '',
+                'email'            => $userObj ? $userObj->email : '',
                 'photo'            => $u->photo ? asset('storage/' . $u->photo) : null,
-                'digital_id_generated' => ($u->user && $u->user->digitalId && $u->user->digitalId->status === 'generated') ? true : false,
-                'digital_id_number' => ($u->user && $u->user->digitalId && $u->user->digitalId->status === 'generated') ? $u->user->digitalId->id_number : null,
-                'emergency_contact_name' => ($u->user && $u->user->digitalId) ? ($u->user->digitalId->emergency_contact_name ?? '') : ($u->emergency_contact_name ?? ''),
-                'emergency_contact_number' => ($u->user && $u->user->digitalId) ? ($u->user->digitalId->emergency_contact_number ?? '') : ($u->emergency_contact_number ?? ''),
+                'voter_id_photo'   => $voterIdUrl,
+                'id_type'          => $u->id_type ?? $userObj?->id_type ?? 'Government Valid ID',
+                'voter_status'     => $u->voter_status ?? $userObj?->voter_status ?? 'N/A',
+                'digital_id_generated' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? true : false,
+                'digital_id_number' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? $userObj->digitalId->id_number : null,
+                'emergency_contact_name' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->emergency_contact_name ?? '') : ($u->emergency_contact_name ?? ''),
+                'emergency_contact_number' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->emergency_contact_number ?? '') : ($u->emergency_contact_number ?? ''),
             ];
         });
     @endphp
@@ -562,6 +572,13 @@ html, body {
                         <option value="official" style="color:#333;">Barangay Official</option>
                         <option value="4ps" style="color:#333;">4Ps</option>
                         <option value="kdbm" style="color:#333;">KDBM</option>
+                    </select>
+                    <select x-model="activeFilter" @change="if(activeFilter) activeTab='masterlist'"
+                            style="appearance:none; padding-right:24px; background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat:no-repeat; background-position:right .7em top 50%; background-size:.65em auto; outline:none; cursor:pointer;"
+                            :class="['has_digital_id', 'no_digital_id'].includes(activeFilter) ? 'filter-pill filter-pill-active' : 'filter-pill'">
+                        <option value="" style="color:#333;">Digital ID Status...</option>
+                        <option value="has_digital_id" style="color:#333;">With Digital ID</option>
+                        <option value="no_digital_id" style="color:#333;">No Digital ID</option>
                     </select>
                 </div>
                 <div class="tab-row">
