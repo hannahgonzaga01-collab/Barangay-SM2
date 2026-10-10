@@ -1781,36 +1781,40 @@ $docConfigs = [
 </div>
 
 {{-- ══ PHOTO LIGHTBOX MODAL ══ --}}
-<div id="photo-lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;">
+<div id="photo-lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:20px;">
     <div onclick="event.stopPropagation()" style="position:relative;max-width:92vw;max-height:92vh;display:flex;flex-direction:column;align-items:center;">
-        <button type="button" onclick="closeLightbox()" title="Close (Esc)"
-                style="position:absolute;top:-10px;right:-10px;z-index:100;background:#ffffff;color:#0f172a;border:2px solid #ffffff;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,0.5);transition:all .15s;"
-                onmouseover="this.style.background='#dc2626';this.style.color='#ffffff';this.style.borderColor='#dc2626';"
-                onmouseout="this.style.background='#ffffff';this.style.color='#0f172a';this.style.borderColor='#ffffff';">
-            <i class="fas fa-times"></i>
-        </button>
+        
+        {{-- Close Button Top Bar --}}
+        <div style="width:100%;display:flex;justify-content:flex-end;margin-bottom:8px;">
+            <button type="button" onclick="closeLightbox()" title="Close (Esc)"
+                    style="background:rgba(255,255,255,0.2);color:#ffffff;border:1px solid rgba(255,255,255,0.4);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,0.4);transition:all .15s;"
+                    onmouseover="this.style.background='#dc2626';this.style.borderColor='#dc2626';"
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.borderColor='rgba(255,255,255,0.4)';">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
         {{-- Direct Image Display --}}
         <img id="photo-lightbox-img" src="" alt="Proof Preview"
-             style="display:block;max-width:85vw;max-height:74vh;object-fit:contain;border-radius:14px;box-shadow:0 25px 60px rgba(0,0,0,0.6);"
+             style="display:block;max-width:85vw;max-height:74vh;object-fit:contain;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,0.6);"
              onerror="handleLightboxError(this)">
 
         {{-- Direct PDF Display --}}
-        <iframe id="photo-lightbox-pdf" src="" style="display:none;width:85vw;max-width:920px;height:74vh;border:none;border-radius:14px;background:#ffffff;box-shadow:0 25px 60px rgba(0,0,0,0.6);"></iframe>
+        <iframe id="photo-lightbox-pdf" src="" style="display:none;width:85vw;max-width:920px;height:74vh;border:none;border-radius:12px;background:#ffffff;box-shadow:0 25px 60px rgba(0,0,0,0.6);"></iframe>
 
-        {{-- Graceful Fallback Card when image is not directly displayable --}}
-        <div id="photo-lightbox-fallback" style="display:none;max-width:480px;width:90vw;background:#ffffff;border-radius:16px;padding:26px 20px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.6);">
-            <div style="width:54px;height:54px;border-radius:50%;background:#eff6ff;color:#0E5393;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;">
-                <i class="fas fa-file-invoice"></i>
+        {{-- Graceful Fallback Card when image is missing / cannot load --}}
+        <div id="photo-lightbox-fallback" style="display:none;max-width:440px;width:90vw;background:#ffffff;border-radius:16px;padding:26px 20px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.6);">
+            <div style="width:52px;height:52px;border-radius:50%;background:#eff6ff;color:#0E5393;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;">
+                <i class="fas fa-id-card"></i>
             </div>
-            <div style="font-size:13.5px;font-weight:900;color:#0f172a;margin-bottom:6px;" id="photo-lightbox-fallback-title">Dokumento / Patunay</div>
+            <div style="font-size:14px;font-weight:900;color:#0f172a;margin-bottom:6px;" id="photo-lightbox-fallback-title">Valid ID / Patunay</div>
             <p style="font-size:11px;color:#64748b;line-height:1.5;margin-bottom:16px;">
-                Naka-attach ang patunay o dokumentong ito sa talaan. Maaari itong buksan o i-download sa hiwalay na tab:
+                Hindi ma-load ang orihinal na larawan ng dokumentong ito. Maaaring kailangang i-upload muli ang ID proof.
             </p>
             <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-                <a id="photo-lightbox-fallback-dl" href="#" download class="btn-plain btn-edit" style="padding:7px 16px;font-size:11px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                    <i class="fas fa-download"></i> I-download File
-                </a>
+                <button type="button" onclick="closeLightbox()" class="btn-plain btn-edit" style="padding:7px 18px;font-size:11px;">
+                    <i class="fas fa-arrow-left"></i> Isara
+                </button>
             </div>
         </div>
 

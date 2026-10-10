@@ -82,6 +82,7 @@ class RegisteredUserController extends Controller
         $photoPath = null;
         if ($request->hasFile('voter_id_photo')) {
             $photoPath = $request->file('voter_id_photo')->store('voter_ids', 'public');
+            \App\Models\SystemUploadedFile::persist($photoPath, $request->file('voter_id_photo'));
         }
 
         // ── 1. Smart Masterlist Fuzzy Matching ──

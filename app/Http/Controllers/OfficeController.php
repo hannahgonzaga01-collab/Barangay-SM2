@@ -916,6 +916,7 @@ class OfficeController extends Controller
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('residents/photos', 'public');
+            \App\Models\SystemUploadedFile::persist($photoPath, $request->file('photo'));
         }
 
         $head = Resident::create([
@@ -1015,6 +1016,7 @@ class OfficeController extends Controller
 
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('residents/photos', 'public');
+            \App\Models\SystemUploadedFile::persist($photoPath, $request->file('photo'));
         }
 
         $resident->update([

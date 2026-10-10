@@ -530,6 +530,12 @@ html, body {
                 this.photoModalUrl = url;
                 this.photoModalTitle = title;
                 this.viewPhotoModal = true;
+                this.$nextTick(() => {
+                    const fb = document.getElementById('res-photo-error-box');
+                    if (fb) fb.style.display = 'none';
+                    const img = document.getElementById('view-photo-modal-img');
+                    if (img) img.style.display = 'block';
+                });
             },
             selectedIdType: 'PhilSys National ID',
             otherIdType: '',
@@ -4656,7 +4662,20 @@ html, body {
                     <iframe :src="photoModalUrl" style="width: 100%; height: 65vh; border: none; border-radius: 8px; background: #fff;"></iframe>
                 </template>
                 <template x-if="!photoModalUrl || !photoModalUrl.toLowerCase().split('?')[0].endsWith('.pdf')">
-                    <img :src="photoModalUrl" alt="ID Proof" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+                    <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                        <img id="view-photo-modal-img" :src="photoModalUrl" alt="ID Proof" 
+                             style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain; box-shadow: 0 8px 30px rgba(0,0,0,0.5); display:block; margin:0 auto;"
+                             onerror="this.style.display='none'; const fb = document.getElementById('res-photo-error-box'); if(fb) fb.style.display='block';">
+                        <div id="res-photo-error-box" style="display: none; padding: 24px 14px; text-align: center;">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 22px; color: #94a3b8;">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">Walang Nahanap na Larawan</div>
+                            <div style="font-size: 11px; color: #94a3b8; max-width: 320px; margin: 0 auto;">
+                                Hindi ma-load ang orihinal na larawan ng dokumento para sa talaang ito.
+                            </div>
+                        </div>
+                    </div>
                 </template>
             </div>
             <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">

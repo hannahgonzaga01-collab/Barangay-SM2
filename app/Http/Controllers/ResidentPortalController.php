@@ -910,6 +910,7 @@ class ResidentPortalController extends Controller
         $user = auth()->user();
         if ($request->hasFile('voter_id_photo')) {
             $photoPath = $request->file('voter_id_photo')->store('voter_ids', 'public');
+            \App\Models\SystemUploadedFile::persist($photoPath, $request->file('voter_id_photo'));
             
             $idType = $request->input('id_type', 'Valid ID');
             if ($idType === 'Other' && $request->filled('id_type_other')) {
@@ -1049,9 +1050,15 @@ class ResidentPortalController extends Controller
         $authIdPath = null;
         if ($request->file('authorization_letter')) {
             $authLetterPath = $request->file('authorization_letter')->store('authorization_letters', 'public');
+            \App\Models\SystemUploadedFile::persist($authLetterPath, $request->file('authorization_letter'));
         }
         if ($request->file('authorized_id')) {
             $authIdPath = $request->file('authorized_id')->store('authorized_ids', 'public');
+            \App\Models\SystemUploadedFile::persist($authIdPath, $request->file('authorized_id'));
+        }
+        if ($request->file('authorized_id2')) {
+            $authId2Path = $request->file('authorized_id2')->store('authorized_ids', 'public');
+            \App\Models\SystemUploadedFile::persist($authId2Path, $request->file('authorized_id2'));
         }
 
         // Ensure user name is synced before saving

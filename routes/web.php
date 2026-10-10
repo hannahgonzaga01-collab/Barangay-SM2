@@ -283,46 +283,23 @@ Route::get('/storage/{path}', function ($path) {
         }
     }
 
-    // Avatar / Resident photo fallback
+    // 2. Check persistent database storage (SystemUploadedFile)
+    try {
+        $diskTarget = storage_path('app/public/' . $cleanPath);
+        $binary = \App\Models\SystemUploadedFile::restoreToDisk($cleanPath, $diskTarget);
+        if ($binary !== null) {
+            $mime = @mime_content_type($diskTarget) ?: 'image/jpeg';
+            return response($binary, 200)->header('Content-Type', $mime);
+        }
+    } catch (\Throwable $e) {}
+
+    // 3. Avatar / Resident photo fallback
     if (str_contains($cleanPath, 'photos') || str_contains($cleanPath, 'avatar') || str_contains($cleanPath, 'residents') || str_contains($cleanPath, 'users')) {
         return redirect('https://ui-avatars.com/api/?name=Resident&background=0E5393&color=fff&size=128&bold=true');
     }
 
-    // Official verified proof SVG placeholder if file is not found on ephemeral storage
-    $title = 'Patunay / Katibayan (Official Record)';
-    if (str_contains($cleanPath, 'letter')) {
-        $title = 'Authorization Letter Record';
-    } elseif (str_contains($cleanPath, 'id') || str_contains($cleanPath, 'voter')) {
-        $title = 'Identification Proof (Valid ID)';
-    } elseif (str_contains($cleanPath, 'vaccine') || str_contains($cleanPath, 'pet')) {
-        $title = 'Pet Vaccination Certificate Proof';
-    }
-
-    $baseName = htmlspecialchars(basename($cleanPath));
-    $safeTitle = htmlspecialchars($title);
-
-    $svg = <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="700" height="460" viewBox="0 0 700 460">
-    <defs>
-        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#0E5393"/>
-            <stop offset="100%" stop-color="#000052"/>
-        </linearGradient>
-    </defs>
-    <rect width="700" height="460" rx="20" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-    <rect x="24" y="24" width="652" height="72" rx="14" fill="url(#bgGrad)"/>
-    <text x="46" y="68" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="17" font-weight="800" fill="#ffffff" letter-spacing="0.5">BARANGAY SAN MIGUEL II • OFFICIAL PROOF RECORD</text>
-    <rect x="24" y="112" width="652" height="324" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 6"/>
-    <circle cx="350" cy="205" r="46" fill="#eff6ff"/>
-    <path d="M332 190 h36 v30 h-36 z M325 205 h50 M325 215 h50" stroke="#0E5393" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <text x="350" y="286" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="20" font-weight="800" fill="#0f172a" text-anchor="middle">{$safeTitle}</text>
-    <text x="350" y="316" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">Attachment Verified on System • File ID: {$baseName}</text>
-    <rect x="240" y="348" width="220" height="40" rx="20" fill="#0E5393"/>
-    <text x="350" y="373" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">✓ Valid Attachment Proof</text>
-</svg>
-SVG;
-
-    return response($svg, 200)->header('Content-Type', 'image/svg+xml');
+    // 4. Gracefully return 404 for missing documents so the modal's error handler triggers
+    abort(404);
 })->where('path', '.*');
 
 require __DIR__ . '/auth.php';
