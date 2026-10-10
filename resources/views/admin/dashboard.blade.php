@@ -259,7 +259,10 @@
                 },
 
                 openResidentProfile(r) {
-                    this.selectedResident = r;
+                    if (!r) return;
+                    const list = Array.isArray(this.allRes) ? this.allRes : Object.values(this.allRes || {});
+                    const fullRes = list.find(x => x && (x.id === r.id || (r.resident_code && x.resident_code === r.resident_code)));
+                    this.selectedResident = fullRes || r;
                     this.showResidentProfileModal = true;
                 },
 
@@ -4337,7 +4340,7 @@
         </div>
 
         {{-- Resident Profile Modal --}}
-        <div x-show="showResidentProfileModal" x-cloak class="modal-ov" x-transition style="z-index: 600;" @click.self="showResidentProfileModal=false">
+        <div x-show="showResidentProfileModal" x-cloak class="modal-ov" x-transition style="z-index: 1050;" @click.self="showResidentProfileModal=false">
             <div class="modal-box" style="max-width: 620px;" @click.away="showResidentProfileModal=false">
                 <div class="modal-in">
                     <div class="modal-hd">
@@ -4659,36 +4662,50 @@
                                     <th style="padding: 12px; text-align: left; color: var(--muted); text-transform: uppercase;">Relationship</th>
                                     <th style="padding: 12px; text-align: left; color: var(--muted); text-transform: uppercase;">Age / Gender</th>
                                     <th style="padding: 12px; text-align: left; color: var(--muted); text-transform: uppercase;">Voter Status</th>
+                                    <th style="padding: 12px; text-align: right; color: var(--muted); text-transform: uppercase;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-for="m in selectedMembers" :key="m.id">
-                                    <tr style="border-bottom: 1px solid #f8fafc;">
+                                    <tr @click="openResidentProfile(m)"
+                                        style="border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s ease;"
+                                        onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''"
+                                        title="Click to view resident profile">
                                         <td style="padding: 12px;">
                                             <div style="display: flex; align-items: center; gap: 10px;">
-                                                <img :src="m.photo ? '/storage/' + m.photo : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((m.first_name||'') + '+' + (m.last_name||'')) + '&background=0E5393&color=fff'" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;">
-                                                <div style="font-weight: 800; color: var(--text);" x-text="(m.first_name || '') + ' ' + (m.last_name || '')"></div>
+                                                <img :src="m.photo ? '/storage/' + m.photo : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((m.first_name||'') + '+' + (m.last_name||'')) + '&background=0E5393&color=fff'" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
+                                                <div>
+                                                    <div style="font-weight: 800; color: var(--text); font-size: 12px;" x-text="(m.first_name || '') + ' ' + (m.last_name || '')"></div>
+                                                    <div style="font-size: 9px; color: var(--brand); font-weight: 700; display:flex; align-items:center; gap:3px; margin-top:2px;">
+                                                        <i class="fas fa-eye"></i> Click to view profile
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                         <td style="padding: 12px;">
-                                            <span style="background: rgba(14,83,147,0.1); color: var(--brand); padding: 2px 8px; border-radius: 99px; font-size: 9px; font-weight: 800;" x-text="m.relationship || 'Member'"></span>
+                                            <span style="background: rgba(14,83,147,0.1); color: var(--brand); padding: 3px 8px; border-radius: 99px; font-size: 9px; font-weight: 800;" x-text="m.relationship || 'Member'"></span>
                                         </td>
-                                        <td style="padding: 12px; color: var(--muted);">
+                                        <td style="padding: 12px; color: var(--muted); font-weight: 600;">
                                             <span x-text="m.age || '—'"></span> yrs • <span x-text="m.gender || '—'"></span>
                                         </td>
                                         <td style="padding: 12px;">
                                             <template x-if="m.is_voter">
-                                                <span style="background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">REGISTERED</span>
+                                                <span style="background: #dcfce7; color: #15803d; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">REGISTERED</span>
                                             </template>
                                             <template x-if="!m.is_voter">
-                                                <span style="background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900;">NON-VOTER</span>
+                                                <span style="background: #f1f5f9; color: #64748b; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 900;">NON-VOTER</span>
                                             </template>
+                                        </td>
+                                        <td style="padding: 12px; text-align: right;">
+                                            <button type="button" @click.stop="openResidentProfile(m)" class="btn btn-sm btn-primary" style="font-size: 9.5px; padding: 4px 10px; border-radius: 6px; display:inline-flex; align-items:center; gap:4px; font-weight:800;">
+                                                <i class="fas fa-id-card"></i> Profile
+                                            </button>
                                         </td>
                                     </tr>
                                 </template>
                                 <template x-if="selectedMembers.length === 0">
                                     <tr>
-                                        <td colspan="4" style="padding: 30px; text-align: center; color: var(--light); font-weight: 600;">
+                                        <td colspan="5" style="padding: 30px; text-align: center; color: var(--light); font-weight: 600;">
                                             <i class="fas fa-user-slash" style="display: block; font-size: 20px; margin-bottom: 8px; opacity: 0.5;"></i>
                                             No other family members found in this household.
                                         </td>

@@ -22,37 +22,52 @@ class StaffPasswordController extends Controller
     public function sendOtp(Request $request)
     {
         $user = auth()->user();
+        $email = $request->input('email') ?: $user->email;
         
-        if (!$user->email) {
+        if (!$email) {
             return response()->json(['success' => false, 'message' => 'No email address found for this account.']);
         }
 
-        $otp = rand(100000, 999999);
+        $otp = (string) rand(100000, 999999);
         $user->otp = $otp;
         $user->otp_expires_at = Carbon::now()->addMinutes(10);
         $user->save();
 
         try {
-            Mail::to($user->email)->send(new PasswordOtpMail($otp));
-            return response()->json(['success' => true, 'message' => 'OTP has been sent to your email.']);
+            Mail::to($email)->send(new PasswordOtpMail($otp));
+            return response()->json(['success' => true, 'message' => 'OTP has been sent to ' . $email . ' (valid for 10 minutes).']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Failed to send email. Please try again later.']);
+            return response()->json(['success' => false, 'message' => 'Failed to send OTP email: ' . $e->getMessage()]);
         }
     }
 
     public function update(Request $request)
     {
         $user = auth()->user();
-        $isResident = $user->role === 'resident';
 
         $rules = [
             'new_password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed', new \App\Rules\NotRecentPassword($user)],
         ];
 
-        if (!$isResident) {
-            $rules['current_password'] = 'required';
+        $inputOtp = $request->input('otp') ?? $request->input('security_answer');
+
+        if (!empty($inputOtp)) {
+            // Verify OTP for resident or staff
+            if (!$user->otp || strtoupper(trim($inputOtp)) !== strtoupper($user->otp) || ($user->otp_expires_at && Carbon::now()->isAfter($user->otp_expires_at))) {
+                return back()->withErrors(['otp' => 'Invalid or expired OTP code. Please check your email or click Send OTP again.']);
+            }
+
+            // Clear OTP after successful verification
+            $user->otp = null;
+            $user->otp_expires_at = null;
+            $user->save();
+        } elseif ($request->filled('current_password')) {
+            // Alternatively allow current password for staff
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+            }
         } else {
-            $rules['security_answer'] = 'required';
+            return back()->withErrors(['otp' => 'Please enter the 6-digit OTP code sent to your email.']);
         }
 
         $request->validate($rules, [
@@ -61,29 +76,10 @@ class StaffPasswordController extends Controller
             'new_password.not_regex' => 'New password must be one word and cannot contain spaces.',
         ]);
 
-        if (!$isResident) {
-            // Check current password for staff
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors(['current_password' => 'Current password is incorrect.']);
-            }
-        } else {
-            // Check OTP for residents
-            $inputOtp = $request->input('otp', $request->input('security_answer'));
-            if (!$user->otp || strtoupper(trim($inputOtp)) !== strtoupper($user->otp) || ($user->otp_expires_at && Carbon::now()->isAfter($user->otp_expires_at))) {
-                return back()->withErrors(['security_answer' => 'Invalid or expired OTP. Please try again.']);
-            }
-
-            // Clear OTP after successful verification
-            $user->otp = null;
-            $user->otp_expires_at = null;
-            $user->save();
-        }
-
         // Update password
         $user->update(['password' => Hash::make($request->new_password)]);
         $user->recordPasswordHistory($user->password);
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Password changed successfully.');
+        return back()->with('success', 'Password has been updated successfully!');
     }
 }

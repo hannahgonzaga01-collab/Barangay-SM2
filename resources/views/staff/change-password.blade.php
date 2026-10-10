@@ -19,11 +19,17 @@
         showCurrent: false, 
         showNew: false, 
         showConfirm: false,
+        emailInput: '{{ auth()->user()?->email }}',
         otpSent: false,
         otpLoading: false,
         otpMessage: '',
         otpError: false,
         sendOtp() {
+            if (!this.emailInput) {
+                this.otpMessage = 'Please enter your registered email address.';
+                this.otpError = true;
+                return;
+            }
             this.otpLoading = true;
             this.otpError = false;
             fetch('{{ route('staff.password.otp') }}', {
@@ -31,7 +37,8 @@
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
+                },
+                body: JSON.stringify({ email: this.emailInput })
             })
             .then(response => response.json())
             .then(data => {
@@ -77,73 +84,55 @@
                     <form method="POST" action="{{ route('staff.password.update') }}" class="space-y-6">
                         @csrf
 
-                        @if(!$isResident)
-                        {{-- Current Password (ONLY FOR STAFF) --}}
-                        <div>
-                            <label style="display:block; font-size:10px; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Current Password</label>
-                            <div style="position:relative;">
-                                <i class="fas fa-lock" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:12px;"></i>
-                                <input :type="showCurrent ? 'text' : 'password'" name="current_password" required
-                                    style="width:100%; padding:12px 45px 12px 40px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; font-size:13px; font-weight:600; color:#0f172a; outline:none; transition:all 0.2s;"
-                                    placeholder="Enter current password"
-                                    onfocus="this.style.borderColor='#0E5393'; this.style.background='#fff'; this.style.boxShadow='0 0 0 4px rgba(14,83,147,0.1)';"
-                                    onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
-                                <button type="button" @click="showCurrent = !showCurrent" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px; cursor:pointer; background:none; border:none; outline:none;">
-                                    <i class="fas" :class="showCurrent ? 'fa-eye-slash' : 'fa-eye'"></i>
-                                </button>
-                            </div>
-                            @error('current_password')
-                                <p style="font-size:10px; color:#dc2626; font-weight:700; margin-top:6px; display:flex; align-items:center; gap:4px;">
-                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-                        @endif
-
-                        @if($isResident)
-                        {{-- OTP Verification (FOR RESIDENTS) --}}
+                        {{-- EMAIL VERIFICATION & OTP (FOR ALL ROLES: RESIDENTS & OFFICIALS) --}}
                         <div style="background:#eff6ff; padding:20px; border-radius:16px; border:1.5px dashed #0E5393;">
-                            <label style="display:block; font-size:10px; font-weight:900; color:#0E5393; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Email Verification</label>
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                                <label style="display:block; font-size:10px; font-weight:900; color:#0E5393; text-transform:uppercase; letter-spacing:0.08em;">
+                                    <i class="fas fa-shield-alt" style="margin-right:4px;"></i> Step 1: Email Verification
+                                </label>
+                                <span style="font-size:9px; font-weight:800; background:#dbeafe; color:#1d4ed8; padding:2px 8px; border-radius:99px;">OTP SECURITY</span>
+                            </div>
                             <p style="font-size:11px; color:#1e40af; font-weight:600; margin-bottom:12px; line-height:1.4;">
-                                We will send a One-Time Password (OTP) to your registered email address for verification.
+                                Click "Send OTP" to receive a 6-digit One-Time Password on your registered email address.
                             </p>
-                            
-                            <div style="display:flex; gap:10px; margin-bottom:12px;">
+
+                            <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+                                <div style="flex:1; min-width:200px; position:relative;">
+                                    <i class="fas fa-envelope" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#0E5393; font-size:12px;"></i>
+                                    <input type="email" x-model="emailInput" readonly
+                                        style="width:100%; padding:10px 12px 10px 36px; background:#fff; border:1.5px solid #bfdbfe; border-radius:10px; font-size:12px; font-weight:700; color:#0f172a; outline:none;"
+                                        placeholder="Registered email address">
+                                </div>
                                 <button type="button" @click="sendOtp" :disabled="otpLoading"
-                                    style="padding:8px 16px; background:#0E5393; color:#fff; font-size:10px; font-weight:900; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                                    style="padding:10px 18px; background:linear-gradient(135deg,#0E5393 0%,#000052 100%); color:#fff; font-size:10.5px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; border:none; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(14,83,147,0.3); transition:all .15s;">
                                     <i class="fas fa-paper-plane" x-show="!otpLoading"></i>
                                     <i class="fas fa-spinner fa-spin" x-show="otpLoading"></i>
                                     <span x-text="otpSent ? 'Resend OTP' : 'Send OTP'"></span>
                                 </button>
-                                <div x-show="otpMessage" :style="{ color: otpError ? '#dc2626' : '#15803d' }" style="font-size:10px; font-weight:700; display:flex; align-items:center;">
-                                    <span x-text="otpMessage"></span>
-                                </div>
                             </div>
 
-                            <div style="position:relative;">
-                                <i class="fas fa-shield-alt" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#0E5393; font-size:12px;"></i>
-                                <input type="text" name="security_answer" required
-                                    style="width:100%; padding:12px 12px 12px 40px; background:#fff; border:1.5px solid #0E5393; border-radius:12px; font-size:13px; font-weight:700; color:#0f172a; outline:none; transition:all 0.2s;"
-                                    placeholder="Enter the 6-digit OTP">
+                            <div x-show="otpMessage" :style="{ color: otpError ? '#dc2626' : '#15803d', background: otpError ? '#fee2e2' : '#dcfce7', borderColor: otpError ? '#fca5a5' : '#86efac' }" style="font-size:11px; font-weight:700; padding:8px 12px; border-radius:8px; border:1px solid; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                                <i :class="otpError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle'"></i>
+                                <span x-text="otpMessage"></span>
                             </div>
-                            @error('security_answer')
-                                <p style="font-size:10px; color:#dc2626; font-weight:700; margin-top:6px; display:flex; align-items:center; gap:4px;">
-                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-                        @else
-                        {{-- Official Department Account Notification --}}
-                        <div style="background:#eff6ff; padding:16px 20px; border-radius:14px; border:1px solid #bfdbfe; display:flex; align-items:center; gap:12px;">
-                            <div style="width:36px; height:36px; border-radius:10px; background:#0E5393; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
+
                             <div>
-                                <div style="font-size:11px; font-weight:800; color:#0E5393; text-transform:uppercase;">Official Department Account Security</div>
-                                <div style="font-size:11px; color:#1e40af; font-weight:600;">Registered Official Email: <strong>{{ auth()->user()?->email }}</strong> (Secured via OTP & Credential Validation)</div>
+                                <label style="display:block; font-size:10px; font-weight:900; color:#0E5393; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">
+                                    Step 2: Enter 6-Digit OTP Code
+                                </label>
+                                <div style="position:relative;">
+                                    <i class="fas fa-key" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#0E5393; font-size:12px;"></i>
+                                    <input type="text" name="otp" required maxlength="6"
+                                        style="width:100%; padding:12px 12px 12px 40px; background:#fff; border:1.5px solid #0E5393; border-radius:12px; font-size:14px; font-weight:800; letter-spacing:2px; color:#0f172a; outline:none; transition:all 0.2s;"
+                                        placeholder="Paste or enter 6-digit OTP code">
+                                </div>
+                                @error('otp')
+                                    <p style="font-size:10.5px; color:#dc2626; font-weight:700; margin-top:6px; display:flex; align-items:center; gap:4px;">
+                                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                    </p>
+                                @enderror
                             </div>
                         </div>
-                        @endif
 
                         {{-- New Password --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

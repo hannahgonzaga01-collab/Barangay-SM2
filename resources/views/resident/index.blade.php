@@ -4347,26 +4347,44 @@ html, body {
                 </div>
                 @elseif($authUser)
                 {{-- APPROVED / ACTIVE RESIDENT (ALLOW UPGRADING VOTER STATUS OR UPDATING ID) --}}
+                @php
+                    $idPhoto = $authUser->voter_id_photo ?? $authUser->resident?->valid_id_photo ?? null;
+                @endphp
                 <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:11px;padding:12px 14px;margin-bottom:14px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
-                        <div>
-                            <div style="font-size:9.5px;font-weight:900;color:#14532d;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;">
-                                <i class="fas fa-certificate" style="color:#16a34a;"></i> ID Verification:
-                                <span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:99px;font-size:9px;font-weight:900;">
-                                    <i class="fas fa-check-circle"></i> VERIFIED & APPROVED
-                                </span>
-                            </div>
-                            <div style="font-size:10px;font-weight:700;color:#166534;margin-top:3px;">
-                                @if($authUser->is_voter)
-                                    <i class="fas fa-check-circle"></i> Official Registered Voter of Brgy. San Miguel II
-                                @else
-                                    <i class="fas fa-user-check"></i> Verified Resident (Non-Voter)
-                                @endif
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                        <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                            @if($idPhoto)
+                                <div style="position:relative;cursor:pointer;flex-shrink:0;" @click="openPhotoModal('{{ asset('storage/'.$idPhoto) }}', 'Verified Valid ID Proof')" title="Click to view full ID proof">
+                                    <img src="{{ asset('storage/'.$idPhoto) }}" alt="Valid ID Proof" style="width:52px;height:36px;border-radius:6px;object-fit:cover;border:1.5px solid #86efac;box-shadow:0 1px 3px rgba(0,0,0,0.08);" onerror="this.onerror=null; this.style.display='none';">
+                                    <div style="position:absolute;bottom:1px;right:1px;background:rgba(0,0,0,0.65);color:#fff;border-radius:3px;font-size:7px;padding:1px 3px;font-weight:900;"><i class="fas fa-search-plus"></i></div>
+                                </div>
+                            @endif
+                            <div style="min-width:0;">
+                                <div style="font-size:9.5px;font-weight:900;color:#14532d;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                                    <i class="fas fa-certificate" style="color:#16a34a;"></i> ID Verification:
+                                    <span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:99px;font-size:9px;font-weight:900;">
+                                        <i class="fas fa-check-circle"></i> VERIFIED & APPROVED
+                                    </span>
+                                </div>
+                                <div style="font-size:10px;font-weight:700;color:#166534;margin-top:3px;">
+                                    @if($authUser->is_voter)
+                                        <i class="fas fa-check-circle"></i> Official Registered Voter of Brgy. San Miguel II
+                                    @else
+                                        <i class="fas fa-user-check"></i> Verified Resident (Non-Voter)
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                        <button type="button" @click="profileModal=false; idUploadModal=true" style="background:#fff;border:1px solid #86efac;border-radius:6px;padding:4px 10px;font-size:9.5px;font-weight:800;color:#15803d;cursor:pointer;">
-                            <i class="fas fa-upload" style="margin-right:3px;"></i> Update ID Proof
-                        </button>
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            @if($idPhoto)
+                                <button type="button" @click="openPhotoModal('{{ asset('storage/'.$idPhoto) }}', 'Verified Valid ID Proof')" style="background:#15803d;border:none;border-radius:6px;padding:5px 12px;font-size:9.5px;font-weight:800;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(21,128,61,0.25);">
+                                    <i class="fas fa-id-card"></i> View ID Proof
+                                </button>
+                            @endif
+                            <button type="button" @click="profileModal=false; idUploadModal=true" style="background:#fff;border:1px solid #86efac;border-radius:6px;padding:4px 10px;font-size:9px;font-weight:700;color:#15803d;cursor:pointer;display:inline-flex;align-items:center;gap:3px;">
+                                <i class="fas fa-upload" style="font-size:8.5px;"></i> {{ $idPhoto ? 'Update ID' : 'Upload ID Proof' }}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 @endif

@@ -245,11 +245,16 @@ Route::middleware(['auth', 'verified', 'role:admin,peace'])->group(function () {
     Route::get('/peace/sample-template', [\App\Http\Controllers\PeaceController::class, 'sampleTemplate'])->name('peace.sample.template');
 });
 
-// 10. STAFF GENERAL (Admin and all Staff roles)
-Route::middleware(['auth', 'verified', 'role:admin,office,justice,vawc,peace'])->group(function () {
+// 10. AUTHENTICATED USER SECURITY (Admin, Staff, and Residents)
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/staff/change-password', [StaffPasswordController::class, 'show'])->name('staff.password.show');
+    Route::get('/change-password', [StaffPasswordController::class, 'show'])->name('password.change');
     Route::post('/staff/change-password', [StaffPasswordController::class, 'update'])->name('staff.password.update');
     Route::post('/staff/change-password/otp', [StaffPasswordController::class, 'sendOtp'])->name('staff.password.otp');
+});
+
+// 11. STAFF GENERAL (Admin and Staff department roles only)
+Route::middleware(['auth', 'verified', 'role:admin,office,justice,vawc,peace'])->group(function () {
 
     // Department Submitted Reports
     Route::post('/department-reports/submit', [DepartmentReportController::class, 'submit'])->name('department.reports.submit');
