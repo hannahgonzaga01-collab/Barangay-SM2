@@ -78,7 +78,7 @@
                                 <td data-label="Status" style="text-align:center;">
                                     <span x-show="r.is_voter" class="pill pill-voter" style="background:#dbeafe;color:#1e40af;font-size:9.5px;font-weight:900;padding:3px 9px;">Voter</span>
                                     <span x-show="r.is_non_voter" class="pill" style="background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:900;padding:3px 9px;">Non-Voter</span>
-                                    <span x-show="!r.is_voter && !r.is_non_voter" class="pill" style="background:#f1f5f9;color:#64748b;font-size:9px;font-weight:700;">Unspecified</span>
+                                    <span x-show="!r.is_voter && !r.is_non_voter" style="font-size:9.5px;color:#94a3b8;font-weight:700;">N/A</span>
                                 </td>
                                 {{-- Category --}}
                                 <td data-label="Category" style="text-align:left;">
@@ -90,7 +90,7 @@
                                         <span x-show="r.is_student" class="pill pill-student" style="background:#cffafe;color:#0e7490;font-weight:800;">Student</span>
                                         <span x-show="r.is_third_gen" class="pill" style="background:#e0e7ff;color:#3730a3;font-weight:800;">Third Gen</span>
                                         <span x-show="r.memberships && r.memberships.includes('Barangay Official')" class="pill" style="background:#fef9c3;color:#854d0e;border:1px solid #facc15;font-weight:800;"><i class="fas fa-certificate"></i> Official</span>
-                                        <span x-show="!r.is_senior && !r.is_pwd && !r.is_single_parent && !r.is_bedridden && !r.is_student && !r.is_third_gen && !(r.memberships && r.memberships.includes('Barangay Official'))" style="font-size:9.5px;color:#94a3b8;font-style:italic;">Regular</span>
+                                        <span x-show="!r.is_senior && !r.is_pwd && !r.is_single_parent && !r.is_bedridden && !r.is_student && !r.is_third_gen && !(r.memberships && r.memberships.includes('Barangay Official'))" style="font-size:9.5px;color:#94a3b8;font-weight:700;">N/A</span>
                                     </div>
                                 </td>
                                 {{-- Digital ID --}}
@@ -102,7 +102,7 @@
                                         </button>
                                     </template>
                                     <template x-if="!r.digital_id_generated">
-                                        <span style="font-size:9.5px;color:#94a3b8;font-weight:600;">None</span>
+                                        <span style="font-size:9.5px;color:#94a3b8;font-weight:700;">N/A</span>
                                     </template>
                                 </td>
                                 {{-- Actions --}}
@@ -142,6 +142,7 @@
                                 <td data-label="Status" style="text-align:center;">
                                     <span x-show="r.is_voter" class="pill pill-voter" style="background:#dbeafe;color:#1e40af;font-size:9.5px;font-weight:900;padding:3px 9px;">Voter</span>
                                     <span x-show="r.is_non_voter" class="pill" style="background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:900;padding:3px 9px;">Non-Voter</span>
+                                    <span x-show="!r.is_voter && !r.is_non_voter" style="font-size:9.5px;color:#94a3b8;font-weight:700;">N/A</span>
                                 </td>
                                 <td data-label="Household ID" class="res-code" x-text="r.household_id || r.code"></td>
                                 <td data-label="Members" style="text-align:center;">

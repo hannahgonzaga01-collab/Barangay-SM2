@@ -935,8 +935,8 @@ class OfficeController extends Controller
             'address' => $request->address,
             'occupation' => $request->occupation,
             'photo' => $photoPath,
-            'is_voter' => $request->has('is_voter') ? 1 : 0,
-            'is_non_voter' => $request->has('is_non_voter') ? 1 : 0,
+            'is_voter' => $request->boolean('is_voter') ? 1 : 0,
+            'is_non_voter' => $request->boolean('is_non_voter') ? 1 : 0,
             'is_senior' => $request->has('is_senior') ? 1 : 0,
             'is_pwd' => $request->has('is_pwd') ? 1 : 0,
             'is_single_parent' => $request->has('is_single_parent') ? 1 : 0,
@@ -985,7 +985,7 @@ class OfficeController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Resident added successfully!');
+        return redirect()->route('office.index')->with('success', 'Resident added successfully!');
     }
 
     public function edit($id)
@@ -1030,8 +1030,8 @@ class OfficeController extends Controller
             'address' => $request->address,
             'occupation' => $request->occupation,
             'photo' => $photoPath,
-            'is_voter' => $request->has('is_voter') ? 1 : 0,
-            'is_non_voter' => $request->has('is_non_voter') ? 1 : 0,
+            'is_voter' => $request->boolean('is_voter') ? 1 : 0,
+            'is_non_voter' => $request->boolean('is_non_voter') ? 1 : 0,
             'is_senior' => $request->has('is_senior') ? 1 : 0,
             'is_pwd' => $request->has('is_pwd') ? 1 : 0,
             'is_single_parent' => $request->has('is_single_parent') ? 1 : 0,
@@ -1060,8 +1060,8 @@ class OfficeController extends Controller
                 'address' => $request->address,
                 'occupation' => $request->occupation,
                 'photo' => $photoPath,
-                'is_voter' => $request->has('is_voter') ? 1 : 0,
-                'is_non_voter' => $request->has('is_non_voter') ? 1 : 0,
+                'is_voter' => $request->boolean('is_voter') ? 1 : 0,
+                'is_non_voter' => $request->boolean('is_non_voter') ? 1 : 0,
                 'is_senior' => $request->has('is_senior') ? 1 : 0,
                 'is_pwd' => $request->has('is_pwd') ? 1 : 0,
                 'is_single_parent' => $request->has('is_single_parent') ? 1 : 0,
@@ -1106,7 +1106,7 @@ class OfficeController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Resident updated successfully!');
+        return redirect()->route('office.index')->with('success', 'Resident updated successfully!');
     }
 
     public function destroy($id)

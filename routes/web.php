@@ -150,6 +150,7 @@ Route::middleware(['auth', 'verified', 'role:admin,office,staff,barangay_officia
     Route::get('/office/export', [OfficeController::class, 'export'])->name('office.export');
     Route::post('/office', [OfficeController::class, 'store'])->name('office.store');
     Route::get('/office/{id}/edit', [OfficeController::class, 'edit'])->name('office.edit');
+    Route::get('/office/{id}', fn() => redirect()->route('office.index'));
     Route::put('/office/{id}', [OfficeController::class, 'update'])->name('office.update');
     Route::delete('/office/{id}', [OfficeController::class, 'destroy'])->name('office.destroy');
     Route::patch('/office/{id}/archive', [OfficeController::class, 'archive'])->name('office.archive');

@@ -1235,21 +1235,19 @@ $docConfigs = [
                     </div>
                 </div>
                 <div class="fgrp"><label class="flbl">Address *</label><input type="text" name="address" required placeholder="House No., Street, Purok, Barangay San Miguel II" class="finput"></div>
-                {{-- Voter Status (Voter vs Non-Voter ONLY) --}}
+                {{-- Voter Status --}}
                 <div class="fgrp">
-                    <label class="flbl">Voter Status *</label>
-                    <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:9px;">
-                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
-                            <input type="radio" name="voter_type_radio" value="voter" checked @change="$refs.addIsVoter.value=1; $refs.addIsNonVoter.value=0;" style="accent-color:var(--brand);width:15px;height:15px;">
-                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:var(--brand);"><i class="fas fa-vote-yea"></i> Registered Voter</span>
+                    <label class="flbl">Voter Status</label>
+                    <div class="classif-grid">
+                        <label class="classif-lbl">
+                            <input type="checkbox" name="is_voter" value="1" x-ref="addIsVoter" @change="if($el.checked){ $refs.addIsNonVoter.checked=false; }">
+                            <span class="classif-txt">Registered Voter</span>
                         </label>
-                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
-                            <input type="radio" name="voter_type_radio" value="non_voter" @change="$refs.addIsVoter.value=0; $refs.addIsNonVoter.value=1;" style="accent-color:var(--brand);width:15px;height:15px;">
-                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:#92400e;"><i class="fas fa-user-slash"></i> Non-Voter</span>
+                        <label class="classif-lbl">
+                            <input type="checkbox" name="is_non_voter" value="1" x-ref="addIsNonVoter" @change="if($el.checked){ $refs.addIsVoter.checked=false; }">
+                            <span class="classif-txt">Non-Voter</span>
                         </label>
                     </div>
-                    <input type="hidden" name="is_voter" x-ref="addIsVoter" value="1">
-                    <input type="hidden" name="is_non_voter" x-ref="addIsNonVoter" value="0">
                 </div>
 
                 {{-- Categories (Senior, PWD, Solo, Bed-ridden, Student, Third Gen) --}}
@@ -1269,7 +1267,7 @@ $docConfigs = [
                 <div class="fgrp" x-data="{ otherMembership: false }">
                     <label class="flbl">Memberships</label>
                     <div class="classif-grid" style="margin-bottom:7px;">
-                        <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="Barangay Official"><span class="classif-txt"><i class="fas fa-certificate text-amber-500"></i> Brgy Official</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="Barangay Official"><span class="classif-txt">Brgy Official</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="4Ps"><span class="classif-txt">4Ps</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="KDBM"><span class="classif-txt">KDBM</span></label>
                         <label class="classif-lbl"><input type="checkbox" @change="otherMembership = $el.checked"><span class="classif-txt">Others</span></label>
@@ -1353,21 +1351,19 @@ $docConfigs = [
                     <div><label class="flbl">Occupation</label><input type="text" name="occupation" :value="editUser.occupation" class="finput"></div>
                 </div>
                 <div class="fgrp"><label class="flbl">Address</label><input type="text" name="address" :value="editUser.address" class="finput"></div>
-                {{-- Voter Status (Voter vs Non-Voter ONLY) --}}
+                {{-- Voter Status --}}
                 <div class="fgrp">
-                    <label class="flbl">Voter Status *</label>
-                    <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:9px;">
-                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
-                            <input type="radio" name="edit_voter_radio" value="voter" :checked="editUser.is_voter" @change="$refs.editIsVoter.value=1; $refs.editIsNonVoter.value=0;" style="accent-color:var(--brand);width:15px;height:15px;">
-                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:var(--brand);"><i class="fas fa-vote-yea"></i> Registered Voter</span>
+                    <label class="flbl">Voter Status</label>
+                    <div class="classif-grid">
+                        <label class="classif-lbl">
+                            <input type="checkbox" name="is_voter" value="1" x-ref="editIsVoter" :checked="editUser.is_voter" @change="if($el.checked){ $refs.editIsNonVoter.checked=false; }">
+                            <span class="classif-txt">Registered Voter</span>
                         </label>
-                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
-                            <input type="radio" name="edit_voter_radio" value="non_voter" :checked="editUser.is_non_voter" @change="$refs.editIsVoter.value=0; $refs.editIsNonVoter.value=1;" style="accent-color:var(--brand);width:15px;height:15px;">
-                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:#92400e;"><i class="fas fa-user-slash"></i> Non-Voter</span>
+                        <label class="classif-lbl">
+                            <input type="checkbox" name="is_non_voter" value="1" x-ref="editIsNonVoter" :checked="editUser.is_non_voter" @change="if($el.checked){ $refs.editIsVoter.checked=false; }">
+                            <span class="classif-txt">Non-Voter</span>
                         </label>
                     </div>
-                    <input type="hidden" name="is_voter" x-ref="editIsVoter" :value="editUser.is_voter ? 1 : 0">
-                    <input type="hidden" name="is_non_voter" x-ref="editIsNonVoter" :value="editUser.is_non_voter ? 1 : 0">
                 </div>
 
                 {{-- Categories (Senior, PWD, Solo, Bed-ridden, Student, Third Gen) --}}
@@ -1439,7 +1435,7 @@ $docConfigs = [
                 })">
                     <label class="flbl">Memberships</label>
                     <div class="classif-grid" style="margin-bottom:7px;">
-                        <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="Barangay Official" x-model="isOfficial"><span class="classif-txt"><i class="fas fa-certificate text-amber-500"></i> Brgy Official</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="Barangay Official" x-model="isOfficial"><span class="classif-txt">Brgy Official</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="4Ps" x-model="is4ps"><span class="classif-txt">4Ps</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="KDBM" x-model="isKdbm"><span class="classif-txt">KDBM</span></label>
                         <label class="classif-lbl"><input type="checkbox" x-model="otherMembership"><span class="classif-txt">Others</span></label>
