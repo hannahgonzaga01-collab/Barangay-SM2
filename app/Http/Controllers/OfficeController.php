@@ -66,9 +66,11 @@ class OfficeController extends Controller
         $soloParents = Resident::where('is_single_parent', true)->select('id')->get();
         $nonVoters = Resident::where('is_non_voter', true)->select('id')->get();
         $bedridden = Resident::where('is_bedridden', true)->select('id')->get();
+        $thirdGens = Resident::where('is_third_gen', true)->select('id')->get();
         $households = Resident::where('is_household_head', true)->select('id')->get();
         $kdbmCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('KDBM', $u->memberships))->count();
         $fourPsCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('4Ps', $u->memberships))->count();
+        $officialCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('Barangay Official', $u->memberships))->count();
         $anyMembershipCount = $users->filter(fn($u) => is_array($u->memberships) && count($u->memberships) > 0)->count();
 
         $digitalIdRequests = DigitalId::with('user')
@@ -103,7 +105,8 @@ class OfficeController extends Controller
 
         $pendingDocCount = $documentRequests->where('status', 'pending')->count();
         $archivedDocCount = $documentRequests->filter(function ($r) {
-            return $r->status === 'released' && $r->updated_at && $r->updated_at < now()->subDays(30);
+            return ($r->status === 'released' && $r->updated_at && $r->updated_at < now()->subDays(30))
+                || ($r->status === 'disapproved');
         })->count();
         $pendingIdCount = $digitalIdRequests->count();
         $pendingVoters = User::where('role', 'resident')
@@ -164,9 +167,11 @@ class OfficeController extends Controller
             'soloParents',
             'nonVoters',
             'bedridden',
+            'thirdGens',
             'households',
             'kdbmCount',
             'fourPsCount',
+            'officialCount',
             'anyMembershipCount',
             'digitalIdRequests',
 
@@ -226,6 +231,8 @@ class OfficeController extends Controller
             $query->where('is_non_voter', 1);
         } elseif ($filter === 'bedridden') {
             $query->where('is_bedridden', 1);
+        } elseif ($filter === 'third_gen') {
+            $query->where('is_third_gen', 1);
         } elseif ($filter === 'heads') {
             $query->where('is_household_head', 1);
         }
@@ -236,6 +243,8 @@ class OfficeController extends Controller
             $residents = $residents->filter(fn($r) => is_array($r->memberships) && in_array('4Ps', $r->memberships));
         } elseif ($filter === 'kdbm') {
             $residents = $residents->filter(fn($r) => is_array($r->memberships) && in_array('KDBM', $r->memberships));
+        } elseif ($filter === 'official') {
+            $residents = $residents->filter(fn($r) => is_array($r->memberships) && in_array('Barangay Official', $r->memberships));
         } elseif ($filter === 'any_membership') {
             $residents = $residents->filter(fn($r) => is_array($r->memberships) && count($r->memberships) > 0);
         }
@@ -279,6 +288,7 @@ class OfficeController extends Controller
                 'Solo Parent',
                 'Student',
                 'Bed-ridden',
+                'Third Gen',
                 'Household Head',
                 'Household ID',
                 'Relationship to Head',
@@ -313,6 +323,7 @@ class OfficeController extends Controller
                     $r->is_single_parent ? 'Yes' : 'No',
                     $r->is_student ? 'Yes' : 'No',
                     $r->is_bedridden ? 'Yes' : 'No',
+                    $r->is_third_gen ? 'Yes' : 'No',
                     $r->is_household_head ? 'Yes' : 'No',
                     $r->household_id ?? 'N/A',
                     $r->relationship ?? 'N/A',
@@ -480,7 +491,10 @@ class OfficeController extends Controller
 
         $currentStatus = $docRequest->status;
         $newStatus = $request->status;
-        $disapprovalReason = $request->disapproval_reason;
+        if ($newStatus === 'rejected') {
+            $newStatus = 'disapproved';
+        }
+        $disapprovalReason = $request->disapproval_reason ?: $request->rejection_reason;
 
         // Terminal lock: Once a document request is released or disapproved, it cannot be modified
         if (in_array($currentStatus, ['released', 'disapproved'])) {
@@ -497,7 +511,7 @@ class OfficeController extends Controller
 
         $updateData = ['status' => $newStatus];
         if ($newStatus === 'disapproved') {
-            $updateData['disapproval_reason'] = $disapprovalReason;
+            $updateData['disapproval_reason'] = $disapprovalReason ?: 'Request Rejected by Office Staff';
         }
 
         if ($newStatus === 'ready') {
@@ -515,6 +529,10 @@ class OfficeController extends Controller
                 : 'Any available staff (Barangay San Miguel II Hall, Dasmariñas City, Cavite)';
         }
 
+        if ($newStatus === 'released') {
+            $updateData['released_at'] = now();
+        }
+
         $docRequest->update($updateData);
 
         if ($newStatus === 'released' && $docRequest->user) {
@@ -528,6 +546,8 @@ class OfficeController extends Controller
                 $this->handleMoveInRelease($docRequest);
             } elseif ($docTypeKey === 'moveout') {
                 $this->handleMoveOutRelease($docRequest);
+            } elseif (in_array($docTypeKey, ['yumao', 'death', 'deathcertificate', 'pagpapatunayparsayumao', 'burial', 'burialassistance'])) {
+                $this->handleDeathRelease($docRequest);
             }
         }
 
@@ -544,11 +564,13 @@ class OfficeController extends Controller
 
         $docTypeKey = strtolower(str_replace(['-', '_', ' '], '', (string)$docRequest->document_type));
         $msg = $newStatus === 'disapproved' 
-            ? 'Request disapproved. Reason sent to resident.' 
-            : (($newStatus === 'released' && in_array($docTypeKey, ['movein', 'moveout']))
+            ? 'Request rejected and archived. Reason recorded and sent to resident.' 
+            : (($newStatus === 'released' && in_array($docTypeKey, ['movein', 'moveout', 'yumao', 'death', 'deathcertificate', 'pagpapatunayparsayumao', 'burial', 'burialassistance']))
                 ? ($docTypeKey === 'movein'
                     ? 'Status updated to Released. Resident has been automatically added to the Masterlist!'
-                    : 'Status updated to Released. Resident has been transferred to Archived Residents!')
+                    : ($docTypeKey === 'moveout'
+                        ? 'Status updated to Released. Resident has been transferred to Archived Records (Inactive / Relocated)!'
+                        : 'Status updated to Released. Resident has been transferred to Archived Records (Deceased) and account deactivated!'))
                 : 'Status updated to ' . ucfirst($newStatus) . '. Resident notified.');
 
         return redirect()->back()->with('success', $msg);
@@ -736,7 +758,7 @@ class OfficeController extends Controller
                 }
             }
 
-            // 2. Archive the resident
+            // 2. Archive the resident & deactivate account
             if ($resident) {
                 $resident->update([
                     'archived_at' => now(),
@@ -753,10 +775,27 @@ class OfficeController extends Controller
                     ]);
                 }
 
+                // Deactivate user account if attached
+                if ($resident->user) {
+                    $resident->user->update([
+                        'status' => 'inactive',
+                        'is_active' => false,
+                        'voter_status' => 'Transferred / Moved Out',
+                    ]);
+                }
+
                 // Archive any pets associated with resident
                 if (method_exists($resident, 'pets')) {
                     $resident->pets()->update(['is_archived' => true]);
                 }
+            }
+
+            if ($user) {
+                $user->update([
+                    'status' => 'inactive',
+                    'is_active' => false,
+                    'voter_status' => 'Transferred / Moved Out',
+                ]);
             }
 
             // Also check if specific family members are listed in request
@@ -783,14 +822,77 @@ class OfficeController extends Controller
         }
     }
 
+    /**
+     * Automatically archive deceased resident and deactivate user when Death document is released.
+     */
+    protected function handleDeathRelease(DocumentRequest $docRequest): void
+    {
+        try {
+            $user = $docRequest->user;
+            $resident = null;
+
+            // 1. Check claimant_name or ward_name (applicant might be authorized representative for deceased)
+            $targetName = trim($docRequest->claimant_name ?: $docRequest->ward_name ?: '');
+            if (!empty($targetName)) {
+                $parts = preg_split('/\s+/', $targetName);
+                $lName = count($parts) > 1 ? array_pop($parts) : '';
+                $fName = implode(' ', $parts);
+                if ($fName) {
+                    $q = Resident::where('first_name', 'like', "%{$fName}%");
+                    if ($lName) { $q->where('last_name', 'like', "%{$lName}%"); }
+                    $resident = $q->whereNull('archived_at')->first();
+                }
+            }
+
+            // 2. If not found, check guest name
+            if (!$resident && ($docRequest->guest_first_name || $docRequest->guest_last_name)) {
+                $resident = Resident::where('first_name', $docRequest->guest_first_name)
+                    ->where('last_name', $docRequest->guest_last_name)
+                    ->first();
+            }
+
+            // 3. If deceased was the direct account resident
+            if (!$resident && $user) {
+                if ($user->resident) {
+                    $resident = $user->resident;
+                } elseif ($user->resident_code) {
+                    $resident = Resident::where('resident_code', $user->resident_code)->first();
+                } else {
+                    $resident = Resident::where('user_id', $user->id)->first();
+                }
+            }
+
+            if ($resident) {
+                $resident->update([
+                    'archived_at' => now(),
+                    'archive_reason' => 'Deceased (Death Document Released)',
+                    'voter_status' => 'Deceased',
+                ]);
+
+                if ($resident->user) {
+                    $resident->user->update([
+                        'status' => 'inactive',
+                        'is_active' => false,
+                        'voter_status' => 'Deceased',
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error handling Death release: ' . $e->getMessage());
+        }
+    }
+
     public function purgeArchivedRequests(Request $request)
     {
         $cutoff = now()->subDays(30);
-        $count = DocumentRequest::where('status', 'released')
-            ->where('updated_at', '<', $cutoff)
+        $count = DocumentRequest::where(function($q) use ($cutoff) {
+                $q->where(function($sub) use ($cutoff) {
+                    $sub->where('status', 'released')->where('updated_at', '<', $cutoff);
+                })->orWhere('status', 'disapproved');
+            })
             ->delete();
 
-        return redirect()->back()->with('success', "Na-clean up at nabura na ang {$count} released document request(s) na nasa archive.");
+        return redirect()->back()->with('success', "Na-clean up at nabura na ang {$count} document request(s) na nasa archive.");
     }
 
     public function destroyDocumentRequest($id)
@@ -838,6 +940,7 @@ class OfficeController extends Controller
             'is_single_parent' => $request->has('is_single_parent') ? 1 : 0,
             'is_student' => $request->has('is_student') ? 1 : 0,
             'is_bedridden' => $request->has('is_bedridden') ? 1 : 0,
+            'is_third_gen' => $request->has('is_third_gen') ? 1 : 0,
             'is_household_head' => $request->has('is_household_head') ? 1 : 0,
             'household_id' => $request->household_id,
             'memberships' => collect($request->memberships)->filter()->count()
@@ -932,6 +1035,7 @@ class OfficeController extends Controller
             'is_single_parent' => $request->has('is_single_parent') ? 1 : 0,
             'is_student' => $request->has('is_student') ? 1 : 0,
             'is_bedridden' => $request->has('is_bedridden') ? 1 : 0,
+            'is_third_gen' => $request->has('is_third_gen') ? 1 : 0,
             'is_household_head' => $request->has('is_household_head') ? 1 : 0,
             'household_id' => $request->household_id,
             'memberships' => $request->has('memberships') && collect($request->memberships)->filter()->count()
@@ -961,6 +1065,7 @@ class OfficeController extends Controller
                 'is_single_parent' => $request->has('is_single_parent') ? 1 : 0,
                 'is_student' => $request->has('is_student') ? 1 : 0,
                 'is_bedridden' => $request->has('is_bedridden') ? 1 : 0,
+                'is_third_gen' => $request->has('is_third_gen') ? 1 : 0,
             ]);
         }
 

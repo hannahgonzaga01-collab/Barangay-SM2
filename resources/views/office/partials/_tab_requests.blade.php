@@ -242,7 +242,7 @@
         <div x-show="docStatusFilter === 'released_archive'" style="padding: 10px 16px; background: #eff6ff; border-bottom: 1.5px solid #bfdbfe; font-size: 11px; color: #1e40af; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
             <div style="display:flex; align-items:center; gap:8px;">
                 <i class="fas fa-archive" style="font-size: 13px; color: #0E5393;"></i>
-                <span><strong>Archived:</strong> Ang mga dokumentong ito ay na-release nang higit 30 araw na.</span>
+                <span><strong>Archived Document Requests:</strong> Listahan ng mga lumang released (30+ days) at rejected document requests. Hiwalay ito sa Masterlist Resident Archives.</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
                 @if(($archivedDocCount ?? 0) > 0)
@@ -262,11 +262,17 @@
             </div>
         </div>
 
-        <style>
-            .active-filter { background:#fff!important; color:#0E5393!important; font-family:inherit!important; font-size:9px!important; font-weight:800!important; padding:4px 10px!important; border-radius:6px!important; border:none!important; box-shadow:0 1px 3px rgba(0,0,0,0.1)!important; cursor:pointer; display:inline-flex!important; align-items:center!important; gap:4px!important; line-height:1.2!important; }
-            .plain-filter { background:transparent!important; color:#64748b!important; font-family:inherit!important; font-size:9px!important; font-weight:700!important; padding:4px 10px!important; border-radius:6px!important; border:none!important; cursor:pointer; display:inline-flex!important; align-items:center!important; gap:4px!important; line-height:1.2!important; }
-            .plain-filter:hover { color:#1e293b!important; }
-        </style>
+        {{-- DEDICATED SEARCH BAR FOR REQUEST ID ON DOC REQ TAB --}}
+        <div style="padding:10px 16px; background:#f8fafc; border-bottom:1.5px solid var(--border); display:flex; align-items:center; gap:10px;">
+            <div style="flex:1; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:12px; pointer-events:none;"></i>
+                <input type="text" x-model="docSearchQuery" placeholder="Search Request ID (e.g. REQ-2026-00035, 00035), Resident Name, or Code..."
+                       style="width:100%; padding:9px 36px 9px 36px; background:#fff; border:1.5px solid var(--border); border-radius:8px; font-size:12px; font-weight:700; color:var(--text); outline:none; transition:border-color .15s, box-shadow .15s;">
+                <button type="button" x-show="docSearchQuery" @click="docSearchQuery=''" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94a3b8; cursor:pointer; font-size:12px;">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+        </div>
 
         <div style="overflow-x:auto;">
             <table class="res-table">
@@ -282,35 +288,41 @@
                 <tbody>
                     @forelse($documentRequests ?? [] as $req)
                     @php
+                        $reqUser = $req->user;
+                        if ($reqUser) {
+                            $displayName = trim(($reqUser->first_name ?? '') . ' ' . ($reqUser->last_name ?? ''));
+                            if (!$displayName) $displayName = $reqUser->name ?? '';
+                            if (!$displayName) $displayName = $reqUser->email ?? 'Unknown User';
+                            $resCode = $reqUser->resident_code ?? '—';
+                            $isGuest = false;
+                        } else {
+                            $displayName = trim(($req->guest_first_name ?? '') . ' ' . ($req->guest_last_name ?? ''));
+                            $resCode = '—';
+                            $isGuest = true;
+                        }
+                        $reqYear = $req->created_at->format('Y');
+                        $reqSeq = str_pad($req->id, 5, '0', STR_PAD_LEFT);
+                        $reqCode = "req-{$reqYear}-{$reqSeq}";
+                        $searchHaystack = strtolower("{$reqCode} {$reqSeq} {$req->id} {$displayName} {$resCode} " . str_replace('_', ' ', $req->document_type) . " " . ($req->claimant_name ?? ''));
                         $isToday = $req->appointment_date === date('Y-m-d');
                         $isFuture = $req->appointment_date > date('Y-m-d');
                         $isOldReleased = $req->status === 'released' && $req->updated_at && $req->updated_at < now()->subDays(30);
+                        $isArchivedDoc = $isOldReleased || ($req->status === 'disapproved');
                         $isOverdue = $req->status === 'pending' && $req->created_at < now()->subHours(48);
                     @endphp
                     <tr id="doc-req-{{ $req->id }}" 
-                        x-show="(docFilter==='all' || (docFilter==='today' && '{{ $isToday ? '1':'0' }}' === '1')) && (
-                            (docStatusFilter==='all' && '{{ $isOldReleased ? '1':'0' }}' === '0') ||
-                            (docStatusFilter==='overdue' && '{{ $isOverdue ? '1':'0' }}' === '1') ||
-                            (docStatusFilter==='released' && '{{ $req->status==='released' && !$isOldReleased ? '1':'0' }}' === '1') ||
-                            (docStatusFilter==='released_archive' && '{{ $isOldReleased ? '1':'0' }}' === '1') ||
-                            (docStatusFilter==='{{ $req->status }}' && docStatusFilter!=='released' && docStatusFilter!=='all' && docStatusFilter!=='released_archive' && docStatusFilter!=='overdue')
+                        x-show="(!docSearchQuery || '{{ $searchHaystack }}'.includes(docSearchQuery.toLowerCase().trim())) && (
+                            (docFilter==='all' || (docFilter==='today' && '{{ $isToday ? '1':'0' }}' === '1')) && (
+                                (docStatusFilter==='all' && '{{ $isArchivedDoc ? '1':'0' }}' === '0') ||
+                                (docStatusFilter==='overdue' && '{{ $isOverdue ? '1':'0' }}' === '1') ||
+                                (docStatusFilter==='released' && '{{ $req->status==='released' && !$isOldReleased ? '1':'0' }}' === '1') ||
+                                (docStatusFilter==='released_archive' && '{{ $isArchivedDoc ? '1':'0' }}' === '1') ||
+                                (docStatusFilter==='disapproved' && '{{ $req->status==='disapproved' ? '1':'0' }}' === '1') ||
+                                (docStatusFilter==='{{ $req->status }}' && docStatusFilter!=='released' && docStatusFilter!=='all' && docStatusFilter!=='released_archive' && docStatusFilter!=='disapproved' && docStatusFilter!=='overdue')
+                            )
                         )"
                         style="transition: background-color 0.5s;">
                         <td data-label="Resident">
-                            @php
-                                $reqUser = $req->user;
-                                if ($reqUser) {
-                                    $displayName = trim(($reqUser->first_name ?? '') . ' ' . ($reqUser->last_name ?? ''));
-                                    if (!$displayName) $displayName = $reqUser->name ?? '';
-                                    if (!$displayName) $displayName = $reqUser->email ?? 'Unknown User';
-                                    $resCode = $reqUser->resident_code ?? '—';
-                                    $isGuest = false;
-                                } else {
-                                    $displayName = trim(($req->guest_first_name ?? '') . ' ' . ($req->guest_last_name ?? ''));
-                                    $resCode = '—';
-                                    $isGuest = true;
-                                }
-                            @endphp
                             <div style="font-size:12px;font-weight:800;color:var(--text);">
                                 {{ $displayName ?: 'Unknown' }}
                                 @if($isGuest)<span style="font-size:7px; background:#fee2e2; color:#dc2626; padding:2px 6px; vertical-align:middle; margin-left:4px; border-radius:4px; font-weight:900; text-transform:uppercase;">GUEST</span>@endif
@@ -326,7 +338,7 @@
                         <td data-label="Document">
                             <div style="font-size:11px;font-weight:800;color:var(--text);">{{ ucwords(str_replace('_',' ',$req->document_type)) }}</div>
                             <div style="font-family:monospace;font-size:9.5px;color:var(--brand);font-weight:800;letter-spacing:0.3px;margin-top:1px;">
-                                REQ-{{ $req->created_at->format('Y') }}-{{ str_pad($req->id, 5, '0', STR_PAD_LEFT) }}
+                                REQ-{{ $reqYear }}-{{ $reqSeq }}
                             </div>
                             @if($req->claimant_type === 'authorized')
                                 <div style="margin-top:4px;">
@@ -373,7 +385,17 @@
                         </td>
                         <td data-label="Status">
                             @if($req->status === 'pending')
-                                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;">
+                                @if($isOverdue)
+                                    <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="status" value="processing">
+                                        <button type="submit" 
+                                                title="Overdue request (>48h) — Click to advance: Overdue ➡️ Processing"
+                                                style="font-size:9.5px;font-weight:900;background:#fee2e2;color:#b91c1c;border:1.5px solid #f87171;padding:4px 10px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .18s;box-shadow:0 1px 3px rgba(185,28,28,0.15);white-space:nowrap;">
+                                            <i class="fas fa-exclamation-triangle"></i> <span>OVERDUE</span> <i class="fas fa-arrow-right" style="font-size:7px;opacity:0.7;"></i>
+                                        </button>
+                                    </form>
+                                @else
                                     <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;">
                                         @csrf @method('PATCH')
                                         <input type="hidden" name="status" value="processing">
@@ -383,12 +405,7 @@
                                             <i class="fas fa-hourglass-half"></i> <span>Pending</span> <i class="fas fa-arrow-right" style="font-size:7px;opacity:0.7;"></i>
                                         </button>
                                     </form>
-                                    @if($isOverdue)
-                                        <span style="font-size:7.5px;background:#ef4444;color:#fff;padding:1px 6px;border-radius:4px;font-weight:900;display:inline-flex;align-items:center;gap:3px;" title="This request has been pending for over 48 hours without action">
-                                            <i class="fas fa-exclamation-circle"></i> OVERDUE
-                                        </span>
-                                    @endif
-                                </div>
+                                @endif
                             @elseif($req->status === 'processing')
                                 <button type="button" 
                                         @click="showReadyModal = true; selectedReq = { id: {{ $req->id }}, type: '{{ ucwords(str_replace('_',' ',$req->document_type)) }}', name: '{{ addslashes($displayName) }}', date: '{{ $req->appointment_date ?? date('Y-m-d') }}', time: '{{ $req->appointment_time ? \Carbon\Carbon::parse($req->appointment_time)->format('H:i') : '08:00' }}' }"
@@ -398,7 +415,7 @@
                                 </button>
                             @elseif($req->status === 'ready')
                                 <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;"
-                                      onsubmit="return confirm('Kumpirmahin: I-release na po ba ang dokumentong ito kay {{ addslashes($displayName) }}?{{ in_array(strtolower(str_replace(['-','_',' '],'',$req->document_type)), ['movein']) ? ' (Awtomatikong maidaragdag ang residente sa Masterlist).' : (in_array(strtolower(str_replace(['-','_',' '],'',$req->document_type)), ['moveout']) ? ' (Awtomatikong ililipat ang residente sa Archived Residents).' : '') }} Ang aksyong ito ay pinal.');">
+                                      onsubmit="return confirm('Kumpirmahin: I-release na po ba ang dokumentong ito kay {{ addslashes($displayName) }}? Ang aksyong ito ay pinal.');">
                                     @csrf @method('PATCH')
                                     <input type="hidden" name="status" value="released">
                                     <button type="submit" 
@@ -412,8 +429,8 @@
                                     <i class="fas fa-box-open"></i> Released
                                 </span>
                             @elseif($req->status === 'disapproved')
-                                <span style="font-size:9.5px;font-weight:900;background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;" title="{{ $req->disapproval_reason ?? 'Request Disapproved' }}">
-                                    <i class="fas fa-times-circle"></i> Disapproved
+                                <span style="font-size:9.5px;font-weight:900;background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;" title="{{ $req->disapproval_reason ?? 'Request Rejected' }}">
+                                    <i class="fas fa-times-circle"></i> Rejected
                                 </span>
                             @else
                                 <span style="font-size:9.5px;font-weight:900;background:#f1f5f9;color:#64748b;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
@@ -481,57 +498,72 @@
                                     <i class="fas fa-print"></i> Print
                                 </button>
                                 
-                                @if($isOldReleased || in_array($req->status, ['released', 'disapproved']))
-                                    <form action="{{ route('office.document.destroy', $req->id) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return confirm('Kumpirmahin: Nais mo bang i-archive ang request record na ito?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="tbl-btn" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;width:auto;padding:0 8px;font-size:9.5px;gap:3px;" title="Archive this record">
-                                            <i class="fas fa-archive"></i> Archive
+                                @if(in_array($req->status, ['pending', 'processing', 'ready']))
+                                    {{-- Direct Release Button --}}
+                                    <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;"
+                                          onsubmit="return confirm('Kumpirmahin: I-release na po ba ang dokumentong ito kay {{ addslashes($displayName) }}?');">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="status" value="released">
+                                        <button type="submit" class="tbl-btn" style="background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Release Document to Resident">
+                                            <i class="fas fa-check-circle"></i> Release
                                         </button>
                                     </form>
-                                @endif
-                                
-                                @if(in_array($req->status, ['pending', 'processing']))
-                                    <div x-data="{ showDisapprove: false, reasonSelect: '', reasonCustom: '' }" style="display:inline;">
-                                        <button @click="showDisapprove = !showDisapprove" type="button" class="tbl-btn" style="background:#fee2e2;color:var(--danger);width:auto;padding:0 8px;font-size:9px;gap:3px;" title="Disapprove Request">
-                                            <i class="fas fa-times"></i> Disapprove
+
+                                    {{-- Reject Button with Modal --}}
+                                    <div x-data="{ showReject: false, reasonSelect: '', reasonCustom: '' }" style="display:inline;">
+                                        <button @click="showReject = !showReject" type="button" class="tbl-btn" style="background:#fee2e2;color:var(--danger);border:1.5px solid #fca5a5;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Reject Request">
+                                            <i class="fas fa-times-circle"></i> Reject
                                         </button>
-                                        <div x-show="showDisapprove" x-cloak class="modal-ov" style="z-index:200;">
-                                            <div class="modal-box" style="max-width:360px;" @click.away="showDisapprove=false">
+                                        <div x-show="showReject" x-cloak class="modal-ov" style="z-index:200;">
+                                            <div class="modal-box" style="max-width:380px;" @click.away="showReject=false">
                                                 <div class="modal-in">
                                                     <div class="modal-hd" style="border-bottom:none;margin-bottom:10px;padding-bottom:0;">
-                                                        <div class="modal-ttl">Disapprove Request</div>
-                                                        <button @click="showDisapprove=false" class="modal-close"><i class="fas fa-times"></i></button>
-                                                    </div>
-                                                <form action="{{ route('office.document.status', $req->id) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <input type="hidden" name="status" value="disapproved">
-                                                    <input type="hidden" name="disapproval_reason" :value="reasonSelect === 'Others' ? reasonCustom : reasonSelect">
-                                                    <div class="fgrp">
-                                                        <label class="flbl">Reason for Disapproval *</label>
-                                                        <select x-model="reasonSelect" required class="finput" style="appearance:auto !important; -webkit-appearance:menulist !important; font-size:12px; height:38px; width:100%; border:1.5px solid #cbd5e1; border-radius:8px; background:#fff; padding:6px 10px; cursor:pointer; margin-bottom:8px;">
-                                                            <option value="">— Select Reason —</option>
-                                                            <option value="Incomplete or Missing Requirements">Incomplete or Missing Requirements</option>
-                                                            <option value="Unclear / Expired Valid ID Uploaded">Unclear / Expired Valid ID Uploaded</option>
-                                                            <option value="Missing Authorization Letter or Representative ID">Missing Authorization Letter or Representative ID</option>
-                                                            <option value="Information / Record Mismatch">Information / Record Mismatch</option>
-                                                            <option value="Not a Registered Resident of Barangay San Miguel II">Not a Registered Resident of Barangay San Miguel II</option>
-                                                            <option value="Duplicate Request Pending">Duplicate Request Pending</option>
-                                                            <option value="Others">Others (Please specify)</option>
-                                                        </select>
-                                                        <div x-show="reasonSelect === 'Others'" x-transition>
-                                                            <textarea x-model="reasonCustom" :required="reasonSelect === 'Others'" class="finput" rows="2" placeholder="Specify reason for disapproval..."></textarea>
+                                                        <div class="modal-ttl" style="display:flex;align-items:center;gap:6px;color:#dc2626;">
+                                                            <i class="fas fa-times-circle"></i> Reject Document Request
                                                         </div>
+                                                        <button @click="showReject=false" class="modal-close"><i class="fas fa-times"></i></button>
                                                     </div>
-                                                    <div style="display:flex;justify-content:flex-end;gap:8px;">
-                                                        <button type="button" @click="showDisapprove=false" class="btn-plain btn-edit">Cancel</button>
-                                                        <button type="submit" class="btn-grad btn-grad-red" style="background:var(--danger);">Submit</button>
-                                                    </div>
-                                                </form>
+                                                    <form action="{{ route('office.document.status', $req->id) }}" method="POST">
+                                                        @csrf @method('PATCH')
+                                                        <input type="hidden" name="status" value="disapproved">
+                                                        <input type="hidden" name="disapproval_reason" :value="reasonSelect === 'Others' ? reasonCustom : reasonSelect">
+                                                        <div class="fgrp" style="text-align:left;">
+                                                            <label class="flbl">Reason for Rejection *</label>
+                                                            <select x-model="reasonSelect" required class="finput" style="appearance:auto !important; -webkit-appearance:menulist !important; font-size:12px; height:38px; width:100%; border:1.5px solid #cbd5e1; border-radius:8px; background:#fff; padding:6px 10px; cursor:pointer; margin-bottom:8px;">
+                                                                <option value="">— Select Reason —</option>
+                                                                <option value="Incomplete or Missing Requirements">Incomplete or Missing Requirements</option>
+                                                                <option value="Unclear / Expired Valid ID Uploaded">Unclear / Expired Valid ID Uploaded</option>
+                                                                <option value="Missing Authorization Letter or Representative ID">Missing Authorization Letter or Representative ID</option>
+                                                                <option value="Information / Record Mismatch">Information / Record Mismatch</option>
+                                                                <option value="Not a Registered Resident of Barangay San Miguel II">Not a Registered Resident of Barangay San Miguel II</option>
+                                                                <option value="Resident Did Not Show Up / Overdue Expired">Resident Did Not Show Up / Overdue Expired</option>
+                                                                <option value="Duplicate Request Pending">Duplicate Request Pending</option>
+                                                                <option value="Others">Others (Please specify)</option>
+                                                            </select>
+                                                            <div x-show="reasonSelect === 'Others'" x-transition>
+                                                                <textarea x-model="reasonCustom" :required="reasonSelect === 'Others'" class="finput" rows="2" placeholder="Specify reason for rejection..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+                                                            <button type="button" @click="showReject=false" class="btn-plain btn-edit">Cancel</button>
+                                                            <button type="submit" class="btn-grad btn-grad-red" style="background:var(--danger);">Reject Request</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                @endif
+                                
+                                @if($isOldReleased || in_array($req->status, ['released', 'disapproved']))
+                                    <form action="{{ route('office.document.destroy', $req->id) }}" method="POST" style="display:inline;margin:0;"
+                                          onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang request record na ito sa archive?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="tbl-btn" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;width:auto;padding:0 8px;font-size:9.5px;gap:3px;" title="Delete this record">
+                                            <i class="fas fa-trash-alt"></i> Delete
+                                        </button>
+                                    </form>
                                 @endif
                             </div>
                         </td>

@@ -33,6 +33,7 @@ class Resident extends Model
         'is_single_parent',
         'is_student',
         'is_bedridden',
+        'is_third_gen',
         'memberships',
         'address',
         'is_household_head',
@@ -53,6 +54,7 @@ class Resident extends Model
         'is_single_parent'  => 'boolean',
         'is_student'        => 'boolean',
         'is_bedridden'      => 'boolean',
+        'is_third_gen'      => 'boolean',
         'is_household_head' => 'boolean',
     ];
 

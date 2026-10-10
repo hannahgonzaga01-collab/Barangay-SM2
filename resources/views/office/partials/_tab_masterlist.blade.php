@@ -27,28 +27,30 @@
                 <thead>
                     <template x-if="activeFilter !== 'heads'">
                         <tr>
-                            <th style="width:45px;text-align:center;">#</th>
-                            <th style="text-align:center;">Photo</th>
-                            <th>Resident Details</th>
-                            <th>Classification</th>
-                            <th>Digital ID</th>
-                            <th>Actions</th>
+                            <th style="width:50px;text-align:center;">#</th>
+                            <th style="width:60px;text-align:center;">Photo</th>
+                            <th style="text-align:left;">Resident Details</th>
+                            <th style="width:115px;text-align:center;">Status</th>
+                            <th style="width:170px;text-align:left;">Category</th>
+                            <th style="width:95px;text-align:center;">Digital ID</th>
+                            <th style="width:145px;text-align:right;">Actions</th>
                         </tr>
                     </template>
                     <template x-if="activeFilter === 'heads'">
                         <tr>
-                            <th style="width:45px;text-align:center;">#</th>
-                            <th style="text-align:center;">Photo</th>
-                            <th>Head's Name</th>
-                            <th>Household ID</th>
-                            <th>Member Count</th>
-                            <th style="text-align:center;"><i class="fas fa-chevron-down" style="font-size:10px;color:#94a3b8;" title="Click row to expand members"></i></th>
+                            <th style="width:50px;text-align:center;">#</th>
+                            <th style="width:60px;text-align:center;">Photo</th>
+                            <th style="text-align:left;">Head's Name & Details</th>
+                            <th style="width:115px;text-align:center;">Status</th>
+                            <th style="width:170px;text-align:left;">Household ID</th>
+                            <th style="width:95px;text-align:center;">Members</th>
+                            <th style="width:145px;text-align:right;">Actions</th>
                         </tr>
                     </template>
                 </thead>
                 <template x-if="filteredResidents.length === 0">
                     <tbody>
-                        <tr><td colspan="6"><div class="empty-st"><i class="fas fa-users"></i><p>No record found</p></div></td></tr>
+                        <tr><td colspan="7"><div class="empty-st"><i class="fas fa-users"></i><p>No record found</p></div></td></tr>
                     </tbody>
                 </template>
                 <template x-for="(r, index) in paginatedResidents" :key="r.id">
@@ -58,45 +60,59 @@
                                 :style="r.is_household_head ? 'background:#f8fafc; cursor:pointer;' : ''"
                                 @click="if(r.is_household_head) viewFamily(r)"
                                 class="res-row-hover">
-                                <td style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);" x-text="(masterlistPage - 1) * masterlistPerPage + index + 1"></td>
-                                <td style="text-align:center;">
+                                <td data-label="#" style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);" x-text="(masterlistPage - 1) * masterlistPerPage + index + 1"></td>
+                                <td data-label="Photo" style="text-align:center;">
                                      <img :src="r.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
                                          x-on:error="$el.src='https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
                                          style="width:36px;height:36px;border-radius:9px;object-fit:cover;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.1);display:block;margin:0 auto;">
                                 </td>
-                                <td>
-                                    <div style="display:flex;align-items:center;gap:6px;">
+                                <td data-label="Resident Details">
+                                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                                         <div class="res-name" x-text="r.name"></div>
                                         <span x-show="r.is_household_head" style="font-size:8px;background:var(--brand);color:#fff;padding:1px 5px;border-radius:4px;font-weight:900;text-transform:uppercase;">Head</span>
                                     </div>
                                     <div class="res-code" x-text="r.code+' • '+(r.contact||'No contact')"></div>
                                     <div class="res-code" style="text-transform:lowercase;font-weight:700;color:var(--brand);margin-top:2px;" x-show="r.email"><i class="fas fa-envelope"></i> <span x-text="r.email"></span></div>
                                 </td>
-                                <td>
-                                    <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-start;">
-                                        <span x-show="r.is_voter" class="pill pill-voter">Voter</span>
-                                        <span x-show="r.is_non_voter" class="pill pill-voter" style="background:#fef3c7;color:#a16207;">Non-Voter</span>
-                                        <span x-show="r.is_pwd" class="pill pill-pwd">PWD</span>
-                                        <span x-show="r.is_bedridden" class="pill pill-pwd" style="background:#fee2e2;color:#dc2626;">Bed-ridden</span>
-                                        <span x-show="r.is_senior" class="pill pill-senior">Senior</span>
-                                        <span x-show="r.is_single_parent" class="pill pill-solo">Solo</span>
+                                {{-- Status (Voter vs Non-Voter ONLY) --}}
+                                <td data-label="Status" style="text-align:center;">
+                                    <span x-show="r.is_voter" class="pill pill-voter" style="background:#dbeafe;color:#1e40af;font-size:9.5px;font-weight:900;padding:3px 9px;">Voter</span>
+                                    <span x-show="r.is_non_voter" class="pill" style="background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:900;padding:3px 9px;">Non-Voter</span>
+                                    <span x-show="!r.is_voter && !r.is_non_voter" class="pill" style="background:#f1f5f9;color:#64748b;font-size:9px;font-weight:700;">Unspecified</span>
+                                </td>
+                                {{-- Category --}}
+                                <td data-label="Category" style="text-align:left;">
+                                    <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+                                        <span x-show="r.is_senior" class="pill pill-senior" style="background:#ffedd5;color:#c2410c;font-weight:800;">Senior</span>
+                                        <span x-show="r.is_pwd" class="pill pill-pwd" style="background:#ede9fe;color:#6d28d9;font-weight:800;">PWD</span>
+                                        <span x-show="r.is_single_parent" class="pill pill-solo" style="background:#fce7f3;color:#be185d;font-weight:800;">Solo Parent</span>
+                                        <span x-show="r.is_bedridden" class="pill" style="background:#fee2e2;color:#b91c1c;font-weight:800;">Bed-ridden</span>
+                                        <span x-show="r.is_student" class="pill pill-student" style="background:#cffafe;color:#0e7490;font-weight:800;">Student</span>
+                                        <span x-show="r.is_third_gen" class="pill" style="background:#e0e7ff;color:#3730a3;font-weight:800;">Third Gen</span>
+                                        <span x-show="r.memberships && r.memberships.includes('Barangay Official')" class="pill" style="background:#fef9c3;color:#854d0e;border:1px solid #facc15;font-weight:800;"><i class="fas fa-certificate"></i> Official</span>
+                                        <span x-show="!r.is_senior && !r.is_pwd && !r.is_single_parent && !r.is_bedridden && !r.is_student && !r.is_third_gen && !(r.memberships && r.memberships.includes('Barangay Official'))" style="font-size:9.5px;color:#94a3b8;font-style:italic;">Regular</span>
                                     </div>
                                 </td>
-                                <td style="text-align:center;">
+                                {{-- Digital ID --}}
+                                <td data-label="Digital ID" style="text-align:center;">
                                     <template x-if="r.digital_id_generated">
-                                        <button @click="selectDigitalIdResident(r); openDigitalId=true;"
-                                                class="btn-outline" style="font-size:9px;padding:3px 8px;border-radius:99px;border:1.5px solid var(--brand);color:var(--brand);background:#fff;display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
+                                        <button type="button" @click.stop="selectDigitalIdResident(r); openDigitalId=true;"
+                                                class="btn-outline" style="font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:99px;border:1.5px solid var(--brand);color:var(--brand);background:#fff;display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
                                             <i class="fas fa-id-card"></i> View ID
                                         </button>
                                     </template>
+                                    <template x-if="!r.digital_id_generated">
+                                        <span style="font-size:9.5px;color:#94a3b8;font-weight:600;">None</span>
+                                    </template>
                                 </td>
-                                <td>
+                                {{-- Actions --}}
+                                <td data-label="Actions" style="text-align:right;">
                                     <div class="tbl-acts">
-                                        <button @click="openProfile(r)" class="tbl-btn tbl-view" title="View"><i class="fas fa-eye"></i></button>
-                                        <button @click="openAddPetModal=true; petTypeSelection=''; selectedUser=r; petPhotoPreview=null; vaccineProofPreview=null;" class="tbl-btn tbl-pet" title="Pet"><i class="fas fa-paw"></i></button>
-                                        <button @click="openEdit(r.id)" class="tbl-btn tbl-edit" title="Edit"><i class="fas fa-edit"></i></button>
+                                        <button type="button" @click.stop="openProfile(r)" class="tbl-btn tbl-view" title="View"><i class="fas fa-eye"></i></button>
+                                        <button type="button" @click.stop="openAddPetModal=true; petTypeSelection=''; selectedUser=r; petPhotoPreview=null; vaccineProofPreview=null;" class="tbl-btn tbl-pet" title="Pet"><i class="fas fa-paw"></i></button>
+                                        <button type="button" @click.stop="openEdit(r.id)" class="tbl-btn tbl-edit" title="Edit"><i class="fas fa-edit"></i></button>
                                         <button type="button"
-                                                @click="archiveTarget={id:r.id,name:r.name}; archiveModal=true"
+                                                @click.stop="archiveTarget={id:r.id,name:r.name}; archiveModal=true"
                                                 class="tbl-btn" title="Archive"
                                                 style="width:30px;height:30px;border-radius:7px;background:#fef3c7;color:#d97706;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;">
                                             <i class="fas fa-archive"></i>
@@ -110,26 +126,32 @@
                                 style="cursor:pointer;transition:background .15s;"
                                 onmouseover="this.style.background='#eff6ff'"
                                 onmouseout="this.style.background=''">
-                                <td style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);" x-text="(masterlistPage - 1) * masterlistPerPage + index + 1"></td>
-                                <td style="text-align:center;">
+                                <td data-label="#" style="text-align:center;font-size:11px;font-weight:800;color:var(--muted);" x-text="(masterlistPage - 1) * masterlistPerPage + index + 1"></td>
+                                <td data-label="Photo" style="text-align:center;">
                                     <img :src="r.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
                                          x-on:error="$el.src='https://ui-avatars.com/api/?name='+encodeURIComponent(r.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
                                          style="width:36px;height:36px;border-radius:9px;object-fit:cover;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.1);display:block;margin:0 auto;">
                                 </td>
-                                <td>
+                                <td data-label="Head's Details">
                                     <div style="display:flex;align-items:center;gap:6px;">
                                         <div class="res-name" x-text="r.name"></div>
                                         <span style="font-size:8px;background:var(--brand);color:#fff;padding:1px 5px;border-radius:4px;font-weight:900;text-transform:uppercase;">Head</span>
                                     </div>
                                     <div class="res-code" x-text="r.address"></div>
                                 </td>
-                                <td class="res-code" x-text="r.household_id || r.code"></td>
-                                <td style="text-align:center;">
+                                <td data-label="Status" style="text-align:center;">
+                                    <span x-show="r.is_voter" class="pill pill-voter" style="background:#dbeafe;color:#1e40af;font-size:9.5px;font-weight:900;padding:3px 9px;">Voter</span>
+                                    <span x-show="r.is_non_voter" class="pill" style="background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:900;padding:3px 9px;">Non-Voter</span>
+                                </td>
+                                <td data-label="Household ID" class="res-code" x-text="r.household_id || r.code"></td>
+                                <td data-label="Members" style="text-align:center;">
                                     <div class="res-name" x-text="allResidents.filter(m => m.household_head_id === r.id).length + 1"></div>
                                     <div style="font-size:8px;color:var(--muted);font-weight:700;text-transform:uppercase;">Members</div>
                                 </td>
-                                <td style="text-align:center;">
-                                    <i class="fas fa-chevron-right" style="font-size:11px;color:#94a3b8;"></i>
+                                <td data-label="Actions" style="text-align:right;">
+                                    <button type="button" @click.stop="viewFamily(r)" class="btn-plain btn-sm" style="font-size:10px;padding:5px 10px;background:#eff6ff;color:var(--brand);border-radius:6px;border:none;cursor:pointer;">
+                                        <i class="fas fa-users"></i> View Members
+                                    </button>
                                 </td>
                             </tr>
                         </template>
@@ -194,6 +216,13 @@
                 <input type="text" x-model="searchArchivedRes" placeholder="Search archived resident by name or code..."
                        style="width:100%;padding:7px 12px 7px 30px;background:#fff;border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;outline:none;">
             </div>
+            <select x-model="filterArchivedResBadge" class="finput fselect" style="width:auto;font-size:11px;padding:6px 12px;">
+                <option value="">All Archive Badges</option>
+                <option value="deceased">Deceased Only</option>
+                <option value="moved_out">Moved Out / Inactive Only</option>
+                <option value="manual">Manual Archived Only</option>
+            </select>
+            <input type="date" x-model="filterArchivedResDate" class="finput" style="width:auto;font-size:11px;padding:5px 10px;" title="Filter by archived / release date">
             <select x-model="filterArchivedResGender" class="finput fselect" style="width:auto;font-size:11px;padding:6px 12px;">
                 <option value="">All Genders</option>
                 <option value="Male">Male</option>
@@ -206,16 +235,22 @@
                 <option value="is_single_parent">Solo Parent</option>
                 <option value="is_non_voter">Non-Voters</option>
                 <option value="is_bedridden">Bed-ridden</option>
+                <option value="is_third_gen">Third Gen</option>
             </select>
+            <button type="button" x-show="filterArchivedResBadge || filterArchivedResDate || searchArchivedRes || filterArchivedResGender || filterArchivedResClass" 
+                    @click="filterArchivedResBadge=''; filterArchivedResDate=''; searchArchivedRes=''; filterArchivedResGender=''; filterArchivedResClass=''"
+                    class="btn-plain btn-sm" style="font-size:10px;padding:6px 11px;background:#fee2e2;color:#dc2626;border-radius:6px;border:none;cursor:pointer;">
+                <i class="fas fa-times"></i> Clear Filters
+            </button>
         </div>
 
         <div style="overflow-x:auto;">
-            <table class="res-table master-tbl">
+            <table class="res-table archived-res-tbl">
                 <thead>
                     <tr>
                         <th style="width:50px;text-align:center;">Photo</th>
                         <th>Resident Details</th>
-                        <th>Classification</th>
+                        <th>Status & Category</th>
                         <th>Archived Date & Reason</th>
                         <th style="text-align:right;">Action</th>
                     </tr>
@@ -224,10 +259,18 @@
                     @forelse($archivedResidents ?? [] as $ar)
                     @php
                         $arName = trim(($ar->first_name ?? '') . ' ' . ($ar->last_name ?? ''));
+                        $reasonLower = strtolower($ar->archive_reason ?? '');
+                        $voterLower = strtolower($ar->voter_status ?? '');
+                        $isDeceased = str_contains($reasonLower, 'deceased') || str_contains($reasonLower, 'yumao') || $voterLower === 'deceased';
+                        $isMovedOut = str_contains($reasonLower, 'moved out') || str_contains($reasonLower, 'relocated') || str_contains($reasonLower, 'move out') || str_contains($voterLower, 'transferred');
+                        $badgeType = $isDeceased ? 'deceased' : ($isMovedOut ? 'moved_out' : 'manual');
+                        $arDateFormatted = $ar->archived_at ? \Carbon\Carbon::parse($ar->archived_at)->format('Y-m-d') : ($ar->updated_at ? $ar->updated_at->format('Y-m-d') : '');
                     @endphp
                     <tr x-show="(!searchArchivedRes || '{{ strtolower($arName . ' ' . ($ar->resident_code ?? '')) }}'.includes(searchArchivedRes.toLowerCase())) &&
                                 (!filterArchivedResGender || '{{ $ar->gender }}' === filterArchivedResGender) &&
-                                (!filterArchivedResClass || '{{ $ar->is_senior ? 'is_senior' : ($ar->is_pwd ? 'is_pwd' : ($ar->is_single_parent ? 'is_single_parent' : ($ar->is_non_voter ? 'is_non_voter' : ($ar->is_bedridden ? 'is_bedridden' : '')))) }}' === filterArchivedResClass)"
+                                (!filterArchivedResBadge || '{{ $badgeType }}' === filterArchivedResBadge) &&
+                                (!filterArchivedResDate || '{{ $arDateFormatted }}' === filterArchivedResDate) &&
+                                (!filterArchivedResClass || '{{ $ar->is_senior ? 'is_senior' : ($ar->is_pwd ? 'is_pwd' : ($ar->is_single_parent ? 'is_single_parent' : ($ar->is_non_voter ? 'is_non_voter' : ($ar->is_bedridden ? 'is_bedridden' : ($ar->is_third_gen ? 'is_third_gen' : ''))))) }}' === filterArchivedResClass)"
                         style="transition:all .15s;">
                         <td style="text-align:center;">
                             @php
@@ -238,21 +281,28 @@
                                  style="width:36px;height:36px;border-radius:9px;object-fit:cover;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.1);display:block;margin:0 auto;filter:grayscale(60%);">
                         </td>
                         <td>
-                            <div style="display:flex;align-items:center;gap:6px;">
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                                 <div class="res-name" style="color:#475569;">{{ $arName }}</div>
-                                <span class="pill" style="background:#fee2e2;color:#dc2626;font-size:8px;">Archived</span>
+                                @if($isDeceased)
+                                    <span class="pill" style="background:#0f172a;color:#f8fafc;font-size:8.5px;font-weight:900;letter-spacing:0.04em;"><i class="fas fa-ribbon text-rose-400"></i> DECEASED</span>
+                                @elseif($isMovedOut)
+                                    <span class="pill" style="background:#fee2e2;color:#991b1b;font-size:8.5px;font-weight:900;letter-spacing:0.04em;"><i class="fas fa-sign-out-alt"></i> INACTIVE (Moved Out)</span>
+                                @else
+                                    <span class="pill" style="background:#fef3c7;color:#92400e;font-size:8.5px;font-weight:900;"><i class="fas fa-archive"></i> Archived</span>
+                                @endif
                             </div>
                             <div class="res-code">{{ $ar->resident_code ?? 'NO-CODE' }} • {{ $ar->contact_number ?: 'No contact' }}</div>
                             <div style="font-size:10px;color:var(--muted);margin-top:2px;">{{ $ar->address ?: 'No address' }}</div>
                         </td>
                         <td>
                             <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                @if($ar->is_voter)<span class="pill pill-voter">Voter</span>@endif
+                                @if($ar->is_non_voter)<span class="pill" style="background:#fef3c7;color:#a16207;font-size:8px;">Non-Voter</span>@endif
                                 @if($ar->is_senior)<span class="pill pill-senior">Senior</span>@endif
                                 @if($ar->is_pwd)<span class="pill pill-pwd">PWD</span>@endif
                                 @if($ar->is_single_parent)<span class="pill pill-solo">Solo</span>@endif
-                                @if($ar->is_voter)<span class="pill pill-voter">Voter</span>@endif
-                                @if($ar->is_non_voter)<span class="pill" style="background:#fef3c7;color:#a16207;font-size:8px;">Non-Voter</span>@endif
                                 @if($ar->is_bedridden)<span class="pill" style="background:#fee2e2;color:#dc2626;font-size:8px;">Bed-ridden</span>@endif
+                                @if($ar->is_third_gen)<span class="pill" style="background:#e0e7ff;color:#3730a3;font-size:8px;">Third Gen</span>@endif
                             </div>
                         </td>
                         <td>

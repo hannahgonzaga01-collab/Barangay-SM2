@@ -144,8 +144,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::delete('/admin/backups/delete/{filename}', [\App\Http\Controllers\BackupController::class, 'destroy']);
 });
 
-// 6. OFFICE PORTAL (Admin and Office roles)
-Route::middleware(['auth', 'verified', 'role:admin,office'])->group(function () {
+// 6. OFFICE PORTAL (Admin, Office, Staff, and Barangay Official roles)
+Route::middleware(['auth', 'verified', 'role:admin,office,staff,barangay_official'])->group(function () {
     Route::get('/office', [OfficeController::class, 'index'])->name('office.index');
     Route::get('/office/export', [OfficeController::class, 'export'])->name('office.export');
     Route::post('/office', [OfficeController::class, 'store'])->name('office.store');

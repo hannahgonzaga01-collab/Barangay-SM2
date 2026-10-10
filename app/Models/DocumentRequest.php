@@ -20,7 +20,7 @@ class DocumentRequest extends Model
         'disapproval_reason',
         'birth_month', 'birth_year', 'child_name', 'father_name',
         'mother_name', 'birth_attendant', 'born_from', 'residing_since',
-        'status', 'admin_notes', 'notified_at',
+        'status', 'released_at', 'admin_notes', 'notified_at',
         'appointment_date', 'appointment_time',
         'reschedule_count',
         'pickup_date', 'pickup_time', 'personnel_in_charge', 'alternate_personnel',
@@ -28,6 +28,7 @@ class DocumentRequest extends Model
 
     protected $casts = [
         'notified_at' => 'datetime',
+        'released_at' => 'datetime',
     ];
 
     public function user()

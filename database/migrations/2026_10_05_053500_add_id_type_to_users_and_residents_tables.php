@@ -19,7 +19,7 @@ return new class extends Migration
 
         if (!Schema::hasColumn('residents', 'id_type')) {
             Schema::table('residents', function (Blueprint $table) {
-                $table->string('id_type')->nullable()->after('voter_id_photo');
+                $table->string('id_type')->nullable();
             });
         }
     }

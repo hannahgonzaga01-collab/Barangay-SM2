@@ -2249,6 +2249,20 @@ html, body {
                     function residentDocFormState() {
                         return { 
                             cType: 'self', 
+                            init() {
+                                if (this.selectedDoc === 'yumao') {
+                                    this.cType = 'authorized';
+                                } else if (this.selectedDoc === 'movein' || this.selectedDoc === 'moveout' || this.selectedDoc === 'jobseeker') {
+                                    this.cType = 'self';
+                                }
+                                this.$watch('selectedDoc', (val) => {
+                                    if (val === 'yumao') {
+                                        this.cType = 'authorized';
+                                    } else if (val === 'movein' || val === 'moveout' || val === 'jobseeker') {
+                                        this.cType = 'self';
+                                    }
+                                });
+                            },
                             selfPurpose: '',
                             selfPurposeSelect: '',
                             selfPurposeCustom: '',
@@ -2565,9 +2579,10 @@ html, body {
                                 ];
                             },
                             init() {
-                                this.cType = 'self';
                                 this.validationAlertMsg = '';
-                                if (this.selectedDoc === 'jobseeker') {
+                                if (this.selectedDoc === 'yumao') {
+                                    this.cType = 'authorized';
+                                } else {
                                     this.cType = 'self';
                                 }
                                 if (this.selectedDoc === 'movein') {
@@ -2575,7 +2590,11 @@ html, body {
                                     this.selfPurpose = 'New Resident Transfer / Relocation';
                                 }
                                 this.$watch('selectedDoc', (val) => {
-                                    this.cType = 'self';
+                                    if (val === 'yumao') {
+                                        this.cType = 'authorized';
+                                    } else {
+                                        this.cType = 'self';
+                                    }
                                     this.validationAlertMsg = '';
                                     this.selfPurposeSelect = '';
                                     this.selfPurpose = '';
@@ -2601,17 +2620,27 @@ html, body {
                         <div class="sblk">
                                 <div class="sblk-ttl" style="font-size:13.5px;"><i class="fas fa-user-check"></i> Who is claiming this document?</div>
                                 <div class="fgrid2 fgrp" style="gap:12px;">
-                                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:800;padding:10px 14px;border-radius:10px;transition:all .15s;"
-                                           :style="cType === 'self' ? 'border:2px solid var(--brand);background:#eff6ff;color:var(--brand);box-shadow:0 2px 6px rgba(14,83,147,0.1);' : 'border:1.5px solid #cbd5e1;background:#fff;color:#334155;'">
-                                        <input type="radio" name="claimant_type" value="self" x-model="cType" @change="validationAlertMsg=''" required style="accent-color:var(--brand);width:17px;height:17px;">
+                                    <label style="display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:800;padding:10px 14px;border-radius:10px;transition:all .15s;"
+                                           :style="selectedDoc === 'yumao' ? 'opacity:0.4;cursor:not-allowed;background:#f1f5f9;border:1.5px solid #cbd5e1;color:#94a3b8;' : (cType === 'self' ? 'border:2px solid var(--brand);background:#eff6ff;color:var(--brand);box-shadow:0 2px 6px rgba(14,83,147,0.1);' : 'cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#334155;')">
+                                        <input type="radio" name="claimant_type" value="self" x-model="cType" @change="validationAlertMsg=''" :disabled="selectedDoc === 'yumao'" required style="accent-color:var(--brand);width:17px;height:17px;">
                                         <span>Self (Personal)</span>
                                     </label>
                                     <label style="display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:800;padding:10px 14px;border-radius:10px;transition:all .15s;"
-                                           :style="cType === 'authorized' ? 'border:2px solid var(--brand);background:#eff6ff;color:var(--brand);box-shadow:0 2px 6px rgba(14,83,147,0.1);' : (selectedDoc === 'jobseeker' ? 'opacity:0.45;cursor:not-allowed;background:#f1f5f9;border:1.5px solid #cbd5e1;color:#94a3b8;' : 'cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#334155;')">
-                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" @change="validationAlertMsg=''" :disabled="selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:17px;height:17px;">
+                                           :style="(selectedDoc === 'movein' || selectedDoc === 'moveout' || selectedDoc === 'jobseeker') ? 'opacity:0.4;cursor:not-allowed;background:#f1f5f9;border:1.5px solid #cbd5e1;color:#94a3b8;' : (cType === 'authorized' ? 'border:2px solid var(--brand);background:#eff6ff;color:var(--brand);box-shadow:0 2px 6px rgba(14,83,147,0.1);' : 'cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#334155;')">
+                                        <input type="radio" name="claimant_type" value="authorized" x-model="cType" @change="validationAlertMsg=''" :disabled="selectedDoc === 'movein' || selectedDoc === 'moveout' || selectedDoc === 'jobseeker'" required style="accent-color:var(--brand);width:17px;height:17px;">
                                         <span>Authorized Person</span>
                                     </label>
                                 </div>
+                                <template x-if="selectedDoc === 'yumao'">
+                                    <div style="background:#fef2f2;border:2px solid #ef4444;border-radius:10px;padding:12px 15px;margin-top:10px;font-size:13px;color:#991b1b;font-weight:700;line-height:1.55;">
+                                        <i class="fas fa-ribbon" style="color:#ef4444;font-size:16px;"></i> <strong>Authorized Representative Required:</strong> Para sa Pagpapatunay para sa Yumao, Authorized Representative (kamag-anak o kinatawan) lamang ang maaaring mag-asikaso at kumuha sa Barangay Hall.
+                                    </div>
+                                </template>
+                                <template x-if="selectedDoc === 'movein' || selectedDoc === 'moveout'">
+                                    <div style="background:#f0fdf4;border:2px solid #10b981;border-radius:10px;padding:12px 15px;margin-top:10px;font-size:13px;color:#065f46;font-weight:700;line-height:1.55;">
+                                        <i class="fas fa-home" style="color:#10b981;font-size:16px;"></i> <strong>Personal Appearance Strictly Required:</strong> Ang pag-asikaso ng Move-In at Move-Out certification ay personal lamang na inaasikaso ng mismong residente (Personal / Self-Request lamang).
+                                    </div>
+                                </template>
                                 <template x-if="selectedDoc === 'jobseeker'">
                                     <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:12px 15px;margin-top:10px;font-size:13px;color:#78350f;font-weight:700;line-height:1.55;">
                                         <i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:16px;"></i> <strong>Personal Appearance Strictly Required (RA 11261):</strong> Bawal po ang Authorized Representative sa First-Time Jobseeker Certificate dahil kailangan pong personal na pirmahan ng aplikante ang Sworn Undertaking sa Barangay Hall.
@@ -2721,7 +2750,9 @@ html, body {
                                     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px dashed #bfdbfe;" :style="index === applicants.length - 1 ? 'border-bottom:none;margin-bottom:0;padding-bottom:0;' : ''">
                                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
                                             <p style="font-size:13px;color:var(--brand);font-weight:900;text-transform:uppercase;">
-                                                <i class="fas fa-user"></i> Applicant Details <span x-text="applicants.length > 1 ? '#' + (index + 1) : ''"></span>
+                                                <i :class="selectedDoc === 'yumao' ? 'fas fa-ribbon' : 'fas fa-user'"></i> 
+                                                <span x-text="selectedDoc === 'yumao' ? 'Detalye ng Yumao / Pumanaw na Residente' : 'Applicant Details'">Applicant Details</span> 
+                                                <span x-text="applicants.length > 1 ? '#' + (index + 1) : ''"></span>
                                             </p>
                                             <button type="button" x-show="applicants.length > 1" @click="applicants.splice(index, 1)" style="font-size:12px;color:var(--danger);font-weight:800;background:none;border:none;cursor:pointer;">
                                                 <i class="fas fa-minus-circle"></i> REMOVE
@@ -2731,12 +2762,12 @@ html, body {
                                         {{-- Row 1: First Name & Last Name (Matching Self tab) --}}
                                         <div class="fgrid2 fgrp">
                                             <div>
-                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">First Name * <span style="font-size:11px;opacity:.7;">(Applicant)</span></label>
-                                                <input type="text" :name="'applicants['+index+'][first_name]'" class="finput" placeholder="First Name" :required="cType === 'authorized'" x-model="app.first_name">
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;"><span x-text="selectedDoc === 'yumao' ? 'First Name ng Pumanaw *' : 'First Name * (Applicant)'">First Name *</span></label>
+                                                <input type="text" :name="'applicants['+index+'][first_name]'" class="finput" :placeholder="selectedDoc === 'yumao' ? 'Unang Pangalan ng Pumanaw' : 'First Name'" :required="cType === 'authorized'" x-model="app.first_name">
                                             </div>
                                             <div>
-                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Last Name * <span style="font-size:11px;opacity:.7;">(Applicant)</span></label>
-                                                <input type="text" :name="'applicants['+index+'][last_name]'" class="finput" placeholder="Last Name" :required="cType === 'authorized'" x-model="app.last_name">
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;"><span x-text="selectedDoc === 'yumao' ? 'Last Name ng Pumanaw *' : 'Last Name * (Applicant)'">Last Name *</span></label>
+                                                <input type="text" :name="'applicants['+index+'][last_name]'" class="finput" :placeholder="selectedDoc === 'yumao' ? 'Apelyido ng Pumanaw' : 'Last Name'" :required="cType === 'authorized'" x-model="app.last_name">
                                             </div>
                                         </div>
 
@@ -2747,7 +2778,7 @@ html, body {
                                                 <input type="text" :name="'applicants['+index+'][middle_name]'" class="finput" placeholder="Middle Name" x-model="app.middle_name">
                                             </div>
                                             <div>
-                                                <label class="flbl" style="font-size:12.5px;font-weight:800;">Relationship to Applicant *</label>
+                                                <label class="flbl" style="font-size:12.5px;font-weight:800;"><span x-text="selectedDoc === 'yumao' ? 'Relasyon sa Yumao *' : 'Relationship to Applicant *'">Relationship to Applicant *</span></label>
                                                 <select :name="'applicants['+index+'][relation]'" class="finput fselect" :required="cType === 'authorized'" x-model="app.relation">
                                                     <option value="">— Select Relationship —</option>
                                                     <option value="Parent">Parent</option>

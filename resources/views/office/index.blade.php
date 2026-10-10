@@ -107,17 +107,31 @@ html, body {
 .res-table thead tr{background:#f8fafc;}
 .res-table th{padding:12px 15px;font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:left;}
 
-.master-tbl{table-layout:fixed;}
-.master-tbl th:nth-child(1){text-align:center;width:65px;}
-.master-tbl th:nth-child(2){width:35%;}
-.master-tbl th:nth-child(3){width:25%;}
-.master-tbl th:nth-child(4){text-align:center;width:15%;}
-.master-tbl th:nth-child(5){text-align:right;width:15%;}
+.master-tbl{table-layout:fixed;width:100%;}
+.master-tbl th:nth-child(1), .master-tbl td:nth-child(1){width:50px;text-align:center;}
+.master-tbl th:nth-child(2), .master-tbl td:nth-child(2){width:60px;text-align:center;}
+.master-tbl th:nth-child(3), .master-tbl td:nth-child(3){width:auto;text-align:left;}
+.master-tbl th:nth-child(4), .master-tbl td:nth-child(4){width:115px;text-align:center;}
+.master-tbl th:nth-child(5), .master-tbl td:nth-child(5){width:170px;text-align:left;}
+.master-tbl th:nth-child(6), .master-tbl td:nth-child(6){width:95px;text-align:center;}
+.master-tbl th:nth-child(7), .master-tbl td:nth-child(7){width:145px;text-align:right;}
+
+.archived-res-tbl{width:100%;}
+.archived-res-tbl th:nth-child(1), .archived-res-tbl td:nth-child(1){width:60px;text-align:center;}
+.archived-res-tbl th:nth-child(2), .archived-res-tbl td:nth-child(2){width:auto;text-align:left;}
+.archived-res-tbl th:nth-child(3), .archived-res-tbl td:nth-child(3){width:170px;text-align:left;}
+.archived-res-tbl th:nth-child(4), .archived-res-tbl td:nth-child(4){width:210px;text-align:left;}
+.archived-res-tbl th:nth-child(5), .archived-res-tbl td:nth-child(5){width:140px;text-align:right;}
 
 .res-table th:last-child{text-align:right;}
 .res-table thead tr th { border-bottom: 2px solid #e2e8f0; }
 
     @media (max-width: 768px) {
+        .master-tbl, .archived-res-tbl { table-layout: auto !important; }
+        .master-tbl th, .master-tbl td, .archived-res-tbl th, .archived-res-tbl td {
+            width: 100% !important;
+            text-align: right !important;
+        }
         .res-table thead { display: none; }
         .res-table tr { 
             display: block; 
@@ -329,6 +343,7 @@ html, body {
                 'is_single_parent' => $u->is_single_parent ? true : false,
                 'is_student'       => $u->is_student ? true : false,
                 'is_bedridden'     => $u->is_bedridden ? true : false,
+                'is_third_gen'     => $u->is_third_gen ? true : false,
                 'is_household_head'=> $u->is_household_head ? true : false,
                 'household_id'     => $u->household_id,
                 'household_head_id'=> $u->household_head_id,
@@ -530,19 +545,21 @@ html, body {
                     </select>
                     <select x-model="activeFilter" @change="if(activeFilter) activeTab='masterlist'"
                             style="appearance:none; padding-right:24px; background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat:no-repeat; background-position:right .7em top 50%; background-size:.65em auto; outline:none; cursor:pointer;"
-                            :class="['senior','pwd','solo','nonvoter','bedridden'].includes(activeFilter) ? 'filter-pill filter-pill-active' : 'filter-pill'">
+                            :class="['senior','pwd','solo','nonvoter','bedridden','third_gen'].includes(activeFilter) ? 'filter-pill filter-pill-active' : 'filter-pill'">
                         <option value="" style="color:#333;">Classification...</option>
                         <option value="senior" style="color:#333;">Seniors</option>
                         <option value="pwd" style="color:#333;">PWD</option>
                         <option value="solo" style="color:#333;">Solo Parent</option>
                         <option value="nonvoter" style="color:#333;">Non-Voters</option>
                         <option value="bedridden" style="color:#333;">Bed-ridden</option>
+                        <option value="third_gen" style="color:#333;">Third Gen</option>
                     </select>
                     <select x-model="activeFilter" @change="if(activeFilter) activeTab='masterlist'"
                             style="appearance:none; padding-right:24px; background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat:no-repeat; background-position:right .7em top 50%; background-size:.65em auto; outline:none; cursor:pointer;"
-                            :class="['any_membership', '4ps', 'kdbm'].includes(activeFilter) ? 'filter-pill filter-pill-active' : 'filter-pill'">
+                            :class="['any_membership', '4ps', 'kdbm', 'official'].includes(activeFilter) ? 'filter-pill filter-pill-active' : 'filter-pill'">
                         <option value="" style="color:#333;">Select Membership...</option>
                         <option value="any_membership" style="color:#333;">All Memberships</option>
+                        <option value="official" style="color:#333;">Barangay Official</option>
                         <option value="4ps" style="color:#333;">4Ps</option>
                         <option value="kdbm" style="color:#333;">KDBM</option>
                     </select>

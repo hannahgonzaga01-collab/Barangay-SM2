@@ -1235,17 +1235,41 @@ $docConfigs = [
                     </div>
                 </div>
                 <div class="fgrp"><label class="flbl">Address *</label><input type="text" name="address" required placeholder="House No., Street, Purok, Barangay San Miguel II" class="finput"></div>
+                {{-- Voter Status (Voter vs Non-Voter ONLY) --}}
                 <div class="fgrp">
-                    <label class="flbl">Classifications</label>
+                    <label class="flbl">Voter Status *</label>
+                    <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:9px;">
+                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
+                            <input type="radio" name="voter_type_radio" value="voter" checked @change="$refs.addIsVoter.value=1; $refs.addIsNonVoter.value=0;" style="accent-color:var(--brand);width:15px;height:15px;">
+                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:var(--brand);"><i class="fas fa-vote-yea"></i> Registered Voter</span>
+                        </label>
+                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
+                            <input type="radio" name="voter_type_radio" value="non_voter" @change="$refs.addIsVoter.value=0; $refs.addIsNonVoter.value=1;" style="accent-color:var(--brand);width:15px;height:15px;">
+                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:#92400e;"><i class="fas fa-user-slash"></i> Non-Voter</span>
+                        </label>
+                    </div>
+                    <input type="hidden" name="is_voter" x-ref="addIsVoter" value="1">
+                    <input type="hidden" name="is_non_voter" x-ref="addIsNonVoter" value="0">
+                </div>
+
+                {{-- Categories (Senior, PWD, Solo, Bed-ridden, Student, Third Gen) --}}
+                <div class="fgrp">
+                    <label class="flbl">Category (Optional)</label>
                     <div class="classif-grid">
-                        @foreach(['is_voter'=>'Voter','is_non_voter'=>'Non Voter','is_senior'=>'Senior Citizen','is_pwd'=>'PWD','is_single_parent'=>'Solo Parent','is_student'=>'Student','is_bedridden'=>'Bed-ridden'] as $field=>$label)
-                        <label class="classif-lbl"><input type="checkbox" name="{{ $field }}" value="1"><span class="classif-txt">{{ $label }}</span></label>
-                        @endforeach
+                        <label class="classif-lbl"><input type="checkbox" name="is_senior" value="1"><span class="classif-txt">Senior Citizen</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_pwd" value="1"><span class="classif-txt">PWD</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_single_parent" value="1"><span class="classif-txt">Solo Parent</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_bedridden" value="1"><span class="classif-txt">Bed-ridden</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_student" value="1"><span class="classif-txt">Student</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_third_gen" value="1"><span class="classif-txt">Third Gen</span></label>
                     </div>
                 </div>
+
+                {{-- Memberships (Barangay Official, 4Ps, KDBM, Others) --}}
                 <div class="fgrp" x-data="{ otherMembership: false }">
                     <label class="flbl">Memberships</label>
                     <div class="classif-grid" style="margin-bottom:7px;">
+                        <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="Barangay Official"><span class="classif-txt"><i class="fas fa-certificate text-amber-500"></i> Brgy Official</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="4Ps"><span class="classif-txt">4Ps</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="KDBM"><span class="classif-txt">KDBM</span></label>
                         <label class="classif-lbl"><input type="checkbox" @change="otherMembership = $el.checked"><span class="classif-txt">Others</span></label>
@@ -1329,12 +1353,33 @@ $docConfigs = [
                     <div><label class="flbl">Occupation</label><input type="text" name="occupation" :value="editUser.occupation" class="finput"></div>
                 </div>
                 <div class="fgrp"><label class="flbl">Address</label><input type="text" name="address" :value="editUser.address" class="finput"></div>
+                {{-- Voter Status (Voter vs Non-Voter ONLY) --}}
                 <div class="fgrp">
-                    <label class="flbl">Classifications</label>
+                    <label class="flbl">Voter Status *</label>
+                    <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:9px;">
+                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
+                            <input type="radio" name="edit_voter_radio" value="voter" :checked="editUser.is_voter" @change="$refs.editIsVoter.value=1; $refs.editIsNonVoter.value=0;" style="accent-color:var(--brand);width:15px;height:15px;">
+                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:var(--brand);"><i class="fas fa-vote-yea"></i> Registered Voter</span>
+                        </label>
+                        <label class="classif-lbl" style="justify-content:center;padding:10px;">
+                            <input type="radio" name="edit_voter_radio" value="non_voter" :checked="editUser.is_non_voter" @change="$refs.editIsVoter.value=0; $refs.editIsNonVoter.value=1;" style="accent-color:var(--brand);width:15px;height:15px;">
+                            <span class="classif-txt" style="font-size:11px;font-weight:800;color:#92400e;"><i class="fas fa-user-slash"></i> Non-Voter</span>
+                        </label>
+                    </div>
+                    <input type="hidden" name="is_voter" x-ref="editIsVoter" :value="editUser.is_voter ? 1 : 0">
+                    <input type="hidden" name="is_non_voter" x-ref="editIsNonVoter" :value="editUser.is_non_voter ? 1 : 0">
+                </div>
+
+                {{-- Categories (Senior, PWD, Solo, Bed-ridden, Student, Third Gen) --}}
+                <div class="fgrp">
+                    <label class="flbl">Category (Optional)</label>
                     <div class="classif-grid">
-                        @foreach(['is_voter'=>'Voter','is_non_voter'=>'Non Voter','is_senior'=>'Senior Citizen','is_pwd'=>'PWD','is_single_parent'=>'Solo Parent','is_student'=>'Student','is_bedridden'=>'Bed-ridden'] as $field=>$label)
-                        <label class="classif-lbl"><input type="checkbox" name="{{ $field }}" value="1" :checked="editUser.{{ $field }}"><span class="classif-txt">{{ $label }}</span></label>
-                        @endforeach
+                        <label class="classif-lbl"><input type="checkbox" name="is_senior" value="1" :checked="editUser.is_senior"><span class="classif-txt">Senior Citizen</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_pwd" value="1" :checked="editUser.is_pwd"><span class="classif-txt">PWD</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_single_parent" value="1" :checked="editUser.is_single_parent"><span class="classif-txt">Solo Parent</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_bedridden" value="1" :checked="editUser.is_bedridden"><span class="classif-txt">Bed-ridden</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_student" value="1" :checked="editUser.is_student"><span class="classif-txt">Student</span></label>
+                        <label class="classif-lbl"><input type="checkbox" name="is_third_gen" value="1" :checked="editUser.is_third_gen"><span class="classif-txt">Third Gen</span></label>
                     </div>
                 </div>
                 <div class="fgrp" x-data="{ isHead: false, householdId: '', familyMembers: [] }" 
@@ -1371,6 +1416,7 @@ $docConfigs = [
                     </div>
                 </div>
                 <div class="fgrp" x-data="{
+                    isOfficial: false,
                     is4ps: false,
                     isKdbm: false,
                     otherValue: '',
@@ -1379,9 +1425,10 @@ $docConfigs = [
                 x-init="$watch('editUser', val => {
                     let m = val.memberships || [];
                     if(typeof m === 'string') { try { m = JSON.parse(m) || []; } catch(e){ m = []; } }
+                    isOfficial = m.includes('Barangay Official');
                     is4ps = m.includes('4Ps');
                     isKdbm = m.includes('KDBM');
-                    let others = m.filter(x => x !== '4Ps' && x !== 'KDBM' && x !== '' && x !== null);
+                    let others = m.filter(x => x !== 'Barangay Official' && x !== '4Ps' && x !== 'KDBM' && x !== '' && x !== null);
                     if(others.length > 0) {
                         otherMembership = true;
                         otherValue = others[0];
@@ -1392,6 +1439,7 @@ $docConfigs = [
                 })">
                     <label class="flbl">Memberships</label>
                     <div class="classif-grid" style="margin-bottom:7px;">
+                        <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="Barangay Official" x-model="isOfficial"><span class="classif-txt"><i class="fas fa-certificate text-amber-500"></i> Brgy Official</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="4Ps" x-model="is4ps"><span class="classif-txt">4Ps</span></label>
                         <label class="classif-lbl"><input type="checkbox" name="memberships[]" value="KDBM" x-model="isKdbm"><span class="classif-txt">KDBM</span></label>
                         <label class="classif-lbl"><input type="checkbox" x-model="otherMembership"><span class="classif-txt">Others</span></label>

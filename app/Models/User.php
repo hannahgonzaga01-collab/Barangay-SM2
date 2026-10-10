@@ -41,6 +41,7 @@ class User extends Authenticatable
         'is_single_parent',
         'is_student',
         'is_bedridden',
+        'is_third_gen',
         'security_question',
         'security_answer',
         'password_history',
@@ -69,6 +70,7 @@ class User extends Authenticatable
             'is_single_parent' => 'boolean',
             'is_student' => 'boolean',
             'is_bedridden' => 'boolean',
+            'is_third_gen' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

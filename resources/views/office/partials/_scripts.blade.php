@@ -89,12 +89,17 @@ function officePortal() {
         selectedReq: { id: null, type: '', name: '', date: '', time: '08:00' },
         docFilter: 'all',
         docStatusFilter: 'all',
+        docSearchQuery: '',
+        rejectModal: false,
+        rejectTarget: { id: null, code: '', name: '', reason: '' },
         masterlistSubView: 'active',
         masterlistPage: 1,
         masterlistPerPage: 25,
         searchArchivedRes: '',
         filterArchivedResGender: '',
         filterArchivedResClass: '',
+        filterArchivedResBadge: '',
+        filterArchivedResDate: '',
 
         // Document Specifics
         openDoc: '',
@@ -239,9 +244,11 @@ function officePortal() {
             else if (this.activeFilter === 'pwd') list = list.filter(r => r.is_pwd);
             else if (this.activeFilter === 'solo') list = list.filter(r => r.is_single_parent);
             else if (this.activeFilter === 'bedridden') list = list.filter(r => r.is_bedridden);
+            else if (this.activeFilter === 'third_gen') list = list.filter(r => r.is_third_gen);
             else if (this.activeFilter === 'heads') list = list.filter(r => r.is_household_head);
             else if (this.activeFilter === '4ps') list = list.filter(r => r.memberships && r.memberships.includes('4Ps'));
             else if (this.activeFilter === 'kdbm') list = list.filter(r => r.memberships && r.memberships.includes('KDBM'));
+            else if (this.activeFilter === 'official') list = list.filter(r => r.memberships && r.memberships.includes('Barangay Official'));
             else if (this.activeFilter === 'any_membership') list = list.filter(r => r.memberships && r.memberships.length > 0);
             return list;
         },

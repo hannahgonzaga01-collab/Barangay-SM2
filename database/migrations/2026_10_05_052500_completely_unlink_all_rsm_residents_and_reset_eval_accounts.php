@@ -30,6 +30,7 @@ return new class extends Migration
             $hResident->first_name        = $hannahUser->first_name ?: 'Hannah';
             $hResident->last_name         = $hannahUser->last_name ?: 'Gonzaga';
             $hResident->gender            = $hannahUser->gender ?: 'Female';
+            $hResident->birthday          = $hannahUser->birthday ?: '2000-01-01';
             $hResident->civil_status      = $hannahUser->civil_status ?: 'Single';
             $hResident->address           = $hannahUser->address ?: 'Barangay San Miguel II';
             $hResident->is_voter          = true;

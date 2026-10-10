@@ -981,6 +981,25 @@ class ResidentPortalController extends Controller
                 'authorized_id2.max'       => 'Ang Valid ID ng Ikalawang Authorized Person ay hindi dapat lumagpas sa 5MB.',
             ]);
 
+            // DEATH CERTIFICATE / YUMAO RESTRICTION (Strictly Authorized Representative only)
+            $docTypeKey = strtolower(str_replace(['-', '_', ' '], '', (string)$request->document_type));
+            if (in_array($docTypeKey, ['yumao', 'death', 'deathcertificate', 'pagpapatunayparsayumao', 'burial', 'burialassistance'])) {
+                if ($request->claimant_type !== 'authorized') {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', '⚠️ Para sa Pagpapatunay para sa Yumao, Authorized Representative (kamag-anak o kinatawan) lamang ang maaaring kumuha ng dokumento.');
+                }
+            }
+
+            // MOVE-IN & MOVE-OUT RESTRICTION (Strictly Personal / Self only)
+            if (in_array($docTypeKey, ['movein', 'moveout'])) {
+                if ($request->claimant_type === 'authorized') {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', '⚠️ Ang Paglipat ng Tirahan (Move-In / Move-Out) ay personal lamang na inaasikaso ng mismong residente (Personal / Self-Request lamang).');
+                }
+            }
+
             // JOBSEEKER RESTRICTIONS (RA 11261 - First-Time Jobseekers Assistance Act)
             if ($request->document_type === 'jobseeker') {
                 if ($request->claimant_type === 'authorized') {
