@@ -143,7 +143,7 @@ class OfficeController extends Controller
                 $u->confidence_score = $match['confidence_score'];
                 $u->confidence_level = $match['confidence_level'];
                 $u->move_in_request = \App\Models\DocumentRequest::where('user_id', $u->id)
-                    ->whereIn('document_type', ['move_in', 'move-in', 'Move In', 'Move-In'])
+                    ->whereIn('document_type', ['movein', 'move_in', 'move-in', 'Move In', 'Move-In', 'Certification of Move-In', 'Certificate of Move-In'])
                     ->latest()
                     ->first();
                 return $u;
@@ -1317,7 +1317,7 @@ class OfficeController extends Controller
 
         // Check if registrant has an active Move-In application
         $moveIn = \App\Models\DocumentRequest::where('user_id', $user->id)
-            ->whereIn('document_type', ['move_in', 'move-in', 'Move In', 'Move-In'])
+            ->whereIn('document_type', ['movein', 'move_in', 'move-in', 'Move In', 'Move-In', 'Certification of Move-In', 'Certificate of Move-In'])
             ->latest()
             ->first();
 

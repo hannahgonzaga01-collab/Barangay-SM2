@@ -79,14 +79,59 @@
                                     @endif
 
                                     @if(!empty($pv->move_in_request))
-                                        <div style="margin-top: 6px; background: #e0f2fe; border: 1.5px solid #7dd3fc; border-radius: 8px; padding: 6px 10px;">
-                                            <div style="font-size: 9.5px; font-weight: 900; color: #0369a1; display: flex; align-items: center; gap: 5px;">
-                                                <i class="fas fa-truck-moving"></i> <span>May Move-In Application</span>
+                                        @php
+                                            $mReq = $pv->move_in_request;
+                                            $mReqYear = $mReq->created_at ? $mReq->created_at->format('Y') : date('Y');
+                                            $mReqSeq = str_pad($mReq->id, 5, '0', STR_PAD_LEFT);
+                                            $mReqCode = "REQ-{$mReqYear}-{$mReqSeq}";
+                                            $mReqStatus = strtolower($mReq->status ?? 'pending');
+                                            $mStatusBg = match($mReqStatus) {
+                                                'ready' => '#dcfce7',
+                                                'released' => '#f1f5f9',
+                                                'processing' => '#dbeafe',
+                                                'disapproved' => '#fee2e2',
+                                                default => '#fef3c7',
+                                            };
+                                            $mStatusColor = match($mReqStatus) {
+                                                'ready' => '#15803d',
+                                                'released' => '#475569',
+                                                'processing' => '#1d4ed8',
+                                                'disapproved' => '#dc2626',
+                                                default => '#a16207',
+                                            };
+                                        @endphp
+                                        <div style="margin-top: 8px; background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 9px 11px; box-shadow: 0 1px 3px rgba(3,105,161,0.08);">
+                                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
+                                                <div style="font-size: 10px; font-weight: 900; color: #0369a1; display: inline-flex; align-items: center; gap: 5px;">
+                                                    <i class="fas fa-truck-moving"></i> <span>May Move-In Application</span>
+                                                </div>
+                                                <span style="font-size: 8px; font-weight: 900; padding: 2px 7px; border-radius: 99px; background: {{ $mStatusBg }}; color: {{ $mStatusColor }}; text-transform: uppercase; border: 1px solid rgba(0,0,0,0.05);">
+                                                    {{ ucfirst($mReqStatus) }}
+                                                </span>
                                             </div>
-                                            <div style="font-size: 9px; color: #0284c7; margin-top: 2px; line-height: 1.35; font-weight: 600;">
-                                                <span>Lilipatan: <strong>{{ ($pv->move_in_request->blk ? 'Blk ' . $pv->move_in_request->blk . ' ' : '') . ($pv->move_in_request->lot ? 'Lot ' . $pv->move_in_request->lot : '') ?: 'San Miguel II' }}</strong></span>
-                                                @if($pv->move_in_request->move_date)
-                                                    <span>• Petsa: <strong>{{ \Carbon\Carbon::parse($pv->move_in_request->move_date)->format('M d, Y') }}</strong></span>
+
+                                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+                                                <button type="button" 
+                                                        @click="activeTab = 'requests'; docFilter = 'all'; docStatusFilter = 'all'; docSearchQuery = '{{ $mReqCode }}'; localStorage.setItem('brgy_office_tab', 'requests'); window.scrollTo({ top: 0, behavior: 'smooth' });"
+                                                        title="I-click para hanapin at tingnan sa Document Requests tab"
+                                                        style="display: inline-flex; align-items: center; gap: 5px; background: #0284c7; color: #fff; font-size: 9.5px; font-weight: 800; padding: 3px 9px; border-radius: 6px; border: none; cursor: pointer; transition: all .15s; box-shadow: 0 1px 3px rgba(2,132,199,0.3);"
+                                                        onmouseover="this.style.background='#0369a1'; this.style.transform='translateY(-1px)';"
+                                                        onmouseout="this.style.background='#0284c7'; this.style.transform='none';">
+                                                    <i class="fas fa-receipt"></i> <span>{{ $mReqCode }}</span>
+                                                    <i class="fas fa-arrow-right" style="font-size: 7.5px; opacity: 0.85;"></i>
+                                                </button>
+
+                                                @if($mReq->move_date)
+                                                    <span style="font-size: 8.5px; color: #0369a1; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">
+                                                        <i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($mReq->move_date)->format('M d, Y') }}
+                                                    </span>
+                                                @endif
+                                            </div>
+
+                                            <div style="font-size: 9px; color: #0284c7; margin-top: 5px; line-height: 1.35; font-weight: 600;">
+                                                <span>Lilipatan: <strong>{{ ($mReq->blk ? 'Blk ' . $mReq->blk . ' ' : '') . ($mReq->lot ? 'Lot ' . $mReq->lot : '') ?: 'San Miguel II' }}</strong></span>
+                                                @if($mReq->landlord)
+                                                    <span> • Landlord/Owner: <strong>{{ $mReq->landlord }}</strong></span>
                                                 @endif
                                             </div>
                                         </div>
@@ -126,39 +171,62 @@
                                 </td>
 
                                 <td style="padding: 14px 14px; text-align: center; vertical-align: middle;">
-                                    @if($pv->voter_id_photo)
-                                        <div x-data="{ openImg: false }">
-                                            @if(!empty($pv->id_type))
-                                                <div style="margin-bottom: 4px;">
-                                                    <span style="font-size: 8px; font-weight: 800; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 2px 6px; border-radius: 99px; display: inline-block;">
-                                                        {{ $pv->id_type }}
-                                                    </span>
-                                                </div>
-                                            @endif
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                        @if($pv->voter_id_photo)
+                                            <div>
+                                                @if(!empty($pv->id_type))
+                                                    <div style="margin-bottom: 3px;">
+                                                        <span style="font-size: 8px; font-weight: 800; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 2px 6px; border-radius: 99px; display: inline-block;">
+                                                            {{ $pv->id_type }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                                @php
+                                                    $vip = $pv->voter_id_photo;
+                                                    $vipUrl = str_starts_with($vip, 'http') ? $vip : (str_starts_with($vip, 'storage/') ? asset($vip) : asset('storage/' . ltrim($vip, '/')));
+                                                @endphp
+                                                <button type="button" onclick="viewPhoto('{{ $vipUrl }}', 'Voter Registration ID')" 
+                                                        style="display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #eff6ff; border: 1.5px solid #bfdbfe; color: #0E5393; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all .15s;"
+                                                        onmouseover="this.style.background='#dbeafe'"
+                                                        onmouseout="this.style.background='#eff6ff'">
+                                                    <i class="fas fa-image"></i> View ID
+                                                </button>
+                                            </div>
+                                        @endif
+
+                                        @if(!empty($pv->move_in_request?->id_proof))
                                             @php
-                                                $vip = $pv->voter_id_photo;
-                                                $vipUrl = str_starts_with($vip, 'http') ? $vip : (str_starts_with($vip, 'storage/') ? asset($vip) : asset('storage/' . ltrim($vip, '/')));
+                                                $mip = $pv->move_in_request->id_proof;
+                                                $mipUrl = str_starts_with($mip, 'http') ? $mip : (str_starts_with($mip, 'storage/') ? asset($mip) : asset('storage/' . ltrim($mip, '/')));
                                             @endphp
-                                            <button type="button" onclick="viewPhoto('{{ $vipUrl }}', 'Voter Registration ID')" 
-                                                    style="display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #eff6ff; border: 1.5px solid #bfdbfe; color: #0E5393; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all .15s;">
-                                                <i class="fas fa-image"></i> View ID
-                                            </button>
-                                        </div>
-                                    @else
-                                        <span style="font-size: 9px; font-weight: 700; color: #94a3b8; font-style: italic;">No ID uploaded</span>
-                                    @endif
+                                            <div>
+                                                <button type="button" onclick="viewPhoto('{{ $mipUrl }}', 'Move-In ID / Proof')" 
+                                                        style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: #f0fdf4; border: 1.5px solid #86efac; color: #166534; border-radius: 8px; font-size: 9.5px; font-weight: 800; cursor: pointer; transition: all .15s;"
+                                                        onmouseover="this.style.background='#dcfce7'"
+                                                        onmouseout="this.style.background='#f0fdf4'">
+                                                    <i class="fas fa-file-invoice"></i> Move-In Proof
+                                                </button>
+                                            </div>
+                                        @endif
+
+                                        @if(!$pv->voter_id_photo && empty($pv->move_in_request?->id_proof))
+                                            <span style="font-size: 9px; font-weight: 700; color: #94a3b8; font-style: italic;">No ID uploaded</span>
+                                        @endif
+                                    </div>
                                 </td>
 
                                 <td style="padding: 14px 14px; text-align: right; vertical-align: middle;">
-                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap;" x-data="{ rejectModal: false, approveModal: false }">
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap;" 
+                                         x-data="{ rejectModal: false, approveModal: false }"
+                                         @keydown.window.escape="approveModal = false; rejectModal = false;">
                                         <button type="button" @click="approveModal = true" class="btn-grad btn-grad-sm" 
-                                                style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 6px 14px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;"
+                                                style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 6px 14px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;"
                                                 title="Approve registration">
                                             <i class="fas fa-check"></i> Approve
                                         </button>
 
                                         <button type="button" @click="rejectModal = true" class="btn-plain btn-sm" 
-                                                style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 10px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;"
+                                                style="background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; padding: 6px 10px; font-size: 10px; font-weight: 800; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;"
                                                 title="Disapprove registration request">
                                             <i class="fas fa-times"></i> Disapprove
                                         </button>
@@ -183,14 +251,25 @@
                                                         </p>
 
                                                         @if(!empty($pv->move_in_request))
+                                                            @php
+                                                                $mReq = $pv->move_in_request;
+                                                                $mReqYear = $mReq->created_at ? $mReq->created_at->format('Y') : date('Y');
+                                                                $mReqSeq = str_pad($mReq->id, 5, '0', STR_PAD_LEFT);
+                                                                $mReqCode = "REQ-{$mReqYear}-{$mReqSeq}";
+                                                            @endphp
                                                             <div style="background: #e0f2fe; border: 1.5px solid #38bdf8; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;">
-                                                                <div style="font-size: 10px; font-weight: 800; color: #0369a1; text-transform: uppercase; margin-bottom: 3px; display: flex; align-items: center; gap: 5px;">
-                                                                    <i class="fas fa-truck-moving"></i> Move-In Application Detected
+                                                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px;">
+                                                                    <div style="font-size: 10px; font-weight: 800; color: #0369a1; text-transform: uppercase; display: flex; align-items: center; gap: 5px;">
+                                                                        <i class="fas fa-truck-moving"></i> Move-In Application Detected
+                                                                    </div>
+                                                                    <span style="font-size: 8.5px; font-weight: 900; background: #0284c7; color: #fff; padding: 2px 7px; border-radius: 5px;">
+                                                                        {{ $mReqCode }}
+                                                                    </span>
                                                                 </div>
                                                                 <div style="font-size: 11px; color: #0c4a6e; font-weight: 700;">
-                                                                    Bagong Lipat sa Barangay: {{ ($pv->move_in_request->blk ? 'Blk ' . $pv->move_in_request->blk . ' ' : '') . ($pv->move_in_request->lot ? 'Lot ' . $pv->move_in_request->lot : '') ?: 'San Miguel II' }}
+                                                                    Bagong Lipat sa Barangay: {{ ($mReq->blk ? 'Blk ' . $mReq->blk . ' ' : '') . ($mReq->lot ? 'Lot ' . $mReq->lot : '') ?: 'San Miguel II' }}
                                                                 </div>
-                                                                <div style="font-size: 9.5px; color: #0284c7; margin-top: 2px;">
+                                                                <div style="font-size: 9.5px; color: #0284c7; margin-top: 3px;">
                                                                     Awtomatikong mai-activate ang account, mailalapat ang bagong tirahan sa Masterlist, at mamarkahang opisyal ang kanyang Move-In form.
                                                                 </div>
                                                             </div>
@@ -218,8 +297,8 @@
                                                         </div>
                                                     </div>
                                                     <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
-                                                        <button type="button" @click="approveModal = false" class="btn-plain btn-ghost btn-sm">Cancel</button>
-                                                        <button type="submit" class="btn-grad btn-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                                                        <button type="button" @click="approveModal = false" class="btn-plain btn-sm" style="background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1; font-weight: 800; cursor: pointer;">Cancel</button>
+                                                        <button type="submit" class="btn-grad btn-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); cursor: pointer; font-weight: 800;">
                                                             <i class="fas fa-check"></i> Yes, Approve
                                                         </button>
                                                     </div>
@@ -229,7 +308,7 @@
 
                                         {{-- Reject Prompt Modal --}}
                                         <div x-show="rejectModal" x-cloak class="modal-ov" style="text-align: left; z-index: 99999;" @click.self="rejectModal = false">
-                                            <div class="modal-box" style="max-width: 460px; background: #fff; border-radius: 16px; overflow: hidden; border-bottom: 4px solid #dc2626;">
+                                            <div class="modal-box" style="max-width: 460px; background: #fff; border-radius: 16px; overflow: hidden; border-bottom: 4px solid #dc2626; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
                                                 <div class="modal-hd" style="padding: 14px 18px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
                                                     <span style="font-size: 12px; font-weight: 900; color: #991b1b; text-transform: uppercase;">
                                                         <i class="fas fa-user-times"></i> Disapprove Registration
@@ -247,9 +326,9 @@
                                                                   placeholder="e.g. Details and submitted ID do not match our official records or reside in another barangay."></textarea>
                                                     </div>
                                                     <div style="padding: 12px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
-                                                        <button type="button" @click="rejectModal = false" class="btn-plain btn-ghost btn-sm">Cancel</button>
-                                                        <button type="submit" class="btn-grad btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">
-                                                            Confirm Disapproval
+                                                        <button type="button" @click="rejectModal = false" class="btn-plain btn-sm" style="background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1; font-weight: 800; cursor: pointer;">Cancel</button>
+                                                        <button type="submit" class="btn-grad btn-sm" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); cursor: pointer; font-weight: 800;">
+                                                            <i class="fas fa-times"></i> Confirm Disapproval
                                                         </button>
                                                     </div>
                                                 </form>
