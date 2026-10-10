@@ -25,4 +25,9 @@ RUN rm -rf /var/www/html/public/storage && php artisan storage:link
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 80
+
+CMD ["/usr/local/bin/entrypoint.sh"]

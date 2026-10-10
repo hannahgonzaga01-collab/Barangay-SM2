@@ -52,6 +52,30 @@ class AppServiceProvider extends ServiceProvider
                     }
                 });
             }
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('residents')) {
+                \Illuminate\Support\Facades\Schema::table('residents', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('residents', 'is_third_gen')) {
+                        $table->boolean('is_third_gen')->default(false);
+                    }
+                });
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
+                \Illuminate\Support\Facades\Schema::table('users', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_third_gen')) {
+                        $table->boolean('is_third_gen')->default(false);
+                    }
+                });
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('document_requests')) {
+                \Illuminate\Support\Facades\Schema::table('document_requests', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('document_requests', 'released_at')) {
+                        $table->timestamp('released_at')->nullable();
+                    }
+                });
+            }
         } catch (\Throwable $e) {
             // Ignored during early container boot or offline migrations
         }

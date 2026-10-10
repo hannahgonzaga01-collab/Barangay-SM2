@@ -66,7 +66,9 @@ class OfficeController extends Controller
         $soloParents = Resident::where('is_single_parent', true)->select('id')->get();
         $nonVoters = Resident::where('is_non_voter', true)->select('id')->get();
         $bedridden = Resident::where('is_bedridden', true)->select('id')->get();
-        $thirdGens = Resident::where('is_third_gen', true)->select('id')->get();
+        $thirdGens = \Illuminate\Support\Facades\Schema::hasColumn('residents', 'is_third_gen')
+            ? Resident::where('is_third_gen', true)->select('id')->get()
+            : collect();
         $households = Resident::where('is_household_head', true)->select('id')->get();
         $kdbmCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('KDBM', $u->memberships))->count();
         $fourPsCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('4Ps', $u->memberships))->count();
