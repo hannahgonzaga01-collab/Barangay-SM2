@@ -51,6 +51,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Global Notifications Read Route (Accessible by all authenticated users: residents, staff, admin)
+    Route::post('/notifications/read', [ResidentPortalController::class, 'markNotificationsRead'])->name('notifications.read');
+    Route::post('/resident/notifications/read', [ResidentPortalController::class, 'markNotificationsRead'])->name('resident.notifications.read');
 });
 
 // 4. RESIDENT PORTAL
@@ -66,7 +70,6 @@ Route::middleware(['verified_resident'])->group(function () {
     Route::get('/resident/voter/upload', fn() => redirect()->route('resident.index'));
     Route::post('/resident/message', [ResidentPortalController::class, 'sendMessage'])->name('resident.message.send');
     Route::get('/resident/message', fn() => redirect()->route('resident.index'));
-    Route::post('/resident/notifications/read', [ResidentPortalController::class, 'markNotificationsRead'])->name('resident.notifications.read');
     Route::post('/resident/profile-photo', [ResidentPortalController::class, 'uploadProfilePhoto'])->name('resident.profile.photo')->middleware('auth');
     Route::get('/resident/profile-photo', fn() => redirect()->route('resident.index'));
     Route::post('/resident/family', [ResidentPortalController::class, 'storeFamilyMember'])->name('resident.family.store')->middleware('auth');
