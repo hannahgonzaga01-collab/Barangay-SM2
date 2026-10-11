@@ -105,6 +105,18 @@ class OtpService
     {
         $message = "Barangay San Miguel II: Ang inyong One-Time PIN (OTP) ay {$code}. Valid for 5 minutes. Huwag itong ibigay kaninuman.";
 
+        // Normalize number to Philippine international format: 639XXXXXXXXX
+        $cleanDigits = preg_replace('/[^0-9]/', '', $phone);
+        if (str_starts_with($cleanDigits, '0') && strlen($cleanDigits) === 11) {
+            $formattedRecipient = '63' . substr($cleanDigits, 1);
+        } elseif (strlen($cleanDigits) === 10 && str_starts_with($cleanDigits, '9')) {
+            $formattedRecipient = '63' . $cleanDigits;
+        } else {
+            $formattedRecipient = $cleanDigits;
+        }
+
+        $smsSent = false;
+
         // 1. PhilSMS Gateway (v3) - Priority
         $philsmsToken = config('services.philsms.token', env('PHILSMS_API_TOKEN', '5139|o8YEh29qrTb3PsAXd2uDwqWxCpNrS5jVSJTQZn4p35400c7b'));
         $philsmsSender = config('services.philsms.sender_id', env('PHILSMS_SENDER_ID', 'PhilSMS'));
@@ -116,68 +128,65 @@ class OtpService
                     'Accept'        => 'application/json',
                     'Content-Type'  => 'application/json',
                 ])->post('https://dashboard.philsms.com/api/v3/sms/send', [
-                    'recipient' => $phone,
+                    'recipient' => $formattedRecipient,
                     'sender_id' => $philsmsSender,
                     'type'      => 'plain',
                     'message'   => $message,
                 ]);
 
                 $resData = $response->json();
-                Log::info("[PhilSMS API Response]", ['body' => $resData, 'status' => $response->status()]);
+                Log::info("[PhilSMS API Response]", ['body' => $resData, 'status' => $response->status(), 'to' => $formattedRecipient]);
 
                 if ($response->successful() && isset($resData['status']) && $resData['status'] === 'success') {
-                    Log::info("[PhilSMS SMS Sent] To: {$phone} | Code: {$code}");
-                    return [
-                        'success' => true,
-                        'mock'    => false,
-                        'message' => "Matagumpay na naipadala ang verification code sa iyong mobile number ({$phone})."
-                    ];
+                    $smsSent = true;
+                    Log::info("[PhilSMS SMS Sent] To: {$formattedRecipient} | Code: {$code}");
+                } else {
+                    Log::warning("[PhilSMS Warning] SMS not delivered: " . json_encode($resData));
                 }
-
-                Log::warning("[PhilSMS Warning] SMS not delivered: " . json_encode($resData));
             } catch (\Throwable $e) {
                 Log::error("[PhilSMS Gateway Error] " . $e->getMessage());
             }
         }
 
         // 2. Semaphore Gateway (Alternate)
-        $apiKey = config('services.semaphore.api_key', env('SEMAPHORE_API_KEY'));
-        $senderName = config('services.semaphore.sender_name', env('SEMAPHORE_SENDER_NAME', 'BRGY-SM2'));
+        if (!$smsSent) {
+            $apiKey = config('services.semaphore.api_key', env('SEMAPHORE_API_KEY'));
+            $senderName = config('services.semaphore.sender_name', env('SEMAPHORE_SENDER_NAME', 'BRGY-SM2'));
 
-        if (!empty($apiKey) && $apiKey !== 'mock') {
-            try {
-                $response = Http::timeout(10)->post('https://api.semaphore.co/api/v4/messages', [
-                    'apikey'     => $apiKey,
-                    'number'     => $phone,
-                    'message'    => $message,
-                    'sendername' => $senderName,
-                ]);
+            if (!empty($apiKey) && $apiKey !== 'mock') {
+                try {
+                    $response = Http::timeout(10)->post('https://api.semaphore.co/api/v4/messages', [
+                        'apikey'     => $apiKey,
+                        'number'     => $phone,
+                        'message'    => $message,
+                        'sendername' => $senderName,
+                    ]);
 
-                if ($response->successful()) {
-                    Log::info("[SMS OTP Sent] To: {$phone} via Semaphore");
-                    return [
-                        'success' => true,
-                        'mock'    => false,
-                        'message' => "Matagumpay na naipadala ang verification code sa iyong mobile number ({$phone})."
-                    ];
+                    if ($response->successful()) {
+                        $smsSent = true;
+                        Log::info("[SMS OTP Sent] To: {$phone} via Semaphore");
+                    } else {
+                        Log::warning("[SMS API Warning] Failed response: " . $response->body());
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("[SMS Gateway Error] " . $e->getMessage());
                 }
-
-                Log::warning("[SMS API Warning] Failed response: " . $response->body());
-            } catch (\Throwable $e) {
-                Log::error("[SMS Gateway Error] " . $e->getMessage());
             }
         }
 
-        // 3. MOCK OTP MODE (Testing / Staging / Telco Fallback)
-        Log::info("[MOCK SMS OTP] To: {$phone} | Code: {$code} | Purpose: {$purpose}");
+        // Session flash for banner consistency
         session()->flash('mock_otp', $code);
         session()->flash('mock_recipient', $phone);
 
+        // Dual Mode: Return code for on-screen auto-fill & visual banner while real SMS is delivered
         return [
             'success'  => true,
             'mock'     => true,
             'code'     => $code,
-            'message'  => "✅ [TEST MODE MOCK OTP]: Ang inyong verification code ay {$code} (Valid for 5 mins).",
+            'sms_sent' => $smsSent,
+            'message'  => $smsSent
+                ? "Matagumpay na naipadala ang OTP sa iyong mobile phone ({$phone})!"
+                : "✅ [TEST MODE]: Ang inyong verification code ay {$code} (Valid for 5 mins).",
         ];
     }
 
