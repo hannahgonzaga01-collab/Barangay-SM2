@@ -110,25 +110,70 @@
 
                         const userRole = '{{ auth()->user()->role ?? "resident" }}';
 
-                        // If user is staff/admin, navigate to the appropriate staff portal URL!
+                        // ══ FOR STAFF / DEPARTMENT USERS ══
                         if (userRole !== 'resident') {
-                            if (staffUrl) {
-                                window.location.href = staffUrl;
-                            } else if (userRole === 'admin') {
-                                window.location.href = '/admin';
-                            } else if (userRole === 'peace') {
-                                window.location.href = targetId === 'sos-history' ? '/peace#sos' : '/peace';
-                            } else if (userRole === 'office') {
-                                window.location.href = '/office';
-                            } else if (userRole === 'justice') {
-                                window.location.href = '/justice';
-                            } else if (userRole === 'vawc') {
-                                window.location.href = '/vawc';
+                            const currentPath = window.location.pathname;
+
+                            // Peace & Order Staff
+                            if (userRole === 'peace') {
+                                const targetTab = (targetId === 'sos-history') ? 'sos' : 'cases';
+                                if (currentPath.includes('/peace')) {
+                                    window.location.hash = targetTab;
+                                    window.dispatchEvent(new CustomEvent('brgy-switch-tab', { detail: targetTab }));
+                                    window.dispatchEvent(new HashChangeEvent('hashchange'));
+                                } else {
+                                    window.location.href = '/peace#' + targetTab;
+                                }
+                                return;
                             }
-                            return;
+
+                            // Office Staff
+                            if (userRole === 'office') {
+                                const targetTab = (targetId === 'application-history') ? 'requests' : 'masterlist';
+                                if (currentPath.includes('/office')) {
+                                    window.location.hash = targetTab;
+                                    window.dispatchEvent(new CustomEvent('brgy-switch-tab', { detail: targetTab }));
+                                    window.dispatchEvent(new HashChangeEvent('hashchange'));
+                                } else {
+                                    window.location.href = '/office#' + targetTab;
+                                }
+                                return;
+                            }
+
+                            // Justice Staff
+                            if (userRole === 'justice') {
+                                if (currentPath.includes('/justice')) {
+                                    window.location.hash = 'blotter';
+                                    window.dispatchEvent(new CustomEvent('brgy-switch-tab', { detail: 'blotter' }));
+                                } else {
+                                    window.location.href = '/justice';
+                                }
+                                return;
+                            }
+
+                            // VAWC Staff
+                            if (userRole === 'vawc') {
+                                if (currentPath.includes('/vawc')) {
+                                    window.location.hash = 'cases';
+                                    window.dispatchEvent(new CustomEvent('brgy-switch-tab', { detail: 'cases' }));
+                                } else {
+                                    window.location.href = '/vawc';
+                                }
+                                return;
+                            }
+
+                            // Admin
+                            if (userRole === 'admin') {
+                                if (staffUrl) {
+                                    window.location.href = staffUrl;
+                                } else {
+                                    window.location.href = '/admin';
+                                }
+                                return;
+                            }
                         }
 
-                        // For residents: Navigate & expand section
+                        // ══ FOR RESIDENT USERS ONLY ══
                         if (window.location.pathname !== '/resident') {
                             window.location.href = '/resident#' + targetId;
                             return;

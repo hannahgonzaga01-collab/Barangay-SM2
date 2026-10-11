@@ -397,8 +397,14 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         });
 
         function peacePortalData() {
+            const hashTab = (window.location.hash || '').replace('#', '');
+            const validTabs = ['cases', 'patrol', 'sos', 'reports', 'archived'];
+            const initialTab = validTabs.includes(hashTab) 
+                ? hashTab 
+                : (validTabs.includes(localStorage.getItem('brgy_peace_tab')) ? localStorage.getItem('brgy_peace_tab') : 'cases');
+
             return {
-        activeTab: (['cases', 'patrol', 'sos', 'reports', 'archived'].includes(localStorage.getItem('brgy_peace_tab')) ? localStorage.getItem('brgy_peace_tab') : 'cases'),
+        activeTab: initialTab,
         viewModal: false,
         addBlotterModal: false,
         addPatrolModal: false,
@@ -896,6 +902,17 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         openTransfer(id) { this.transferIssueId = id; this.transferModal = true; },
         init() {
             this.$watch('activeTab', value => localStorage.setItem('brgy_peace_tab', value));
+            window.addEventListener('hashchange', () => {
+                const h = (window.location.hash || '').replace('#', '');
+                if (['cases', 'patrol', 'sos', 'reports', 'archived'].includes(h)) {
+                    this.activeTab = h;
+                }
+            });
+            window.addEventListener('brgy-switch-tab', (e) => {
+                if (e.detail && ['cases', 'patrol', 'sos', 'reports', 'archived'].includes(e.detail)) {
+                    this.activeTab = e.detail;
+                }
+            });
             this.stopEmergencyChime();
             this.stopSosTabTitle();
             this.pollSosAlerts();
