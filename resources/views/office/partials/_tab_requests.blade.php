@@ -466,13 +466,20 @@
                                     $displayName = trim(($reqUser?->first_name ?? $reqUser?->name ?? $req->guest_first_name ?? '').' '.($reqUser?->last_name ?? $req->guest_last_name ?? ''));
                                     $resCode = $reqUser?->resident_code ?? '—';
                                     $resAddress = $req->address ?: ($reqUser?->address ?? '');
-                                    $bdRaw = $req->birthday ?: ($reqUser?->birthday ? \Carbon\Carbon::parse($reqUser->birthday)->format('Y-m-d') : ''); 
+                                    $bdRaw = $req->birthday;
+                                    if (!$bdRaw && $reqUser?->birthday) {
+                                        try {
+                                            $bdRaw = \Carbon\Carbon::parse($reqUser->birthday)->format('Y-m-d');
+                                        } catch (\Throwable $e) {
+                                            $bdRaw = $reqUser->birthday;
+                                        }
+                                    }
                                     $resBirthplace = $reqUser?->birthplace ?? '';
                                     $storedAge = $req->age ?: ($reqUser?->age ?? '');
                                     if (!$storedAge && $bdRaw) {
                                         try {
                                             $storedAge = \Carbon\Carbon::parse($bdRaw)->age;
-                                        } catch (\Exception $e) {}
+                                        } catch (\Throwable $e) {}
                                     }
                                 @endphp
                                 <button

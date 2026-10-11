@@ -122,8 +122,14 @@
                                                 </button>
 
                                                 @if($mReq->move_date)
+                                                    @php
+                                                        $dispMoveDate = $mReq->move_date;
+                                                        try {
+                                                            $dispMoveDate = \Carbon\Carbon::parse($mReq->move_date)->format('M d, Y');
+                                                        } catch (\Throwable $e) {}
+                                                    @endphp
                                                     <span style="font-size: 8.5px; color: #0369a1; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">
-                                                        <i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($mReq->move_date)->format('M d, Y') }}
+                                                        <i class="far fa-calendar-alt"></i> {{ $dispMoveDate }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -145,7 +151,17 @@
                                         </div>
                                         <div style="font-size: 10px; color: #64748b; font-weight: 600; margin-top: 2px;">
                                             Code: <strong style="color:#0f172a;">{{ $matched->resident_code ?? 'NO-CODE' }}</strong> •
-                                            Bday: <strong>{{ $matched->birthday ? \Carbon\Carbon::parse($matched->birthday)->format('M d, Y') : 'N/A' }}</strong>
+                                            @php
+                                                $dispMatchBday = 'N/A';
+                                                if ($matched->birthday) {
+                                                    try {
+                                                        $dispMatchBday = \Carbon\Carbon::parse($matched->birthday)->format('M d, Y');
+                                                    } catch (\Throwable $e) {
+                                                        $dispMatchBday = $matched->birthday;
+                                                    }
+                                                }
+                                            @endphp
+                                            Bday: <strong>{{ $dispMatchBday }}</strong>
                                         </div>
                                         @if($matched->address)
                                             <div style="font-size: 9.5px; color: #475569; margin-top: 2px;">
