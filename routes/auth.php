@@ -43,6 +43,9 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
 
+    Route::post('forgot-password/otp-reset', [\App\Http\Controllers\Auth\OtpController::class, 'resetPasswordWithOtp'])
+        ->name('password.otp.reset');
+
     Route::post('login/otp', [\App\Http\Controllers\Auth\OtpController::class, 'loginWithOtp'])
         ->name('login.otp');
 });

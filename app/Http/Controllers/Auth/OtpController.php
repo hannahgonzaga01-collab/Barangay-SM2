@@ -81,12 +81,12 @@ class OtpController extends Controller
                 }
             }
 
-            if ($purpose === 'login') {
+            if ($purpose === 'login' || $purpose === 'change_password') {
                 $userExists = User::where('contact_number', $normalizedPhone)->exists();
                 if (!$userExists) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Walang nahanap na account gamit ang mobile number na ito. Mangyaring mag-register muna.'
+                        'message' => 'Walang nahanap na account gamit ang mobile number na ito. Mangyaring suriin ang inyong numero.'
                     ], 404);
                 }
             }
@@ -188,5 +188,52 @@ class OtpController extends Controller
             default:
                 return redirect()->route('resident.index');
         }
+    }
+
+    /**
+     * Reset password using verified Mobile Number OTP.
+     */
+    public function resetPasswordWithOtp(Request $request)
+    {
+        $request->validate([
+            'contact_number' => ['required', 'string'],
+            'otp_code'       => ['required', 'string'],
+            'password'       => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed'],
+        ], [
+            'password.min' => 'Ang password ay dapat hindi bababa sa 8 characters.',
+            'password.max' => 'Ang password ay hindi dapat lalagpas sa 16 characters.',
+            'password.not_regex' => 'Bawal ang spaces sa password.',
+            'password.confirmed' => 'Hindi tugma ang kumpirmasyon ng password.',
+        ]);
+
+        $cleanPhone = OtpService::normalizePhoneNumber($request->contact_number);
+        if (!OtpService::isValidPhoneNumber($cleanPhone)) {
+            return back()->withInput()->withErrors(['contact_number' => 'Wastong 11-digit mobile number ang kailangan.']);
+        }
+
+        $isValid = OtpService::verifyOtp($cleanPhone, $request->otp_code, 'change_password');
+        if (!$isValid) {
+            $isValid = OtpService::verifyOtp($cleanPhone, $request->otp_code, 'auth');
+        }
+
+        if (!$isValid) {
+            return back()->withInput()->withErrors(['otp_code' => 'Mali o expired na ang One-Time PIN (OTP).']);
+        }
+
+        $user = User::where('contact_number', $cleanPhone)->first();
+        if (!$user) {
+            return back()->withInput()->withErrors(['contact_number' => 'Walang nahanap na account gamit ang mobile number na ito.']);
+        }
+
+        $user->forceFill([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'remember_token' => \Illuminate\Support\Str::random(60),
+        ])->save();
+
+        if (method_exists($user, 'recordPasswordHistory')) {
+            $user->recordPasswordHistory($user->password);
+        }
+
+        return redirect()->route('login')->with('status', 'Matagumpay na na-reset ang iyong password! Maaari ka nang mag-log in gamit ang iyong bagong password.');
     }
 }
