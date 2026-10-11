@@ -92,7 +92,7 @@
                             });
                         }
                     },
-                    handleNotifClick(notifId, targetId) {
+                    handleNotifClick(notifId, targetId, staffUrl = null) {
                         this.notifOpen = false;
                         if (this.unreadCount > 0) {
                             this.unreadCount = Math.max(0, this.unreadCount - 1);
@@ -108,7 +108,27 @@
                             body: JSON.stringify({ id: notifId })
                         });
 
-                        // Navigate & expand section
+                        const userRole = '{{ auth()->user()->role ?? "resident" }}';
+
+                        // If user is staff/admin, navigate to the appropriate staff portal URL!
+                        if (userRole !== 'resident') {
+                            if (staffUrl) {
+                                window.location.href = staffUrl;
+                            } else if (userRole === 'admin') {
+                                window.location.href = '/admin';
+                            } else if (userRole === 'peace') {
+                                window.location.href = targetId === 'sos-history' ? '/peace#sos' : '/peace';
+                            } else if (userRole === 'office') {
+                                window.location.href = '/office';
+                            } else if (userRole === 'justice') {
+                                window.location.href = '/justice';
+                            } else if (userRole === 'vawc') {
+                                window.location.href = '/vawc';
+                            }
+                            return;
+                        }
+
+                        // For residents: Navigate & expand section
                         if (window.location.pathname !== '/resident') {
                             window.location.href = '/resident#' + targetId;
                             return;
@@ -154,9 +174,27 @@
                                 $isUnread = is_null($notif->read_at); 
                                 $type = $notif->data['type'] ?? '';
                                 $targetId = (str_contains($type, 'sos')) ? 'sos-history' : ((str_contains($type, 'document') || str_contains($type, 'reminder') || str_contains($type, 'appointment')) ? 'application-history' : 'incident-reports');
+                                
+                                // Appropriate staff portal redirect for staff/admin users
+                                $staffUrl = null;
+                                if (str_contains($type, 'sos')) {
+                                    $staffUrl = route('peace.dashboard');
+                                } elseif (str_contains($type, 'document') || str_contains($type, 'appointment')) {
+                                    $staffUrl = route('office.index');
+                                } else {
+                                    $userRole = auth()->user()->role ?? '';
+                                    $staffUrl = match($userRole) {
+                                        'peace'   => route('peace.dashboard'),
+                                        'justice' => route('justice.dashboard'),
+                                        'vawc'    => route('vawc.dashboard'),
+                                        'office'  => route('office.index'),
+                                        'admin'   => route('admin.dashboard'),
+                                        default   => null
+                                    };
+                                }
                             @endphp
                             <div class="flex items-start gap-2.5 px-3.5 py-2.5 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition {{ $isUnread ? 'bg-blue-50/60' : '' }}"
-                                 @click="handleNotifClick('{{ $notif->id }}', '{{ $targetId }}')">
+                                 @click="handleNotifClick('{{ $notif->id }}', '{{ $targetId }}', '{{ $staffUrl }}')">
                                 <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 {{ $isUnread ? (str_contains($type, 'sos') ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-700') : 'bg-slate-100 text-slate-400' }}">
                                     <i class="fas {{ str_contains($type, 'sos') ? 'fa-ambulance' : (str_contains($type, 'reminder') || str_contains($type, 'appointment') ? 'fa-clock' : ($type === 'document_received' ? 'fa-file-alt' : 'fa-bell')) }} text-xs"></i>
                                 </div>
