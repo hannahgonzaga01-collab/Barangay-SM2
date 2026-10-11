@@ -76,17 +76,68 @@
                     $navNotifications = $navUser->notifications()->latest()->take(10)->get();
                 @endphp
                 {{-- Notification Bell (Between Language Toggle and User Profile) --}}
-                <div class="relative" x-data="{ notifOpen: false }" @click.away="notifOpen=false">
-                    <button @click="notifOpen=!notifOpen; if(notifOpen) { fetch('{{ route('resident.notifications.read') }}', { method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Content-Type':'application/json'} }); }"
+                <div class="relative" x-data="{ 
+                    notifOpen: false,
+                    unreadCount: {{ $navUnreadCount }},
+                    markAllRead() {
+                        if (this.unreadCount > 0) {
+                            this.unreadCount = 0;
+                            fetch('{{ route('resident.notifications.read') }}', { 
+                                method: 'POST', 
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                } 
+                            });
+                        }
+                    },
+                    handleNotifClick(notifId, targetId) {
+                        this.notifOpen = false;
+                        if (this.unreadCount > 0) {
+                            this.unreadCount = Math.max(0, this.unreadCount - 1);
+                        }
+                        // Mark this notification as read in backend
+                        fetch('{{ route('resident.notifications.read') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ id: notifId })
+                        });
+
+                        // Navigate & expand section
+                        if (window.location.pathname !== '/resident') {
+                            window.location.href = '/resident#' + targetId;
+                            return;
+                        }
+
+                        // Open tab / collapse state if on resident page
+                        window.location.hash = targetId;
+                        window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+                        setTimeout(() => {
+                            const el = document.getElementById(targetId);
+                            if (el) {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                el.style.transition = 'all 0.4s ease';
+                                el.style.outline = '2px solid #0E5393';
+                                setTimeout(() => { el.style.outline = 'none'; }, 2000);
+                            }
+                        }, 150);
+                    }
+                }" @click.away="notifOpen=false">
+                    <button @click="notifOpen=!notifOpen; if(notifOpen) { markAllRead(); }"
                             class="relative flex items-center justify-center w-8 h-8 rounded-lg transition"
                             style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;"
                             title="Notifications">
                         <i class="fas fa-bell text-xs"></i>
-                        @if($navUnreadCount > 0)
-                        <span class="absolute -top-1.5 -right-1.5 bg-red-600 text-white font-black text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center border-2 border-slate-900 px-1">
-                            {{ $navUnreadCount }}
+                        <span x-show="unreadCount > 0" 
+                              x-text="unreadCount" 
+                              class="absolute -top-1.5 -right-1.5 bg-red-600 text-white font-black text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center border-2 border-slate-900 px-1">
                         </span>
-                        @endif
                     </button>
 
                     <div x-show="notifOpen" x-cloak x-transition
@@ -94,9 +145,8 @@
                          style="border-color:#e2e8f0;z-index:9999;">
                         <div class="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                             <span class="text-xs font-black text-slate-800 uppercase tracking-wide">Notifications</span>
-                            @if($navUnreadCount > 0)
-                            <span class="text-[9px] bg-red-100 text-red-600 font-extrabold px-2 py-0.5 rounded-full">{{ $navUnreadCount }} unread</span>
-                            @endif
+                            <span x-show="unreadCount > 0" class="text-[9px] bg-red-100 text-red-600 font-extrabold px-2 py-0.5 rounded-full" x-text="unreadCount + ' unread'"></span>
+                            <span x-show="unreadCount === 0" class="text-[9px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">All read</span>
                         </div>
                         <div class="max-h-72 overflow-y-auto">
                             @forelse($navNotifications as $notif)
@@ -106,7 +156,7 @@
                                 $targetId = (str_contains($type, 'sos')) ? 'sos-history' : ((str_contains($type, 'document') || str_contains($type, 'reminder') || str_contains($type, 'appointment')) ? 'application-history' : 'incident-reports');
                             @endphp
                             <div class="flex items-start gap-2.5 px-3.5 py-2.5 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition {{ $isUnread ? 'bg-blue-50/60' : '' }}"
-                                 @click="notifOpen=false; document.getElementById('{{ $targetId }}')?.scrollIntoView({behavior:'smooth'})">
+                                 @click="handleNotifClick('{{ $notif->id }}', '{{ $targetId }}')">
                                 <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 {{ $isUnread ? (str_contains($type, 'sos') ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-700') : 'bg-slate-100 text-slate-400' }}">
                                     <i class="fas {{ str_contains($type, 'sos') ? 'fa-ambulance' : (str_contains($type, 'reminder') || str_contains($type, 'appointment') ? 'fa-clock' : ($type === 'document_received' ? 'fa-file-alt' : 'fa-bell')) }} text-xs"></i>
                                 </div>

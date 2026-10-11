@@ -2522,8 +2522,8 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         </div>
 
         {{-- ══ ROVING PROOF MODAL ══ --}}
-        <div x-show="proofModal" x-cloak class="modal-ov" x-transition>
-            <div class="modal-box" style="max-width:400px;" @click.away="proofModal=false">
+        <div x-show="proofModal" x-cloak class="modal-ov" x-transition style="z-index:99999;">
+            <div class="modal-box" style="max-width:420px;position:relative;" @click.away="proofModal=false">
                 <div class="modal-in">
                     <div class="modal-hd">
                         <div class="modal-ttl">
@@ -2533,34 +2533,38 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                 <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;">Add photo after patrol roving</div>
                             </div>
                         </div>
-                        <button @click="proofModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                        <button type="button" @click="proofModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
                     </div>
                     <form :action="'/peace/patrol/'+activePatrolId+'/proof'" method="POST" enctype="multipart/form-data">
                         @csrf @method('PATCH')
                         <div class="fgrp">
                             <label class="flbl">Upload Roving Photos <span style="font-size:9.5px;color:var(--muted);font-weight:600;">(Max: 6 photos, 5MB each)</span></label>
-                            <label style="cursor:pointer;display:block;"
+                            
+                            {{-- Dropzone with Click to Browse --}}
+                            <div style="cursor:pointer;display:block;"
+                                @click="$refs.proofFileInput && $refs.proofFileInput.click()"
                                 @dragover.prevent="$refs.dzr.style.border='2px solid var(--brand)';$refs.dzr.style.background='#eff6ff'"
                                 @dragleave.prevent="$refs.dzr.style.border='2px dashed var(--border)';$refs.dzr.style.background='#f8fafc'"
-                                @drop.prevent="const f=$event.dataTransfer.files;if(f.length){$refs.filer.files=f;handleProofFiles(f);$refs.dzr.style.border='2px dashed var(--border)';$refs.dzr.style.background='#f8fafc'}">
+                                @drop.prevent="const f=$event.dataTransfer.files; if(f.length){ try { $refs.proofFileInput.files = f; } catch(e){} handleProofFiles(f); $refs.dzr.style.border='2px dashed var(--border)'; $refs.dzr.style.background='#f8fafc'; }">
                                 <div x-ref="dzr" style="min-height:150px;padding:15px;border-radius:10px;background:#f8fafc;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .2s;" :style="localProofPreviews.length?'border:2px solid var(--brand)':''">
                                     <div x-show="localProofPreviews.length > 0" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
                                         <template x-for="(src, idx) in localProofPreviews" :key="idx">
-                                            <img :src="src" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #ccc;">
+                                            <img :src="src" style="width:65px;height:65px;object-fit:cover;border-radius:6px;border:1px solid #cbd5e1;box-shadow:0 2px 5px rgba(0,0,0,0.08);">
                                         </template>
                                     </div>
-                                    <div x-show="localProofPreviews.length === 0" style="text-align:center;">
-                                        <i class="fas fa-images" style="font-size:24px;color:var(--light);margin-bottom:6px;"></i>
-                                        <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Upload Roving Photos</div>
-                                        <div style="font-size:9px;font-weight:600;color:var(--light);">Click or Drag & Drop (Up to 6, Max: 5MB each)</div>
+                                    <div x-show="localProofPreviews.length === 0" style="text-align:center;padding:12px;">
+                                        <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:var(--brand);margin-bottom:6px;opacity:0.8;"></i>
+                                        <div style="font-size:11px;font-weight:800;color:var(--brand);text-transform:uppercase;">Click to Choose Photo(s)</div>
+                                        <div style="font-size:9.5px;font-weight:600;color:var(--muted);margin-top:2px;">or Drag & Drop image files here</div>
+                                        <div style="font-size:8.5px;color:var(--light);margin-top:4px;">Up to 6 photos, Max: 5MB each</div>
                                     </div>
                                 </div>
-                                <input type="file" name="roving_photo[]" accept="image/*" multiple style="display:none;" x-ref="filer" required @change="const f=$event.target.files;if(f.length){handleProofFiles(f)}">
-                            </label>
+                                <input type="file" name="roving_photo[]" accept="image/*" multiple style="display:none;" x-ref="proofFileInput" required @change="const f=$event.target.files; if(f.length){ handleProofFiles(f); }">
+                            </div>
                         </div>
                         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:15px;">
                             <button type="button" @click="proofModal=false" class="btn btn-ghost">Cancel</button>
-                            <button type="submit" class="btn btn-success"><i class="fas fa-upload"></i> Upload Photo</button>
+                            <button type="submit" class="btn btn-success" style="font-weight:800;"><i class="fas fa-upload"></i> Upload Photo</button>
                         </div>
                     </form>
                 </div>

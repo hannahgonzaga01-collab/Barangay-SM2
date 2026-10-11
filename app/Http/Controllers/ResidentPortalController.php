@@ -681,12 +681,18 @@ class ResidentPortalController extends Controller
         ]);
     }
 
-    public function markNotificationsRead()
+    public function markNotificationsRead(Request $request)
     {
         if (auth()->check()) {
-            auth()->user()->unreadNotifications->markAsRead();
+            if ($request->has('id') && $request->id) {
+                auth()->user()->notifications()->where('id', $request->id)->whereNull('read_at')->update(['read_at' => now()]);
+            } else {
+                auth()->user()->unreadNotifications->markAsRead();
+            }
+            $unreadCount = auth()->user()->unreadNotifications()->count();
+            return response()->json(['success' => true, 'unread_count' => $unreadCount]);
         }
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'unread_count' => 0]);
     }
 
     public function uploadProfilePhoto(Request $request)
