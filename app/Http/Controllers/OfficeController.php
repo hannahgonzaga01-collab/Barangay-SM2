@@ -20,12 +20,6 @@ class OfficeController extends Controller
 {
     public function index(Request $request)
     {
-        if (\App\Models\Resident::count() < 2000 && file_exists(base_path('database/data/official_masterlist.json'))) {
-            (new \Database\Seeders\OfficialMasterlistSeeder())->run();
-        } else {
-            \App\Services\DemographicRebalancer::rebalanceIfNeeded();
-        }
-
         $query = Resident::with(['user.digitalId']);
 
         if ($request->filled('view')) {
@@ -48,8 +42,8 @@ class OfficeController extends Controller
         }
 
         $users = $query->whereNull('archived_at')->latest()->get();
-        $archivedResidents = Resident::whereNotNull('archived_at')->latest()->get();
-        $archivedResidentsCount = $archivedResidents->count();
+        $archivedResidentsCount = Resident::whereNotNull('archived_at')->count();
+        $archivedResidents = Resident::whereNotNull('archived_at')->latest()->limit(50)->get();
         $pets = Pet::with('resident')->where('is_archived', false)->get();
         $petCount = $pets->count();
         $archivedPets = Pet::with('resident')->where('is_archived', true)->latest()->get();

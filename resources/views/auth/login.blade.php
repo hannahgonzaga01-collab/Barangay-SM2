@@ -374,7 +374,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('login') }}" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
             @csrf
 
             <div class="fgrp">
@@ -413,8 +413,9 @@
             </div>
 
             <div class="login-btn-actions">
-                <button type="submit" class="btn-login">
-                    <i class="fas fa-sign-in-alt" style="margin-right:7px;"></i> Log In
+                <button type="submit" class="btn-login" :disabled="isSubmitting" :style="isSubmitting ? 'opacity:0.8;cursor:not-allowed;' : ''">
+                    <span x-show="!isSubmitting"><i class="fas fa-sign-in-alt" style="margin-right:7px;"></i> Log In</span>
+                    <span x-show="isSubmitting" style="display:none;"><i class="fas fa-spinner fa-spin" style="margin-right:7px;"></i> Logging in...</span>
                 </button>
                 <a href="{{ route('resident.index') }}" class="btn-back-portal">
                     <i class="fas fa-arrow-left"></i> Back to Portal

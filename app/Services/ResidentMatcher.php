@@ -10,9 +10,16 @@ class ResidentMatcher
     /**
      * Find best matching resident in masterlist and compute similarity score.
      */
+    protected static $cachedResidents = null;
+
     public static function match(string $firstName, string $lastName, ?string $birthday = null): array
     {
-        $residents = Resident::whereNull('archived_at')->get();
+        if (self::$cachedResidents === null) {
+            self::$cachedResidents = Resident::whereNull('archived_at')
+                ->select(['id', 'resident_code', 'first_name', 'last_name', 'birthday', 'address', 'user_id'])
+                ->get();
+        }
+        $residents = self::$cachedResidents;
 
         $bestMatch = null;
         $highestScore = 0;
