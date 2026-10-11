@@ -536,11 +536,15 @@ html, body {
                 this.phoneOtpSuccess = '';
                 let phone = this.newPhone.trim();
                 if (!phone) {
-                    this.phoneOtpError = 'Mangyaring ilagay ang bagong 11-digit mobile number.';
+                    this.phoneOtpError = this.lang === 'fil'
+                        ? 'Mangyaring ilagay ang bagong 11-digit mobile number.'
+                        : 'Please enter your new 11-digit mobile number.';
                     return;
                 }
                 if (!/^09\d{9}$/.test(phone)) {
-                    this.phoneOtpError = 'Format: 09XXXXXXXXX (11 digits nagsisimula sa 09).';
+                    this.phoneOtpError = this.lang === 'fil'
+                        ? 'Format: 09XXXXXXXXX (11 digits nagsisimula sa 09).'
+                        : 'Format: 09XXXXXXXXX (11 digits starting with 09).';
                     return;
                 }
 
@@ -558,7 +562,9 @@ html, body {
                 .then(data => {
                     this.phoneOtpSending = false;
                     if (data.success) {
-                        this.phoneOtpSuccess = data.message || 'Naipadala ang OTP verification code!';
+                        this.phoneOtpSuccess = this.lang === 'fil'
+                            ? (data.message || 'Naipadala ang OTP verification code!')
+                            : 'OTP verification code sent successfully to your mobile phone!';
                         if (data.mock && data.code) {
                             this.phoneMockOtp = data.code;
                             this.phoneOtpCode = data.code;
@@ -569,12 +575,12 @@ html, body {
                             if (this.phoneOtpCooldown <= 0) clearInterval(timer);
                         }, 1000);
                     } else {
-                        this.phoneOtpError = data.message || 'Hindi maipadala ang OTP. Pakisubukang muli.';
+                        this.phoneOtpError = data.message || (this.lang === 'fil' ? 'Hindi maipadala ang OTP. Pakisubukang muli.' : 'Failed to send OTP. Please try again.');
                     }
                 })
                 .catch(() => {
                     this.phoneOtpSending = false;
-                    this.phoneOtpError = 'Nagkaroon ng network error. Pakisubukang muli.';
+                    this.phoneOtpError = this.lang === 'fil' ? 'Nagkaroon ng network error. Pakisubukang muli.' : 'Network error occurred. Please try again.';
                 });
             },
             passOtpCode: '',
@@ -588,7 +594,9 @@ html, body {
                 this.passOtpSuccess = '';
                 let target = '{{ addslashes($authUser?->contact_number ?: ($authUser?->email ?: "")) }}';
                 if (!target) {
-                    this.passOtpError = 'Walang nakarehistrong mobile number o email ang account na ito.';
+                    this.passOtpError = this.lang === 'fil'
+                        ? 'Walang nakarehistrong mobile number o email ang account na ito.'
+                        : 'No registered mobile number or email found for this account.';
                     return;
                 }
 
@@ -606,7 +614,9 @@ html, body {
                 .then(data => {
                     this.passOtpSending = false;
                     if (data.success) {
-                        this.passOtpSuccess = data.message || 'Naipadala ang OTP verification code!';
+                        this.passOtpSuccess = this.lang === 'fil'
+                            ? (data.message || 'Naipadala ang OTP verification code!')
+                            : 'OTP verification code sent successfully to your mobile phone!';
                         if (data.mock && data.code) {
                             this.passMockOtp = data.code;
                             this.passOtpCode = data.code;
@@ -617,12 +627,12 @@ html, body {
                             if (this.passOtpCooldown <= 0) clearInterval(timer);
                         }, 1000);
                     } else {
-                        this.passOtpError = data.message || 'Hindi maipadala ang OTP. Pakisubukang muli.';
+                        this.passOtpError = data.message || (this.lang === 'fil' ? 'Hindi maipadala ang OTP. Pakisubukang muli.' : 'Failed to send OTP. Please try again.');
                     }
                 })
                 .catch(() => {
                     this.passOtpSending = false;
-                    this.passOtpError = 'Nagkaroon ng network error. Pakisubukang muli.';
+                    this.passOtpError = this.lang === 'fil' ? 'Nagkaroon ng network error. Pakisubukang muli.' : 'Network error occurred. Please try again.';
                 });
             },
             idUploadModal: false,
@@ -849,6 +859,40 @@ html, body {
                         faq_hours_title: 'Barangay Office Hours & 24/7 Tanod Desk:',
                         faq_hours_desc: 'Office hours: Monday to Friday, 8:00 AM to 5:00 PM. The Barangay Tanod Desk and Emergency SOS dispatch are active 24/7 for community security and emergencies.',
                         faq_close: 'Close Guide',
+
+                        // Email Edit Modal
+                        email_modal_title: 'Update Registered Email',
+                        email_modal_note: 'Enter your active personal email address where you want to receive document pickup notices and emergency SOS dispatch receipts.',
+                        email_lbl_new: 'New Email Address *',
+                        email_btn_save: 'Save Email',
+
+                        // Mobile Edit Modal
+                        phone_modal_title: 'Update Mobile Number',
+                        phone_modal_note: 'Update your 11-digit mobile number. You will receive an SMS OTP code for verification. Strictly 1 account = 1 mobile number.',
+                        phone_lbl_new: 'New Mobile Number *',
+                        phone_lbl_otp: '6-Digit One-Time PIN (OTP) *',
+                        phone_btn_save: 'Verify & Save Mobile Number',
+
+                        // Password Edit Modal
+                        pass_modal_title: 'Change Account Password',
+                        pass_modal_note: 'Choose a verification method to update your account password. Must be 8–16 characters without spaces.',
+                        pass_tab_current: 'Current Password',
+                        pass_tab_otp: 'Verify via OTP',
+                        pass_lbl_current: 'Current Password *',
+                        pass_ph_current: 'Current password',
+                        pass_lbl_new: 'New Password (8–16 Characters) *',
+                        pass_ph_new: 'New password (no spaces)',
+                        pass_lbl_confirm: 'Confirm New Password *',
+                        pass_ph_confirm: 'Confirm new password',
+                        pass_btn_save: 'Update Password',
+
+                        // Shared OTP Banner
+                        otp_banner_title: 'Your OTP Code (Sent via SMS):',
+                        otp_banner_badge: 'SMS DELIVERED',
+                        otp_banner_sub: 'One-Time PIN delivered to your registered mobile phone via SMS.',
+                        otp_send_btn: 'Send OTP',
+                        otp_sending: 'Sending...',
+                        otp_wait: 'Wait',
                     },
                     fil: {
                         welcome: 'Maligayang Pagdating',
@@ -989,6 +1033,40 @@ html, body {
                         faq_hours_title: 'Oras ng Tanggapan at 24/7 Tanod Desk:',
                         faq_hours_desc: 'Lunes hanggang Biyernes, 8:00 AM – 5:00 PM ang opisina. Ang Tanod Desk at Emergency SOS ay bukas 24/7 para sa anumang sakuna o emergency.',
                         faq_close: 'Isara ang Gabay',
+
+                        // Email Edit Modal
+                        email_modal_title: 'I-update ang Nakarehistrong Email',
+                        email_modal_note: 'Ilagay ang inyong aktibong personal email kung saan nais makatanggap ng abiso sa pagkuha ng dokumento at resibo ng emergency SOS.',
+                        email_lbl_new: 'Bagong Email Address *',
+                        email_btn_save: 'I-save ang Email',
+
+                        // Mobile Edit Modal
+                        phone_modal_title: 'I-update ang Mobile Number',
+                        phone_modal_note: 'I-update ang inyong 11-digit mobile number. Makakatanggap kayo ng SMS OTP verification code. Mahigpit na 1 account = 1 mobile number.',
+                        phone_lbl_new: 'Bagong Mobile Number *',
+                        phone_lbl_otp: '6-Digit One-Time PIN (OTP) *',
+                        phone_btn_save: 'Beripikahin at I-save ang Mobile',
+
+                        // Password Edit Modal
+                        pass_modal_title: 'Palitan ang Password ng Account',
+                        pass_modal_note: 'Pumili ng paraan ng beripikasyon upang palitan ang password ng account. Dapat ay 8–16 na character na walang espasyo.',
+                        pass_tab_current: 'Kasalukuyang Password',
+                        pass_tab_otp: 'Beripikahin via OTP',
+                        pass_lbl_current: 'Kasalukuyang Password *',
+                        pass_ph_current: 'Kasalukuyang password',
+                        pass_lbl_new: 'Bagong Password (8–16 Character) *',
+                        pass_ph_new: 'Bagong password (walang espasyo)',
+                        pass_lbl_confirm: 'Kumpirmahin ang Bagong Password *',
+                        pass_ph_confirm: 'Ulitin ang bagong password',
+                        pass_btn_save: 'I-update ang Password',
+
+                        // Shared OTP Banner
+                        otp_banner_title: 'Inyong OTP Code (Sent via SMS):',
+                        otp_banner_badge: 'SMS DELIVERED',
+                        otp_banner_sub: 'Inyong One-Time PIN (naipadala rin sa inyong cellphone via SMS).',
+                        otp_send_btn: 'Ipadala ang OTP',
+                        otp_sending: 'Ipinapadala...',
+                        otp_wait: 'Maghintay ng',
                     }
                 };
                 return (dict[this.lang] && dict[this.lang][key]) ? dict[this.lang][key] : (dict['en'][key] || key);
@@ -3549,27 +3627,38 @@ html, body {
     {{-- UPDATE EMAIL MODAL --}}
     @if($isAuth)
     <div x-show="emailEditModal" x-cloak class="modal-ov" x-transition style="z-index:99999;">
-        <div class="modal-box" style="max-width:420px;" @click.away="emailEditModal=false">
+        <div class="modal-box" style="max-width:440px;" @click.away="emailEditModal=false">
             <div class="modal-in">
                 <div class="modal-hd">
                     <div class="modal-ttl">
                         <div class="modal-ico"><i class="fas fa-envelope"></i></div>
-                        <div>Update Registered Email</div>
+                        <div x-text="t('email_modal_title')">Update Registered Email</div>
                     </div>
                     <button @click="emailEditModal=false; profileModal=true;" class="modal-close"><i class="fas fa-times-circle"></i></button>
                 </div>
                 <form action="{{ route('resident.email.update') }}" method="POST">
                     @csrf
-                    <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
-                        Enter your active personal email address where you want to receive document pickup notices and emergency SOS dispatch receipts.
-                    </p>
+                    
+                    {{-- Clean High-Contrast Note Box --}}
+                    <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:flex-start; gap:11px;">
+                        <div style="width:28px; height:28px; border-radius:8px; background:#dbeafe; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">
+                            <i class="fas fa-info-circle" style="color:#0284c7; font-size:14px;"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:11px; font-weight:800; color:#0369a1; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:3px;" x-text="lang === 'fil' ? 'MAHALAGANG PAALALA' : 'IMPORTANT NOTICE'">IMPORTANT NOTICE</div>
+                            <div style="font-size:12px; color:#1e3a8a; line-height:1.5; font-weight:600;" x-text="t('email_modal_note')">
+                                Enter your active personal email address where you want to receive document pickup notices and emergency SOS dispatch receipts.
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="fgrp">
-                        <label class="flbl">New Email Address *</label>
+                        <label class="flbl" x-text="t('email_lbl_new')">New Email Address *</label>
                         <input type="email" name="email" required class="finput" value="{{ $authUser?->email }}" placeholder="your-email@gmail.com">
                     </div>
                     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
-                        <button type="button" @click="emailEditModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm">Cancel</button>
-                        <button type="submit" class="btn-grad btn-sm"><i class="fas fa-save"></i> Save Email</button>
+                        <button type="button" @click="emailEditModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm" x-text="t('cancel')">Cancel</button>
+                        <button type="submit" class="btn-grad btn-sm"><i class="fas fa-save"></i> <span x-text="t('email_btn_save')">Save Email</span></button>
                     </div>
                 </form>
             </div>
@@ -3585,59 +3674,69 @@ html, body {
                 <div class="modal-hd">
                     <div class="modal-ttl">
                         <div class="modal-ico"><i class="fas fa-mobile-alt"></i></div>
-                        <div>Update Mobile Number</div>
+                        <div x-text="t('phone_modal_title')">Update Mobile Number</div>
                     </div>
                     <button @click="phoneEditModal=false; profileModal=true;" class="modal-close"><i class="fas fa-times-circle"></i></button>
                 </div>
                 <form action="{{ route('resident.phone.update') }}" method="POST">
                     @csrf
-                    <p style="font-size:11.5px;color:#64748b;line-height:1.5;margin-bottom:14px;font-weight:600;">
-                        I-update ang inyong 11-digit mobile number. Makakatanggap kayo ng OTP verification code. <span style="color:#0E5393;font-weight:800;">Strictly 1 account = 1 mobile number</span>.
-                    </p>
+
+                    {{-- Clean High-Contrast Note Box --}}
+                    <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:flex-start; gap:11px;">
+                        <div style="width:28px; height:28px; border-radius:8px; background:#dbeafe; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">
+                            <i class="fas fa-shield-alt" style="color:#0284c7; font-size:14px;"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:11px; font-weight:800; color:#0369a1; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:3px;" x-text="lang === 'fil' ? 'MAHALAGANG PAALALA' : 'IMPORTANT NOTICE'">IMPORTANT NOTICE</div>
+                            <div style="font-size:12px; color:#1e3a8a; line-height:1.5; font-weight:600;" x-text="t('phone_modal_note')">
+                                Update your 11-digit mobile number. You will receive an SMS OTP code for verification. Strictly 1 account = 1 mobile number.
+                            </div>
+                        </div>
+                    </div>
 
                     {{-- OTP Verification Banner --}}
                     <template x-if="phoneMockOtp">
                         <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
                                 <strong style="display:flex; align-items:center; gap:6px; color:#0E5393; font-size:12px;">
-                                    <i class="fas fa-sms" style="font-size:14px;"></i> Inyong OTP Code (Sent via SMS):
+                                    <i class="fas fa-sms" style="font-size:14px;"></i> <span x-text="t('otp_banner_title')">Your OTP Code (Sent via SMS):</span>
                                 </strong>
-                                <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;">SMS DELIVERED</span>
+                                <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;" x-text="t('otp_banner_badge')">SMS DELIVERED</span>
                             </div>
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:18px; font-weight:900; letter-spacing:3px; color:#0E5393; background:#fff; padding:4px 14px; border-radius:7px; border:1px solid #bfdbfe;" x-text="phoneMockOtp"></span>
-                                <span style="font-size:11px; color:#3b82f6; font-weight:600;">Inyong One-Time PIN (naipadala rin sa inyong cellphone via SMS).</span>
+                                <span style="font-size:11px; color:#3b82f6; font-weight:600;" x-text="t('otp_banner_sub')">One-Time PIN delivered to your registered mobile phone via SMS.</span>
                             </div>
                         </div>
                     </template>
 
                     <template x-if="phoneOtpError">
-                        <div style="background:#fee2e2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; margin-bottom:10px; color:#991b1b; font-size:11px; font-weight:700;">
+                        <div style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:12px; color:#991b1b; font-size:11.5px; font-weight:700;">
                             <i class="fas fa-exclamation-circle"></i> <span x-text="phoneOtpError"></span>
                         </div>
                     </template>
 
                     <template x-if="phoneOtpSuccess">
-                        <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#15803d; font-size:11px; font-weight:700;">
+                        <div style="background:#dcfce7; border:1px solid #86efac; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#15803d; font-size:11.5px; font-weight:700;">
                             <i class="fas fa-check-circle"></i> <span x-text="phoneOtpSuccess"></span>
                         </div>
                     </template>
 
                     <div class="fgrp" style="margin-bottom:14px;">
-                        <label class="flbl">Bagong Mobile Number *</label>
+                        <label class="flbl" x-text="t('phone_lbl_new')">New Mobile Number *</label>
                         <div class="fwrap" style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:9px; padding:0 6px 0 12px;">
                             <i class="fas fa-mobile-alt" style="color:#0E5393; font-size:14px; margin-right:8px;"></i>
                             <input type="tel" name="contact_number" x-model="newPhone" required class="finput" style="flex:1; border:none; background:transparent; padding:10px 0; font-size:14px; font-weight:700;" maxlength="11" placeholder="09XXXXXXXXX">
                             <button type="button" class="btn-send-otp" @click="sendPhoneChangeOtp()" :disabled="phoneOtpSending || phoneOtpCooldown > 0">
-                                <span x-show="!phoneOtpSending && phoneOtpCooldown === 0"><i class="fas fa-paper-plane"></i> Send OTP</span>
-                                <span x-show="phoneOtpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
-                                <span x-show="phoneOtpCooldown > 0" x-text="`Wait ${phoneOtpCooldown}s`"></span>
+                                <span x-show="!phoneOtpSending && phoneOtpCooldown === 0"><i class="fas fa-paper-plane"></i> <span x-text="t('otp_send_btn')">Send OTP</span></span>
+                                <span x-show="phoneOtpSending"><i class="fas fa-spinner fa-spin"></i> <span x-text="t('otp_sending')">Sending...</span></span>
+                                <span x-show="phoneOtpCooldown > 0" x-text="`${t('otp_wait')} ${phoneOtpCooldown}s`"></span>
                             </button>
                         </div>
                     </div>
 
                     <div class="fgrp" style="margin-bottom:14px;">
-                        <label class="flbl">6-Digit One-Time PIN (OTP) *</label>
+                        <label class="flbl" x-text="t('phone_lbl_otp')">6-Digit One-Time PIN (OTP) *</label>
                         <div class="fwrap">
                             <i class="fas fa-shield-alt" style="color:#0E5393; font-size:14px; margin-right:8px;"></i>
                             <input type="text" name="otp_code" x-model="phoneOtpCode" required class="finput" maxlength="6" placeholder="000000" style="letter-spacing:6px; font-size:16px; font-weight:900; color:#0f172a;">
@@ -3645,46 +3744,63 @@ html, body {
                     </div>
 
                     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
-                        <button type="button" @click="phoneEditModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm">Cancel</button>
-                        <button type="submit" class="btn-grad btn-sm"><i class="fas fa-save"></i> Verify &amp; Save Mobile Number</button>
+                        <button type="button" @click="phoneEditModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm" x-text="t('cancel')">Cancel</button>
+                        <button type="submit" class="btn-grad btn-sm"><i class="fas fa-save"></i> <span x-text="t('phone_btn_save')">Verify &amp; Save Mobile Number</span></button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+    @endif
 
     {{-- UPDATE PASSWORD MODAL (WITH CURRENT PASS OR OTP) --}}
+    @if($isAuth)
     <div x-show="passwordEditModal" x-cloak class="modal-ov" x-transition style="z-index:99999;">
         <div class="modal-box" style="max-width:440px;" @click.away="passwordEditModal=false">
             <div class="modal-in" x-data="{ passMethod: 'current' }">
                 <div class="modal-hd">
                     <div class="modal-ttl">
                         <div class="modal-ico"><i class="fas fa-shield-alt"></i></div>
-                        <div>Change Account Password</div>
+                        <div x-text="t('pass_modal_title')">Change Account Password</div>
                     </div>
                     <button @click="passwordEditModal=false; profileModal=true;" class="modal-close"><i class="fas fa-times-circle"></i></button>
                 </div>
                 <form action="{{ route('resident.password.update') }}" method="POST">
                     @csrf
                     
-                    {{-- Toggle Verification Way as Tabs --}}
-                    <div style="display:flex; gap:8px; background:#f1f5f9; padding:5px; border-radius:12px; margin-bottom:16px; border:1px solid #e2e8f0;">
+                    {{-- Clean High-Contrast Note Box --}}
+                    <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:flex-start; gap:11px;">
+                        <div style="width:28px; height:28px; border-radius:8px; background:#dbeafe; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">
+                            <i class="fas fa-lock" style="color:#0284c7; font-size:14px;"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:11px; font-weight:800; color:#0369a1; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:3px;" x-text="lang === 'fil' ? 'SEGURIDAD NG ACCOUNT' : 'ACCOUNT SECURITY'">ACCOUNT SECURITY</div>
+                            <div style="font-size:12px; color:#1e3a8a; line-height:1.5; font-weight:600;" x-text="t('pass_modal_note')">
+                                Choose a verification method to update your account password. Must be 8–16 characters without spaces.
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Balanced 50/50 Grid Switcher Tabs (Zero Ugly Borders, Perfect Spacing) --}}
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; background:#f1f5f9; padding:6px; border-radius:14px; margin-bottom:18px; border:1.5px solid #e2e8f0; width:100%; box-sizing:border-box;">
                         <button type="button" @click="passMethod = 'current'"
-                            style="flex:1; display:flex; align-items:center; justify-content:center; gap:7px; padding:10px 12px; border-radius:9px; border:none; font-size:11.5px; font-weight:800; text-transform:uppercase; cursor:pointer; transition:all .2s ease;"
-                            :style="passMethod === 'current' ? 'background:#0E5393; color:#fff; box-shadow:0 3px 10px rgba(14,83,147,.28);' : 'background:transparent; color:#64748b;'">
-                            <i class="fas fa-lock"></i> <span>Current Password</span>
+                            style="width:100%; box-sizing:border-box; border:none; outline:none; -webkit-tap-highlight-color:transparent; padding:12px 14px; border-radius:10px; font-size:12px; font-weight:800; letter-spacing:0.03em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s ease; margin:0;"
+                            :style="passMethod === 'current' ? 'background:#0E5393; color:#ffffff; box-shadow:0 3px 12px rgba(14,83,147,0.35);' : 'background:transparent; color:#64748b;'">
+                            <i class="fas fa-lock" style="font-size:13px;"></i>
+                            <span x-text="t('pass_tab_current')">Current Password</span>
                         </button>
                         <button type="button" @click="passMethod = 'otp'"
-                            style="flex:1; display:flex; align-items:center; justify-content:center; gap:7px; padding:10px 12px; border-radius:9px; border:none; font-size:11.5px; font-weight:800; text-transform:uppercase; cursor:pointer; transition:all .2s ease;"
-                            :style="passMethod === 'otp' ? 'background:#0E5393; color:#fff; box-shadow:0 3px 10px rgba(14,83,147,.28);' : 'background:transparent; color:#64748b;'">
-                            <i class="fas fa-mobile-alt"></i> <span>Verify via OTP</span>
+                            style="width:100%; box-sizing:border-box; border:none; outline:none; -webkit-tap-highlight-color:transparent; padding:12px 14px; border-radius:10px; font-size:12px; font-weight:800; letter-spacing:0.03em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s ease; margin:0;"
+                            :style="passMethod === 'otp' ? 'background:#0E5393; color:#ffffff; box-shadow:0 3px 12px rgba(14,83,147,0.35);' : 'background:transparent; color:#64748b;'">
+                            <i class="fas fa-mobile-alt" style="font-size:13px;"></i>
+                            <span x-text="t('pass_tab_otp')">Verify via OTP</span>
                         </button>
                     </div>
 
                     <div x-show="passMethod === 'current'">
                         <div class="fgrp" style="margin-bottom:14px;">
-                            <label class="flbl">Kasalukuyang Password *</label>
-                            <input type="password" name="current_password" class="finput" placeholder="Current password">
+                            <label class="flbl" x-text="t('pass_lbl_current')">Current Password *</label>
+                            <input type="password" name="current_password" class="finput" :placeholder="t('pass_ph_current')">
                         </div>
                     </div>
 
@@ -3694,19 +3810,19 @@ html, body {
                             <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
                                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
                                     <strong style="display:flex; align-items:center; gap:6px; color:#0E5393; font-size:12px;">
-                                        <i class="fas fa-sms" style="font-size:14px;"></i> Inyong OTP Code (Sent via SMS):
+                                        <i class="fas fa-sms" style="font-size:14px;"></i> <span x-text="t('otp_banner_title')">Your OTP Code (Sent via SMS):</span>
                                     </strong>
-                                    <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;">SMS DELIVERED</span>
+                                    <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;" x-text="t('otp_banner_badge')">SMS DELIVERED</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:10px;">
                                     <span style="font-size:18px; font-weight:900; letter-spacing:3px; color:#0E5393; background:#fff; padding:4px 14px; border-radius:7px; border:1px solid #bfdbfe;" x-text="passMockOtp"></span>
-                                    <span style="font-size:11px; color:#3b82f6; font-weight:600;">Inyong One-Time PIN (naipadala rin sa inyong cellphone via SMS).</span>
+                                    <span style="font-size:11px; color:#3b82f6; font-weight:600;" x-text="t('otp_banner_sub')">One-Time PIN delivered to your registered mobile phone via SMS.</span>
                                 </div>
                             </div>
                         </template>
 
                         <template x-if="passOtpError">
-                            <div class="ferr" style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:12px; color:#991b1b; font-size:11.5px;">
+                            <div class="ferr" style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:12px; color:#991b1b; font-size:11.5px; font-weight:700;">
                                 <i class="fas fa-exclamation-circle"></i> <span x-text="passOtpError"></span>
                             </div>
                         </template>
@@ -3718,31 +3834,34 @@ html, body {
                         </template>
 
                         <div class="fgrp" style="margin-bottom:14px;">
-                            <label class="flbl">OTP Code to: {{ $authUser?->contact_number ?: $authUser?->email }}</label>
+                            <label class="flbl">
+                                <span x-text="lang === 'fil' ? 'OTP Code ipinadala sa:' : 'OTP Code sent to:'"></span>
+                                {{ $authUser?->contact_number ?: $authUser?->email }}
+                            </label>
                             <div class="fwrap" style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:9px; padding:0 6px 0 12px;">
                                 <input type="text" name="otp_code" x-model="passOtpCode" class="finput" style="flex:1; border:none; background:transparent; padding:10px 0; letter-spacing:4px; font-size:15px; font-weight:800;" maxlength="6" placeholder="000000">
                                 <button type="button" class="btn-send-otp" @click="sendPassChangeOtp()" :disabled="passOtpSending || passOtpCooldown > 0">
-                                    <span x-show="!passOtpSending && passOtpCooldown === 0"><i class="fas fa-paper-plane"></i> Send OTP</span>
-                                    <span x-show="passOtpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
-                                    <span x-show="passOtpCooldown > 0" x-text="`Wait ${passOtpCooldown}s`"></span>
+                                    <span x-show="!passOtpSending && passOtpCooldown === 0"><i class="fas fa-paper-plane"></i> <span x-text="t('otp_send_btn')">Send OTP</span></span>
+                                    <span x-show="passOtpSending"><i class="fas fa-spinner fa-spin"></i> <span x-text="t('otp_sending')">Sending...</span></span>
+                                    <span x-show="passOtpCooldown > 0" x-text="`${t('otp_wait')} ${passOtpCooldown}s`"></span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <div class="fgrp" style="margin-bottom:12px;">
-                        <label class="flbl">Bagong Password (8-16 characters) *</label>
-                        <input type="password" name="password" required class="finput" maxlength="16" placeholder="New password (no spaces)">
+                        <label class="flbl" x-text="t('pass_lbl_new')">New Password (8-16 characters) *</label>
+                        <input type="password" name="password" required class="finput" maxlength="16" :placeholder="t('pass_ph_new')">
                     </div>
 
                     <div class="fgrp" style="margin-bottom:14px;">
-                        <label class="flbl">Kumpirmahin ang Bagong Password *</label>
-                        <input type="password" name="password_confirmation" required class="finput" maxlength="16" placeholder="Confirm new password">
+                        <label class="flbl" x-text="t('pass_lbl_confirm')">Confirm New Password *</label>
+                        <input type="password" name="password_confirmation" required class="finput" maxlength="16" :placeholder="t('pass_ph_confirm')">
                     </div>
 
                     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
-                        <button type="button" @click="passwordEditModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm">Cancel</button>
-                        <button type="submit" class="btn-grad btn-sm"><i class="fas fa-key"></i> Update Password</button>
+                        <button type="button" @click="passwordEditModal=false; profileModal=true;" class="btn-plain btn-ghost btn-sm" x-text="t('cancel')">Cancel</button>
+                        <button type="submit" class="btn-grad btn-sm"><i class="fas fa-key"></i> <span x-text="t('pass_btn_save')">Update Password</span></button>
                     </div>
                 </form>
             </div>
