@@ -515,6 +515,28 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         personnelList: [''],
         proofModal: false,
         activePatrolId: null,
+        localProofPreviews: [],
+        handleProofFiles(files) {
+            if (!files || !files.length) return;
+            if (files.length > 6) {
+                alert('Hanggang 6 na larawan lamang ang maaaring i-upload.');
+                return;
+            }
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > 5 * 1024 * 1024) {
+                    alert('Ang photo na "' + files[i].name + '" ay lagpas sa 5MB. Mangyaring mag-upload ng 5MB pababa.');
+                    return;
+                }
+            }
+            this.localProofPreviews = [];
+            for (let i = 0; i < files.length; i++) {
+                const r = new FileReader();
+                r.onload = (e) => {
+                    this.localProofPreviews.push(e.target.result);
+                };
+                r.readAsDataURL(files[i]);
+            }
+        },
         searchQuery: '',
         filterStatus: '',
         filterType: '',
@@ -978,7 +1000,6 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                         <option value="under_review">Under Review</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
-                        <option value="settled">Settled</option>
                         <option value="rejected">Rejected</option>
                     </select>
                     <select x-model="filterType">
@@ -1004,7 +1025,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                             <th style="text-align:right;white-space:nowrap;min-width:240px;">Action</th>
                         </tr></thead>
                         <tbody>
-                            @forelse(\App\Models\IssueReport::where('department','Peace & Order')->where('issue_type', '!=', 'Patrol Schedule')->latest()->get() as $issue)
+                            @forelse(\App\Models\IssueReport::where('department','Peace & Order')->where('issue_type', '!=', 'Patrol Schedule')->whereNotIn('status', ['settled', 'resolved'])->latest()->get() as $issue)
                             @php 
                                 $caseCode = 'PO-'.$issue->created_at->format('Y').'-'.str_pad($issue->id, 3, '0', STR_PAD_LEFT); 
                                 // Case-insensitive and robust sensitive check
@@ -2490,24 +2511,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         </div>
 
         {{-- ══ ROVING PROOF MODAL ══ --}}
-        <div x-show="proofModal" x-cloak class="modal-ov" x-transition x-data="{
-            localProofPreviews: [],
-            handleFiles(files) {
-                if(files.length > 6) { alert('Maximum 6 photos allowed.'); return; }
-                for(let i=0; i<files.length; i++) {
-                    if (files[i].size > 5 * 1024 * 1024) {
-                        alert('Ang photo na "' + files[i].name + '" ay lagpas sa 5MB. Mangyaring mag-upload ng 5MB pababa.');
-                        return;
-                    }
-                }
-                this.localProofPreviews = [];
-                for(let i=0; i<files.length; i++) {
-                    const r = new FileReader();
-                    r.onload = e => this.localProofPreviews.push(e.target.result);
-                    r.readAsDataURL(files[i]);
-                }
-            }
-        }">
+        <div x-show="proofModal" x-cloak class="modal-ov" x-transition>
             <div class="modal-box" style="max-width:400px;" @click.away="proofModal=false">
                 <div class="modal-in">
                     <div class="modal-hd">
@@ -2527,7 +2531,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                             <label style="cursor:pointer;display:block;"
                                 @dragover.prevent="$refs.dzr.style.border='2px solid var(--brand)';$refs.dzr.style.background='#eff6ff'"
                                 @dragleave.prevent="$refs.dzr.style.border='2px dashed var(--border)';$refs.dzr.style.background='#f8fafc'"
-                                @drop.prevent="const f=$event.dataTransfer.files;if(f.length){$refs.filer.files=f;handleFiles(f);$refs.dzr.style.border='2px dashed var(--border)';$refs.dzr.style.background='#f8fafc'}">
+                                @drop.prevent="const f=$event.dataTransfer.files;if(f.length){$refs.filer.files=f;handleProofFiles(f);$refs.dzr.style.border='2px dashed var(--border)';$refs.dzr.style.background='#f8fafc'}">
                                 <div x-ref="dzr" style="min-height:150px;padding:15px;border-radius:10px;background:#f8fafc;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .2s;" :style="localProofPreviews.length?'border:2px solid var(--brand)':''">
                                     <div x-show="localProofPreviews.length > 0" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
                                         <template x-for="(src, idx) in localProofPreviews" :key="idx">
@@ -2540,7 +2544,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                         <div style="font-size:9px;font-weight:600;color:var(--light);">Click or Drag & Drop (Up to 6, Max: 5MB each)</div>
                                     </div>
                                 </div>
-                                <input type="file" name="roving_photo[]" accept="image/*" multiple style="display:none;" x-ref="filer" required @change="const f=$event.target.files;if(f.length){handleFiles(f)}">
+                                <input type="file" name="roving_photo[]" accept="image/*" multiple style="display:none;" x-ref="filer" required @change="const f=$event.target.files;if(f.length){handleProofFiles(f)}">
                             </label>
                         </div>
                         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:15px;">

@@ -229,7 +229,13 @@ class PeaceController extends Controller
         if ($request->hasFile('roving_photo')) {
             $paths = [];
             foreach ($request->file('roving_photo') as $file) {
-                $paths[] = $file->store('patrol_proofs', 'public');
+                $storedPath = $file->store('patrol_proofs', 'public');
+                $paths[] = $storedPath;
+                try {
+                    \App\Models\SystemUploadedFile::persist($storedPath, $file);
+                } catch (\Throwable $e) {
+                    \Log::warning("Failed to persist patrol proof to SystemUploadedFile: " . $e->getMessage());
+                }
             }
             $patrol->update([
                 'image_path' => json_encode($paths),
