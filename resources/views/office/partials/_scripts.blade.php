@@ -86,6 +86,8 @@ function officePortal() {
         archiveTarget: { id: null, name: '' },
         archivePetModal: false,
         archivePetTarget: { id: null, name: '' },
+        releaseConfirmModal: false,
+        releaseTarget: { id: null, name: '', docType: '' },
         showReadyModal: false,
         selectedReq: { id: null, type: '', name: '', date: '', time: '08:00' },
         docFilter: 'all',

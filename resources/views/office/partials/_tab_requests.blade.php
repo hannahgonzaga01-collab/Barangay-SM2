@@ -435,16 +435,12 @@
                                     <i class="fas fa-sync-alt fa-spin" style="animation-duration: 3s; font-size:8px;"></i> <span>Processing</span> <i class="fas fa-arrow-right" style="font-size:7px;opacity:0.7;"></i>
                                 </button>
                             @elseif($req->status === 'ready')
-                                <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;"
-                                      onsubmit="return confirm('Kumpirmahin: I-release na po ba ang dokumentong ito kay {{ addslashes($displayName) }}? Ang aksyong ito ay pinal.');">
-                                    @csrf @method('PATCH')
-                                    <input type="hidden" name="status" value="released">
-                                    <button type="submit" 
-                                            title="Click to release document to resident: Ready ➡️ Released"
-                                            style="font-size:9.5px;font-weight:900;background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;padding:4px 10px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .18s;box-shadow:0 1px 3px rgba(5,150,105,0.12);white-space:nowrap;">
-                                        <i class="fas fa-calendar-check"></i> <span>Ready</span> <i class="fas fa-arrow-right" style="font-size:7px;opacity:0.7;"></i>
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        @click="releaseTarget = { id: {{ $req->id }}, name: '{{ addslashes($displayName) }}', docType: '{{ ucwords(str_replace('_',' ',$req->document_type)) }}' }; releaseConfirmModal = true;"
+                                        title="Click to release document to resident: Ready ➡️ Released"
+                                        style="font-size:9.5px;font-weight:900;background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;padding:4px 10px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .18s;box-shadow:0 1px 3px rgba(5,150,105,0.12);white-space:nowrap;">
+                                    <i class="fas fa-calendar-check"></i> <span>Ready</span> <i class="fas fa-arrow-right" style="font-size:7px;opacity:0.7;"></i>
+                                </button>
                             @elseif($req->status === 'released')
                                 <span style="font-size:9.5px;font-weight:900;background:#dcfce7;color:#15803d;border:1.5px solid #86efac;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
                                     <i class="fas fa-box-open"></i> Released
@@ -528,14 +524,11 @@
                                 
                                 @if(in_array($req->status, ['pending', 'processing', 'ready']))
                                     {{-- Direct Release Button --}}
-                                    <form action="{{ route('office.document.status', $req->id) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return confirm('Kumpirmahin: I-release na po ba ang dokumentong ito kay {{ addslashes($displayName) }}?');">
-                                        @csrf @method('PATCH')
-                                        <input type="hidden" name="status" value="released">
-                                        <button type="submit" class="tbl-btn" style="background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Release Document to Resident">
-                                            <i class="fas fa-check-circle"></i> Release
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            @click="releaseTarget = { id: {{ $req->id }}, name: '{{ addslashes($displayName) }}', docType: '{{ ucwords(str_replace('_',' ',$req->document_type)) }}' }; releaseConfirmModal = true;"
+                                            class="tbl-btn" style="background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Release Document to Resident">
+                                        <i class="fas fa-check-circle"></i> Release
+                                    </button>
 
                                     {{-- Reject Button with Modal --}}
                                     <div x-data="{ showReject: false, reasonSelect: '', reasonCustom: '' }" style="display:inline;">
