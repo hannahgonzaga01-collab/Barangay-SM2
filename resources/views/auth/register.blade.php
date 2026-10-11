@@ -1190,21 +1190,6 @@
                                 <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
                             @enderror
                         </div>
-
-                        <div style="margin-bottom:14px;">
-                            <label class="flbl" for="email_contact_number">Mobile / Cellphone Number <span style="font-weight:600;text-transform:none;color:#64748b;">(optional)</span></label>
-                            <div class="fwrap">
-                                <i class="fas fa-phone ficon"></i>
-                                <input id="email_contact_number" type="tel" name="contact_number" class="finput" placeholder="09XXXXXXXXX (11 digits)"
-                                    maxlength="11" value="{{ old('contact_number') }}" autocomplete="tel">
-                            </div>
-                            <div style="font-size:11px; color:#64748b; margin-top:4px; font-weight:600;">
-                                Paalala: 1 account = 1 mobile number lamang. Bawal ang duplicate na numero.
-                            </div>
-                            @error('contact_number')
-                                <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
-                            @enderror
-                        </div>
                     </div>
 
                     {{-- ── TAB 2: MOBILE NUMBER (OTP) REGISTRATION ── --}}
@@ -1271,15 +1256,6 @@
                             @error('otp_code')
                                 <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
                             @enderror
-                        </div>
-
-                        <div style="margin-bottom:14px;">
-                            <label class="flbl" for="opt_email">Email Address <span style="font-weight:600;text-transform:none;color:#64748b;">(optional)</span></label>
-                            <div class="fwrap">
-                                <i class="fas fa-envelope ficon"></i>
-                                <input id="opt_email" type="email" name="email" class="finput" placeholder="Optional (for email receipts)"
-                                    value="{{ old('email') }}" autocomplete="email">
-                            </div>
                         </div>
                     </div>
 
