@@ -99,16 +99,51 @@ class OtpService
     }
 
     /**
-     * Send SMS OTP via Semaphore or fallback to Mock OTP.
+     * Send SMS OTP via PhilSMS, Semaphore, or fallback to Mock OTP.
      */
     protected static function sendSmsOtp(string $phone, string $code, string $purpose): array
     {
+        $message = "Barangay San Miguel II: Ang inyong One-Time PIN (OTP) ay {$code}. Valid for 5 minutes. Huwag itong ibigay kaninuman.";
+
+        // 1. PhilSMS Gateway (v3) - Priority
+        $philsmsToken = config('services.philsms.token', env('PHILSMS_API_TOKEN', '5139|o8YEh29qrTb3PsAXd2uDwqWxCpNrS5jVSJTQZn4p35400c7b'));
+        $philsmsSender = config('services.philsms.sender_id', env('PHILSMS_SENDER_ID', 'PhilSMS'));
+
+        if (!empty($philsmsToken) && $philsmsToken !== 'mock') {
+            try {
+                $response = Http::timeout(10)->withHeaders([
+                    'Authorization' => 'Bearer ' . $philsmsToken,
+                    'Accept'        => 'application/json',
+                    'Content-Type'  => 'application/json',
+                ])->post('https://dashboard.philsms.com/api/v3/sms/send', [
+                    'recipient' => $phone,
+                    'sender_id' => $philsmsSender,
+                    'type'      => 'plain',
+                    'message'   => $message,
+                ]);
+
+                $resData = $response->json();
+                Log::info("[PhilSMS API Response]", ['body' => $resData, 'status' => $response->status()]);
+
+                if ($response->successful() && isset($resData['status']) && $resData['status'] === 'success') {
+                    Log::info("[PhilSMS SMS Sent] To: {$phone} | Code: {$code}");
+                    return [
+                        'success' => true,
+                        'mock'    => false,
+                        'message' => "Matagumpay na naipadala ang verification code sa iyong mobile number ({$phone})."
+                    ];
+                }
+
+                Log::warning("[PhilSMS Warning] SMS not delivered: " . json_encode($resData));
+            } catch (\Throwable $e) {
+                Log::error("[PhilSMS Gateway Error] " . $e->getMessage());
+            }
+        }
+
+        // 2. Semaphore Gateway (Alternate)
         $apiKey = config('services.semaphore.api_key', env('SEMAPHORE_API_KEY'));
         $senderName = config('services.semaphore.sender_name', env('SEMAPHORE_SENDER_NAME', 'BRGY-SM2'));
 
-        $message = "Barangay San Miguel II: Ang inyong One-Time PIN (OTP) ay {$code}. Valid for 5 minutes. Huwag itong ibigay kaninuman.";
-
-        // If client has provided real Semaphore API key, transmit real SMS
         if (!empty($apiKey) && $apiKey !== 'mock') {
             try {
                 $response = Http::timeout(10)->post('https://api.semaphore.co/api/v4/messages', [
@@ -133,7 +168,7 @@ class OtpService
             }
         }
 
-        // MOCK OTP MODE (Testing & Staging)
+        // 3. MOCK OTP MODE (Testing / Staging / Telco Fallback)
         Log::info("[MOCK SMS OTP] To: {$phone} | Code: {$code} | Purpose: {$purpose}");
         session()->flash('mock_otp', $code);
         session()->flash('mock_recipient', $phone);
