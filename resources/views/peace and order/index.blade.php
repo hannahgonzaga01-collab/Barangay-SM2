@@ -415,11 +415,13 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
         previewPhotoTitle: '',
         previewPhotoMeta: '',
         previewPhotoError: false,
-        openProofPreview(src, title, meta) {
+        previewPatrolId: null,
+        openProofPreview(src, title, meta, patrolId = null) {
             this.previewPhotoError = false;
             this.previewPhotoSrc = src;
             this.previewPhotoTitle = title || 'Patrol Proof Photo';
             this.previewPhotoMeta = meta || '';
+            this.previewPatrolId = patrolId;
             this.previewPhotoModal = true;
         },
 
@@ -1259,8 +1261,8 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                             $firstImgUrl = asset('storage/' . ltrim($firstImg, '/'));
                                         }
                                     @endphp
-                                    <div style="display:flex;align-items:center;gap:6px;">
-                                        <div @click="openProofPreview('{{ $firstImgUrl }}', '{{ addslashes($patrol->team_name) }} — Patrol Proof', '{{ \Carbon\Carbon::parse($patrol->schedule_date)->format('M d, Y') }} • {{ addslashes($patrol->personnel_names) }}')" 
+                                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                        <div @click="openProofPreview('{{ $firstImgUrl }}', '{{ addslashes($patrol->team_name) }} — Patrol Proof', '{{ \Carbon\Carbon::parse($patrol->schedule_date)->format('M d, Y') }} • {{ addslashes($patrol->personnel_names) }}', {{ $patrol->id }})" 
                                               style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;"
                                               onmouseover="this.style.borderColor='var(--brand)';this.style.background='#eff6ff';"
                                               onmouseout="this.style.borderColor='var(--border)';this.style.background='#f8fafc';"
@@ -1275,6 +1277,15 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                                 @endif
                                             </span>
                                         </div>
+                                        <button type="button" @click="activePatrolId={{ $patrol->id }}; proofModal=true;" class="btn btn-ghost btn-sm" style="font-size:9px;padding:3px 7px;border-radius:6px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--brand);font-weight:800;" title="Mag-upload ng bagong photo kapalit">
+                                            <i class="fas fa-sync-alt" style="font-size:8px;"></i> Change
+                                        </button>
+                                        <form action="{{ route('peace.patrol.proof.remove', $patrol->id) }}" method="POST" onsubmit="return confirm('Sigurado ka bang nais mong tanggalin ang photo na ito upang makapag-upload ng bago?');" style="margin:0;display:inline;">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-ghost btn-sm" style="font-size:9px;padding:3px 7px;border-radius:6px;border:1px solid #fecaca;background:#fff5f5;color:#dc2626;font-weight:800;" title="Tanggalin ang photo">
+                                                <i class="fas fa-trash-alt" style="font-size:8px;"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                     @else
                                     <button @click="activePatrolId={{ $patrol->id }}; proofModal=true" class="btn btn-ghost btn-sm" style="font-size:9px;padding:4px 9px;border:1.5px dashed var(--brand);color:var(--brand);background:#fff;border-radius:7px;font-weight:800;">
@@ -2768,15 +2779,25 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                         </div>
                     </div>
 
-                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
                         <button type="button" @click="previewPhotoModal=false" class="btn btn-ghost" style="font-size:11px;font-weight:700;">
                             Close
                         </button>
-                        <template x-if="previewPhotoSrc && !previewPhotoError">
-                            <a :href="previewPhotoSrc" download class="btn btn-primary" style="background:linear-gradient(135deg,var(--brand) 0%,#04192D 100%);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:800;box-shadow:0 2px 8px rgba(14,83,147,0.3);">
-                                <i class="fas fa-download"></i> Download Photo
-                            </a>
-                        </template>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <template x-if="previewPatrolId">
+                                <button type="button" 
+                                        @click="const pid=previewPatrolId; previewPhotoModal=false; activePatrolId=pid; proofModal=true;" 
+                                        class="btn btn-primary" 
+                                        style="background:linear-gradient(135deg,#059669 0%,#047857 100%);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:800;padding:8px 14px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(5,150,105,0.3);cursor:pointer;">
+                                    <i class="fas fa-camera"></i> <span x-text="(previewPhotoError || !previewPhotoSrc) ? 'Upload New Photo' : 'Change / Replace Photo'"></span>
+                                </button>
+                            </template>
+                            <template x-if="previewPhotoSrc && !previewPhotoError">
+                                <a :href="previewPhotoSrc" download class="btn btn-primary" style="background:linear-gradient(135deg,var(--brand) 0%,#04192D 100%);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:800;box-shadow:0 2px 8px rgba(14,83,147,0.3);">
+                                    <i class="fas fa-download"></i> Download Photo
+                                </a>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>

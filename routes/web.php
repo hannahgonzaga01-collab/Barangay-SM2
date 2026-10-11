@@ -237,6 +237,7 @@ Route::middleware(['auth', 'verified', 'role:admin,peace'])->group(function () {
     Route::match(['put', 'patch'], '/peace/patrol/{id}', [\App\Http\Controllers\PeaceController::class, 'updatePatrol'])->name('peace.patrol.update');
     Route::post('/peace/patrol/quick-duty', [\App\Http\Controllers\PeaceController::class, 'updateQuickDuty'])->name('peace.patrol.quick-duty');
     Route::patch('/peace/patrol/{id}/proof', [\App\Http\Controllers\PeaceController::class, 'updatePatrolProof'])->name('peace.patrol.proof');
+    Route::delete('/peace/patrol/{id}/proof', [\App\Http\Controllers\PeaceController::class, 'removePatrolProof'])->name('peace.patrol.proof.remove');
     Route::patch('/peace/patrol/{id}/status', [\App\Http\Controllers\PeaceController::class, 'updatePatrolStatus'])->name('peace.patrol.status');
     Route::delete('/peace/patrol/{id}', [\App\Http\Controllers\PeaceController::class, 'destroyPatrol'])->name('peace.patrol.destroy');
     Route::patch('/peace/issues/{id}/status', [\App\Http\Controllers\PeaceController::class, 'updateStatus']);

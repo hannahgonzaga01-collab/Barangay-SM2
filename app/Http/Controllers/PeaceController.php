@@ -246,6 +246,16 @@ class PeaceController extends Controller
         return redirect()->back()->with('success', 'Roving proof(s) uploaded and patrol marked as Completed.');
     }
 
+    public function removePatrolProof($id)
+    {
+        $patrol = PatrolSchedule::findOrFail($id);
+        $patrol->update([
+            'image_path' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Patrol proof photo removed. Maaari ka nang mag-upload ng bagong larawan.');
+    }
+
     public function updatePatrolStatus(Request $request, $id)
     {
         $patrol = PatrolSchedule::findOrFail($id);
