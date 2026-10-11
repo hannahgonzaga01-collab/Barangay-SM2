@@ -6,27 +6,105 @@
         }
 
         .flbl {
-            font-size: 8.5px;
+            font-size: 11.5px;
             font-weight: 800;
-            color: #64748b;
+            color: #334155;
             text-transform: uppercase;
-            letter-spacing: .06em;
+            letter-spacing: .05em;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
 
         .finput {
             width: 100%;
-            padding: 9px 12px 9px 36px;
+            padding: 10px 14px 10px 38px;
             background: #f8fafc;
-            border: 1.5px solid #e2e8f0;
+            border: 1.5px solid #cbd5e1;
             border-radius: 9px;
             font-family: inherit;
-            font-size: 12.5px;
+            font-size: 13.5px;
             font-weight: 600;
             color: #0f172a;
             outline: none;
             transition: all .15s;
+        }
+
+        /* Modern Segmented Tabs for Login */
+        .reg-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            margin-bottom: 16px;
+            gap: 4px;
+        }
+
+        .reg-tab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .2s;
+            outline: none !important;
+            background: transparent;
+            color: #64748b;
+        }
+
+        .reg-tab-btn:focus {
+            outline: none !important;
+        }
+
+        .reg-tab-btn.active {
+            background: #0E5393 !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 12px rgba(14, 83, 147, 0.25) !important;
+        }
+
+        .reg-tab-btn:not(.active):hover {
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-send-otp {
+            background: #0E5393 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 8px 14px !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+            letter-spacing: .02em !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            transition: all .15s !important;
+            box-shadow: 0 2px 6px rgba(14, 83, 147, 0.25) !important;
+            flex-shrink: 0 !important;
+            outline: none !important;
+        }
+
+        .btn-send-otp:hover:not(:disabled) {
+            background: #000052 !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-send-otp:disabled {
+            background: #94a3b8 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            opacity: 0.8 !important;
         }
 
         .finput:focus {
@@ -369,16 +447,12 @@
         @endif
 
         {{-- Login Method Navigation Tabs --}}
-        <div style="display:flex; background:#f1f5f9; padding:3px; border-radius:10px; margin-bottom:15px; border:1px solid #e2e8f0;">
-            <button type="button" @click="tab = 'password'"
-                    :style="tab === 'password' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
-                    style="flex:1; padding:8px 10px; border:none; border-radius:8px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
-                <i class="fas fa-key"></i> Password
+        <div class="reg-tabs">
+            <button type="button" @click="tab = 'password'" class="reg-tab-btn" :class="{ 'active': tab === 'password' }">
+                <i class="fas fa-key"></i> <span>Password</span>
             </button>
-            <button type="button" @click="tab = 'otp'"
-                    :style="tab === 'otp' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
-                    style="flex:1; padding:8px 10px; border:none; border-radius:8px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
-                <i class="fas fa-mobile-alt"></i> Mobile OTP
+            <button type="button" @click="tab = 'otp'" class="reg-tab-btn" :class="{ 'active': tab === 'otp' }">
+                <i class="fas fa-mobile-alt"></i> <span>Mobile OTP</span>
             </button>
         </div>
 
@@ -441,58 +515,55 @@
 
             {{-- Mock OTP Banner for OTP Login --}}
             <template x-if="mockCode">
-                <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#1d4ed8; font-size:12px;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;">
-                        <strong style="display:flex; align-items:center; gap:5px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
-                        <span style="font-size:9.5px; background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12.5px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <strong style="display:flex; align-items:center; gap:6px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
+                        <span style="font-size:10px; background:#dbeafe; padding:2px 7px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:17px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;" x-text="mockCode"></span>
-                        <span style="font-size:11px; color:#60a5fa;">Gamitin ang code na ito para mag-sign in.</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:18px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:4px 12px; border-radius:7px; border:1px solid #bfdbfe;" x-text="mockCode"></span>
+                        <span style="font-size:11.5px; color:#3b82f6; font-weight:600;">Gamitin ang code na ito para mag-sign in.</span>
                     </div>
                 </div>
             </template>
 
             <template x-if="otpError">
-                <div class="err-msg" style="background:#fee2e2; border:1px solid #fecaca; padding:9px 12px; border-radius:8px; margin-bottom:12px; color:#991b1b;">
+                <div class="err-msg" style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:12px; color:#991b1b; font-size:11.5px;">
                     <i class="fas fa-exclamation-circle"></i> <span x-text="otpError"></span>
                 </div>
             </template>
 
             <template x-if="otpSuccess">
-                <div class="status-msg" style="margin-bottom:12px; padding:8px 12px; font-size:11px;">
+                <div class="status-msg" style="margin-bottom:12px; padding:10px 14px; font-size:11.5px; border-radius:9px;">
                     <i class="fas fa-check-circle"></i> <span x-text="otpSuccess"></span>
                 </div>
             </template>
 
             <div class="fgrp">
                 <label class="flbl" for="otp_contact_number"><i class="fas fa-mobile-alt" style="margin-right:4px;"></i> Registered Mobile Number</label>
-                <div style="display:flex; gap:8px;">
-                    <div class="finput-wrap" style="flex:1;">
-                        <i class="fas fa-phone finput-ico"></i>
-                        <input id="otp_contact_number" type="tel" name="contact_number" x-model="otpPhone" class="finput"
-                            maxlength="11" placeholder="09XXXXXXXXX" required autocomplete="tel">
-                    </div>
-                    <button type="button" @click="sendOtp()" :disabled="otpSending || otpCooldown > 0"
-                            style="padding:0 14px; background:#0E5393; color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; transition:all .15s; font-family:inherit; min-width:105px;"
-                            :style="(otpSending || otpCooldown > 0) ? 'opacity:0.6; cursor:not-allowed;' : ''">
-                        <span x-show="!otpSending && otpCooldown === 0"><i class="fas fa-paper-plane" style="margin-right:4px;"></i> Send OTP</span>
+                <div class="finput-wrap" style="padding-right: 6px; display:flex; align-items:center; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:9px;">
+                    <i class="fas fa-phone finput-ico" style="position:static; transform:none; color:#0E5393; font-size:13px; margin:0 8px 0 12px; pointer-events:none;"></i>
+                    <input id="otp_contact_number" type="tel" name="contact_number" x-model="otpPhone" class="finput"
+                        maxlength="11" placeholder="09XXXXXXXXX" required autocomplete="tel"
+                        style="border:none; background:transparent; padding:10px 0; font-size:14.5px; font-weight:700; flex:1;">
+                    <button type="button" class="btn-send-otp" @click="sendOtp()" :disabled="otpSending || otpCooldown > 0">
+                        <span x-show="!otpSending && otpCooldown === 0"><i class="fas fa-paper-plane"></i> Send OTP</span>
                         <span x-show="otpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
                         <span x-show="otpCooldown > 0" x-text="`Wait ${otpCooldown}s`"></span>
                     </button>
                 </div>
-                <div style="font-size:9.5px; color:#64748b; margin-top:4px; font-weight:600;">
-                    Ilagay ang iyong 11-digit mobile number na nakarehistro sa iyong account.
+                <div style="font-size:11px; color:#64748b; margin-top:5px; font-weight:600;">
+                    Ilagay ang iyong 11-digit mobile number na nakarehistro sa account.
                 </div>
             </div>
 
             <div class="fgrp">
-                <label class="flbl" for="otp_code"><i class="fas fa-key" style="margin-right:4px;"></i> 6-Digit One-Time PIN (OTP)</label>
+                <label class="flbl" for="otp_code"><i class="fas fa-shield-alt" style="margin-right:4px;"></i> 6-Digit One-Time PIN (OTP)</label>
                 <div class="finput-wrap">
-                    <i class="fas fa-unlock-alt finput-ico"></i>
+                    <i class="fas fa-unlock-alt finput-ico" style="color:#0E5393;"></i>
                     <input id="otp_code" type="text" name="otp_code" x-model="otpCode" class="finput"
-                        maxlength="6" placeholder="123456" required autocomplete="one-time-code"
-                        style="letter-spacing:4px; font-size:15px; font-weight:800;">
+                        maxlength="6" placeholder="000000" required autocomplete="one-time-code"
+                        style="letter-spacing:6px; font-size:16px; font-weight:900; color:#0f172a;">
                 </div>
             </div>
 

@@ -3621,13 +3621,12 @@ html, body {
                         </div>
                     </template>
 
-                    <div class="fgrp" style="margin-bottom:12px;">
+                    <div class="fgrp" style="margin-bottom:14px;">
                         <label class="flbl">Bagong Mobile Number *</label>
-                        <div style="display:flex; gap:8px;">
-                            <input type="tel" name="contact_number" x-model="newPhone" required class="finput" style="flex:1;" maxlength="11" placeholder="09XXXXXXXXX">
-                            <button type="button" @click="sendPhoneChangeOtp()" :disabled="phoneOtpSending || phoneOtpCooldown > 0"
-                                    class="btn-plain btn-sm" style="background:#0E5393; color:#fff; border-radius:8px; padding:0 12px; font-size:11px; font-weight:800; white-space:nowrap;"
-                                    :style="(phoneOtpSending || phoneOtpCooldown > 0) ? 'opacity:0.6; cursor:not-allowed;' : ''">
+                        <div class="fwrap" style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:9px; padding:0 6px 0 12px;">
+                            <i class="fas fa-mobile-alt" style="color:#0E5393; font-size:14px; margin-right:8px;"></i>
+                            <input type="tel" name="contact_number" x-model="newPhone" required class="finput" style="flex:1; border:none; background:transparent; padding:10px 0; font-size:14px; font-weight:700;" maxlength="11" placeholder="09XXXXXXXXX">
+                            <button type="button" class="btn-send-otp" @click="sendPhoneChangeOtp()" :disabled="phoneOtpSending || phoneOtpCooldown > 0">
                                 <span x-show="!phoneOtpSending && phoneOtpCooldown === 0"><i class="fas fa-paper-plane"></i> Send OTP</span>
                                 <span x-show="phoneOtpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
                                 <span x-show="phoneOtpCooldown > 0" x-text="`Wait ${phoneOtpCooldown}s`"></span>
@@ -3637,7 +3636,10 @@ html, body {
 
                     <div class="fgrp" style="margin-bottom:14px;">
                         <label class="flbl">6-Digit One-Time PIN (OTP) *</label>
-                        <input type="text" name="otp_code" x-model="phoneOtpCode" required class="finput" maxlength="6" placeholder="123456" style="letter-spacing:4px; font-size:14px; font-weight:800;">
+                        <div class="fwrap">
+                            <i class="fas fa-shield-alt" style="color:#0E5393; font-size:14px; margin-right:8px;"></i>
+                            <input type="text" name="otp_code" x-model="phoneOtpCode" required class="finput" maxlength="6" placeholder="000000" style="letter-spacing:6px; font-size:16px; font-weight:900; color:#0f172a;">
+                        </div>
                     </div>
 
                     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
@@ -3664,21 +3666,17 @@ html, body {
                     @csrf
                     
                     {{-- Toggle Verification Way --}}
-                    <div style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; margin-bottom:12px; border:1px solid #e2e8f0;">
-                        <button type="button" @click="passMethod = 'current'"
-                                :style="passMethod === 'current' ? 'background:#fff; color:#0E5393; font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
-                                style="flex:1; padding:6px; border:none; border-radius:6px; font-size:11px; cursor:pointer; font-family:inherit;">
-                            Current Password
+                    <div class="reg-tabs" style="margin-bottom:14px;">
+                        <button type="button" @click="passMethod = 'current'" class="reg-tab-btn" :class="{ 'active': passMethod === 'current' }">
+                            <i class="fas fa-lock"></i> <span>Current Password</span>
                         </button>
-                        <button type="button" @click="passMethod = 'otp'"
-                                :style="passMethod === 'otp' ? 'background:#fff; color:#0E5393; font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
-                                style="flex:1; padding:6px; border:none; border-radius:6px; font-size:11px; cursor:pointer; font-family:inherit;">
-                            Verify via OTP PIN
+                        <button type="button" @click="passMethod = 'otp'" class="reg-tab-btn" :class="{ 'active': passMethod === 'otp' }">
+                            <i class="fas fa-mobile-alt"></i> <span>Verify via OTP</span>
                         </button>
                     </div>
 
                     <div x-show="passMethod === 'current'">
-                        <div class="fgrp" style="margin-bottom:12px;">
+                        <div class="fgrp" style="margin-bottom:14px;">
                             <label class="flbl">Kasalukuyang Password *</label>
                             <input type="password" name="current_password" class="finput" placeholder="Current password">
                         </div>
@@ -3687,37 +3685,35 @@ html, body {
                     <div x-show="passMethod === 'otp'" x-cloak>
                         {{-- Mock OTP Banner --}}
                         <template x-if="passMockOtp">
-                            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#1d4ed8; font-size:11.5px;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;">
-                                    <strong style="display:flex; align-items:center; gap:5px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
-                                    <span style="font-size:9.5px; background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12.5px;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                                    <strong style="display:flex; align-items:center; gap:6px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
+                                    <span style="font-size:10px; background:#dbeafe; padding:2px 7px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size:16px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;" x-text="passMockOtp"></span>
-                                    <span style="font-size:10.5px; color:#60a5fa;">Gamitin ang code na ito.</span>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <span style="font-size:18px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:4px 12px; border-radius:7px; border:1px solid #bfdbfe;" x-text="passMockOtp"></span>
+                                    <span style="font-size:11.5px; color:#3b82f6; font-weight:600;">Gamitin ang code na ito.</span>
                                 </div>
                             </div>
                         </template>
 
                         <template x-if="passOtpError">
-                            <div style="background:#fee2e2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; margin-bottom:10px; color:#991b1b; font-size:11px; font-weight:700;">
+                            <div class="ferr" style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:12px; color:#991b1b; font-size:11.5px;">
                                 <i class="fas fa-exclamation-circle"></i> <span x-text="passOtpError"></span>
                             </div>
                         </template>
 
                         <template x-if="passOtpSuccess">
-                            <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#15803d; font-size:11px; font-weight:700;">
+                            <div style="background:#dcfce7; border:1px solid #86efac; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#15803d; font-size:11.5px; font-weight:700; display:flex; align-items:center; gap:8px;">
                                 <i class="fas fa-check-circle"></i> <span x-text="passOtpSuccess"></span>
                             </div>
                         </template>
 
-                        <div class="fgrp" style="margin-bottom:12px;">
+                        <div class="fgrp" style="margin-bottom:14px;">
                             <label class="flbl">OTP Code to: {{ $authUser?->contact_number ?: $authUser?->email }}</label>
-                            <div style="display:flex; gap:8px;">
-                                <input type="text" name="otp_code" x-model="passOtpCode" class="finput" style="flex:1; letter-spacing:3px; font-weight:800;" maxlength="6" placeholder="123456">
-                                <button type="button" @click="sendPassChangeOtp()" :disabled="passOtpSending || passOtpCooldown > 0"
-                                        class="btn-plain btn-sm" style="background:#0E5393; color:#fff; border-radius:8px; padding:0 12px; font-size:11px; font-weight:800; white-space:nowrap;"
-                                        :style="(passOtpSending || passOtpCooldown > 0) ? 'opacity:0.6; cursor:not-allowed;' : ''">
+                            <div class="fwrap" style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:9px; padding:0 6px 0 12px;">
+                                <input type="text" name="otp_code" x-model="passOtpCode" class="finput" style="flex:1; border:none; background:transparent; padding:10px 0; letter-spacing:4px; font-size:15px; font-weight:800;" maxlength="6" placeholder="000000">
+                                <button type="button" class="btn-send-otp" @click="sendPassChangeOtp()" :disabled="passOtpSending || passOtpCooldown > 0">
                                     <span x-show="!passOtpSending && passOtpCooldown === 0"><i class="fas fa-paper-plane"></i> Send OTP</span>
                                     <span x-show="passOtpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
                                     <span x-show="passOtpCooldown > 0" x-text="`Wait ${passOtpCooldown}s`"></span>

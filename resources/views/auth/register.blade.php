@@ -43,20 +43,20 @@
         }
 
         .flbl {
-            font-size: 9px;
-            font-weight: 900;
-            color: #64748b;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #334155;
             text-transform: uppercase;
-            letter-spacing: .08em;
+            letter-spacing: .05em;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .fwrap {
             display: flex;
             align-items: center;
             background: #f1f5f9;
-            border: 1.5px solid #e2e8f0;
+            border: 1.5px solid #cbd5e1;
             border-radius: 10px;
             padding: 0 13px;
             transition: border-color .15s, box-shadow .15s, background .15s;
@@ -65,12 +65,12 @@
         .fwrap:focus-within {
             border-color: #0E5393;
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(14, 83, 147, .1);
+            box-shadow: 0 0 0 3px rgba(14, 83, 147, .12);
         }
 
         .ficon {
-            color: #94a3b8;
-            font-size: 12px;
+            color: #64748b;
+            font-size: 13px;
             flex-shrink: 0;
             margin-right: 9px;
         }
@@ -81,7 +81,7 @@
             background: transparent;
             padding: 12px 0;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 600;
             color: #0f172a;
             outline: none;
@@ -95,13 +95,91 @@
         }
 
         .ferr {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             color: #dc2626;
             margin-top: 5px;
             display: flex;
             align-items: center;
+            gap: 5px;
+        }
+
+        /* Responsive Modern Segmented Control / Tabs */
+        .reg-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            margin-bottom: 16px;
             gap: 4px;
+        }
+
+        .reg-tab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .2s;
+            outline: none !important;
+            background: transparent;
+            color: #64748b;
+        }
+
+        .reg-tab-btn:focus {
+            outline: none !important;
+        }
+
+        .reg-tab-btn.active {
+            background: #0E5393 !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 12px rgba(14, 83, 147, 0.25) !important;
+        }
+
+        .reg-tab-btn:not(.active):hover {
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-send-otp {
+            background: #0E5393 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 8px 14px !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+            letter-spacing: .02em !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            transition: all .15s !important;
+            box-shadow: 0 2px 6px rgba(14, 83, 147, 0.25) !important;
+            flex-shrink: 0 !important;
+            outline: none !important;
+        }
+
+        .btn-send-otp:hover:not(:disabled) {
+            background: #000052 !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-send-otp:disabled {
+            background: #94a3b8 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            opacity: 0.8 !important;
         }
 
         .fgrid2 {
@@ -220,15 +298,15 @@
         }
 
         .section-divider {
-            font-size: 9px;
-            font-weight: 900;
-            color: #64748b;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #475569;
             text-transform: uppercase;
-            letter-spacing: .08em;
-            margin: 14px 0 10px;
+            letter-spacing: .06em;
+            margin: 16px 0 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .section-divider::before,
@@ -1090,25 +1168,21 @@
                     <input type="hidden" name="reg_method" :value="regMethod">
 
                     {{-- Registration Method Switcher Tabs --}}
-                    <div style="display:flex; background:#f1f5f9; padding:3px; border-radius:10px; margin-bottom:14px; border:1px solid #e2e8f0;">
-                        <button type="button" @click="regMethod = 'email'"
-                                :style="regMethod === 'email' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
-                                style="flex:1; padding:9px 10px; border:none; border-radius:8px; font-size:11.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
-                            <i class="fas fa-envelope"></i> Register via Email
+                    <div class="reg-tabs">
+                        <button type="button" @click="regMethod = 'email'" class="reg-tab-btn" :class="{ 'active': regMethod === 'email' }">
+                            <i class="fas fa-envelope"></i> <span>Email</span>
                         </button>
-                        <button type="button" @click="regMethod = 'phone'"
-                                :style="regMethod === 'phone' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
-                                style="flex:1; padding:9px 10px; border:none; border-radius:8px; font-size:11.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
-                            <i class="fas fa-mobile-alt"></i> Mobile Number (OTP)
+                        <button type="button" @click="regMethod = 'phone'" class="reg-tab-btn" :class="{ 'active': regMethod === 'phone' }">
+                            <i class="fas fa-mobile-alt"></i> <span>Mobile No. (OTP)</span>
                         </button>
                     </div>
 
                     {{-- ── TAB 1: EMAIL REGISTRATION ── --}}
                     <div x-show="regMethod === 'email'">
-                        <div style="margin-bottom:12px;">
+                        <div style="margin-bottom:14px;">
                             <label class="flbl" for="email">Email Address *</label>
                             <div class="fwrap">
-                                <i class="fas fa-envelope ficon"></i>
+                                <i class="fas fa-envelope ficon" style="color:#0E5393;"></i>
                                 <input id="email" type="email" name="email" class="finput" placeholder="username@gmail.com"
                                     value="{{ old('email') }}" :required="step === 2 && regMethod === 'email'" autocomplete="username">
                             </div>
@@ -1117,15 +1191,15 @@
                             @enderror
                         </div>
 
-                        <div style="margin-bottom:12px;">
-                            <label class="flbl" for="email_contact_number">Mobile / Cellphone Number <span style="font-weight:600;text-transform:none;">(optional)</span></label>
+                        <div style="margin-bottom:14px;">
+                            <label class="flbl" for="email_contact_number">Mobile / Cellphone Number <span style="font-weight:600;text-transform:none;color:#64748b;">(optional)</span></label>
                             <div class="fwrap">
                                 <i class="fas fa-phone ficon"></i>
                                 <input id="email_contact_number" type="tel" name="contact_number" class="finput" placeholder="09XXXXXXXXX (11 digits)"
                                     maxlength="11" value="{{ old('contact_number') }}" autocomplete="tel">
                             </div>
-                            <div style="font-size:9.5px; color:#64748b; margin-top:3px; font-weight:600;">
-                                Paalala: 1 account = 1 mobile number lamang. Bawal ang duplicate na numero sa ibang account.
+                            <div style="font-size:11px; color:#64748b; margin-top:4px; font-weight:600;">
+                                Paalala: 1 account = 1 mobile number lamang. Bawal ang duplicate na numero.
                             </div>
                             @error('contact_number')
                                 <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
@@ -1135,51 +1209,48 @@
 
                     {{-- ── TAB 2: MOBILE NUMBER (OTP) REGISTRATION ── --}}
                     <div x-show="regMethod === 'phone'" x-cloak>
-                        <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:10px 12px;border-radius:9px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;">
-                            <i class="fas fa-shield-alt" style="color:#0E5393;margin-top:2px;font-size:12px;"></i>
-                            <div style="font-size:10px;color:#0E5393;font-weight:700;line-height:1.5;">
-                                Magrehistro gamit ang inyong mobile number. Makakatanggap kayo ng 6-digit OTP verification code. Strictly 1 account = 1 mobile number.
+                        <div style="background:#eff6ff; border:1.5px solid #bfdbfe; padding:12px 14px; border-radius:10px; margin-bottom:14px; display:flex; gap:10px; align-items:flex-start;">
+                            <i class="fas fa-shield-alt" style="color:#0E5393; margin-top:2px; font-size:14px; flex-shrink:0;"></i>
+                            <div style="font-size:12px; color:#0E5393; font-weight:700; line-height:1.5;">
+                                Magrehistro gamit ang mobile number. Makakatanggap kayo ng 6-digit OTP verification code. <strong>Strictly 1 account = 1 mobile number</strong>.
                             </div>
                         </div>
 
                         {{-- Mock OTP Banner --}}
                         <template x-if="mockOtp">
-                            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#1d4ed8; font-size:12px;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;">
-                                    <strong style="display:flex; align-items:center; gap:5px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
-                                    <span style="font-size:9.5px; background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12.5px;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                                    <strong style="display:flex; align-items:center; gap:6px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
+                                    <span style="font-size:10px; background:#dbeafe; padding:2px 7px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size:17px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;" x-text="mockOtp"></span>
-                                    <span style="font-size:11px; color:#60a5fa;">Gamitin ang verification code na ito para ma-verify ang account.</span>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <span style="font-size:18px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:4px 12px; border-radius:7px; border:1px solid #bfdbfe;" x-text="mockOtp"></span>
+                                    <span style="font-size:11.5px; color:#3b82f6; font-weight:600;">Gamitin ang verification code na ito para ma-verify ang account.</span>
                                 </div>
                             </div>
                         </template>
 
                         <template x-if="otpError">
-                            <div class="ferr" style="background:#fee2e2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; margin-bottom:10px; color:#991b1b;">
+                            <div class="ferr" style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:12px; color:#991b1b; font-size:11.5px;">
                                 <i class="fas fa-exclamation-circle"></i> <span x-text="otpError"></span>
                             </div>
                         </template>
 
                         <template x-if="otpSuccess">
-                            <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#15803d; font-size:11px; font-weight:700; display:flex; align-items:center; gap:6px;">
+                            <div style="background:#dcfce7; border:1px solid #86efac; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#15803d; font-size:11.5px; font-weight:700; display:flex; align-items:center; gap:8px;">
                                 <i class="fas fa-check-circle"></i> <span x-text="otpSuccess"></span>
                             </div>
                         </template>
 
-                        <div style="margin-bottom:12px;">
+                        <div style="margin-bottom:14px;">
                             <label class="flbl" for="reg_phone">11-Digit Mobile Number *</label>
-                            <div style="display:flex; gap:8px;">
-                                <div class="fwrap" style="flex:1;">
-                                    <i class="fas fa-mobile-alt ficon"></i>
-                                    <input id="reg_phone" type="tel" name="contact_number" x-model="contactNumber" class="finput"
-                                        maxlength="11" placeholder="09XXXXXXXXX" :required="step === 2 && regMethod === 'phone'" autocomplete="tel">
-                                </div>
-                                <button type="button" @click="sendRegisterOtp()" :disabled="otpSending || otpCooldown > 0"
-                                        style="padding:0 14px; background:#0E5393; color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; transition:all .15s; font-family:inherit; min-width:110px;"
-                                        :style="(otpSending || otpCooldown > 0) ? 'opacity:0.6; cursor:not-allowed;' : ''">
-                                    <span x-show="!otpSending && otpCooldown === 0"><i class="fas fa-paper-plane" style="margin-right:4px;"></i> Send OTP</span>
+                            <div class="fwrap" style="padding-right: 6px;">
+                                <i class="fas fa-mobile-alt ficon" style="color:#0E5393; font-size:14px;"></i>
+                                <input id="reg_phone" type="tel" name="contact_number" x-model="contactNumber" class="finput"
+                                    maxlength="11" placeholder="09XXXXXXXXX" :required="step === 2 && regMethod === 'phone'" autocomplete="tel"
+                                    style="font-size:14.5px; font-weight:700; letter-spacing:0.5px;">
+                                <button type="button" class="btn-send-otp" @click="sendRegisterOtp()" :disabled="otpSending || otpCooldown > 0">
+                                    <span x-show="!otpSending && otpCooldown === 0"><i class="fas fa-paper-plane"></i> Send OTP</span>
                                     <span x-show="otpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
                                     <span x-show="otpCooldown > 0" x-text="`Wait ${otpCooldown}s`"></span>
                                 </button>
@@ -1189,21 +1260,21 @@
                             @enderror
                         </div>
 
-                        <div style="margin-bottom:12px;">
+                        <div style="margin-bottom:14px;">
                             <label class="flbl" for="reg_otp_code">6-Digit One-Time PIN (OTP) *</label>
                             <div class="fwrap">
-                                <i class="fas fa-unlock-alt ficon"></i>
+                                <i class="fas fa-shield-alt ficon" style="color:#0E5393; font-size:14px;"></i>
                                 <input id="reg_otp_code" type="text" name="otp_code" x-model="otpCode" class="finput"
-                                    maxlength="6" placeholder="123456" :required="step === 2 && regMethod === 'phone'"
-                                    style="letter-spacing:4px; font-size:14px; font-weight:800;">
+                                    maxlength="6" placeholder="000000" :required="step === 2 && regMethod === 'phone'"
+                                    style="letter-spacing:6px; font-size:16px; font-weight:900; color:#0f172a;">
                             </div>
                             @error('otp_code')
                                 <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
                             @enderror
                         </div>
 
-                        <div style="margin-bottom:12px;">
-                            <label class="flbl" for="opt_email">Email Address <span style="font-weight:600;text-transform:none;">(optional)</span></label>
+                        <div style="margin-bottom:14px;">
+                            <label class="flbl" for="opt_email">Email Address <span style="font-weight:600;text-transform:none;color:#64748b;">(optional)</span></label>
                             <div class="fwrap">
                                 <i class="fas fa-envelope ficon"></i>
                                 <input id="opt_email" type="email" name="email" class="finput" placeholder="Optional (for email receipts)"
