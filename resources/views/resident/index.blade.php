@@ -3150,7 +3150,7 @@ html, body {
                             <div class="fgrid2 fgrp">
                                 <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Block No.</label><input type="text" name="blk" class="finput"></div>
                                 <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Lot No.</label><input type="text" name="lot" class="finput"></div>
-                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Move Date</label><input type="text" name="move_date" placeholder="e.g. March 1, 2026" class="finput"></div>
+                                <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Move Date</label><input type="date" name="move_date" class="finput"></div>
                                 <div><label class="flbl" style="font-size:12.5px;font-weight:800;">Landlord / Owner</label><input type="text" name="landlord" class="finput"></div>
                                 <div class="fspan2"><label class="flbl" style="font-size:12.5px;font-weight:800;">Family Members (comma-separated)</label><input type="text" name="family_members" class="finput"></div>
                             </div>
