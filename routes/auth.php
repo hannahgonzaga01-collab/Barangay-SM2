@@ -42,7 +42,16 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    Route::post('login/otp', [\App\Http\Controllers\Auth\OtpController::class, 'loginWithOtp'])
+        ->name('login.otp');
 });
+
+Route::post('auth/send-otp', [\App\Http\Controllers\Auth\OtpController::class, 'send'])
+    ->name('auth.send-otp');
+
+Route::post('auth/verify-otp', [\App\Http\Controllers\Auth\OtpController::class, 'verify'])
+    ->name('auth.verify-otp');
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)

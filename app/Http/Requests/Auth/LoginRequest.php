@@ -246,11 +246,24 @@ class LoginRequest extends FormRequest
             }
         }
 
+        // ── Mobile Number Authentication Support ──
+        $rawLogin = trim((string)$this->input('email'));
+        $cleanPhone = \App\Services\OtpService::normalizePhoneNumber($rawLogin);
+
+        if (\App\Services\OtpService::isValidPhoneNumber($cleanPhone)) {
+            $userByPhone = \App\Models\User::where('contact_number', $cleanPhone)->first();
+            if ($userByPhone && \Illuminate\Support\Facades\Hash::check($inputPassword, $userByPhone->password)) {
+                Auth::login($userByPhone, $this->boolean('remember'));
+                RateLimiter::clear($this->throttleKey());
+                return;
+            }
+        }
+
         if (! Auth::attempt(['email' => $inputEmail, 'password' => $inputPassword], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey(), 600);
 
             throw ValidationException::withMessages([
-                'email' => 'Your email or password is wrong please try again.',
+                'email' => 'Your email/mobile number or password is wrong. Please try again.',
             ]);
         }
 

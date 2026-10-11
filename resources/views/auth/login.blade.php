@@ -278,10 +278,68 @@
 
     <div class="auth-card-head">
         <h2><i class="fas fa-sign-in-alt" style="margin-right:8px;opacity:.8;"></i> Welcome Back</h2>
-        <p>Sign in to access your Barangay San Miguel II account</p>
+        <p>Sign in with your Email Address or Mobile Number</p>
     </div>
 
-    <div class="auth-card-body">
+    <div class="auth-card-body" x-data="{
+        tab: 'password',
+        otpPhone: '{{ old('contact_number', '') }}',
+        otpCode: '',
+        otpSending: false,
+        otpCooldown: 0,
+        otpSent: false,
+        mockCode: '',
+        otpError: '',
+        otpSuccess: '',
+        sendOtp() {
+            this.otpError = '';
+            this.otpSuccess = '';
+            let phone = this.otpPhone.trim();
+            if (!phone) {
+                this.otpError = 'Mangyaring ilagay ang inyong 11-digit mobile number.';
+                return;
+            }
+            if (!/^09\d{9}$/.test(phone)) {
+                this.otpError = 'Format: 09XXXXXXXXX (11 digits nagsisimula sa 09).';
+                return;
+            }
+
+            this.otpSending = true;
+            fetch('{{ route('auth.send-otp') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ recipient: phone, purpose: 'login' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.otpSending = false;
+                if (data.success) {
+                    this.otpSent = true;
+                    this.otpSuccess = data.message || 'Naipadala ang verification code!';
+                    if (data.mock && data.code) {
+                        this.mockCode = data.code;
+                        this.otpCode = data.code; // auto-populate for convenient testing
+                    }
+                    this.otpCooldown = 60;
+                    let timer = setInterval(() => {
+                        this.otpCooldown--;
+                        if (this.otpCooldown <= 0) clearInterval(timer);
+                    }, 1000);
+                } else {
+                    this.otpError = data.message || 'Hindi maipadala ang OTP. Pakisubukang muli.';
+                }
+            })
+            .catch(() => {
+                this.otpSending = false;
+                this.otpError = 'Nagkaroon ng problema sa network. Pakisubukang muli.';
+            });
+        }
+    }">
+        {{-- Session Flash Messages --}}
         @if(session('status') || session('success'))
             <div class="status-msg">
                 <i class="fas fa-check-circle"></i> {{ session('status') ?? session('success') }}
@@ -290,29 +348,59 @@
 
         @if(session('error'))
             <div class="err-msg"
-                style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:16px; color:#991b1b;">
+                style="background:#fee2e2; border:1px solid #fecaca; padding:10px 14px; border-radius:9px; margin-bottom:14px; color:#991b1b;">
                 <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}">
+        @if(session('mock_otp'))
+            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:9px; padding:10px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                    <strong style="display:flex; align-items:center; gap:6px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
+                    <span style="font-size:10px; background:#dbeafe; padding:1px 6px; border-radius:4px; font-weight:800;">5 MINS VALID</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:17px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;">
+                        {{ session('mock_otp') }}
+                    </span>
+                    <span style="font-size:11px; color:#60a5fa;">({{ session('mock_recipient') }})</span>
+                </div>
+            </div>
+        @endif
+
+        {{-- Login Method Navigation Tabs --}}
+        <div style="display:flex; background:#f1f5f9; padding:3px; border-radius:10px; margin-bottom:15px; border:1px solid #e2e8f0;">
+            <button type="button" @click="tab = 'password'"
+                    :style="tab === 'password' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
+                    style="flex:1; padding:8px 10px; border:none; border-radius:8px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
+                <i class="fas fa-key"></i> Password
+            </button>
+            <button type="button" @click="tab = 'otp'"
+                    :style="tab === 'otp' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
+                    style="flex:1; padding:8px 10px; border:none; border-radius:8px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
+                <i class="fas fa-mobile-alt"></i> Mobile OTP
+            </button>
+        </div>
+
+        {{-- TAB 1: STANDARD PASSWORD LOGIN (Email OR Phone + Password) --}}
+        <form method="POST" action="{{ route('login') }}" x-show="tab === 'password'">
             @csrf
 
             <div class="fgrp">
-                <label class="flbl" for="email"> Email Address</label>
+                <label class="flbl" for="email"><i class="fas fa-id-badge" style="margin-right:4px;"></i> Email Address or Mobile Number</label>
                 <div class="finput-wrap">
-                    <i class="fas fa-envelope finput-ico"></i>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" class="finput"
-                        placeholder="username@gmail.com" required autofocus autocomplete="username">
+                    <i class="fas fa-user finput-ico"></i>
+                    <input id="email" type="text" name="email" value="{{ old('email') }}" class="finput"
+                        placeholder="username@gmail.com or 09XXXXXXXXX" required autofocus autocomplete="username">
                 </div>
                 @error('email')<div class="err-msg"><i class="fas fa-exclamation-circle"></i>{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="fgrp" x-data="{ show: false }">
-                <label class="flbl" for="password"> Password</label>
+                <label class="flbl" for="password"><i class="fas fa-lock" style="margin-right:4px;"></i> Password</label>
                 <div class="finput-wrap has-toggle">
-                    <i class="fas fa-lock finput-ico"></i>
+                    <i class="fas fa-shield-alt finput-ico"></i>
                     <input id="password" :type="show ? 'text' : 'password'" name="password" class="finput"
                         placeholder="Enter your password" required autocomplete="current-password">
                     <button type="button" class="toggle-pw" @click="show=!show">
@@ -343,7 +431,89 @@
             </div>
 
             <div class="register-row" style="border-top:none; margin-top:12px; padding-top:0;">
-                <p style="font-size:13px;">Don't have an account yet? <a href="{{ route('register') }}">Create one here</a></p>
+                <p style="font-size:12px;">Don't have an account yet? <a href="{{ route('register') }}">Create one here</a></p>
+            </div>
+        </form>
+
+        {{-- TAB 2: PASSWORDLESS MOBILE NUMBER + OTP LOGIN --}}
+        <form method="POST" action="{{ route('login.otp') }}" x-show="tab === 'otp'" x-cloak>
+            @csrf
+
+            {{-- Mock OTP Banner for OTP Login --}}
+            <template x-if="mockCode">
+                <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#1d4ed8; font-size:12px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;">
+                        <strong style="display:flex; align-items:center; gap:5px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
+                        <span style="font-size:9.5px; background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:17px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;" x-text="mockCode"></span>
+                        <span style="font-size:11px; color:#60a5fa;">Gamitin ang code na ito para mag-sign in.</span>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="otpError">
+                <div class="err-msg" style="background:#fee2e2; border:1px solid #fecaca; padding:9px 12px; border-radius:8px; margin-bottom:12px; color:#991b1b;">
+                    <i class="fas fa-exclamation-circle"></i> <span x-text="otpError"></span>
+                </div>
+            </template>
+
+            <template x-if="otpSuccess">
+                <div class="status-msg" style="margin-bottom:12px; padding:8px 12px; font-size:11px;">
+                    <i class="fas fa-check-circle"></i> <span x-text="otpSuccess"></span>
+                </div>
+            </template>
+
+            <div class="fgrp">
+                <label class="flbl" for="otp_contact_number"><i class="fas fa-mobile-alt" style="margin-right:4px;"></i> Registered Mobile Number</label>
+                <div style="display:flex; gap:8px;">
+                    <div class="finput-wrap" style="flex:1;">
+                        <i class="fas fa-phone finput-ico"></i>
+                        <input id="otp_contact_number" type="tel" name="contact_number" x-model="otpPhone" class="finput"
+                            maxlength="11" placeholder="09XXXXXXXXX" required autocomplete="tel">
+                    </div>
+                    <button type="button" @click="sendOtp()" :disabled="otpSending || otpCooldown > 0"
+                            style="padding:0 14px; background:#0E5393; color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; transition:all .15s; font-family:inherit; min-width:105px;"
+                            :style="(otpSending || otpCooldown > 0) ? 'opacity:0.6; cursor:not-allowed;' : ''">
+                        <span x-show="!otpSending && otpCooldown === 0"><i class="fas fa-paper-plane" style="margin-right:4px;"></i> Send OTP</span>
+                        <span x-show="otpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
+                        <span x-show="otpCooldown > 0" x-text="`Wait ${otpCooldown}s`"></span>
+                    </button>
+                </div>
+                <div style="font-size:9.5px; color:#64748b; margin-top:4px; font-weight:600;">
+                    Ilagay ang iyong 11-digit mobile number na nakarehistro sa iyong account.
+                </div>
+            </div>
+
+            <div class="fgrp">
+                <label class="flbl" for="otp_code"><i class="fas fa-key" style="margin-right:4px;"></i> 6-Digit One-Time PIN (OTP)</label>
+                <div class="finput-wrap">
+                    <i class="fas fa-unlock-alt finput-ico"></i>
+                    <input id="otp_code" type="text" name="otp_code" x-model="otpCode" class="finput"
+                        maxlength="6" placeholder="123456" required autocomplete="one-time-code"
+                        style="letter-spacing:4px; font-size:15px; font-weight:800;">
+                </div>
+            </div>
+
+            <div class="remember-row">
+                <label class="remember-lbl">
+                    <input type="checkbox" name="remember" value="1">
+                    <span>Remember this device</span>
+                </label>
+            </div>
+
+            <div class="login-btn-actions">
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt" style="margin-right:7px;"></i> Sign In with OTP
+                </button>
+                <a href="{{ route('resident.index') }}" class="btn-back-portal">
+                    <i class="fas fa-arrow-left"></i> Back to Portal
+                </a>
+            </div>
+
+            <div class="register-row" style="border-top:none; margin-top:12px; padding-top:0;">
+                <p style="font-size:12px;">Don't have an account yet? <a href="{{ route('register') }}">Create one here</a></p>
             </div>
         </form>
     </div>

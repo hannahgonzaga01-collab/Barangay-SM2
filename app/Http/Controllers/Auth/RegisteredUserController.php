@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Resident;
 use App\Services\ResidentMatcher;
+use App\Services\OtpService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -58,22 +59,77 @@ class RegisteredUserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'middle_name' => ['nullable', 'string', 'max:255'],
-            'birthday' => ['required', 'date', 'before_or_equal:' . now()->subYears(15)->toDateString()],
-            'is_voter' => ['required', 'in:0,1'],
-            'precinct_no' => ['nullable', 'string', 'max:50'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed'],
-            'voter_id_photo' => ['nullable', 'image', 'max:5120'], // Max 5MB Proof/ID upload
-        ], [
-            'password.min' => 'Password must be at least 8 characters.',
-            'password.max' => 'Password must not exceed 16 characters.',
-            'password.not_regex' => 'Password must be one word and cannot contain spaces.',
-            'voter_id_photo.max' => 'Ang ID / patunay ay hindi dapat lumagpas sa 5MB (Max: 5MB).',
-        ]);
+        $isPhoneReg = $request->input('reg_method') === 'phone' || (!$request->filled('email') && $request->filled('contact_number'));
+
+        if ($isPhoneReg) {
+            $cleanPhone = OtpService::normalizePhoneNumber($request->contact_number);
+            $request->merge(['contact_number' => $cleanPhone]);
+
+            $rules = [
+                'first_name' => ['required', 'string', 'max:255'],
+                'last_name' => ['required', 'string', 'max:255'],
+                'middle_name' => ['nullable', 'string', 'max:255'],
+                'birthday' => ['required', 'date', 'before_or_equal:' . now()->subYears(15)->toDateString()],
+                'is_voter' => ['required', 'in:0,1'],
+                'precinct_no' => ['nullable', 'string', 'max:50'],
+                'contact_number' => ['required', 'string', 'regex:/^09\d{9}$/', 'unique:users,contact_number'],
+                'otp_code' => ['required', 'string'],
+                'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+                'password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed'],
+                'voter_id_photo' => ['nullable', 'image', 'max:5120'], // Max 5MB Proof/ID upload
+            ];
+
+            $messages = [
+                'contact_number.required' => 'Mangyaring ilagay ang inyong 11-digit mobile number.',
+                'contact_number.regex' => 'Ang format ng mobile number ay dapat 09XXXXXXXXX (11 digits).',
+                'contact_number.unique' => 'Ang mobile number na ito ay nakarehistro na sa ibang account. Bawal ang paulit-ulit na numero sa bawat account.',
+                'otp_code.required' => 'Kailangan ang 6-digit One-Time PIN (OTP) verification code.',
+                'password.min' => 'Password must be at least 8 characters.',
+                'password.max' => 'Password must not exceed 16 characters.',
+                'password.not_regex' => 'Password must be one word and cannot contain spaces.',
+                'voter_id_photo.max' => 'Ang ID / patunay ay hindi dapat lumagpas sa 5MB (Max: 5MB).',
+            ];
+
+            $request->validate($rules, $messages);
+
+            // Verify OTP code
+            $otpValid = OtpService::verifyOtp($cleanPhone, $request->otp_code, 'register');
+            if (!$otpValid) {
+                return back()->withInput()->withErrors([
+                    'otp_code' => 'Mali o expired na ang inilagay na 6-digit OTP code para sa mobile number na ito. Pakisubukang kumuha ng bagong OTP.'
+                ]);
+            }
+        } else {
+            $cleanPhone = $request->filled('contact_number') ? OtpService::normalizePhoneNumber($request->contact_number) : null;
+            if ($cleanPhone) {
+                $request->merge(['contact_number' => $cleanPhone]);
+            }
+
+            $rules = [
+                'first_name' => ['required', 'string', 'max:255'],
+                'last_name' => ['required', 'string', 'max:255'],
+                'middle_name' => ['nullable', 'string', 'max:255'],
+                'birthday' => ['required', 'date', 'before_or_equal:' . now()->subYears(15)->toDateString()],
+                'is_voter' => ['required', 'in:0,1'],
+                'precinct_no' => ['nullable', 'string', 'max:50'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+                'contact_number' => ['nullable', 'string', 'regex:/^09\d{9}$/', 'unique:users,contact_number'],
+                'password' => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed'],
+                'voter_id_photo' => ['nullable', 'image', 'max:5120'], // Max 5MB Proof/ID upload
+            ];
+
+            $messages = [
+                'email.required' => 'Email address is required.',
+                'email.unique' => 'Ang email address na ito ay nakarehistro na sa ibang account.',
+                'contact_number.unique' => 'Ang mobile number na ito ay nakarehistro na sa ibang account. Bawal ang paulit-ulit na numero sa bawat account.',
+                'password.min' => 'Password must be at least 8 characters.',
+                'password.max' => 'Password must not exceed 16 characters.',
+                'password.not_regex' => 'Password must be one word and cannot contain spaces.',
+                'voter_id_photo.max' => 'Ang ID / patunay ay hindi dapat lumagpas sa 5MB (Max: 5MB).',
+            ];
+
+            $request->validate($rules, $messages);
+        }
 
         // Build full name
         $fullName = trim($request->first_name . ' ' . ($request->middle_name ? $request->middle_name . ' ' : '') . $request->last_name);
@@ -104,7 +160,8 @@ class RegisteredUserController extends Controller
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
             'last_name' => $request->last_name,
-            'email' => $request->email,
+            'email' => $request->filled('email') ? strtolower(trim($request->email)) : null,
+            'contact_number' => $cleanPhone ?: null,
             'password' => Hash::make($request->password),
             'role' => 'resident',
             'status' => $userStatus,
@@ -122,6 +179,7 @@ class RegisteredUserController extends Controller
             // Link to the exact found resident record
             $matchedResident->update([
                 'user_id' => $user->id,
+                'contact_no' => $cleanPhone ?: $matchedResident->contact_no,
                 'is_voter' => $request->boolean('is_voter'),
                 'precinct_no' => $request->filled('precinct_no') ? strtoupper(trim($request->precinct_no)) : null,
                 'voter_status' => 'approved',

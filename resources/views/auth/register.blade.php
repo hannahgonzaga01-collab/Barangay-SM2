@@ -593,7 +593,7 @@
     </style>
 
     <div class="rp-outer" x-data="{
-        step: {{ ($errors->has('email') || $errors->has('password') || $errors->has('password_confirmation')) ? 2 : 1 }},
+        step: {{ ($errors->has('email') || $errors->has('contact_number') || $errors->has('otp_code') || $errors->has('password') || $errors->has('password_confirmation')) ? 2 : 1 }},
         firstName: '{{ addslashes(old('first_name', '')) }}',
         lastName: '{{ addslashes(old('last_name', '')) }}',
         middleName: '{{ addslashes(old('middle_name', '')) }}',
@@ -610,6 +610,62 @@
         step1Errors: {},
         serverError: '{{ addslashes(session('error', '')) }}',
         isVerifying: false,
+        regMethod: '{{ old('reg_method', old('contact_number') ? 'phone' : 'email') }}',
+        contactNumber: '{{ old('contact_number', '') }}',
+        otpCode: '{{ old('otp_code', '') }}',
+        otpCooldown: 0,
+        otpSending: false,
+        otpSent: false,
+        mockOtp: '{{ session('mock_otp', '') }}',
+        otpError: '',
+        otpSuccess: '',
+        sendRegisterOtp() {
+            this.otpError = '';
+            this.otpSuccess = '';
+            let phone = this.contactNumber.trim();
+            if (!phone) {
+                this.otpError = 'Mangyaring ilagay ang inyong 11-digit mobile number.';
+                return;
+            }
+            if (!/^09\d{9}$/.test(phone)) {
+                this.otpError = 'Format: 09XXXXXXXXX (11 digits nagsisimula sa 09).';
+                return;
+            }
+
+            this.otpSending = true;
+            fetch('{{ route('auth.send-otp') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ recipient: phone, purpose: 'register' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.otpSending = false;
+                if (data.success) {
+                    this.otpSent = true;
+                    this.otpSuccess = data.message || 'Naipadala ang verification code!';
+                    if (data.mock && data.code) {
+                        this.mockOtp = data.code;
+                        this.otpCode = data.code;
+                    }
+                    this.otpCooldown = 60;
+                    let timer = setInterval(() => {
+                        this.otpCooldown--;
+                        if (this.otpCooldown <= 0) clearInterval(timer);
+                    }, 1000);
+                } else {
+                    this.otpError = data.message || 'Hindi maipadala ang verification code. Pakisubukang muli.';
+                }
+            })
+            .catch(() => {
+                this.otpSending = false;
+                this.otpError = 'Nagkaroon ng network error. Pakisubukang muli.';
+            });
+        },
         formatPrecinct(val) {
             if (!val || val === '') return '0';
             let str = String(val).toUpperCase().replace(/[^0-9A-Z]/g, '');
@@ -1029,19 +1085,131 @@
                 {{-- ══════════════════════════════════════════════════════════════ --}}
                 <div x-show="step === 2" x-transition x-cloak>
 
-                    <div class="section-divider">Account Credentials &amp; Security</div>
+                    <div class="section-divider">Account Credentials &amp; Verification</div>
 
-                    {{-- Email --}}
-                    <div style="margin-bottom:12px;">
-                        <label class="flbl" for="email">Email Address *</label>
-                        <div class="fwrap">
-                            <i class="fas fa-envelope ficon"></i>
-                            <input id="email" type="email" name="email" class="finput" placeholder="username@gmail.com"
-                                value="{{ old('email') }}" :required="step === 2" autocomplete="username">
+                    <input type="hidden" name="reg_method" :value="regMethod">
+
+                    {{-- Registration Method Switcher Tabs --}}
+                    <div style="display:flex; background:#f1f5f9; padding:3px; border-radius:10px; margin-bottom:14px; border:1px solid #e2e8f0;">
+                        <button type="button" @click="regMethod = 'email'"
+                                :style="regMethod === 'email' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
+                                style="flex:1; padding:9px 10px; border:none; border-radius:8px; font-size:11.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
+                            <i class="fas fa-envelope"></i> Register via Email
+                        </button>
+                        <button type="button" @click="regMethod = 'phone'"
+                                :style="regMethod === 'phone' ? 'background:#fff; color:#0E5393; box-shadow:0 2px 6px rgba(0,0,0,0.08); font-weight:800;' : 'background:transparent; color:#64748b; font-weight:600;'"
+                                style="flex:1; padding:9px 10px; border:none; border-radius:8px; font-size:11.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; font-family:inherit;">
+                            <i class="fas fa-mobile-alt"></i> Mobile Number (OTP)
+                        </button>
+                    </div>
+
+                    {{-- ── TAB 1: EMAIL REGISTRATION ── --}}
+                    <div x-show="regMethod === 'email'">
+                        <div style="margin-bottom:12px;">
+                            <label class="flbl" for="email">Email Address *</label>
+                            <div class="fwrap">
+                                <i class="fas fa-envelope ficon"></i>
+                                <input id="email" type="email" name="email" class="finput" placeholder="username@gmail.com"
+                                    value="{{ old('email') }}" :required="step === 2 && regMethod === 'email'" autocomplete="username">
+                            </div>
+                            @error('email')
+                                <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
+                            @enderror
                         </div>
-                        @error('email')
-                            <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
-                        @enderror
+
+                        <div style="margin-bottom:12px;">
+                            <label class="flbl" for="email_contact_number">Mobile / Cellphone Number <span style="font-weight:600;text-transform:none;">(optional)</span></label>
+                            <div class="fwrap">
+                                <i class="fas fa-phone ficon"></i>
+                                <input id="email_contact_number" type="tel" name="contact_number" class="finput" placeholder="09XXXXXXXXX (11 digits)"
+                                    maxlength="11" value="{{ old('contact_number') }}" autocomplete="tel">
+                            </div>
+                            <div style="font-size:9.5px; color:#64748b; margin-top:3px; font-weight:600;">
+                                Paalala: 1 account = 1 mobile number lamang. Bawal ang duplicate na numero sa ibang account.
+                            </div>
+                            @error('contact_number')
+                                <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- ── TAB 2: MOBILE NUMBER (OTP) REGISTRATION ── --}}
+                    <div x-show="regMethod === 'phone'" x-cloak>
+                        <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:10px 12px;border-radius:9px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;">
+                            <i class="fas fa-shield-alt" style="color:#0E5393;margin-top:2px;font-size:12px;"></i>
+                            <div style="font-size:10px;color:#0E5393;font-weight:700;line-height:1.5;">
+                                Magrehistro gamit ang inyong mobile number. Makakatanggap kayo ng 6-digit OTP verification code. Strictly 1 account = 1 mobile number.
+                            </div>
+                        </div>
+
+                        {{-- Mock OTP Banner --}}
+                        <template x-if="mockOtp">
+                            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#1d4ed8; font-size:12px;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;">
+                                    <strong style="display:flex; align-items:center; gap:5px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
+                                    <span style="font-size:9.5px; background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:17px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;" x-text="mockOtp"></span>
+                                    <span style="font-size:11px; color:#60a5fa;">Gamitin ang verification code na ito para ma-verify ang account.</span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="otpError">
+                            <div class="ferr" style="background:#fee2e2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; margin-bottom:10px; color:#991b1b;">
+                                <i class="fas fa-exclamation-circle"></i> <span x-text="otpError"></span>
+                            </div>
+                        </template>
+
+                        <template x-if="otpSuccess">
+                            <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#15803d; font-size:11px; font-weight:700; display:flex; align-items:center; gap:6px;">
+                                <i class="fas fa-check-circle"></i> <span x-text="otpSuccess"></span>
+                            </div>
+                        </template>
+
+                        <div style="margin-bottom:12px;">
+                            <label class="flbl" for="reg_phone">11-Digit Mobile Number *</label>
+                            <div style="display:flex; gap:8px;">
+                                <div class="fwrap" style="flex:1;">
+                                    <i class="fas fa-mobile-alt ficon"></i>
+                                    <input id="reg_phone" type="tel" name="contact_number" x-model="contactNumber" class="finput"
+                                        maxlength="11" placeholder="09XXXXXXXXX" :required="step === 2 && regMethod === 'phone'" autocomplete="tel">
+                                </div>
+                                <button type="button" @click="sendRegisterOtp()" :disabled="otpSending || otpCooldown > 0"
+                                        style="padding:0 14px; background:#0E5393; color:#fff; border:none; border-radius:9px; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; transition:all .15s; font-family:inherit; min-width:110px;"
+                                        :style="(otpSending || otpCooldown > 0) ? 'opacity:0.6; cursor:not-allowed;' : ''">
+                                    <span x-show="!otpSending && otpCooldown === 0"><i class="fas fa-paper-plane" style="margin-right:4px;"></i> Send OTP</span>
+                                    <span x-show="otpSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
+                                    <span x-show="otpCooldown > 0" x-text="`Wait ${otpCooldown}s`"></span>
+                                </button>
+                            </div>
+                            @error('contact_number')
+                                <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <label class="flbl" for="reg_otp_code">6-Digit One-Time PIN (OTP) *</label>
+                            <div class="fwrap">
+                                <i class="fas fa-unlock-alt ficon"></i>
+                                <input id="reg_otp_code" type="text" name="otp_code" x-model="otpCode" class="finput"
+                                    maxlength="6" placeholder="123456" :required="step === 2 && regMethod === 'phone'"
+                                    style="letter-spacing:4px; font-size:14px; font-weight:800;">
+                            </div>
+                            @error('otp_code')
+                                <div class="ferr"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <label class="flbl" for="opt_email">Email Address <span style="font-weight:600;text-transform:none;">(optional)</span></label>
+                            <div class="fwrap">
+                                <i class="fas fa-envelope ficon"></i>
+                                <input id="opt_email" type="email" name="email" class="finput" placeholder="Optional (for email receipts)"
+                                    value="{{ old('email') }}" autocomplete="email">
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Password --}}

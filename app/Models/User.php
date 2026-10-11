@@ -48,6 +48,8 @@ class User extends Authenticatable
         'photo_updated_at',
         'id_type',
         'last_login_at',
+        'otp',
+        'otp_expires_at',
     ];
 
     protected $hidden = [
@@ -61,6 +63,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'photo_updated_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
             'password' => 'hashed',
             'birthday' => 'date',
             'is_voter' => 'boolean',

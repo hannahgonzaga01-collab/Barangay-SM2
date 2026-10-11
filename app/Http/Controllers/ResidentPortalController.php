@@ -1685,4 +1685,96 @@ class ResidentPortalController extends Controller
         return redirect()->route('resident.index')
             ->with('success', '✅ Email address updated to ' . $user->email . '! All document notifications and emergency SOS receipts will now be sent here.');
     }
+
+    public function updateResidentPhone(Request $request)
+    {
+        $request->validate([
+            'contact_number' => ['required', 'string'],
+            'otp_code'       => ['required', 'string'],
+        ], [
+            'contact_number.required' => 'Mangyaring ilagay ang inyong bagong 11-digit mobile number.',
+            'otp_code.required'       => 'Kailangan ang 6-digit One-Time PIN (OTP) verification code.',
+        ]);
+
+        $cleanPhone = \App\Services\OtpService::normalizePhoneNumber($request->contact_number);
+        if (!\App\Services\OtpService::isValidPhoneNumber($cleanPhone)) {
+            return redirect()->back()->with('error', 'Mangyaring maglagay ng wastong 11-digit Philippine mobile number (e.g. 09123456789).');
+        }
+
+        // Strictly 1 account = 1 mobile number!
+        $existing = User::where('contact_number', $cleanPhone)
+            ->where('id', '!=', auth()->id())
+            ->exists();
+
+        if ($existing) {
+            return redirect()->back()->with('error', 'Ang mobile number na ito ay pagmamay-ari na ng ibang rehistradong account. Bawal ang paulit-ulit na numero sa bawat account.');
+        }
+
+        $isValidOtp = \App\Services\OtpService::verifyOtp($cleanPhone, $request->otp_code, 'change_phone');
+        if (!$isValidOtp) {
+            return redirect()->back()->with('error', 'Mali o expired na ang inilagay na 6-digit OTP code para sa bagong mobile number.');
+        }
+
+        /** @var User $user */
+        $user = auth()->user();
+        $user->contact_number = $cleanPhone;
+        $user->save();
+
+        // Also sync to linked Resident model if resident exists
+        $resident = Resident::where('user_id', $user->id)->first();
+        if ($resident) {
+            $resident->update(['contact_no' => $cleanPhone]);
+        }
+
+        return redirect()->route('resident.index')
+            ->with('success', '✅ Matagumpay na na-update ang inyong mobile number sa ' . $cleanPhone . '! Magagamit na ito sa pag-log in at SMS notifications.');
+    }
+
+    public function updateResidentPassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['nullable', 'string'],
+            'otp_code'         => ['nullable', 'string'],
+            'password'         => ['required', 'string', 'min:8', 'max:16', 'not_regex:/\s/', 'confirmed'],
+        ], [
+            'password.min'       => 'Password must be at least 8 characters.',
+            'password.max'       => 'Password must not exceed 16 characters.',
+            'password.not_regex' => 'Password must not contain spaces.',
+            'password.confirmed' => 'Password confirmation does not match.',
+        ]);
+
+        /** @var User $user */
+        $user = auth()->user();
+
+        // Verify either current password OR OTP code sent to user's registered phone/email
+        $verified = false;
+
+        if ($request->filled('current_password')) {
+            if (\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+                $verified = true;
+            } else {
+                return redirect()->back()->with('error', 'Mali ang inyong kasalukuyang password.');
+            }
+        } elseif ($request->filled('otp_code')) {
+            $target = $user->contact_number ?: $user->email;
+            if ($target && \App\Services\OtpService::verifyOtp($target, $request->otp_code, 'change_password')) {
+                $verified = true;
+            } else {
+                return redirect()->back()->with('error', 'Mali o expired na ang inilagay na OTP verification code.');
+            }
+        } else {
+            return redirect()->back()->with('error', 'Mangyaring ilagay ang kasalukuyang password o mag-verify gamit ang OTP code.');
+        }
+
+        if ($verified) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            $user->save();
+            $user->recordPasswordHistory($user->password);
+
+            return redirect()->route('resident.index')
+                ->with('success', '✅ Matagumpay na nabago ang inyong password! Mangyaring tandaan ito.');
+        }
+
+        return redirect()->back()->with('error', 'Hindi ma-verify ang pagbabago ng password.');
+    }
 }
