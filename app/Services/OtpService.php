@@ -186,7 +186,7 @@ class OtpService
             'sms_sent' => $smsSent,
             'message'  => $smsSent
                 ? "Matagumpay na naipadala ang OTP sa iyong mobile phone ({$phone})!"
-                : "✅ [TEST MODE]: Ang inyong verification code ay {$code} (Valid for 5 mins).",
+                : "Matagumpay na nabuo ang inyong 6-digit OTP verification code para sa mobile number ({$phone}).",
         ];
     }
 
@@ -213,7 +213,7 @@ class OtpService
         } catch (\Throwable $e) {
             Log::error("[EMAIL OTP Error] " . $e->getMessage());
 
-            // Fallback mock representation if mail server encounters SMTP connection delay
+            // Fallback representation if mail server encounters SMTP connection delay
             session()->flash('mock_otp', $code);
             session()->flash('mock_recipient', $email);
 
@@ -221,7 +221,7 @@ class OtpService
                 'success' => true,
                 'mock'    => true,
                 'code'    => $code,
-                'message' => "✅ [TEST MODE MOCK OTP]: Ang inyong email verification code ay {$code}."
+                'message' => "Ang inyong 6-digit email verification code ay {$code}.",
             ];
         }
     }

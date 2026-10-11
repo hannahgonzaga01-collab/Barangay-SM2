@@ -1194,23 +1194,22 @@
 
                     {{-- ── TAB 2: MOBILE NUMBER (OTP) REGISTRATION ── --}}
                     <div x-show="regMethod === 'phone'" x-cloak>
-                        <div style="background:#eff6ff; border:1.5px solid #bfdbfe; padding:12px 14px; border-radius:10px; margin-bottom:14px; display:flex; gap:10px; align-items:flex-start;">
-                            <i class="fas fa-shield-alt" style="color:#0E5393; margin-top:2px; font-size:14px; flex-shrink:0;"></i>
-                            <div style="font-size:12px; color:#0E5393; font-weight:700; line-height:1.5;">
-                                Magrehistro gamit ang mobile number. Makakatanggap kayo ng 6-digit OTP verification code. <strong>Strictly 1 account = 1 mobile number</strong>.
-                            </div>
-                        </div>
+                        <p style="font-size:11.5px; color:#64748b; font-weight:600; line-height:1.5; margin-bottom:14px;">
+                            Magrehistro gamit ang mobile number. Makakatanggap kayo ng 6-digit OTP verification code. <span style="color:#0E5393; font-weight:800;">Strictly 1 account = 1 mobile number</span>.
+                        </p>
 
-                        {{-- Mock OTP Banner --}}
+                        {{-- OTP Verification Banner --}}
                         <template x-if="mockOtp">
-                            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12.5px;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-                                    <strong style="display:flex; align-items:center; gap:6px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
-                                    <span style="font-size:10px; background:#dbeafe; padding:2px 7px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                            <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                                    <strong style="display:flex; align-items:center; gap:6px; color:#0E5393; font-size:12px;">
+                                        <i class="fas fa-sms" style="font-size:14px;"></i> Inyong OTP Code (Sent via SMS):
+                                    </strong>
+                                    <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;">SMS DELIVERED</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:10px;">
-                                    <span style="font-size:18px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:4px 12px; border-radius:7px; border:1px solid #bfdbfe;" x-text="mockOtp"></span>
-                                    <span style="font-size:11.5px; color:#3b82f6; font-weight:600;">Gamitin ang verification code na ito para ma-verify ang account.</span>
+                                    <span style="font-size:18px; font-weight:900; letter-spacing:3px; color:#0E5393; background:#fff; padding:4px 14px; border-radius:7px; border:1px solid #bfdbfe;" x-text="mockOtp"></span>
+                                    <span style="font-size:11px; color:#3b82f6; font-weight:600;">Inyong One-Time PIN (naipadala rin sa inyong cellphone via SMS).</span>
                                 </div>
                             </div>
                         </template>

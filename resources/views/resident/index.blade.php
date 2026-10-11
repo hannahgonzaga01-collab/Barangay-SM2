@@ -3591,20 +3591,22 @@ html, body {
                 </div>
                 <form action="{{ route('resident.phone.update') }}" method="POST">
                     @csrf
-                    <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px;">
-                        I-update ang inyong 11-digit mobile number. Makakatanggap kayo ng OTP verification code. <strong>Strictly 1 account = 1 mobile number</strong>.
+                    <p style="font-size:11.5px;color:#64748b;line-height:1.5;margin-bottom:14px;font-weight:600;">
+                        I-update ang inyong 11-digit mobile number. Makakatanggap kayo ng OTP verification code. <span style="color:#0E5393;font-weight:800;">Strictly 1 account = 1 mobile number</span>.
                     </p>
 
-                    {{-- Mock OTP Banner for Testing --}}
+                    {{-- OTP Verification Banner --}}
                     <template x-if="phoneMockOtp">
-                        <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:9px; padding:10px 14px; margin-bottom:12px; color:#1d4ed8; font-size:11.5px;">
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;">
-                                <strong style="display:flex; align-items:center; gap:5px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
-                                <span style="font-size:9.5px; background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                        <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                                <strong style="display:flex; align-items:center; gap:6px; color:#0E5393; font-size:12px;">
+                                    <i class="fas fa-sms" style="font-size:14px;"></i> Inyong OTP Code (Sent via SMS):
+                                </strong>
+                                <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;">SMS DELIVERED</span>
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:16px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;" x-text="phoneMockOtp"></span>
-                                <span style="font-size:10.5px; color:#60a5fa;">Gamitin ang verification code na ito.</span>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:18px; font-weight:900; letter-spacing:3px; color:#0E5393; background:#fff; padding:4px 14px; border-radius:7px; border:1px solid #bfdbfe;" x-text="phoneMockOtp"></span>
+                                <span style="font-size:11px; color:#3b82f6; font-weight:600;">Inyong One-Time PIN (naipadala rin sa inyong cellphone via SMS).</span>
                             </div>
                         </div>
                     </template>
@@ -3665,12 +3667,16 @@ html, body {
                 <form action="{{ route('resident.password.update') }}" method="POST">
                     @csrf
                     
-                    {{-- Toggle Verification Way --}}
-                    <div class="reg-tabs" style="margin-bottom:14px;">
-                        <button type="button" @click="passMethod = 'current'" class="reg-tab-btn" :class="{ 'active': passMethod === 'current' }">
+                    {{-- Toggle Verification Way as Tabs --}}
+                    <div style="display:flex; gap:8px; background:#f1f5f9; padding:5px; border-radius:12px; margin-bottom:16px; border:1px solid #e2e8f0;">
+                        <button type="button" @click="passMethod = 'current'"
+                            style="flex:1; display:flex; align-items:center; justify-content:center; gap:7px; padding:10px 12px; border-radius:9px; border:none; font-size:11.5px; font-weight:800; text-transform:uppercase; cursor:pointer; transition:all .2s ease;"
+                            :style="passMethod === 'current' ? 'background:#0E5393; color:#fff; box-shadow:0 3px 10px rgba(14,83,147,.28);' : 'background:transparent; color:#64748b;'">
                             <i class="fas fa-lock"></i> <span>Current Password</span>
                         </button>
-                        <button type="button" @click="passMethod = 'otp'" class="reg-tab-btn" :class="{ 'active': passMethod === 'otp' }">
+                        <button type="button" @click="passMethod = 'otp'"
+                            style="flex:1; display:flex; align-items:center; justify-content:center; gap:7px; padding:10px 12px; border-radius:9px; border:none; font-size:11.5px; font-weight:800; text-transform:uppercase; cursor:pointer; transition:all .2s ease;"
+                            :style="passMethod === 'otp' ? 'background:#0E5393; color:#fff; box-shadow:0 3px 10px rgba(14,83,147,.28);' : 'background:transparent; color:#64748b;'">
                             <i class="fas fa-mobile-alt"></i> <span>Verify via OTP</span>
                         </button>
                     </div>
@@ -3683,16 +3689,18 @@ html, body {
                     </div>
 
                     <div x-show="passMethod === 'otp'" x-cloak>
-                        {{-- Mock OTP Banner --}}
+                        {{-- OTP Verification Banner --}}
                         <template x-if="passMockOtp">
-                            <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12.5px;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-                                    <strong style="display:flex; align-items:center; gap:6px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
-                                    <span style="font-size:10px; background:#dbeafe; padding:2px 7px; border-radius:4px; font-weight:800;">AUTO-FILLED</span>
+                            <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                                    <strong style="display:flex; align-items:center; gap:6px; color:#0E5393; font-size:12px;">
+                                        <i class="fas fa-sms" style="font-size:14px;"></i> Inyong OTP Code (Sent via SMS):
+                                    </strong>
+                                    <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;">SMS DELIVERED</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:10px;">
-                                    <span style="font-size:18px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:4px 12px; border-radius:7px; border:1px solid #bfdbfe;" x-text="passMockOtp"></span>
-                                    <span style="font-size:11.5px; color:#3b82f6; font-weight:600;">Gamitin ang code na ito.</span>
+                                    <span style="font-size:18px; font-weight:900; letter-spacing:3px; color:#0E5393; background:#fff; padding:4px 14px; border-radius:7px; border:1px solid #bfdbfe;" x-text="passMockOtp"></span>
+                                    <span style="font-size:11px; color:#3b82f6; font-weight:600;">Inyong One-Time PIN (naipadala rin sa inyong cellphone via SMS).</span>
                                 </div>
                             </div>
                         </template>

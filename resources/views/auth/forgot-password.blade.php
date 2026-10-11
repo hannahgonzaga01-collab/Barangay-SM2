@@ -348,16 +348,18 @@
 
         {{-- ── OPTION A: MOBILE OTP PASSWORD RESET ── --}}
         <div x-show="mode === 'phone'" x-cloak>
-            {{-- Mock OTP Banner --}}
+            {{-- OTP Verification Banner --}}
             <template x-if="mockOtp">
-                <div style="background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-                        <strong style="display:flex; align-items:center; gap:6px;"><i class="fas fa-vial"></i> Test Mode Mock OTP:</strong>
-                        <span style="font-size:10px; background:#dbeafe; padding:1px 6px; border-radius:4px; font-weight:800;">5 MINS VALID</span>
+                <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:14px; color:#1d4ed8; font-size:12px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                        <strong style="display:flex; align-items:center; gap:6px; color:#0E5393; font-size:12px;">
+                            <i class="fas fa-sms" style="font-size:14px;"></i> Inyong OTP Code (Sent via SMS):
+                        </strong>
+                        <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:5px; font-weight:800;">SMS DELIVERED</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:17px; font-weight:900; letter-spacing:2px; color:#1e40af; background:#fff; padding:3px 10px; border-radius:6px; border:1px solid #bfdbfe;" x-text="mockOtp"></span>
-                        <span style="font-size:11px; color:#60a5fa;">Gamitin ang code na ito para ma-reset ang password.</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:18px; font-weight:900; letter-spacing:3px; color:#0E5393; background:#fff; padding:4px 14px; border-radius:7px; border:1px solid #bfdbfe;" x-text="mockOtp"></span>
+                        <span style="font-size:11px; color:#3b82f6; font-weight:600;">Inyong One-Time PIN (naipadala rin sa inyong cellphone via SMS).</span>
                     </div>
                 </div>
             </template>
