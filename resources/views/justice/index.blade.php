@@ -2177,7 +2177,7 @@ html, body {
                         <!-- Image Preview -->
                         <template x-if="previewingEvidence && ['jpg','jpeg','png','webp','gif'].includes(previewingEvidence.ext) && !evidenceImgError">
                             <img :src="'/storage/'+previewingEvidence.path" 
-                                 @error="evidenceImgError = true"
+                                 x-on:error="evidenceImgError = true"
                                  style="max-width:100%;max-height:60vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.5);">
                         </template>
 

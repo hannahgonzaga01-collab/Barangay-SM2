@@ -2745,7 +2745,7 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                         {{-- Clean Image Preview when Loaded --}}
                         <template x-if="previewPhotoSrc && !previewPhotoError">
                             <img :src="previewPhotoSrc" 
-                                 @error="previewPhotoError = true"
+                                 x-on:error="previewPhotoError = true"
                                  alt="Patrol Proof Photo"
                                  style="max-width:100%;max-height:360px;width:auto;height:auto;object-fit:contain;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.08);display:block;margin:0 auto;">
                         </template>
