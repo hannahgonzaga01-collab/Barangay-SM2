@@ -210,10 +210,6 @@ html, body {
                 <button type="button" class="portal-tab" :class="activeTab==='reports'?'active':''" @click="activeTab='reports'">
                     <i class="fas fa-file-invoice"></i> <span>KP Reports</span>
                 </button>
-                <button type="button" class="portal-tab" :class="activeTab==='archived'?'active':''" @click="activeTab='archived'">
-                    <i class="fas fa-archive"></i> <span>Archived Records</span>
-                    <span class="tab-badge" style="background:#fef3c7;color:#92400e;">{{ $reports->whereIn('status', ['settled', 'resolved', 'escalated'])->count() }}</span>
-                </button>
             </div>
             <div class="nav-actions-group">
                 <button type="button" class="btn btn-ghost btn-sm" style="border:1.5px solid var(--border);" @click="exportModal=true" title="Export Blotter & Transmittal Reports">
@@ -364,8 +360,38 @@ html, body {
             </div>
         </div>
 
-        {{-- ══ SETTLEMENTS & AMICABLE AGREEMENTS TAB ══ --}}
+        {{-- ══ SETTLEMENTS & AMICABLE AGREEMENTS TAB (WITH PAGINATION & RESIDENT LOOKUP) ══ --}}
         <div x-show="activeTab==='mediation'" x-transition>
+            @php
+                $settledList = $reports->where('status', 'settled')->values();
+                $settledDataArray = $settledList->map(function($sRep) {
+                    $sCaseNo = 'JUS-'.$sRep->created_at->format('Y').'-'.str_pad($sRep->id,3,'0',STR_PAD_LEFT);
+                    return [
+                        'id'               => $sRep->id,
+                        'case_no'          => $sCaseNo,
+                        'complainant'      => $sRep->complainant_name ?? '—',
+                        'complainant_name' => $sRep->complainant_name ?? '',
+                        'respondent'       => $sRep->respondent_name ?? '—',
+                        'respondent_name'  => $sRep->respondent_name ?? '',
+                        'contact'          => $sRep->contact ?? '',
+                        'issue_type'       => $sRep->issue_type,
+                        'settlement_date'  => $sRep->updated_at->format('M d, Y'),
+                        'description'      => $sRep->description ?? '',
+                        'location'         => $sRep->location ?? '',
+                        'incident_date'    => $sRep->incident_date ? \Carbon\Carbon::parse($sRep->incident_date)->format('M d, Y') : 'N/A',
+                        'witness_name'     => $sRep->witness_name ?? '',
+                        'evidence'         => $sRep->evidence ? (is_string($sRep->evidence) ? json_decode($sRep->evidence, true) : $sRep->evidence) : [],
+                        'status'           => 'settled',
+                        'hearing_date'     => $sRep->hearing_date ? \Carbon\Carbon::parse($sRep->hearing_date)->format('M d, Y h:i A') : '',
+                        'is_restricted'    => (bool)$sRep->is_restricted,
+                        'user_id'          => $sRep->user_id,
+                        'date_filed'       => $sRep->created_at->format('M d, Y h:i A')
+                    ];
+                });
+            @endphp
+            <script>
+                window.__settledJusticeData = @json($settledDataArray);
+            </script>
             <div class="wcard" style="padding:20px;">
                 <div class="wcard-head" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
                     <div>
@@ -374,23 +400,53 @@ html, body {
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <span class="wcard-badge" style="background:#dcfce7;color:#166534;font-size:10px;padding:4px 10px;">
-                            <i class="fas fa-check-double"></i> {{ $reports->where('status','settled')->count() }} Settled Cases
+                            <i class="fas fa-check-double"></i> {{ $settledList->count() }} Settled Cases
                         </span>
                     </div>
                 </div>
 
-                @php
-                    $settledList = $reports->where('status', 'settled');
-                @endphp
+                {{-- Search & Filter Toolbar --}}
+                <div style="padding:10px 14px;background:#fafbfc;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;">
+                    <div style="position:relative;flex:1;min-width:240px;max-width:440px;">
+                        <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:11px;"></i>
+                        <input type="text" x-model="searchSettlement" @input="settlementPage = 1" placeholder="Search resident, respondent, dispute type, or case no..." 
+                               style="width:100%;padding:7px 12px 7px 30px;font-size:11px;font-weight:600;border:1.5px solid var(--border);border-radius:8px;outline:none;background:#fff;">
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <button type="button" x-show="searchSettlement" 
+                                @click="searchSettlement=''; settlementPage=1;" 
+                                style="background:none;border:none;color:var(--muted);font-size:10.5px;cursor:pointer;font-weight:700;">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <div style="font-size:11px;color:var(--muted);font-weight:700;">
+                            Per page:
+                            <select x-model.number="settlementPerPage" @change="settlementPage=1" style="padding:3px 6px;font-size:10px;font-weight:800;border:1px solid var(--border);border-radius:6px;background:#fff;outline:none;cursor:pointer;">
+                                <option :value="10">10</option>
+                                <option :value="25">25</option>
+                                <option :value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
                 @if($settledList->isEmpty())
                     <div class="empty-st" style="padding:40px 10px;">
                         <i class="fas fa-file-signature" style="font-size:36px;color:#cbd5e1;"></i>
                         <p style="font-size:12px;font-weight:800;color:var(--text);margin-top:10px;">No settlement records yet.</p>
-                        <p style="font-size:10px;color:var(--light);margin-top:4px;font-weight:600;">When a hearing is concluded and KP Form 16 (Amicable Settlement) is recorded, the settled case will be archived here.</p>
+                        <p style="font-size:10px;color:var(--light);margin-top:4px;font-weight:600;">When a hearing is concluded and KP Form 16 (Amicable Settlement) is recorded, the settled case will appear here.</p>
                     </div>
                 @else
-                    <div style="overflow-x:auto;">
+                    {{-- Search with 0 results state --}}
+                    <div x-show="filteredSettlements().length === 0" class="empty-st" style="padding:36px 10px;">
+                        <i class="fas fa-search" style="font-size:32px;color:#cbd5e1;"></i>
+                        <p style="font-size:12px;font-weight:800;color:var(--text);margin-top:8px;">No settlements found matching "<span x-text="searchSettlement"></span>"</p>
+                        <button type="button" @click="searchSettlement=''; settlementPage=1;" class="btn btn-ghost btn-sm" style="margin-top:8px;font-size:10px;">
+                            <i class="fas fa-redo"></i> Reset Search
+                        </button>
+                    </div>
+
+                    {{-- Settlements Table --}}
+                    <div x-show="filteredSettlements().length > 0" style="overflow-x:auto;">
                         <table class="ptbl">
                             <thead>
                                 <tr>
@@ -403,70 +459,55 @@ html, body {
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($settledList as $sRep)
-                                @php
-                                    $sCaseNo = 'JUS-'.$sRep->created_at->format('Y').'-'.str_pad($sRep->id,3,'0',STR_PAD_LEFT);
-                                @endphp
-                                <tr>
-                                    <td>
-                                        <div style="font-size:11px;font-weight:900;color:var(--brand);">#{{ $sCaseNo }}</div>
-                                        <div style="font-size:8.5px;color:var(--light);font-weight:700;text-transform:uppercase;">Settlement</div>
-                                    </td>
-                                    <td>
-                                        <div style="font-size:11px;font-weight:800;color:var(--text);">
-                                            {{ $sRep->complainant_name ?? '—' }} <span style="font-size:9px;color:var(--muted);font-weight:600;">vs</span> {{ $sRep->respondent_name ?? '—' }}
-                                        </div>
-                                        <div style="font-size:9px;color:var(--muted);">{{ $sRep->contact ?? '' }}</div>
-                                    </td>
-                                    <td>
-                                        <span style="background:#eff6ff;color:var(--brand);font-size:9px;font-weight:900;padding:3px 8px;border-radius:99px;">
-                                            {{ $sRep->issue_type }}
-                                        </span>
-                                    </td>
-                                    <td style="font-size:11px;color:#059669;font-weight:800;white-space:nowrap;">
-                                        {{ $sRep->updated_at->format('M d, Y') }}
-                                    </td>
-                                    <td>
-                                        <span class="spill spill-closed"><i class="fas fa-check-circle" style="font-size:6px;"></i> SETTLED</span>
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <div style="display:inline-flex;gap:6px;">
-                                            <button type="button" @click="openDocDraft('kp16', {
-                                                id: {{ $sRep->id }},
-                                                case_no: '{{ $sCaseNo }}',
-                                                issue_type: '{{ addslashes($sRep->issue_type) }}',
-                                                complainant: '{{ addslashes($sRep->complainant_name ?? '') }}',
-                                                respondent: '{{ addslashes($sRep->respondent_name ?? '') }}',
-                                                description: '{{ addslashes($sRep->description ?? '') }}'
-                                            })" class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;font-size:9px;" title="View & Print Amicable Settlement Form">
-                                                <i class="fas fa-file-contract"></i> View KP Form 16
-                                            </button>
-                                            <button type="button" @click="openView({
-                                                id: {{ $sRep->id }},
-                                                case_no: '{{ $sCaseNo }}',
-                                                issue_type: '{{ addslashes($sRep->issue_type) }}',
-                                                complainant: '{{ addslashes($sRep->complainant_name ?? '') }}',
-                                                contact: '{{ addslashes($sRep->contact ?? '') }}',
-                                                respondent: '{{ addslashes($sRep->respondent_name ?? '') }}',
-                                                description: '{{ addslashes($sRep->description ?? '') }}',
-                                                location: '{{ addslashes($sRep->location ?? '') }}',
-                                                incident_date: '{{ $sRep->incident_date ? \Carbon\Carbon::parse($sRep->incident_date)->format('M d, Y') : 'N/A' }}',
-                                                witness_name: '{{ addslashes($sRep->witness_name ?? '') }}',
-                                                evidence: @js($sRep->evidence),
-                                                status: 'settled',
-                                                hearing_date: '{{ $sRep->hearing_date ? \Carbon\Carbon::parse($sRep->hearing_date)->format('M d, Y h:i A') : '' }}',
-                                                is_restricted: {{ $sRep->is_restricted ? 'true' : 'false' }},
-                                                user_id: {{ $sRep->user_id ?: 'null' }},
-                                                date_filed: '{{ $sRep->created_at->format('M d, Y h:i A') }}'
-                                            })" class="btn btn-sm btn-ghost" style="padding:4px 8px;" title="View Case Record">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
+                                <template x-for="sRep in paginatedSettlements()" :key="sRep.id">
+                                    <tr>
+                                        <td>
+                                            <div style="font-size:11px;font-weight:900;color:var(--brand);" x-text="'#' + sRep.case_no"></div>
+                                            <div style="font-size:8.5px;color:var(--light);font-weight:700;text-transform:uppercase;">Settlement</div>
+                                        </td>
+                                        <td>
+                                            <div style="font-size:11px;font-weight:800;color:var(--text);">
+                                                <span x-text="sRep.complainant"></span> <span style="font-size:9px;color:var(--muted);font-weight:600;">vs</span> <span x-text="sRep.respondent"></span>
+                                            </div>
+                                            <div style="font-size:9px;color:var(--muted);" x-text="sRep.contact"></div>
+                                        </td>
+                                        <td>
+                                            <span style="background:#eff6ff;color:var(--brand);font-size:9px;font-weight:900;padding:3px 8px;border-radius:99px;" x-text="sRep.issue_type"></span>
+                                        </td>
+                                        <td style="font-size:11px;color:#059669;font-weight:800;white-space:nowrap;" x-text="sRep.settlement_date"></td>
+                                        <td>
+                                            <span class="spill spill-closed"><i class="fas fa-check-circle" style="font-size:6px;"></i> SETTLED</span>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <div style="display:inline-flex;gap:6px;">
+                                                <button type="button" @click="openDocDraft('kp16', sRep)" class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;font-size:9px;" title="View & Print Amicable Settlement Form">
+                                                    <i class="fas fa-file-contract"></i> View KP Form 16
+                                                </button>
+                                                <button type="button" @click="openView(sRep)" class="btn btn-sm btn-ghost" style="padding:4px 8px;" title="View Case Record">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
                             </tbody>
                         </table>
+                    </div>
+
+                    {{-- Settlement Pagination Footer --}}
+                    <div x-show="filteredSettlements().length > 0" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);background:#fafbfc;border-radius:0 0 10px 10px;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                        <div style="font-size:11px;color:var(--muted);font-weight:700;">
+                            Showing <span style="font-weight:900;color:var(--text);" x-text="((settlementPage - 1) * settlementPerPage) + 1"></span> to <span style="font-weight:900;color:var(--text);" x-text="Math.min(settlementPage * settlementPerPage, filteredSettlements().length)"></span> of <span style="font-weight:900;color:var(--text);" x-text="filteredSettlements().length"></span> settlement records
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <button type="button" @click="setSettlementPage(settlementPage - 1)" :disabled="settlementPage <= 1" class="btn btn-ghost btn-sm" :style="settlementPage <= 1 ? 'opacity:0.4;cursor:not-allowed;' : 'cursor:pointer;'" style="padding:4px 10px;font-size:10px;background:#fff;border:1.5px solid var(--border);">
+                                <i class="fas fa-chevron-left"></i> Prev
+                            </button>
+                            <span style="font-size:11px;font-weight:800;color:var(--text);padding:0 6px;">Page <span x-text="settlementPage"></span> of <span x-text="totalSettlementPages()"></span></span>
+                            <button type="button" @click="setSettlementPage(settlementPage + 1)" :disabled="settlementPage >= totalSettlementPages()" class="btn btn-ghost btn-sm" :style="settlementPage >= totalSettlementPages() ? 'opacity:0.4;cursor:not-allowed;' : 'cursor:pointer;'" style="padding:4px 10px;font-size:10px;background:#fff;border:1.5px solid var(--border);">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -1103,161 +1144,6 @@ html, body {
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-
-        {{-- ══ ARCHIVED RECORDS TAB (SETTLED KP CASES, AMICABLE AGREEMENTS & CFA CERTIFICATES) ══ --}}
-        <div x-show="activeTab==='archived'" x-transition>
-            @php
-                $archivedJusticeList = $reports->whereIn('status', ['settled', 'resolved', 'escalated']);
-                $settledCount = $reports->whereIn('status', ['settled', 'resolved'])->count();
-                $cfaCount = $reports->where('status', 'escalated')->count();
-            @endphp
-            <div class="wcard" style="padding:20px;">
-                <div class="wcard-head" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                    <div>
-                        <div class="wcard-title">
-                            <i class="fas fa-archive" style="color:#d97706;"></i> Archived Records — Katarungang Pambarangay
-                        </div>
-                        <div style="font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px;">
-                            Permanent repository of Amicable Settlements (KP Form 16) and Issued Certificates to File Action (CFA / KP Form 20)
-                        </div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <span class="wcard-badge" style="background:#dcfce7;color:#166534;font-size:10px;padding:4px 10px;">
-                            <i class="fas fa-handshake"></i> {{ $settledCount }} Settled Cases
-                        </span>
-                        <span class="wcard-badge" style="background:#fee2e2;color:#991b1b;font-size:10px;padding:4px 10px;">
-                            <i class="fas fa-gavel"></i> {{ $cfaCount }} CFA Court Endorsed
-                        </span>
-                    </div>
-                </div>
-
-                {{-- Filter Toolbar with Resident Lookup --}}
-                <div style="padding:12px 16px;background:#fafbfc;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                    <div style="position:relative;flex:1;min-width:240px;max-width:440px;">
-                        <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:11px;"></i>
-                        <input type="text" x-model="searchArchiveJus" placeholder="Search resident name, respondent, contact, case no..." 
-                               style="width:100%;padding:7px 12px 7px 30px;font-size:11px;font-weight:600;border:1.5px solid var(--border);border-radius:8px;outline:none;background:#fff;">
-                    </div>
-                    <select x-model="filterArchiveJusDisposition" style="padding:7px 12px;font-size:11px;font-weight:700;border-radius:8px;border:1.5px solid var(--border);outline:none;cursor:pointer;background:#fff;">
-                        <option value="">All Archive Dispositions</option>
-                        <option value="settled">Amicable Settlements Only (KP 16)</option>
-                        <option value="escalated">CFA / Court Endorsed Only (KP 20)</option>
-                    </select>
-                    <button type="button" x-show="searchArchiveJus || filterArchiveJusDisposition" 
-                            @click="searchArchiveJus=''; filterArchiveJusDisposition='';" 
-                            style="background:none;border:none;color:var(--muted);font-size:10.5px;cursor:pointer;font-weight:700;">
-                        <i class="fas fa-times"></i> Clear Filters
-                    </button>
-                </div>
-
-                @if($archivedJusticeList->isEmpty())
-                    <div class="empty-st" style="padding:40px 10px;">
-                        <i class="fas fa-archive" style="font-size:36px;color:#cbd5e1;"></i>
-                        <p style="font-size:12px;font-weight:800;color:var(--text);margin-top:10px;">No archived cases yet.</p>
-                        <p style="font-size:10px;color:var(--light);margin-top:4px;font-weight:600;">When a hearing is concluded with KP Form 16 or escalated with KP Form 20, the record will be archived here.</p>
-                    </div>
-                @else
-                    <div style="overflow-x:auto;">
-                        <table class="ptbl">
-                            <thead>
-                                <tr>
-                                    <th>Case No.</th>
-                                    <th>Complainant vs Respondent</th>
-                                    <th>Dispute Nature</th>
-                                    <th>Date Resolved / Closed</th>
-                                    <th>Disposition</th>
-                                    <th style="text-align:center;">Official KP Form</th>
-                                    <th style="text-align:right;">Case Record</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($archivedJusticeList as $aRep)
-                                @php
-                                    $aCaseNo = 'JUS-'.$aRep->created_at->format('Y').'-'.str_pad($aRep->id,3,'0',STR_PAD_LEFT);
-                                    $isSettled = in_array($aRep->status, ['settled', 'resolved']);
-                                    $aSearchStr = strtolower($aCaseNo . ' ' . ($aRep->complainant_name ?? '') . ' ' . ($aRep->respondent_name ?? '') . ' ' . ($aRep->contact ?? '') . ' ' . ($aRep->location ?? '') . ' ' . ($aRep->description ?? '') . ' ' . $aRep->issue_type . ' ' . $aRep->status);
-                                @endphp
-                                <tr x-show="(!searchArchiveJus || '{{ addslashes($aSearchStr) }}'.includes(searchArchiveJus.toLowerCase().trim())) && (!filterArchiveJusDisposition || (filterArchiveJusDisposition === 'settled' && {{ $isSettled ? 'true' : 'false' }}) || (filterArchiveJusDisposition === 'escalated' && {{ !$isSettled ? 'true' : 'false' }}))">
-                                    <td>
-                                        <div style="font-size:11px;font-weight:900;color:var(--brand);">#{{ $aCaseNo }}</div>
-                                        <div style="font-size:8px;color:var(--light);font-weight:700;text-transform:uppercase;">KP Archive</div>
-                                    </td>
-                                    <td>
-                                        <div style="font-size:11px;font-weight:800;color:var(--text);">
-                                            {{ $aRep->complainant_name ?? '—' }} <span style="font-size:9px;color:var(--muted);font-weight:600;">vs</span> {{ $aRep->respondent_name ?? '—' }}
-                                        </div>
-                                        <div style="font-size:9px;color:var(--muted);">{{ $aRep->contact ?? '' }}</div>
-                                    </td>
-                                    <td>
-                                        <span style="background:#eff6ff;color:var(--brand);font-size:9px;font-weight:900;padding:3px 8px;border-radius:99px;">
-                                            {{ $aRep->issue_type }}
-                                        </span>
-                                    </td>
-                                    <td style="font-size:11px;color:var(--text);font-weight:800;white-space:nowrap;">
-                                        {{ $aRep->updated_at->format('M d, Y') }}
-                                    </td>
-                                    <td>
-                                        @if($isSettled)
-                                            <span class="spill spill-closed"><i class="fas fa-check-circle" style="font-size:6px;"></i> SETTLED</span>
-                                        @else
-                                            <span class="spill spill-urgent"><i class="fas fa-gavel" style="font-size:6px;"></i> CFA ISSUED</span>
-                                        @endif
-                                    </td>
-                                    <td style="text-align:center;">
-                                        @if($isSettled)
-                                            <button type="button" @click="openDocDraft('kp16', {
-                                                id: {{ $aRep->id }},
-                                                case_no: '{{ $aCaseNo }}',
-                                                issue_type: '{{ addslashes($aRep->issue_type) }}',
-                                                complainant: '{{ addslashes($aRep->complainant_name ?? '') }}',
-                                                respondent: '{{ addslashes($aRep->respondent_name ?? '') }}',
-                                                description: '{{ addslashes($aRep->description ?? '') }}'
-                                            })" class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;font-size:9px;" title="View & Print Amicable Settlement Form">
-                                                <i class="fas fa-file-contract"></i> View KP Form 16
-                                            </button>
-                                        @else
-                                            <button type="button" @click="openDocDraft('kp20', {
-                                                id: {{ $aRep->id }},
-                                                case_no: '{{ $aCaseNo }}',
-                                                issue_type: '{{ addslashes($aRep->issue_type) }}',
-                                                complainant: '{{ addslashes($aRep->complainant_name ?? '') }}',
-                                                respondent: '{{ addslashes($aRep->respondent_name ?? '') }}',
-                                                description: '{{ addslashes($aRep->description ?? '') }}'
-                                            })" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;font-size:9px;" title="View & Print Certificate to File Action">
-                                                <i class="fas fa-gavel"></i> View KP Form 20 (CFA)
-                                            </button>
-                                        @endif
-                                    </td>
-                                    <td style="text-align:right;">
-                                        <button type="button" @click="openView({
-                                            id: {{ $aRep->id }},
-                                            case_no: '{{ $aCaseNo }}',
-                                            issue_type: '{{ addslashes($aRep->issue_type) }}',
-                                            complainant: '{{ addslashes($aRep->complainant_name ?? '') }}',
-                                            contact: '{{ addslashes($aRep->contact ?? '') }}',
-                                            respondent: '{{ addslashes($aRep->respondent_name ?? '') }}',
-                                            description: '{{ addslashes($aRep->description ?? '') }}',
-                                            location: '{{ addslashes($aRep->location ?? '') }}',
-                                            incident_date: '{{ $aRep->incident_date ? \Carbon\Carbon::parse($aRep->incident_date)->format('M d, Y') : 'N/A' }}',
-                                            witness_name: '{{ addslashes($aRep->witness_name ?? '') }}',
-                                            evidence: @js($aRep->evidence),
-                                            status: '{{ $aRep->status }}',
-                                            hearing_date: '{{ $aRep->hearing_date ? \Carbon\Carbon::parse($aRep->hearing_date)->format('M d, Y h:i A') : '' }}',
-                                            is_restricted: {{ $aRep->is_restricted ? 'true' : 'false' }},
-                                            user_id: {{ $aRep->user_id ?: 'null' }},
-                                            date_filed: '{{ $aRep->created_at->format('M d, Y h:i A') }}'
-                                        })" class="btn btn-sm btn-ghost" style="padding:4px 8px;" title="View Case Record">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
             </div>
         </div>
 
@@ -2517,9 +2403,37 @@ html, body {
             searchQuery: '',
             filterDate: '',
             filterStatus: '',
-            filterType: '',
-            searchArchiveJus: '',
-            filterArchiveJusDisposition: '',
+            searchSettlement: '',
+            settlementPage: 1,
+            settlementPerPage: 10,
+            filteredSettlements() {
+                const list = (window.__settledJusticeData || []);
+                if (!this.searchSettlement || !this.searchSettlement.trim()) return list;
+                const q = this.searchSettlement.toLowerCase().trim();
+                return list.filter(s => 
+                    (s.case_no && s.case_no.toLowerCase().includes(q)) ||
+                    (s.complainant && s.complainant.toLowerCase().includes(q)) ||
+                    (s.respondent && s.respondent.toLowerCase().includes(q)) ||
+                    (s.contact && s.contact.toLowerCase().includes(q)) ||
+                    (s.issue_type && s.issue_type.toLowerCase().includes(q)) ||
+                    (s.description && s.description.toLowerCase().includes(q))
+                );
+            },
+            totalSettlementPages() {
+                const total = this.filteredSettlements().length;
+                return Math.max(1, Math.ceil(total / this.settlementPerPage));
+            },
+            paginatedSettlements() {
+                const filtered = this.filteredSettlements();
+                const maxP = this.totalSettlementPages();
+                const curP = (this.settlementPage > maxP) ? 1 : Math.max(1, this.settlementPage);
+                const start = (curP - 1) * this.settlementPerPage;
+                return filtered.slice(start, start + this.settlementPerPage);
+            },
+            setSettlementPage(p) {
+                const maxP = this.totalSettlementPages();
+                if (p >= 1 && p <= maxP) this.settlementPage = p;
+            },
             selectedIssueId: '',
             scheduledDate: '',
             selectedTimeSlot: '',

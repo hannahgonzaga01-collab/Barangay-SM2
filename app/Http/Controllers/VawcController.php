@@ -59,6 +59,7 @@ class VawcController extends Controller
         $newV = IssueReport::where('department', 'VAWC')->where('status', 'submitted')->count();
         $urgentV = IssueReport::where('department', 'VAWC')->where('status', 'urgent')->count();
         $settledV = IssueReport::where('department', 'VAWC')->where('status', 'settled')->count();
+        $archivedV = IssueReport::where('department', 'VAWC')->where('status', 'archived')->count();
 
         // Retrieve Privacy Audit Trail
         $auditLogs = VawcAuditLog::latest()->take(100)->get();
@@ -66,7 +67,41 @@ class VawcController extends Controller
         $vawcReports = \App\Models\DepartmentReport::where('department', 'VAWC')->latest()->get();
         $customTemplate = \App\Http\Controllers\DepartmentReportController::getTemplateForDepartment('VAWC');
 
-        return view('vawc.index', compact('issues', 'totalV', 'newV', 'urgentV', 'settledV', 'auditLogs', 'vawcReports', 'customTemplate'));
+        return view('vawc.index', compact('issues', 'totalV', 'newV', 'urgentV', 'settledV', 'archivedV', 'auditLogs', 'vawcReports', 'customTemplate'));
+    }
+
+    public function archiveCase(Request $request, $id)
+    {
+        $request->validate([
+            'archive_note' => 'required|string|min:3|max:1000'
+        ]);
+
+        $issue = IssueReport::findOrFail($id);
+
+        $caseCode = 'VAWC-' . $issue->created_at->format('Y') . '-' . str_pad($issue->id, 3, '0', STR_PAD_LEFT);
+        $timestamp = now()->format('M d, Y h:i A');
+        $staffName = auth()->user()->name ?? 'VAWC Staff';
+        $archiveEntry = "[ARCHIVED on {$timestamp} by {$staffName}]: " . trim($request->archive_note);
+
+        $existingNotes = $issue->admin_notes ? trim($issue->admin_notes) . "\n\n" : '';
+
+        $issue->update([
+            'status' => 'archived',
+            'admin_notes' => $existingNotes . $archiveEntry
+        ]);
+
+        VawcAuditLog::log(
+            action: 'case_archived',
+            caseId: $issue->id,
+            caseCode: $caseCode,
+            details: "Case archived by {$staffName}. Archiving Note: " . trim($request->archive_note)
+        );
+
+        if ($issue->user) {
+            $issue->user->notify(new IssueStatusUpdated($issue));
+        }
+
+        return redirect()->back()->with('success', "Case #{$caseCode} has been officially archived.");
     }
 
     public function updateStatus(Request $request, $id)
@@ -85,13 +120,14 @@ class VawcController extends Controller
             'settled'         => 4,
             'resolved'        => 4,
             'rejected'        => 4,
+            'archived'        => 4,
         ];
 
         $currentStatus = $issue->status;
         $newStatus = $request->status;
 
         // Terminal lock
-        if (in_array($currentStatus, ['settled', 'resolved', 'rejected'])) {
+        if (in_array($currentStatus, ['settled', 'resolved', 'rejected', 'archived'])) {
             return redirect()->back()->with('error', 'This case is already ' . ($currentStatus === 'settled' ? 'resolved' : $currentStatus) . ' and cannot be changed.');
         }
 

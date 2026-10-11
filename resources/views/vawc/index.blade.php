@@ -227,6 +227,7 @@ html, body {
         exportModal: false,
         auditModal: false,
         rerouteModal: false,
+        archiveModal: false,
         referralPreviewModal: false,
         isEditingReferral: false,
         uploadPanelOpen: false,
@@ -238,6 +239,7 @@ html, body {
         auditSearch: '',
         activeIssue: null,
         rerouteData: { id: null, case_code: '', complainant: '', reason: '' },
+        archiveData: { id: null, case_code: '', complainant_name: '', note: '' },
         rejectFormData: { id: null, reason: '' },
         vawcRep: {
             province: 'Cavite',
@@ -310,6 +312,13 @@ html, body {
             this.rerouteData.complainant = issue.complainant_name;
             this.rerouteData.reason = '';
             this.rerouteModal = true;
+        },
+        openArchive(issue) {
+            this.archiveData.id = issue.id;
+            this.archiveData.case_code = issue.case_code;
+            this.archiveData.complainant_name = issue.complainant_name;
+            this.archiveData.note = '';
+            this.archiveModal = true;
         },
         openReferralPreview(issue) {
             this.previewData = Object.assign({}, issue);
@@ -515,9 +524,9 @@ html, body {
                 <div class="ac-sub">Emergency escalation & PDF</div>
             </div>
             <div class="action-card" @click="activeTab='audit'" :class="activeTab==='audit'?'active':''">
-                <div class="ac-ico" style="background:#dcfce7;"><i class="fas fa-clipboard-check" style="color:#15803d;"></i></div>
-                <div class="ac-name">Resolved Archive</div>
-                <div class="ac-sub">Closed cases history</div>
+                <div class="ac-ico" style="background:#fef3c7;"><i class="fas fa-archive" style="color:#d97706;"></i></div>
+                <div class="ac-name">Archived Records</div>
+                <div class="ac-sub">Resolved & archived cases</div>
             </div>
             <div class="action-card" @click="activeTab='reports'" :class="activeTab==='reports'?'active':''">
                 <div class="ac-ico" style="background:#eff6ff;"><i class="fas fa-file-invoice" style="color:#2563eb;"></i></div>
@@ -746,8 +755,10 @@ html, body {
                                 </td>
                                 <td><div style="font-size:11px;color:var(--brand);font-weight:800;">{{ $issue->created_at->format('M d, Y') }}</div></td>
                                 <td>
-                                    @php $sc=['submitted'=>'spill-new','under_review'=>'spill-active','approved'=>'spill-settled','settled'=>'spill-settled','urgent'=>'spill-urgent','pending'=>'spill-pending','on_going'=>'spill-active','referred_to_pnp'=>'spill-active','rejected'=>'spill-new'][$issue->status]??'spill-pending'; @endphp
-                                    @if($issue->status === 'under_review' && str_contains((string)$issue->admin_notes, 'AUTO-FLAGGED'))
+                                    @php $sc=['submitted'=>'spill-new','under_review'=>'spill-active','approved'=>'spill-settled','settled'=>'spill-settled','urgent'=>'spill-urgent','pending'=>'spill-pending','on_going'=>'spill-active','referred_to_pnp'=>'spill-active','rejected'=>'spill-new','archived'=>'spill-settled'][$issue->status]??'spill-pending'; @endphp
+                                    @if($issue->status === 'archived')
+                                        <span class="spill spill-settled" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:8.5px;"><i class="fas fa-archive" style="font-size:7px;"></i> ARCHIVED</span>
+                                    @elseif($issue->status === 'under_review' && str_contains((string)$issue->admin_notes, 'AUTO-FLAGGED'))
                                         <span class="spill spill-urgent" style="background:#fdf4ff;color:#7c3aed;border:1px solid #e9d5ff;font-size:8.5px;" title="{{ $issue->admin_notes }}"><i class="fas fa-shield-alt" style="font-size:7px;"></i> UNDER REVIEW (AUTO-FLAGGED)</span>
                                     @else
                                         <span class="spill {{ $sc }}"><i class="fas fa-circle" style="font-size:6px;"></i> {{ ucfirst(str_replace('_',' ',$issue->status)) }}</span>
@@ -768,6 +779,18 @@ html, body {
                                             <i class="fas fa-exchange-alt"></i>
                                         </button>
 
+                                        {{-- 3. ARCHIVE BUTTON TRIGGERING CONFIRMATION MODAL WITH MANDATORY NOTE --}}
+                                        @if($issue->status === 'archived')
+                                            <span class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;cursor:default;" title="Case Already Archived">
+                                                <i class="fas fa-archive"></i>
+                                            </span>
+                                        @else
+                                            <button type="button" @click="openArchive({{ json_encode($issueData) }})"
+                                                    class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;" title="Archive Blotter Case (Requires Note)">
+                                                <i class="fas fa-archive"></i>
+                                            </button>
+                                        @endif
+
                                         {{-- 4. STATUS UPDATE DROPDOWN --}}
                                         @php
                                             $vawcRankMap = [
@@ -781,13 +804,14 @@ html, body {
                                                 'settled'         => 4,
                                                 'resolved'        => 4,
                                                 'rejected'        => 4,
+                                                'archived'        => 4,
                                             ];
                                             $curVawcRank = $vawcRankMap[$issue->status] ?? 1;
-                                            $isVawcTerminal = in_array($issue->status, ['settled', 'resolved', 'rejected']);
+                                            $isVawcTerminal = in_array($issue->status, ['settled', 'resolved', 'rejected', 'archived']);
                                         @endphp
                                         @if($isVawcTerminal)
-                                            <select disabled style="height:32px;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;background:#f8fafc;color:#94a3b8;cursor:not-allowed;outline:none;font-family:inherit;opacity:0.75;" title="This case is already {{ $issue->status === 'settled' ? 'Resolved' : ucfirst($issue->status) }} and locked.">
-                                                <option selected>{{ $issue->status === 'settled' ? 'Resolved' : ucfirst(str_replace('_',' ',$issue->status)) }}</option>
+                                            <select disabled style="height:32px;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;background:#f8fafc;color:#94a3b8;cursor:not-allowed;outline:none;font-family:inherit;opacity:0.75;" title="This case is already {{ $issue->status === 'settled' ? 'Resolved' : ($issue->status === 'archived' ? 'Archived' : ucfirst($issue->status)) }} and locked.">
+                                                <option selected>{{ $issue->status === 'archived' ? 'Archived' : ($issue->status === 'settled' ? 'Resolved' : ucfirst(str_replace('_',' ',$issue->status))) }}</option>
                                             </select>
                                         @else
                                             <form :id="'vawc-status-form-{{ $issue->id }}'" action="{{ url('/vawc/issues/'.$issue->id.'/status') }}" method="POST" style="display:inline;margin:0;">
@@ -913,27 +937,69 @@ html, body {
             </div>
         </div>
 
-        {{-- AUDIT TAB (RESOLVED ARCHIVE) --}}
+        {{-- AUDIT TAB (RESOLVED & ARCHIVED CASES ARCHIVE) --}}
         <div x-show="activeTab==='audit'" x-transition>
+            @php
+                $archivedVawcList = \App\Models\IssueReport::where('department','VAWC')->whereIn('status',['settled','resolved','archived'])->latest()->get();
+            @endphp
             <div class="card">
                 <div class="card-head">
-                    <div class="card-title"><i class="fas fa-clipboard-check"></i> Resolved Cases Archive</div>
-                    <span class="cbadge" style="background:#dcfce7;color:#15803d;">Archived</span>
+                    <div class="card-title"><i class="fas fa-archive" style="color:#d97706;"></i> Archived & Resolved Cases Repository</div>
+                    <span class="cbadge" style="background:#fef3c7;color:#92400e;">{{ $archivedVawcList->count() }} Archived Cases</span>
                 </div>
                 <div style="overflow-x:auto;">
                     <table class="tbl">
                         <thead><tr>
                             <th>Case Code</th>
+                            <th>Category</th>
                             <th>Complainant / Victim</th>
                             <th>Date Filed</th>
-                            <th>Resolved Date</th>
-                            <th>Status</th>
+                            <th>Date Closed / Archived</th>
+                            <th>Status & Remarks</th>
+                            <th style="text-align:right;">Action</th>
                         </tr></thead>
                         <tbody>
-                            @forelse(\App\Models\IssueReport::where('department','VAWC')->where('status','settled')->latest()->get() as $resolvedIssue)
-                            @php $rCode = 'VAWC-'.$resolvedIssue->created_at->format('Y').'-'.str_pad($resolvedIssue->id, 3, '0', STR_PAD_LEFT); @endphp
+                            @forelse($archivedVawcList as $resolvedIssue)
+                            @php 
+                                $rCode = 'VAWC-'.$resolvedIssue->created_at->format('Y').'-'.str_pad($resolvedIssue->id, 3, '0', STR_PAD_LEFT); 
+                                $rData = [
+                                    'id'                     => $resolvedIssue->id,
+                                    'case_code'              => $rCode,
+                                    'issue_type'             => $resolvedIssue->issue_type,
+                                    'status'                 => $resolvedIssue->status,
+                                    'complainant_name'       => $resolvedIssue->complainant_name,
+                                    'complainant_age'        => $resolvedIssue->complainant_age,
+                                    'complainant_gender'     => $resolvedIssue->complainant_gender,
+                                    'contact'                => $resolvedIssue->contact,
+                                    'complainant_address'    => $resolvedIssue->complainant_address,
+                                    'is_on_behalf'           => (bool)$resolvedIssue->is_on_behalf,
+                                    'victim_name'            => $resolvedIssue->victim_name,
+                                    'victim_age'             => $resolvedIssue->victim_age,
+                                    'victim_gender'          => $resolvedIssue->victim_gender,
+                                    'victim_relationship'    => $resolvedIssue->victim_relationship,
+                                    'respondent_name'        => $resolvedIssue->respondent_name,
+                                    'respondent_address'     => $resolvedIssue->respondent_address,
+                                    'description'            => $resolvedIssue->description,
+                                    'rejection_reason'       => $resolvedIssue->rejection_reason,
+                                    'admin_summary'          => $resolvedIssue->admin_summary,
+                                    'admin_notes'            => $resolvedIssue->admin_notes,
+                                    'official_document'      => $resolvedIssue->official_document,
+                                    'official_document_name' => $resolvedIssue->official_document_name,
+                                    'official_document_url'  => $resolvedIssue->official_document ? asset('storage/' . $resolvedIssue->official_document) : null,
+                                    'transfer_reason'        => $resolvedIssue->transfer_reason,
+                                    'transfer_count'         => $resolvedIssue->transfer_count,
+                                    'witness_name'           => $resolvedIssue->witness_name,
+                                    'evidence'               => $resolvedIssue->evidence ? json_decode($resolvedIssue->evidence, true) : [],
+                                    'incident_date'          => $resolvedIssue->incident_date ? \Carbon\Carbon::parse($resolvedIssue->incident_date)->format('M d, Y h:i A') : 'N/A',
+                                    'location'               => $resolvedIssue->location,
+                                    'is_restricted'          => $resolvedIssue->is_restricted,
+                                    'user_id'                => $resolvedIssue->user_id,
+                                    'created_at'             => $resolvedIssue->created_at->format('M d, Y'),
+                                ];
+                            @endphp
                             <tr>
-                                <td><div style="font-size:11px;font-weight:900;color:#15803d;">#{{ $rCode }}</div></td>
+                                <td><div style="font-size:11px;font-weight:900;color:#7c3aed;">#{{ $rCode }}</div></td>
+                                <td><span style="background:#f5f3ff;color:#7c3aed;font-size:9px;font-weight:900;padding:2px 8px;border-radius:99px;">{{ $resolvedIssue->issue_type }}</span></td>
                                 <td>
                                     <div style="font-size:12px;font-weight:800;">{{ $resolvedIssue->complainant_name }}</div>
                                     @if($resolvedIssue->is_on_behalf && $resolvedIssue->victim_name)
@@ -942,10 +1008,26 @@ html, body {
                                 </td>
                                 <td><div style="font-size:11px;color:var(--muted);">{{ $resolvedIssue->created_at->format('M d, Y') }}</div></td>
                                 <td><div style="font-size:11px;font-weight:800;color:var(--text);">{{ $resolvedIssue->updated_at->format('M d, Y') }}</div></td>
-                                <td><span class="spill spill-settled"><i class="fas fa-check-circle" style="font-size:8px;"></i> RESOLVED</span></td>
+                                <td>
+                                    @if($resolvedIssue->status === 'archived')
+                                        <span class="spill spill-settled" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:8.5px;"><i class="fas fa-archive" style="font-size:7px;"></i> ARCHIVED</span>
+                                    @else
+                                        <span class="spill spill-settled"><i class="fas fa-check-circle" style="font-size:8px;"></i> RESOLVED</span>
+                                    @endif
+                                    @if($resolvedIssue->admin_notes)
+                                        <div style="font-size:9.5px;color:var(--muted);margin-top:3px;max-width:240px;line-height:1.3;white-space:normal;">
+                                            {{ Str::limit($resolvedIssue->admin_notes, 90) }}
+                                        </div>
+                                    @endif
+                                </td>
+                                <td style="text-align:right;">
+                                    <button type="button" @click="openView({{ json_encode($rData) }})" class="btn-action-icon btn-action-view" title="View Full Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
                             </tr>
                             @empty
-                            <tr><td colspan="5"><div class="tbl-empty"><i class="fas fa-clipboard-check"></i><p style="font-size:11px;font-weight:700;">No resolved cases archived here.</p></div></td></tr>
+                            <tr><td colspan="7"><div class="tbl-empty"><i class="fas fa-archive"></i><p style="font-size:11px;font-weight:700;">No archived or resolved cases on file.</p></div></td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -1500,6 +1582,52 @@ html, body {
                             <button type="button" @click="rerouteModal=false" class="btn btn-ghost">Cancel</button>
                             <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);" :disabled="!rerouteData.reason || rerouteData.reason.trim().length < 4">
                                 <i class="fas fa-exchange-alt"></i> Confirm Re-route
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- ══ ARCHIVE CASE MODAL (WITH MANDATORY RESOLUTION NOTE & NOTICE) ══ --}}
+        <div x-show="archiveModal" x-cloak class="modal-ov" x-transition>
+            <div class="modal-box" style="max-width: 500px;" @click.away="archiveModal=false">
+                <div class="modal-in">
+                    <div class="modal-hd">
+                        <div class="modal-ttl">
+                            <div class="modal-ico" style="background:#fef3c7;color:#d97706;"><i class="fas fa-archive"></i></div>
+                            <div>
+                                <div>Archive Blotter Case Record</div>
+                                <div style="font-size:9px;font-weight:700;color:#d97706;text-transform:none;" x-text="'Case #' + archiveData.case_code + ' — ' + archiveData.complainant_name"></div>
+                            </div>
+                        </div>
+                        <button @click="archiveModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                    </div>
+
+                    <form :action="'/vawc/issues/' + archiveData.id + '/archive'" method="POST">
+                        @csrf @method('PATCH')
+                        
+                        {{-- Prominent Guardrail / Paalala Note --}}
+                        <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:11px;color:#92400e;line-height:1.5;">
+                            <div style="font-weight:900;display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                                <i class="fas fa-exclamation-triangle" style="color:#d97706;"></i> Mahalagang Paalala / Guardrail Note:
+                            </div>
+                            Ang pag-archive ng kasong ito ay nagpapatunay na ang blotter ay opisyal nang <strong>tapos, nairesolba, o nai-endorso</strong> sa kaukulang ahensya. 
+                            Kinakailangan maglagay ng <strong>Opisyal na Note / Dahilan</strong> bago tuluyang mai-archive para sa opisyal na talaan ng VAWC.
+                        </div>
+
+                        <div class="fgrp">
+                            <label class="flbl">Archive Note / Resolution Reason <span style="color:#dc2626;">*</span></label>
+                            <textarea name="archive_note" required rows="3" class="finput" style="resize:vertical;" placeholder="Ilagay ang detalye ng resolusyon o dahilan ng pag-archive (hal. Naresolba sa barangay level na may kasunduan / Nabigyan ng BPO / Naiturn-over sa PNP Women's Desk at sarado na)..." x-model="archiveData.note"></textarea>
+                            <span style="font-size:9px;color:var(--muted);font-weight:600;display:block;margin-top:4px;">
+                                * Ang note na ito, pangalan ng nag-archive, at eksaktong oras ay maitatala sa Opisyal na Privacy Audit Trail ng VAWC.
+                            </span>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+                            <button type="button" @click="archiveModal=false" class="btn btn-ghost">Cancel</button>
+                            <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#d97706,#b45309);border:none;box-shadow:0 2px 8px rgba(217,119,6,0.3);" :disabled="!archiveData.note || archiveData.note.trim().length < 3">
+                                <i class="fas fa-archive"></i> Tuluyang I-Archive
                             </button>
                         </div>
                     </form>

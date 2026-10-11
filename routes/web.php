@@ -222,6 +222,7 @@ Route::middleware(['auth', 'verified', 'role:admin,vawc'])->group(function () {
     Route::post('/vawc/issues/{id}/pnp-referral', [\App\Http\Controllers\VawcController::class, 'pnpReferral']);
     Route::get('/vawc/issues/{id}/print-referral', [\App\Http\Controllers\VawcController::class, 'printReferral']);
     Route::patch('/vawc/issues/{id}/transfer-peace', [\App\Http\Controllers\VawcController::class, 'transferToPeace'])->name('vawc.transfer.peace');
+    Route::patch('/vawc/issues/{id}/archive', [\App\Http\Controllers\VawcController::class, 'archiveCase'])->name('vawc.archive');
     Route::get('/vawc/export', [\App\Http\Controllers\VawcController::class, 'export'])->name('vawc.export');
     Route::post('/vawc/import', [\App\Http\Controllers\VawcController::class, 'importBlotter'])->name('vawc.import');
     Route::get('/vawc/sample-template', [\App\Http\Controllers\VawcController::class, 'sampleTemplate'])->name('vawc.sample.template');
