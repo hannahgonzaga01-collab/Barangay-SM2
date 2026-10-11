@@ -522,14 +522,16 @@
                                     <i class="fas fa-print"></i> Print
                                 </button>
                                 
-                                @if(in_array($req->status, ['pending', 'processing', 'ready']))
-                                    {{-- Direct Release Button --}}
+                                @if($isOverdue)
+                                    {{-- Release Button strictly for Overdue items in Actions column --}}
                                     <button type="button" 
                                             @click="releaseTarget = { id: {{ $req->id }}, name: '{{ addslashes($displayName) }}', docType: '{{ ucwords(str_replace('_',' ',$req->document_type)) }}' }; releaseConfirmModal = true;"
-                                            class="tbl-btn" style="background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Release Document to Resident">
+                                            class="tbl-btn" style="background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Direct Release Overdue Document">
                                         <i class="fas fa-check-circle"></i> Release
                                     </button>
+                                @endif
 
+                                @if(in_array($req->status, ['pending', 'processing', 'ready']))
                                     {{-- Reject Button with Modal --}}
                                     <div x-data="{ showReject: false, reasonSelect: '', reasonCustom: '' }" style="display:inline;">
                                         <button @click="showReject = !showReject" type="button" class="tbl-btn" style="background:#fee2e2;color:var(--danger);border:1.5px solid #fca5a5;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Reject Request">
@@ -577,14 +579,12 @@
                                 @endif
                                 
                                 @if($isOldReleased || in_array($req->status, ['released', 'disapproved']))
-                                    <form action="{{ route('office.document.destroy', $req->id) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return confirm('Kumpirmahin: Nais mo bang burahin ang request record na ito sa archive?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="tbl-btn" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;width:auto;padding:0 8px;font-size:9.5px;gap:3px;" title="Delete this record">
-                                            <i class="fas fa-trash-alt"></i> Delete
-                                        </button>
-                                    </form>
+                                    {{-- Archive Action Button (Branded Modal, No Raw Delete) --}}
+                                    <button type="button" 
+                                            @click="archiveDocTarget = { id: {{ $req->id }}, name: '{{ addslashes($displayName) }}', docType: '{{ ucwords(str_replace('_',' ',$req->document_type)) }}' }; archiveDocModal = true;"
+                                            class="tbl-btn" style="background:#fef3c7;color:#a16207;border:1.5px solid #fde68a;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Archive this record">
+                                        <i class="fas fa-archive"></i> Archive
+                                    </button>
                                 @endif
                             </div>
                         </td>

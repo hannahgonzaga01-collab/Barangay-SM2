@@ -727,6 +727,75 @@ $docConfigs = [
     </div>
 </div>
 
+{{-- ══ DOCUMENT ARCHIVE CONFIRMATION MODAL ══ --}}
+<div x-show="archiveDocModal" x-cloak class="modal-ov" x-transition style="z-index:650;" @keydown.window.escape="archiveDocModal=false">
+    <div class="modal-box" style="max-width:440px;width:92%;border-radius:18px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 20px 45px rgba(4,25,45,0.22);padding:0;" @click.away="archiveDocModal=false">
+        <div style="background:linear-gradient(135deg,#0E5393 0%,#04192D 100%);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.12);">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:900;color:#fff;letter-spacing:0.3px;">Archive Document Record</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,0.75);font-weight:700;">Barangay San Miguel II • Civil Registry</div>
+                </div>
+            </div>
+            <button type="button" @click="archiveDocModal=false" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;padding:4px;border-radius:6px;transition:all .15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+                <i class="fas fa-times-circle"></i>
+            </button>
+        </div>
+
+        <div style="padding:22px 20px;background:#ffffff;">
+            <div style="text-align:center;margin-bottom:16px;">
+                <div style="width:58px;height:58px;border-radius:50%;background:#fef3c7;border:2px solid #fde68a;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#d97706;font-size:24px;box-shadow:0 4px 12px rgba(217,119,6,0.12);">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <div style="font-size:15px;font-weight:900;color:#0f172a;line-height:1.3;margin-bottom:4px;">
+                    I-archive ang Document Record?
+                </div>
+                <div style="font-size:11px;color:#64748b;font-weight:600;">
+                    Ililipat ang record na ito sa opisyal na archive para sa maayos na pag-iingat ng mga tala.
+                </div>
+            </div>
+
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed #cbd5e1;margin-bottom:8px;">
+                    <span style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Resident</span>
+                    <span style="font-size:12px;font-weight:900;color:#0E5393;" x-text="archiveDocTarget.name || 'Resident'"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Document</span>
+                    <span style="font-size:11px;font-weight:800;color:#0f172a;" x-text="archiveDocTarget.docType || 'Document Request'"></span>
+                </div>
+            </div>
+
+            <div style="background:#fffbeb;border:1px solid #fef3c7;border-left:4px solid #f59e0b;padding:10px 12px;border-radius:8px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
+                <i class="fas fa-info-circle" style="color:#d97706;font-size:13px;margin-top:2px;"></i>
+                <div style="font-size:10.5px;color:#92400e;line-height:1.45;font-weight:600;">
+                    Ang record na ito ay ligtas na mananatili sa archives ng tanggapan at maaari pa ring balikan kung kinakailangan.
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+                <button type="button" @click="archiveDocModal=false"
+                        style="flex:1;padding:12px;border:1.5px solid #cbd5e1;background:#f8fafc;border-radius:10px;font-size:12px;font-weight:800;color:#475569;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;"
+                        onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">
+                    <i class="fas fa-times"></i> Kanselahin
+                </button>
+                <form :action="'/office/document-request/' + archiveDocTarget.id" method="POST" style="flex:1.3;margin:0;">
+                    @csrf @method('DELETE')
+                    <button type="submit"
+                            style="width:100%;padding:12px;background:linear-gradient(135deg,#d97706 0%,#b45309 100%);border:none;border-radius:10px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;transition:all .18s;box-shadow:0 3px 10px rgba(217,119,6,0.3);display:inline-flex;align-items:center;justify-content:center;gap:7px;"
+                            onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 14px rgba(217,119,6,0.4)';"
+                            onmouseout="this.style.transform='none';this.style.boxShadow='0 3px 10px rgba(217,119,6,0.3)';">
+                        <i class="fas fa-archive"></i> Oo, I-archive
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- ══ PET ARCHIVE CONFIRMATION MODAL ══ --}}
 <div x-show="archivePetModal" x-cloak class="modal-ov" x-transition style="z-index:700;">
     <div class="modal-box" style="max-width:380px;" @click.away="archivePetModal=false">

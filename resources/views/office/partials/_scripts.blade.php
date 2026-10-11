@@ -86,6 +86,8 @@ function officePortal() {
         archiveTarget: { id: null, name: '' },
         archivePetModal: false,
         archivePetTarget: { id: null, name: '' },
+        archiveDocModal: false,
+        archiveDocTarget: { id: null, name: '', docType: '' },
         releaseConfirmModal: false,
         releaseTarget: { id: null, name: '', docType: '' },
         showReadyModal: false,
