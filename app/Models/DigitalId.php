@@ -10,6 +10,7 @@ class DigitalId extends Model
         'user_id',
         'contact_person',
         'contact_person_number',
+        'contact_person_address',
         'status',
         'id_number',
     ];

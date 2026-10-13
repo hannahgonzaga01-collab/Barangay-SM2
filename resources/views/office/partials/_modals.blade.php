@@ -1638,7 +1638,7 @@ $docConfigs = [
         <div class="modal-in">
             <div class="modal-hd">
                 <div class="modal-ttl"><div class="modal-ttl-ico"><i class="fas fa-id-badge"></i></div><div><div>Digital ID Generator</div><div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">Barangay San Miguel II • Residence ID Card</div></div></div>
-                <button @click="openDigitalId=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                <button @click="openDigitalId=false; resetDigitalIdSelection();" class="modal-close"><i class="fas fa-times-circle"></i></button>
             </div>
 
             {{-- Resident Search & Selection Bar --}}
@@ -1646,7 +1646,7 @@ $docConfigs = [
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                     <div class="section-blk-ttl" style="margin-bottom:0;"><i class="fas fa-search"></i> Select Resident</div>
                     <template x-if="digitalIdResident">
-                        <button type="button" @click="digitalIdResident=null; digitalIdSearch=''" class="btn-plain btn-edit" style="font-size:9px;padding:3px 8px;">
+                        <button type="button" @click="resetDigitalIdSelection()" class="btn-plain btn-edit" style="font-size:9px;padding:3px 8px;">
                             <i class="fas fa-user-friends"></i> Change Resident
                         </button>
                     </template>
@@ -1655,9 +1655,10 @@ $docConfigs = [
                     <div style="display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;gap:7px;">
                         <i class="fas fa-search" style="color:var(--light);font-size:11px;"></i>
                         <input type="text" x-model="digitalIdSearch"
+                               @input="onDigitalIdSearchInput()"
                                placeholder="Search resident name or code..." autocomplete="off"
                                style="flex:1;background:transparent;border:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--text);outline:none;">
-                        <button type="button" x-show="digitalIdSearch" @click="digitalIdSearch=''; if(!digitalIdResident) digitalIdSearch=''" style="background:none;border:none;color:var(--light);cursor:pointer;font-size:10px;"><i class="fas fa-times"></i></button>
+                        <button type="button" x-show="digitalIdSearch" @click="resetDigitalIdSelection()" style="background:none;border:none;color:var(--light);cursor:pointer;font-size:10px;" title="Clear search"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
             </div>
@@ -1730,11 +1731,33 @@ $docConfigs = [
             <div x-show="digitalIdResident" x-transition>
                 {{-- Emergency contact fields --}}
                 <div class="section-blk">
-                    <div class="section-blk-ttl"><i class="fas fa-phone"></i> In Case of Emergency (Printed on Back of ID)</div>
+                    <div class="section-blk-ttl" style="display:flex;align-items:center;justify-content:space-between;">
+                        <span><i class="fas fa-phone"></i> In Case of Emergency (Printed on Back of ID)</span>
+                        <span style="font-size:9.5px;color:#dc2626;font-weight:700;">* Required to generate or print</span>
+                    </div>
                     <div class="fgrid3" style="gap:9px;">
-                        <div><label class="flbl">Contact Person Name</label><input type="text" x-model="ecName" placeholder="e.g. Marinel V. Ganitnit" class="finput"></div>
-                        <div><label class="flbl">Contact Person Address</label><input type="text" x-model="ecAddress" placeholder="e.g. Blk.6 Lot.7 Burol Main" class="finput"></div>
-                        <div><label class="flbl">Contact Number</label><input type="text" x-model="ecNum" placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11" title="Please enter exactly 11 digits (e.g. 09123456789)" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput"></div>
+                        <div>
+                            <label class="flbl">Contact Person Name <span style="color:#dc2626;">*</span></label>
+                            <input type="text" x-model="ecName" required placeholder="Full Name of Contact Person" class="finput"
+                                   :style="(!ecName || !ecName.trim()) ? 'border-color:#fca5a5;background:#fff5f5;' : 'border-color:#86efac;background:#fff;'">
+                        </div>
+                        <div>
+                            <label class="flbl">Contact Person Address <span style="color:#dc2626;">*</span></label>
+                            <input type="text" x-model="ecAddress" required placeholder="Complete Address (e.g. Blk/Lot)" class="finput"
+                                   :style="(!ecAddress || !ecAddress.trim()) ? 'border-color:#fca5a5;background:#fff5f5;' : 'border-color:#86efac;background:#fff;'">
+                        </div>
+                        <div>
+                            <label class="flbl">Contact Number (11 Digits) <span style="color:#dc2626;">*</span></label>
+                            <input type="text" x-model="ecNum" required placeholder="09XXXXXXXXX" pattern="\d{11}" maxlength="11" minlength="11"
+                                   title="Please enter exactly 11 digits starting with 09 (e.g. 09123456789)"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="finput"
+                                   :style="(!ecNum || ecNum.length !== 11 || !ecNum.startsWith('09')) ? 'border-color:#fca5a5;background:#fff5f5;' : 'border-color:#86efac;background:#fff;'">
+                        </div>
+                    </div>
+                    <div x-show="!ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.length !== 11 || !ecNum.startsWith('09')"
+                         style="margin-top:7px;font-size:10px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:5px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Please fill in all 3 emergency contact fields (Name, Address, and 11-digit mobile number starting with 09) before generating or printing.</span>
                     </div>
                 </div>
 
@@ -1834,9 +1857,9 @@ $docConfigs = [
                         {{-- Emergency Box --}}
                         <div style="border:2px solid #000;border-radius:0;padding:6px 10px;background:rgba(255,255,255,0.7);text-align:center;position:relative;margin-bottom:8px;">
                             <div style="font-size:8px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.04em;">— CONTACT PERSON IN CASE OF EMERGENCY —</div>
-                            <div style="font-size:12.5px;font-weight:900;color:#000;text-transform:uppercase;margin:2px 0 1px;" x-text="(ecName || 'MARINEL V. GANITNIT').toUpperCase()"></div>
-                            <div style="font-size:9.5px;font-weight:900;color:#000;text-transform:uppercase;margin-bottom:1px;" x-text="(ecAddress || 'BLK.6 LOT.7 CHESTER VILLE BUROL MAIN').toUpperCase()"></div>
-                            <div style="font-size:9.5px;font-weight:900;color:#000;text-transform:uppercase;">CONTACT NO: <span x-text="ecNum || '0917-933-0940'"></span></div>
+                            <div style="font-size:12.5px;font-weight:900;color:#000;text-transform:uppercase;margin:2px 0 1px;min-height:16px;" x-text="ecName ? ecName.toUpperCase() : '—'"></div>
+                            <div style="font-size:9.5px;font-weight:900;color:#000;text-transform:uppercase;margin-bottom:1px;min-height:13px;" x-text="ecAddress ? ecAddress.toUpperCase() : '—'"></div>
+                            <div style="font-size:9.5px;font-weight:900;color:#000;text-transform:uppercase;">CONTACT NO: <span x-text="ecNum || '—'"></span></div>
                         </div>
 
                         {{-- Terms and Conditions text --}}
@@ -1866,15 +1889,36 @@ $docConfigs = [
                     </div>
                 </div>
 
-                <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:14px;">
-                    <button @click="openDigitalId=false" class="btn-plain btn-edit">Cancel</button>
-                    <form :action="`/office/digital-id/generate-manual/${digitalIdResident.id}`" method="POST" style="margin:0;">
+                <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:14px;align-items:center;">
+                    <button type="button" @click="openDigitalId=false; resetDigitalIdSelection();" class="btn-plain btn-edit">Cancel</button>
+                    <form :action="`/office/digital-id/generate-manual/${digitalIdResident.id}`" method="POST" style="margin:0;"
+                          @submit.prevent="
+                              if (!ecName || !ecName.trim()) { alert('Please enter the Contact Person Name before generating.'); return false; }
+                              if (!ecAddress || !ecAddress.trim()) { alert('Please enter the Contact Person Address before generating.'); return false; }
+                              if (!ecNum || !ecNum.trim() || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) { alert('Please enter a valid 11-digit Contact Number (e.g. 09123456789) before generating.'); return false; }
+                              $el.submit();
+                          ">
                         @csrf
                         <input type="hidden" name="ecName" :value="ecName">
+                        <input type="hidden" name="ecAddress" :value="ecAddress">
                         <input type="hidden" name="ecNum" :value="ecNum">
-                        <button type="submit" class="btn-plain btn-green" style="padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;"><i class="fas fa-id-badge"></i> Generate ID</button>
+                        <button type="submit" class="btn-plain btn-green"
+                                :disabled="!ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
+                                :style="(!ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;padding:10px 17px;font-size:11px;font-weight:900;' : 'padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;'">
+                            <i class="fas fa-id-badge"></i> Generate ID
+                        </button>
                     </form>
-                    <button @click="printDigitalId(digitalIdResident)" class="btn-grad"><i class="fas fa-print"></i> Print ID</button>
+                    <button type="button" @click="
+                            if (!ecName || !ecName.trim()) { alert('Please enter the Contact Person Name before printing.'); return; }
+                            if (!ecAddress || !ecAddress.trim()) { alert('Please enter the Contact Person Address before printing.'); return; }
+                            if (!ecNum || !ecNum.trim() || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) { alert('Please enter a valid 11-digit Contact Number (e.g. 09123456789) before printing.'); return; }
+                            printDigitalId(digitalIdResident);
+                        "
+                        :disabled="!ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
+                        :style="(!ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;' : ''"
+                        class="btn-grad">
+                        <i class="fas fa-print"></i> Print ID
+                    </button>
                 </div>
             </div>
         </div>

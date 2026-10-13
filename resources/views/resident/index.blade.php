@@ -5428,9 +5428,9 @@ html, body {
                     <div style="position:relative;z-index:1;display:flex;flex-direction:column;height:100%;justify-content:space-between;">
                         <div style="border:1.5px solid #000;border-radius:0;padding:5px 8px;background:rgba(255,255,255,0.7);text-align:center;margin-bottom:8px;">
                             <div style="font-size:7.5px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.04em;">— CONTACT PERSON IN CASE OF EMERGENCY —</div>
-                            <div style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;margin:1px 0;">{{ strtoupper($digitalId->contact_person ?? 'MARINEL V. GANITNIT') }}</div>
-                            <div style="font-size:8px;font-weight:900;color:#000;text-transform:uppercase;margin-bottom:1px;">{{ strtoupper($digitalId->contact_person_address ?? 'BLK.6 LOT.7 CHESTER VILLE BUROL MAIN') }}</div>
-                            <div style="font-size:8px;font-weight:900;color:#000;text-transform:uppercase;">CONTACT NO: {{ $digitalId->contact_person_number ?? '0917-933-0940' }}</div>
+                            <div style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;margin:1px 0;">{{ !empty($digitalId?->contact_person) ? strtoupper($digitalId->contact_person) : '—' }}</div>
+                            <div style="font-size:8px;font-weight:900;color:#000;text-transform:uppercase;margin-bottom:1px;">{{ !empty($digitalId?->contact_person_address) ? strtoupper($digitalId->contact_person_address) : '—' }}</div>
+                            <div style="font-size:8px;font-weight:900;color:#000;text-transform:uppercase;">CONTACT NO: {{ $digitalId?->contact_person_number ?? '—' }}</div>
                         </div>
                         <div style="margin-top:0;">
                             <div style="font-size:7.5px;font-weight:900;color:#000;text-transform:uppercase;margin-bottom:1px;">THIS CARD IS NON - TRANSFERABLE</div>

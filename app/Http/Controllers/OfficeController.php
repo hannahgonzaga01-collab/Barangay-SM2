@@ -439,27 +439,60 @@ class OfficeController extends Controller
 
     public function generateManualDigitalId(Request $request, $resident_id)
     {
+        $request->validate([
+            'ecName' => 'required|string|max:255',
+            'ecAddress' => 'required|string|max:255',
+            'ecNum' => ['required', 'regex:/^09\d{9}$/'],
+        ], [
+            'ecName.required' => 'Emergency Contact Person Name is required.',
+            'ecAddress.required' => 'Emergency Contact Person Address is required.',
+            'ecNum.required' => 'Emergency Contact Number is required.',
+            'ecNum.regex' => 'Emergency Contact Number must be an 11-digit mobile number starting with 09 (e.g. 09123456789).',
+        ]);
+
         $resident = Resident::findOrFail($resident_id);
 
         if (!$resident->user_id) {
-            return redirect()->back()->with('error', 'Cannot generate Digital ID. Resident has no online account.');
+            $user = User::where('name', $resident->first_name . ' ' . $resident->last_name)->first();
+            if (!$user) {
+                $user = User::create([
+                    'name' => trim(($resident->first_name ?? '') . ' ' . ($resident->last_name ?? '')),
+                    'first_name' => $resident->first_name,
+                    'last_name' => $resident->last_name,
+                    'middle_name' => $resident->middle_name,
+                    'suffix' => $resident->suffix,
+                    'role' => 'resident',
+                    'status' => 'verified',
+                    'email' => strtolower($resident->resident_code ?? ('res_' . $resident->id)) . '@barangaysm2.local',
+                    'password' => bcrypt('ResidentSM2!'),
+                    'contact_number' => $resident->contact_number,
+                    'address' => $resident->address,
+                    'birthday' => $resident->birthday,
+                ]);
+            }
+            $resident->update(['user_id' => $user->id]);
         }
 
         $digitalId = DigitalId::where('user_id', $resident->user_id)->first();
 
+        $data = [
+            'status' => 'generated',
+            'contact_person' => trim($request->ecName),
+            'contact_person_number' => trim($request->ecNum),
+        ];
+
         if (!$digitalId) {
-            $digitalId = DigitalId::create([
-                'user_id' => $resident->user_id,
-                'contact_person' => $request->ecName ?? 'N/A',
-                'contact_person_number' => $request->ecNum ?? 'N/A',
-                'status' => 'generated',
-            ]);
+            $data['user_id'] = $resident->user_id;
+            $digitalId = DigitalId::create($data);
         } else {
-            $digitalId->update([
-                'status' => 'generated',
-                'contact_person' => $request->ecName ?? $digitalId->contact_person,
-                'contact_person_number' => $request->ecNum ?? $digitalId->contact_person_number,
-            ]);
+            $digitalId->update($data);
+        }
+
+        try {
+            $digitalId->contact_person_address = trim($request->ecAddress);
+            $digitalId->save();
+        } catch (\Throwable $e) {
+            // Column may not yet exist on unmigrated database
         }
 
         if (!$digitalId->id_number) {
@@ -470,7 +503,7 @@ class OfficeController extends Controller
             $idNumber = $digitalId->id_number;
         }
 
-        return redirect()->back()->with('success', 'Digital ID generated: ' . $idNumber);
+        return redirect()->back()->with('success', 'Digital ID successfully generated: ' . $idNumber);
     }
 
     public function updateDocumentStatus(Request $request, $id)

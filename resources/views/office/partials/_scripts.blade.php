@@ -196,6 +196,26 @@ function officePortal() {
             }
             return list.slice(0, 50);
         },
+        resetDigitalIdSelection() {
+            this.digitalIdResident = null;
+            this.digitalIdSearch = '';
+            this.ecName = '';
+            this.ecNum = '';
+            this.ecAddress = '';
+            this.digitalIdCardView = 'front';
+        },
+        onDigitalIdSearchInput() {
+            if (this.digitalIdResident) {
+                const query = (this.digitalIdSearch || '').trim().toLowerCase();
+                const curName = (this.digitalIdResident.name || '').trim().toLowerCase();
+                if (query !== curName) {
+                    this.digitalIdResident = null;
+                    this.ecName = '';
+                    this.ecNum = '';
+                    this.ecAddress = '';
+                }
+            }
+        },
         selectDigitalIdResident(r) {
             if (!r) return;
             this.digitalIdResident = {
@@ -210,9 +230,9 @@ function officePortal() {
             this.digitalIdSearch = this.digitalIdResident.name;
             this.digitalIdOpen = false;
             this.digitalIdCardView = 'front';
-            this.ecName = r.emergency_contact_name || this.ecName || '';
-            this.ecNum = r.emergency_contact_number || this.ecNum || '';
-            this.ecAddress = r.emergency_contact_address || this.ecAddress || '';
+            this.ecName = r.emergency_contact_name || '';
+            this.ecNum = r.emergency_contact_number || '';
+            this.ecAddress = r.emergency_contact_address || '';
             this.$nextTick(() => {
                 generateQRCode(this.digitalIdResident.id, this.digitalIdResident.code);
             });
@@ -341,10 +361,24 @@ function officePortal() {
             this.$watch('searchQuery', () => { this.masterlistPage = 1; });
             this.$watch('activeFilter', () => { this.masterlistPage = 1; });
             
+            this.$watch('digitalIdSearch', (val) => {
+                if (!val || !val.trim()) {
+                    if (this.digitalIdResident) {
+                        this.digitalIdResident = null;
+                        this.ecName = '';
+                        this.ecNum = '';
+                        this.ecAddress = '';
+                    }
+                }
+            });
+            
             // Global listeners for header buttons
             window.addEventListener('open-import-modal', () => this.openImportModal = true);
             window.addEventListener('open-add-modal', () => this.openAddModal = true);
-            window.addEventListener('open-digital-id', () => this.openDigitalId = true);
+            window.addEventListener('open-digital-id', () => {
+                this.resetDigitalIdSelection();
+                this.openDigitalId = true;
+            });
 
             window.addEventListener('navigate-task', (e) => {
                 const detail = e.detail || {};
@@ -411,6 +445,13 @@ function generateQRCode(residentId,residentCode){
 }
 function printDigitalId(resident){
     if(!resident) return;
+    const ecName = (document.querySelector('input[x-model="ecName"]')?.value || '').trim();
+    const ecAddress = (document.querySelector('input[x-model="ecAddress"]')?.value || '').trim();
+    const ecNum = (document.querySelector('input[x-model="ecNum"]')?.value || '').trim();
+    if (!ecName || !ecAddress || !ecNum || ecNum.length !== 11 || !ecNum.startsWith('09')) {
+        alert('Cannot print Digital ID. Please provide all required Emergency Contact details (Contact Person Name, Address, and 11-digit Number starting with 09) first.');
+        return;
+    }
     generateQRCode(resident.id, resident.code);
     setTimeout(()=>{
         const front = document.getElementById('digital-id-front');

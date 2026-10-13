@@ -364,8 +364,9 @@ html, body {
                 'voter_status'     => $u->voter_status ?? $userObj?->voter_status ?? 'N/A',
                 'digital_id_generated' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? true : false,
                 'digital_id_number' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? $userObj->digitalId->id_number : null,
-                'emergency_contact_name' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->emergency_contact_name ?? '') : ($u->emergency_contact_name ?? ''),
-                'emergency_contact_number' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->emergency_contact_number ?? '') : ($u->emergency_contact_number ?? ''),
+                'emergency_contact_name' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person ?? $userObj->digitalId->emergency_contact_name ?? '') : '',
+                'emergency_contact_number' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person_number ?? $userObj->digitalId->emergency_contact_number ?? '') : '',
+                'emergency_contact_address' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person_address ?? '') : '',
             ];
         });
     @endphp
