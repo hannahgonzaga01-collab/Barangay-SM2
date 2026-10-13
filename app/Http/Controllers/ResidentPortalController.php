@@ -181,29 +181,9 @@ class ResidentPortalController extends Controller
                 ->update(['is_active' => false, 'archived_at' => now()]);
         }
 
-        $announcements = Announcement::where('is_active', true)->latest()->take(5)->get();
-        $events        = Event::where('is_active', true)->latest()->get();
-
-        // Feed for "Past Updates" (ONLY includes archived items)
-        $recentAnnouncements = Announcement::where('is_active', false)
-            ->latest()
-            ->take(20)
-            ->get()->map(function($a) {
-                $a->type = 'Announcement';
-                $a->sort_date = $a->archived_at ?? $a->created_at;
-                return $a;
-            });
-            
-        $recentEvents = Event::where('is_active', false)
-            ->latest()
-            ->take(20)
-            ->get()->map(function($e) {
-                $e->type = 'Event';
-                $e->sort_date = $e->archived_at ?? $e->created_at;
-                return $e;
-            });
-
-        $recentUpdates = $recentAnnouncements->concat($recentEvents)->sortByDesc('sort_date')->values();
+        $myFamily = ($resident && $resident->is_household_head) 
+            ? Resident::where('household_head_id', $resident->id)->where('id', '!=', $resident->id)->get() 
+            : collect();
 
         $unreadNotifications = collect();
         $allNotifications    = collect();
@@ -211,13 +191,42 @@ class ResidentPortalController extends Controller
             $unreadNotifications = auth()->user()->unreadNotifications()->take(10)->get();
             $allNotifications    = auth()->user()->notifications()->take(20)->get();
         }
-        
-        $carouselData   = SiteSetting::where('key', 'carousel_data')->first()?->value;
-        $carouselSlides = $carouselData ? collect(json_decode($carouselData))->where('is_active', true)->sortBy('sort_order') : collect();
-        $orgChartPath   = SiteSetting::where('key', 'organizational_chart')->first()?->value;
 
-        // Fetch Patrol Schedules for Tanod Duty Display
-        $patrolSchedules = \App\Models\PatrolSchedule::latest()->get();
+        $publicData = \Illuminate\Support\Facades\Cache::remember('resident_portal_public_data', 60, function() {
+            $announcements = Announcement::where('is_active', true)->latest()->take(5)->get();
+            $events        = Event::where('is_active', true)->latest()->get();
+
+            // Feed for "Past Updates" (ONLY includes archived items)
+            $recentAnnouncements = Announcement::where('is_active', false)
+                ->latest()
+                ->take(20)
+                ->get()->map(function($a) {
+                    $a->type = 'Announcement';
+                    $a->sort_date = $a->archived_at ?? $a->created_at;
+                    return $a;
+                });
+                
+            $recentEvents = Event::where('is_active', false)
+                ->latest()
+                ->take(20)
+                ->get()->map(function($e) {
+                    $e->type = 'Event';
+                    $e->sort_date = $e->archived_at ?? $e->created_at;
+                    return $e;
+                });
+
+            $recentUpdates = $recentAnnouncements->concat($recentEvents)->sortByDesc('sort_date')->values();
+            
+            $carouselData   = SiteSetting::where('key', 'carousel_data')->first()?->value;
+            $carouselSlides = $carouselData ? collect(json_decode($carouselData))->where('is_active', true)->sortBy('sort_order') : collect();
+            $orgChartPath   = SiteSetting::where('key', 'organizational_chart')->first()?->value;
+
+            // Fetch Patrol Schedules for Tanod Duty Display
+            $patrolSchedules = \App\Models\PatrolSchedule::latest()->get();
+
+            return compact('announcements', 'events', 'recentUpdates', 'carouselSlides', 'orgChartPath', 'patrolSchedules');
+        });
+        extract($publicData);
 
         // Retrieve latest personnel per team (Team A / Team B)
         $teamARecord = $patrolSchedules->firstWhere('team_name', 'Team A');
@@ -365,7 +374,7 @@ class ResidentPortalController extends Controller
         }
 
         return view('resident.index', compact(
-            'requests', 'digitalId', 'resident', 'issueReports', 'sosHistory',
+            'requests', 'digitalId', 'resident', 'myFamily', 'issueReports', 'sosHistory',
             'announcements', 'events', 'recentUpdates',
             'unreadNotifications', 'allNotifications',
             'carouselSlides', 'orgChartPath',

@@ -320,57 +320,6 @@ html, body {
     </div>
     @endif
 
-    @php
-        $allResidents = $users->map(function($u) {
-            $userObj = $u->user;
-            if (!$userObj && !empty($u->resident_code)) {
-                $userObj = \App\Models\User::where('resident_code', $u->resident_code)->first();
-            }
-            $voterIdRaw = $userObj?->voter_id_photo ?? $u->voter_id_photo ?? null;
-            $voterIdUrl = $voterIdRaw ? asset('storage/' . ltrim($voterIdRaw, '/')) : null;
-            return [
-                'id'               => $u->id,
-                'first_name'       => $u->first_name,
-                'last_name'        => $u->last_name,
-                'name'             => $u->first_name . ' ' . $u->last_name,
-                'code'             => $u->resident_code ?? 'NO-CODE',
-                'resident_code'    => $u->resident_code ?? 'NO-CODE',
-                'address'          => $u->address ?? '',
-                'birthday'         => $u->birthday ?? '',
-                'gender'           => $u->gender ?? '',
-                'civil_status'     => $u->civil_status ?? '',
-                'spouse_name'      => $u->spouse_name ?? '',
-                'contact'          => $u->contact_number ?? '',
-                'birthplace'       => $u->birthplace ?? '',
-                'occupation'       => $u->occupation ?? '',
-                'is_voter'         => $u->is_voter ? true : false,
-                'is_non_voter'     => $u->is_non_voter ? true : false,
-                'is_senior'        => $u->is_senior ? true : false,
-                'is_pwd'           => $u->is_pwd ? true : false,
-                'is_single_parent' => $u->is_single_parent ? true : false,
-                'is_student'       => $u->is_student ? true : false,
-                'is_bedridden'     => $u->is_bedridden ? true : false,
-                'is_third_gen'     => $u->is_third_gen ? true : false,
-                'is_household_head'=> $u->is_household_head ? true : false,
-                'household_id'     => $u->household_id,
-                'household_head_id'=> $u->household_head_id,
-                'relationship'     => $u->relationship ?? 'Member',
-                'verification_status'=> $u->verification_status ?? 'verified',
-                'memberships'      => is_array($u->memberships) ? $u->memberships : (is_string($u->memberships) ? json_decode($u->memberships, true) : []),
-                'email'            => $userObj ? $userObj->email : '',
-                'photo'            => $u->photo ? asset('storage/' . $u->photo) : null,
-                'voter_id_photo'   => $voterIdUrl,
-                'id_type'          => $u->id_type ?? $userObj?->id_type ?? 'Government Valid ID',
-                'voter_status'     => $u->voter_status ?? $userObj?->voter_status ?? 'N/A',
-                'digital_id_generated' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? true : false,
-                'digital_id_number' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? $userObj->digitalId->id_number : null,
-                'emergency_contact_name' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person ?? $userObj->digitalId->emergency_contact_name ?? '') : '',
-                'emergency_contact_number' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person_number ?? $userObj->digitalId->emergency_contact_number ?? '') : '',
-                'emergency_contact_address' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person_address ?? '') : '',
-            ];
-        });
-    @endphp
-
     <script>
         window._allResidents = @json($allResidents);
     </script>

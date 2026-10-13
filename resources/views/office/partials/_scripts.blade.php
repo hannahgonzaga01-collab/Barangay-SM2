@@ -36,7 +36,7 @@ function officePortal() {
             get totalDocsIssued() {
                 return (Number(this.clearanceIssued)||0) + (Number(this.indigencyIssued)||0) + (Number(this.residencyIssued)||0) + (Number(this.businessClearanceIssued)||0) + (Number(this.firstTimeJobseekerIssued)||0);
             },
-            digitalIdIssued: {{ \App\Models\DigitalId::where('status', 'generated')->count() }},
+            digitalIdIssued: {{ $digitalIdIssuedCount ?? 0 }},
             registeredPets: {{ $petCount ?? 0 }},
             preparedBy: 'BARANGAY SECRETARY / OFFICE ADMIN',
             preparedRole: 'Barangay Secretary',

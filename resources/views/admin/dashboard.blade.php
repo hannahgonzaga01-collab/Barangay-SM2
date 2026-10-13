@@ -3094,11 +3094,46 @@
                                                                             @change="const d=new Date($event.target.value+'T00:00:00');dayLabel=['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()]">
                                                                     </div>
                                                                 </div>
-                                                                <div class="fgrid2 fgrp">
-                                                                    <div><label class="flbl">Time Range</label><input type="text" name="time_range"
-                                                                            class="finput" value="{{ $evt->time_range }}"></div>
-                                                                    <div><label class="flbl">Location</label><input type="text" name="location" class="finput"
-                                                                            value="{{ $evt->location }}"></div>
+                                                                <div class="fgrp" x-data="{
+                                                                    startTime: '',
+                                                                    endTime: '',
+                                                                    timeRange: '{{ addslashes($evt->time_range) }}',
+                                                                    format12h(timeStr) {
+                                                                        if (!timeStr) return '';
+                                                                        const parts = timeStr.split(':');
+                                                                        let h = parseInt(parts[0], 10);
+                                                                        const m = parts[1] || '00';
+                                                                        const ampm = h >= 12 ? 'PM' : 'AM';
+                                                                        h = h % 12;
+                                                                        h = h ? h : 12;
+                                                                        return h + ':' + m + ' ' + ampm;
+                                                                    },
+                                                                    updateRange() {
+                                                                        if (this.startTime && this.endTime) {
+                                                                            this.timeRange = this.format12h(this.startTime) + ' – ' + this.format12h(this.endTime);
+                                                                        } else if (this.startTime) {
+                                                                            this.timeRange = this.format12h(this.startTime);
+                                                                        }
+                                                                    }
+                                                                }">
+                                                                    <div class="fgrid2">
+                                                                        <div>
+                                                                            <label class="flbl"><i class="far fa-clock" style="color:#0E5393;"></i> Time Picker <span style="font-size:9px;color:var(--muted);font-weight:600;">(Start & End)</span></label>
+                                                                            <div style="display:flex;align-items:center;gap:6px;">
+                                                                                <input type="time" class="finput" style="flex:1;" x-model="startTime" @change="updateRange()" title="Start Time">
+                                                                                <span style="font-size:10px;font-weight:800;color:var(--muted);">TO</span>
+                                                                                <input type="time" class="finput" style="flex:1;" x-model="endTime" @change="updateRange()" title="End Time">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label class="flbl">Time Range Display</label>
+                                                                            <input type="text" name="time_range" x-model="timeRange" class="finput" placeholder="e.g. 8:00 AM – 12:00 PM">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="fgrp">
+                                                                    <label class="flbl">Location</label>
+                                                                    <input type="text" name="location" class="finput" value="{{ $evt->location }}">
                                                                 </div>
                                                                 <div class="fgrp"><label class="flbl">Tag</label><select name="tag" class="finput">
                                                                         <option {{ $evt->tag == 'Community' ? 'selected' : '' }}>Community</option>
@@ -5005,11 +5040,46 @@
                                     @change="const d=new Date($event.target.value+'T00:00:00');addDayLabel=['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()]">
                             </div>
                         </div>
-                        <div class="fgrid2 fgrp">
-                            <div><label class="flbl">Time Range</label><input type="text" name="time_range"
-                                    class="finput" placeholder="e.g. 6:00 AM – 9:00 AM"></div>
-                            <div><label class="flbl">Location</label><input type="text" name="location" class="finput"
-                                    placeholder="e.g. Brgy. Hall"></div>
+                        <div class="fgrp" x-data="{
+                            startTime: '',
+                            endTime: '',
+                            timeRange: '',
+                            format12h(timeStr) {
+                                if (!timeStr) return '';
+                                const parts = timeStr.split(':');
+                                let h = parseInt(parts[0], 10);
+                                const m = parts[1] || '00';
+                                const ampm = h >= 12 ? 'PM' : 'AM';
+                                h = h % 12;
+                                h = h ? h : 12;
+                                return h + ':' + m + ' ' + ampm;
+                            },
+                            updateRange() {
+                                if (this.startTime && this.endTime) {
+                                    this.timeRange = this.format12h(this.startTime) + ' – ' + this.format12h(this.endTime);
+                                } else if (this.startTime) {
+                                    this.timeRange = this.format12h(this.startTime);
+                                }
+                            }
+                        }">
+                            <div class="fgrid2">
+                                <div>
+                                    <label class="flbl"><i class="far fa-clock" style="color:#0E5393;"></i> Time Picker <span style="font-size:9px;color:var(--muted);font-weight:600;">(Start & End)</span></label>
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <input type="time" class="finput" style="flex:1;" x-model="startTime" @change="updateRange()" title="Start Time">
+                                        <span style="font-size:10px;font-weight:800;color:var(--muted);">TO</span>
+                                        <input type="time" class="finput" style="flex:1;" x-model="endTime" @change="updateRange()" title="End Time">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="flbl">Time Range Display</label>
+                                    <input type="text" name="time_range" x-model="timeRange" class="finput" placeholder="e.g. 8:00 AM – 12:00 PM">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fgrp">
+                            <label class="flbl">Location</label>
+                            <input type="text" name="location" class="finput" placeholder="e.g. Brgy. Hall">
                         </div>
                         <div class="fgrp"><label class="flbl">Tag</label><select name="tag" class="finput"
                                 style="appearance:none;cursor:pointer;">

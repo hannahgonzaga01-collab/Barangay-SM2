@@ -103,11 +103,11 @@ class AdminController extends Controller
         $allPets = Pet::with('resident')->where('is_archived', false)->latest()->get()->values();
 
         // ── Residents Basic Data For Global Filter ──
-        $resList = Resident::select('id', 'first_name', 'last_name', 'middle_name', 'birthday')->get()->map(function ($r) {
+        $resList = $activeResidents->map(function ($r) {
             return [
                 'id'        => $r->id,
                 'name'      => trim($r->first_name . ' ' . $r->last_name),
-                'bmonth'    => $r->birthday ? Carbon::parse($r->birthday)->month : null,
+                'bmonth'    => $r->bmonth,
                 'bdate_raw' => $r->birthday
             ];
         })->toArray();

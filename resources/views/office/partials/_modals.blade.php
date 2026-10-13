@@ -1374,8 +1374,9 @@ $docConfigs = [
                 <button @click="openAddModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
             </div>
             <form action="{{ route('office.store') }}" method="POST" enctype="multipart/form-data" style="padding-top:14px;" 
-                  x-data="{ isHouseholdHead: false, householdId: '', familyMembers: [] }"
-                  x-init="$watch('isHouseholdHead', val => { if(val && !householdId) householdId = getNextHouseholdId() })">
+                  x-data="{ isHouseholdHead: false, householdId: '', familyMembers: [], isSubmitting: false }"
+                  x-init="$watch('isHouseholdHead', val => { if(val && !householdId) householdId = getNextHouseholdId() })"
+                  @submit="if(isSubmitting){ $event.preventDefault(); return false; } isSubmitting = true;">
                 @csrf
                 <div style="display:flex;justify-content:center;margin-bottom:18px;" x-data="{ isDragging: false }">
                     <label style="cursor:pointer;">
@@ -1487,7 +1488,10 @@ $docConfigs = [
                 </div>
                 <div style="display:flex;justify-content:flex-end;gap:9px;padding-top:4px;">
                     <button type="button" @click="openAddModal=false" class="btn-plain btn-edit">Cancel</button>
-                    <button type="submit" class="btn-grad"><i class="fas fa-user-plus"></i> Save Resident</button>
+                    <button type="submit" class="btn-grad" :disabled="isSubmitting" :style="isSubmitting ? 'opacity:0.6;cursor:not-allowed;' : ''">
+                        <i :class="isSubmitting ? 'fas fa-spinner fa-spin' : 'fas fa-user-plus'"></i> 
+                        <span x-text="isSubmitting ? 'Saving Resident...' : 'Save Resident'"></span>
+                    </button>
                 </div>
             </form>
         </div>

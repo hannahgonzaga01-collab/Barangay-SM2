@@ -4877,13 +4877,7 @@ html, body {
 
                 {{-- MY FAMILY --}}
                 @php 
-                    $userResId = $authUser?->resident?->id 
-                        ?? \App\Models\Resident::where('user_id', $authUser?->id ?? -1)->value('id') 
-                        ?? ($authUser?->resident_code ? \App\Models\Resident::where('resident_code', $authUser->resident_code)->value('id') : null)
-                        ?? -1;
-                    $myFamily = \App\Models\Resident::where('household_head_id', $userResId)
-                        ->where('id', '!=', $userResId)
-                        ->get(); 
+                    $myFamily = $myFamily ?? collect();
                 @endphp
                 <div>
                     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:12px;margin-bottom:14px;">

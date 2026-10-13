@@ -41,7 +41,7 @@ class OfficeController extends Controller
             });
         }
 
-        $users = $query->whereNull('archived_at')->latest()->get();
+        $users = $query->whereNull('archived_at')->with('user.digitalId')->latest()->get();
         $archivedResidentsCount = Resident::whereNotNull('archived_at')->count();
         $archivedResidents = Resident::whereNotNull('archived_at')->latest()->limit(50)->get();
         $pets = Pet::with('resident')->where('is_archived', false)->get();
@@ -49,51 +49,123 @@ class OfficeController extends Controller
         $archivedPets = Pet::with('resident')->where('is_archived', true)->latest()->get();
         $archivedPetsCount = $archivedPets->count();
 
-        $currentMonth = now()->month;
-        $birthdayThisMonth = Resident::whereMonth('birthday', $currentMonth)->select('id')->get();
-        $seniors = Resident::where(function($q) {
-            $q->where('is_senior', true)
-              ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
-              ->orWhere('age', '>=', 60);
-        })->select('id')->get();
-        $pwds = Resident::where('is_pwd', true)->select('id')->get();
-        $soloParents = Resident::where('is_single_parent', true)->select('id')->get();
-        $nonVoters = Resident::where('is_non_voter', true)->select('id')->get();
-        $bedridden = Resident::where('is_bedridden', true)->select('id')->get();
-        $thirdGens = \Illuminate\Support\Facades\Schema::hasColumn('residents', 'is_third_gen')
-            ? Resident::where('is_third_gen', true)->select('id')->get()
-            : collect();
-        $households = Resident::where('is_household_head', true)->select('id')->get();
+        // Demographic & metric counts cached for 60 seconds
+        $stats = \Illuminate\Support\Facades\Cache::remember('office_demographic_counts', 60, function() {
+            $currentMonth = now()->month;
+            return [
+                'birthdayThisMonth' => Resident::whereMonth('birthday', $currentMonth)->count(),
+                'seniors' => Resident::where(function($q) {
+                    $q->where('is_senior', true)
+                      ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
+                      ->orWhere('age', '>=', 60);
+                })->count(),
+                'pwds' => Resident::where('is_pwd', true)->count(),
+                'soloParents' => Resident::where('is_single_parent', true)->count(),
+                'nonVoters' => Resident::where('is_non_voter', true)->count(),
+                'bedridden' => Resident::where('is_bedridden', true)->count(),
+                'households' => Resident::where('is_household_head', true)->count(),
+                'digitalIdIssued' => DigitalId::where('status', 'generated')->count(),
+            ];
+        });
+
+        $birthdayThisMonth = collect()->pad($stats['birthdayThisMonth'], null);
+        $seniors           = collect()->pad($stats['seniors'], null);
+        $pwds              = collect()->pad($stats['pwds'], null);
+        $soloParents       = collect()->pad($stats['soloParents'], null);
+        $nonVoters         = collect()->pad($stats['nonVoters'], null);
+        $bedridden         = collect()->pad($stats['bedridden'], null);
+        $households        = collect()->pad($stats['households'], null);
+        $thirdGens         = collect();
+        $digitalIdIssuedCount = $stats['digitalIdIssued'];
+
         $kdbmCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('KDBM', $u->memberships))->count();
         $fourPsCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('4Ps', $u->memberships))->count();
         $officialCount = $users->filter(fn($u) => is_array($u->memberships) && in_array('Barangay Official', $u->memberships))->count();
         $anyMembershipCount = $users->filter(fn($u) => is_array($u->memberships) && count($u->memberships) > 0)->count();
 
-        $digitalIdRequests = DigitalId::with('user')
+        // Pre-fetch any users by resident_code for residents that don't have user_id
+        $residentCodes = $users->pluck('resident_code')->filter()->unique();
+        $usersByCode = $residentCodes->isNotEmpty()
+            ? \App\Models\User::whereIn('resident_code', $residentCodes)->with('digitalId')->get()->keyBy('resident_code')
+            : collect();
+
+        // Pre-format all residents for Alpine to eliminate 500+ Blade N+1 queries
+        $allResidents = $users->map(function($u) use ($usersByCode) {
+            $userObj = $u->user ?: ($usersByCode->get($u->resident_code));
+            $voterIdRaw = $userObj?->voter_id_photo ?? $u->voter_id_photo ?? null;
+            $voterIdUrl = $voterIdRaw ? asset('storage/' . ltrim($voterIdRaw, '/')) : null;
+            return [
+                'id'               => $u->id,
+                'first_name'       => $u->first_name,
+                'last_name'        => $u->last_name,
+                'name'             => $u->first_name . ' ' . $u->last_name,
+                'code'             => $u->resident_code ?? 'NO-CODE',
+                'resident_code'    => $u->resident_code ?? 'NO-CODE',
+                'address'          => $u->address ?? '',
+                'birthday'         => $u->birthday ?? '',
+                'gender'           => $u->gender ?? '',
+                'civil_status'     => $u->civil_status ?? '',
+                'spouse_name'      => $u->spouse_name ?? '',
+                'contact'          => $u->contact_number ?? '',
+                'birthplace'       => $u->birthplace ?? '',
+                'occupation'       => $u->occupation ?? '',
+                'is_voter'         => (bool)$u->is_voter,
+                'is_non_voter'     => (bool)$u->is_non_voter,
+                'is_senior'        => (bool)$u->is_senior,
+                'is_pwd'           => (bool)$u->is_pwd,
+                'is_single_parent' => (bool)$u->is_single_parent,
+                'is_student'       => (bool)$u->is_student,
+                'is_bedridden'     => (bool)$u->is_bedridden,
+                'is_third_gen'     => (bool)$u->is_third_gen,
+                'is_household_head'=> (bool)$u->is_household_head,
+                'household_id'     => $u->household_id,
+                'household_head_id'=> $u->household_head_id,
+                'relationship'     => $u->relationship ?? 'Member',
+                'verification_status'=> $u->verification_status ?? 'verified',
+                'memberships'      => is_array($u->memberships) ? $u->memberships : (is_string($u->memberships) ? json_decode($u->memberships, true) : []),
+                'email'            => $userObj ? $userObj->email : '',
+                'photo'            => $u->photo ? asset('storage/' . $u->photo) : null,
+                'voter_id_photo'   => $voterIdUrl,
+                'id_type'          => $u->id_type ?? $userObj?->id_type ?? 'Government Valid ID',
+                'voter_status'     => $u->voter_status ?? $userObj?->voter_status ?? 'N/A',
+                'digital_id_generated' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? true : false,
+                'digital_id_number' => ($userObj && $userObj->digitalId && $userObj->digitalId->status === 'generated') ? $userObj->digitalId->id_number : null,
+                'emergency_contact_name' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person ?? $userObj->digitalId->emergency_contact_name ?? '') : '',
+                'emergency_contact_number' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person_number ?? $userObj->digitalId->emergency_contact_number ?? '') : '',
+                'emergency_contact_address' => ($userObj && $userObj->digitalId) ? ($userObj->digitalId->contact_person_address ?? '') : '',
+            ];
+        });
+
+        // Pre-fetch digital ID requests without N+1 queries
+        $pendingDigitalIds = DigitalId::with('user')
             ->where('status', 'pending')
             ->latest()
-            ->get()
-            ->map(function ($idReq) {
-                // If user relation loaded but has no name, try to find resident by resident_code
-                if ($idReq->user && !trim(($idReq->user->first_name ?? '') . ($idReq->user->last_name ?? ''))) {
-                    if ($idReq->user->resident_code) {
-                        $resident = \App\Models\Resident::where('resident_code', $idReq->user->resident_code)->first();
-                        if ($resident) {
-                            $idReq->user->first_name = $resident->first_name;
-                            $idReq->user->last_name = $resident->last_name;
-                        }
-                    }
-                    // Fallback: use the 'name' column if set
-                    if (!trim(($idReq->user->first_name ?? '') . ($idReq->user->last_name ?? ''))) {
-                        $parts = explode(' ', trim($idReq->user->name ?? ''));
-                        $idReq->user->first_name = $parts[0] ?? '';
-                        $idReq->user->last_name = end($parts) ?: '';
-                    }
+            ->get();
+
+        $codesNeedingResident = $pendingDigitalIds
+            ->filter(fn($idReq) => $idReq->user && !trim(($idReq->user->first_name ?? '') . ($idReq->user->last_name ?? '')) && !empty($idReq->user->resident_code))
+            ->pluck('user.resident_code')
+            ->unique();
+
+        $residentsByCode = $codesNeedingResident->isNotEmpty()
+            ? Resident::whereIn('resident_code', $codesNeedingResident)->get()->keyBy('resident_code')
+            : collect();
+
+        $digitalIdRequests = $pendingDigitalIds->map(function ($idReq) use ($residentsByCode) {
+            if ($idReq->user && !trim(($idReq->user->first_name ?? '') . ($idReq->user->last_name ?? ''))) {
+                if ($idReq->user->resident_code && isset($residentsByCode[$idReq->user->resident_code])) {
+                    $resident = $residentsByCode[$idReq->user->resident_code];
+                    $idReq->user->first_name = $resident->first_name;
+                    $idReq->user->last_name  = $resident->last_name;
                 }
-                return $idReq;
-            });
-
-
+                if (!trim(($idReq->user->first_name ?? '') . ($idReq->user->last_name ?? ''))) {
+                    $parts = explode(' ', trim($idReq->user->name ?? ''));
+                    $idReq->user->first_name = $parts[0] ?? '';
+                    $idReq->user->last_name  = end($parts) ?: '';
+                }
+            }
+            return $idReq;
+        });
 
         $documentRequests = DocumentRequest::with(['user'])
             ->latest()
@@ -116,7 +188,7 @@ class OfficeController extends Controller
         $pendingResidentsCount = $pendingResidents->count();
         
         // Smart Masterlist Verification Requests (Pending account registrations)
-        $pendingVerifications = User::where('role', 'resident')
+        $pendingUsers = User::where('role', 'resident')
             ->where(function ($q) {
                 $q->where('status', 'pending_verification')
                   ->orWhere('status', 'pending')
@@ -126,22 +198,29 @@ class OfficeController extends Controller
             })
             ->where('status', '!=', 'declined')
             ->latest()
-            ->get()
-            ->map(function ($u) {
-                $match = \App\Services\ResidentMatcher::match(
-                    $u->first_name ?: $u->name,
-                    $u->last_name ?: '',
-                    $u->birthday ? $u->birthday->format('Y-m-d') : null
-                );
-                $u->matched_resident = $match['matched_resident'];
-                $u->confidence_score = $match['confidence_score'];
-                $u->confidence_level = $match['confidence_level'];
-                $u->move_in_request = \App\Models\DocumentRequest::where('user_id', $u->id)
-                    ->whereIn('document_type', ['movein', 'move_in', 'move-in', 'Move In', 'Move-In', 'Certification of Move-In', 'Certificate of Move-In'])
-                    ->latest()
-                    ->first();
-                return $u;
-            });
+            ->get();
+
+        $pendingUserIds = $pendingUsers->pluck('id');
+        $moveInRequestsByUser = $pendingUserIds->isNotEmpty()
+            ? \App\Models\DocumentRequest::whereIn('user_id', $pendingUserIds)
+                ->whereIn('document_type', ['movein', 'move_in', 'move-in', 'Move In', 'Move-In', 'Certification of Move-In', 'Certificate of Move-In'])
+                ->latest()
+                ->get()
+                ->groupBy('user_id')
+            : collect();
+
+        $pendingVerifications = $pendingUsers->map(function ($u) use ($moveInRequestsByUser) {
+            $match = \App\Services\ResidentMatcher::match(
+                $u->first_name ?: $u->name,
+                $u->last_name ?: '',
+                $u->birthday ? $u->birthday->format('Y-m-d') : null
+            );
+            $u->matched_resident = $match['matched_resident'];
+            $u->confidence_score = $match['confidence_score'];
+            $u->confidence_level = $match['confidence_level'];
+            $u->move_in_request  = $moveInRequestsByUser->get($u->id)?->first();
+            return $u;
+        });
         $pendingVerificationsCount = $pendingVerifications->count();
 
         $totalPending = $pendingDocCount + $pendingIdCount + $pendingVotersCount + $pendingResidentsCount + $pendingVerificationsCount;
@@ -151,6 +230,7 @@ class OfficeController extends Controller
 
         return view('office.index', compact(
             'users',
+            'allResidents',
             'archivedResidents',
             'archivedResidentsCount',
             'pets',
@@ -165,6 +245,7 @@ class OfficeController extends Controller
             'bedridden',
             'thirdGens',
             'households',
+            'digitalIdIssuedCount',
             'kdbmCount',
             'fourPsCount',
             'officialCount',
@@ -961,10 +1042,23 @@ class OfficeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'photo' => 'nullable|image|max:5120',
         ], [
             'photo.max' => 'Ang larawan ng residente ay hindi dapat lumagpas sa 5MB.',
         ]);
+
+        // Duplicate submission prevention (debounce protection against double-clicks)
+        $recentDuplicate = Resident::where('first_name', $request->first_name)
+            ->where('last_name', $request->last_name)
+            ->where('birthday', $request->birthday)
+            ->where('created_at', '>=', now()->subSeconds(30))
+            ->first();
+
+        if ($recentDuplicate) {
+            return redirect()->route('office.index')->with('success', 'Nai-save na ang residente!');
+        }
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
