@@ -1891,20 +1891,39 @@ $docConfigs = [
 
                 <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:14px;align-items:center;">
                     <button type="button" @click="openDigitalId=false; resetDigitalIdSelection();" class="btn-plain btn-edit">Cancel</button>
-                    <form :action="`/office/digital-id/generate-manual/${digitalIdResident.id}`" method="POST" style="margin:0;"
-                          @submit.prevent="
-                              if (!ecName || !ecName.trim()) { alert('Please enter the Contact Person Name before generating.'); return false; }
-                              if (!ecAddress || !ecAddress.trim()) { alert('Please enter the Contact Person Address before generating.'); return false; }
-                              if (!ecNum || !ecNum.trim() || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) { alert('Please enter a valid 11-digit Contact Number (e.g. 09123456789) before generating.'); return false; }
-                              $el.submit();
+                    <form :action="'/office/digital-id/generate-manual/' + (digitalIdResident ? digitalIdResident.id : '')"
+                          method="POST"
+                          style="margin:0;"
+                          @submit="
+                              if (!digitalIdResident || !digitalIdResident.id) {
+                                  $event.preventDefault();
+                                  alert('Please select a resident first.');
+                                  return false;
+                              }
+                              if (!ecName || !ecName.trim()) {
+                                  $event.preventDefault();
+                                  alert('Please enter the Contact Person Name before generating.');
+                                  return false;
+                              }
+                              if (!ecAddress || !ecAddress.trim()) {
+                                  $event.preventDefault();
+                                  alert('Please enter the Contact Person Address before generating.');
+                                  return false;
+                              }
+                              if (!ecNum || !ecNum.trim() || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) {
+                                  $event.preventDefault();
+                                  alert('Please enter a valid 11-digit Contact Number (e.g. 09123456789) before generating.');
+                                  return false;
+                              }
                           ">
                         @csrf
+                        <input type="hidden" name="resident_id" :value="digitalIdResident ? digitalIdResident.id : ''">
                         <input type="hidden" name="ecName" :value="ecName">
                         <input type="hidden" name="ecAddress" :value="ecAddress">
                         <input type="hidden" name="ecNum" :value="ecNum">
                         <button type="submit" class="btn-plain btn-green"
-                                :disabled="!ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
-                                :style="(!ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;padding:10px 17px;font-size:11px;font-weight:900;' : 'padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;'">
+                                :disabled="!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
+                                :style="(!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;padding:10px 17px;font-size:11px;font-weight:900;' : 'padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;'">
                             <i class="fas fa-id-badge"></i> Generate ID
                         </button>
                     </form>

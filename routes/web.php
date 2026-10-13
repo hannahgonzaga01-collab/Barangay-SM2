@@ -175,7 +175,7 @@ Route::middleware(['auth', 'verified', 'role:admin,office,staff,barangay_officia
 
     // Office Digital ID
     Route::post('/office/digital-id/{id}/generate', [OfficeController::class, 'generateDigitalId'])->name('office.digital.id.generate');
-    Route::post('/office/digital-id/generate-manual/{resident_id}', [OfficeController::class, 'generateManualDigitalId'])->name('office.digital.id.generate-manual');
+    Route::post('/office/digital-id/generate-manual/{resident_id?}', [OfficeController::class, 'generateManualDigitalId'])->name('office.digital.id.generate-manual');
 
     // Office Voter Verification & Import
     Route::post('/office/import', [OfficeController::class, 'import'])->name('office.import');

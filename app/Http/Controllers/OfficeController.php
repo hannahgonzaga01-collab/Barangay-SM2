@@ -336,7 +336,10 @@ class OfficeController extends Controller
 
     public function generateDigitalId(Request $request, $id)
     {
-        $digitalId = DigitalId::findOrFail($id);
+        $digitalId = DigitalId::find($id);
+        if (!$digitalId) {
+            return redirect()->route('office.index')->with('error', 'Digital ID request not found.');
+        }
 
         // Format: BSM2-YY-MM-XXX (e.g., BSM2-26-11-008)
         $sequence = str_pad($digitalId->id, 3, '0', STR_PAD_LEFT);
@@ -347,7 +350,7 @@ class OfficeController extends Controller
             'id_number' => $idNumber,
         ]);
 
-        return redirect()->back()->with('success', 'Digital ID generated: ' . $idNumber);
+        return redirect()->route('office.index')->with('success', 'Digital ID generated: ' . $idNumber);
     }
 
     public function approveVoter(Request $request, $id)
@@ -437,8 +440,14 @@ class OfficeController extends Controller
         return redirect()->back()->with('success', 'Voter verification declined and email sent.');
     }
 
-    public function generateManualDigitalId(Request $request, $resident_id)
+    public function generateManualDigitalId(Request $request, $resident_id = null)
     {
+        $id = $resident_id ?: $request->input('resident_id');
+
+        if (!$id) {
+            return redirect()->route('office.index')->with('error', 'Please select a resident to generate a Digital ID.');
+        }
+
         $request->validate([
             'ecName' => 'required|string|max:255',
             'ecAddress' => 'required|string|max:255',
@@ -450,7 +459,24 @@ class OfficeController extends Controller
             'ecNum.regex' => 'Emergency Contact Number must be an 11-digit mobile number starting with 09 (e.g. 09123456789).',
         ]);
 
-        $resident = Resident::findOrFail($resident_id);
+        $resident = Resident::where('id', $id)
+            ->orWhere('resident_code', $id)
+            ->first();
+
+        if (!$resident) {
+            $user = User::where('id', $id)
+                ->orWhere('resident_code', $id)
+                ->first();
+            if ($user && $user->resident) {
+                $resident = $user->resident;
+            } elseif ($user) {
+                $resident = Resident::where('user_id', $user->id)->first();
+            }
+        }
+
+        if (!$resident) {
+            return redirect()->route('office.index')->with('error', 'Resident record not found.');
+        }
 
         if (!$resident->user_id) {
             $user = User::where('name', $resident->first_name . ' ' . $resident->last_name)->first();
@@ -503,7 +529,7 @@ class OfficeController extends Controller
             $idNumber = $digitalId->id_number;
         }
 
-        return redirect()->back()->with('success', 'Digital ID successfully generated: ' . $idNumber);
+        return redirect()->route('office.index')->with('success', 'Digital ID successfully generated: ' . $idNumber);
     }
 
     public function updateDocumentStatus(Request $request, $id)
