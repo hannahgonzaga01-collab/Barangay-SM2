@@ -96,7 +96,7 @@
                                 {{-- Digital ID --}}
                                 <td data-label="Digital ID" style="text-align:center;">
                                     <template x-if="r.digital_id_generated">
-                                        <button type="button" @click.stop="selectDigitalIdResident(r); openDigitalId=true;"
+                                        <button type="button" @click.stop="openViewDigitalId(r)"
                                                 class="btn-outline" style="font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:99px;border:1.5px solid var(--brand);color:var(--brand);background:#fff;display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
                                             <i class="fas fa-id-card"></i> View ID
                                         </button>

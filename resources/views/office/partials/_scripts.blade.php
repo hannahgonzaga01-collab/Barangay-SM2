@@ -72,6 +72,8 @@ function officePortal() {
         editUser: {},
         selectedUser: {},
         openDigitalId: false,
+        digitalIdViewMode: false,
+        showEditEC: false,
         digitalIdSearch: '',
         digitalIdResident: null,
         digitalIdOpen: false,
@@ -203,6 +205,8 @@ function officePortal() {
             this.ecNum = '';
             this.ecAddress = '';
             this.digitalIdCardView = 'front';
+            this.digitalIdViewMode = false;
+            this.showEditEC = true;
         },
         onDigitalIdSearchInput() {
             if (this.digitalIdResident) {
@@ -215,6 +219,18 @@ function officePortal() {
                     this.ecAddress = '';
                 }
             }
+        },
+        openViewDigitalId(r) {
+            this.selectDigitalIdResident(r);
+            this.digitalIdViewMode = true;
+            this.showEditEC = false;
+            this.openDigitalId = true;
+        },
+        openGenerateDigitalId() {
+            this.resetDigitalIdSelection();
+            this.digitalIdViewMode = false;
+            this.showEditEC = true;
+            this.openDigitalId = true;
         },
         selectDigitalIdResident(r) {
             if (!r) return;
@@ -233,6 +249,7 @@ function officePortal() {
             this.ecName = r.emergency_contact_name || '';
             this.ecNum = r.emergency_contact_number || '';
             this.ecAddress = r.emergency_contact_address || '';
+            this.showEditEC = !r.digital_id_generated;
             this.$nextTick(() => {
                 generateQRCode(this.digitalIdResident.id, this.digitalIdResident.code);
             });
@@ -445,9 +462,9 @@ function generateQRCode(residentId,residentCode){
 }
 function printDigitalId(resident){
     if(!resident) return;
-    const ecName = (document.querySelector('input[x-model="ecName"]')?.value || '').trim();
-    const ecAddress = (document.querySelector('input[x-model="ecAddress"]')?.value || '').trim();
-    const ecNum = (document.querySelector('input[x-model="ecNum"]')?.value || '').trim();
+    const ecName = (document.querySelector('input[x-model="ecName"]')?.value || resident.emergency_contact_name || '').trim();
+    const ecAddress = (document.querySelector('input[x-model="ecAddress"]')?.value || resident.emergency_contact_address || '').trim();
+    const ecNum = (document.querySelector('input[x-model="ecNum"]')?.value || resident.emergency_contact_number || '').trim();
     if (!ecName || !ecAddress || !ecNum || ecNum.length !== 11 || !ecNum.startsWith('09')) {
         alert('Cannot print Digital ID. Please provide all required Emergency Contact details (Contact Person Name, Address, and 11-digit Number starting with 09) first.');
         return;

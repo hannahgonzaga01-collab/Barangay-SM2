@@ -1641,12 +1641,40 @@ $docConfigs = [
     <div class="modal-box" style="max-width:620px;" @click.away="openDigitalId=false">
         <div class="modal-in">
             <div class="modal-hd">
-                <div class="modal-ttl"><div class="modal-ttl-ico"><i class="fas fa-id-badge"></i></div><div><div>Digital ID Generator</div><div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">Barangay San Miguel II • Residence ID Card</div></div></div>
+                <div class="modal-ttl">
+                    <div class="modal-ttl-ico"><i :class="digitalIdViewMode ? 'fas fa-id-card' : 'fas fa-id-badge'"></i></div>
+                    <div>
+                        <div x-text="digitalIdViewMode ? 'Resident Digital ID' : 'Digital ID Generator'"></div>
+                        <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;"
+                             x-text="digitalIdViewMode ? (digitalIdResident ? digitalIdResident.name + ' • Official Residence ID Card' : 'Official Residence ID Card') : 'Barangay San Miguel II • Residence ID Card'"></div>
+                    </div>
+                </div>
                 <button @click="openDigitalId=false; resetDigitalIdSelection();" class="modal-close"><i class="fas fa-times-circle"></i></button>
             </div>
 
-            {{-- Resident Search & Selection Bar --}}
-            <div class="section-blk">
+            {{-- Clean View Badge for View Mode --}}
+            <template x-if="digitalIdViewMode && digitalIdResident">
+                <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:9px 13px;margin-bottom:12px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <img :src="digitalIdResident.photo || 'https://ui-avatars.com/api/?name='+encodeURIComponent(digitalIdResident.name)+'&background=0E5393&color=fff&bold=true&rounded=true'"
+                             style="width:34px;height:34px;border-radius:8px;object-fit:cover;border:1.5px solid #cbd5e1;flex-shrink:0;">
+                        <div>
+                            <div style="font-size:12.5px;font-weight:900;color:var(--text);" x-text="digitalIdResident.name"></div>
+                            <div style="font-size:9.5px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px;margin-top:1px;">
+                                <span>ID: <b style="color:#0E5393;" x-text="digitalIdResident.digital_id_number || digitalIdResident.code"></b></span>
+                                <span>•</span>
+                                <span style="color:#15803d;font-weight:800;"><i class="fas fa-check-circle"></i> Generated & Active</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" @click="showEditEC = !showEditEC" class="btn-plain btn-edit" style="font-size:9.5px;padding:4px 9px;display:flex;align-items:center;gap:4px;">
+                        <i class="fas fa-user-edit"></i> <span x-text="showEditEC ? 'Hide Contacts' : 'Edit Contacts'"></span>
+                    </button>
+                </div>
+            </template>
+
+            {{-- Resident Search & Selection Bar (Only in Generator Mode) --}}
+            <div class="section-blk" x-show="!digitalIdViewMode">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                     <div class="section-blk-ttl" style="margin-bottom:0;"><i class="fas fa-search"></i> Select Resident</div>
                     <template x-if="digitalIdResident">
@@ -1733,8 +1761,8 @@ $docConfigs = [
 
             {{-- 2. SELECTED RESIDENT DIGITAL ID VIEWER & ACTIONS --}}
             <div x-show="digitalIdResident" x-transition>
-                {{-- Emergency contact fields --}}
-                <div class="section-blk">
+                {{-- Emergency contact fields (Only in generator mode or when editing contacts) --}}
+                <div class="section-blk" x-show="!digitalIdViewMode || showEditEC" x-transition>
                     <div class="section-blk-ttl" style="display:flex;align-items:center;justify-content:space-between;">
                         <span><i class="fas fa-phone"></i> In Case of Emergency (Printed on Back of ID)</span>
                         <span style="font-size:9.5px;color:#dc2626;font-weight:700;">* Required to generate or print</span>
@@ -1894,43 +1922,45 @@ $docConfigs = [
                 </div>
 
                 <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:14px;align-items:center;">
-                    <button type="button" @click="openDigitalId=false; resetDigitalIdSelection();" class="btn-plain btn-edit">Cancel</button>
-                    <form :action="'/office/digital-id/generate-manual/' + (digitalIdResident ? digitalIdResident.id : '')"
-                          method="POST"
-                          style="margin:0;"
-                          @submit="
-                              if (!digitalIdResident || !digitalIdResident.id) {
-                                  $event.preventDefault();
-                                  alert('Please select a resident first.');
-                                  return false;
-                              }
-                              if (!ecName || !ecName.trim()) {
-                                  $event.preventDefault();
-                                  alert('Please enter the Contact Person Name before generating.');
-                                  return false;
-                              }
-                              if (!ecAddress || !ecAddress.trim()) {
-                                  $event.preventDefault();
-                                  alert('Please enter the Contact Person Address before generating.');
-                                  return false;
-                              }
-                              if (!ecNum || !ecNum.trim() || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) {
-                                  $event.preventDefault();
-                                  alert('Please enter a valid 11-digit Contact Number (e.g. 09123456789) before generating.');
-                                  return false;
-                              }
-                          ">
-                        @csrf
-                        <input type="hidden" name="resident_id" :value="digitalIdResident ? digitalIdResident.id : ''">
-                        <input type="hidden" name="ecName" :value="ecName">
-                        <input type="hidden" name="ecAddress" :value="ecAddress">
-                        <input type="hidden" name="ecNum" :value="ecNum">
-                        <button type="submit" class="btn-plain btn-green"
-                                :disabled="!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
-                                :style="(!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;padding:10px 17px;font-size:11px;font-weight:900;' : 'padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;'">
-                            <i class="fas fa-id-badge"></i> Generate ID
-                        </button>
-                    </form>
+                    <button type="button" @click="openDigitalId=false; resetDigitalIdSelection();" class="btn-plain btn-edit">Close</button>
+                    <div x-show="!digitalIdViewMode || showEditEC || (digitalIdResident && !digitalIdResident.digital_id_generated)">
+                        <form :action="'/office/digital-id/generate-manual/' + (digitalIdResident ? digitalIdResident.id : '')"
+                              method="POST"
+                              style="margin:0;"
+                              @submit="
+                                  if (!digitalIdResident || !digitalIdResident.id) {
+                                      $event.preventDefault();
+                                      alert('Please select a resident first.');
+                                      return false;
+                                  }
+                                  if (!ecName || !ecName.trim()) {
+                                      $event.preventDefault();
+                                      alert('Please enter the Contact Person Name before generating.');
+                                      return false;
+                                  }
+                                  if (!ecAddress || !ecAddress.trim()) {
+                                      $event.preventDefault();
+                                      alert('Please enter the Contact Person Address before generating.');
+                                      return false;
+                                  }
+                                  if (!ecNum || !ecNum.trim() || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) {
+                                      $event.preventDefault();
+                                      alert('Please enter a valid 11-digit Contact Number (e.g. 09123456789) before generating.');
+                                      return false;
+                                  }
+                              ">
+                            @csrf
+                            <input type="hidden" name="resident_id" :value="digitalIdResident ? digitalIdResident.id : ''">
+                            <input type="hidden" name="ecName" :value="ecName">
+                            <input type="hidden" name="ecAddress" :value="ecAddress">
+                            <input type="hidden" name="ecNum" :value="ecNum">
+                            <button type="submit" class="btn-plain btn-green"
+                                    :disabled="!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
+                                    :style="(!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;padding:10px 17px;font-size:11px;font-weight:900;' : 'padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;'">
+                                <i class="fas fa-id-badge"></i> <span x-text="digitalIdResident && digitalIdResident.digital_id_generated ? 'Update & Re-save ID' : 'Generate ID'"></span>
+                            </button>
+                        </form>
+                    </div>
                     <button type="button" @click="
                             if (!ecName || !ecName.trim()) { alert('Please enter the Contact Person Name before printing.'); return; }
                             if (!ecAddress || !ecAddress.trim()) { alert('Please enter the Contact Person Address before printing.'); return; }
