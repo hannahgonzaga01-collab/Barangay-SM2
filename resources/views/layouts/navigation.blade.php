@@ -350,11 +350,13 @@
 
                             <div style="height:1px;background:#f1f5f9;margin:4px 0;"></div>
 
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form method="POST" action="{{ route('logout') }}" x-data="{ isLoggingOut: false }" @submit="isLoggingOut = true">
                                 @csrf
-                                <button type="submit"
-                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition text-left">
-                                    <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
+                                <button type="submit" :disabled="isLoggingOut"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition text-left"
+                                        :style="isLoggingOut ? 'opacity:0.75;cursor:not-allowed;' : ''">
+                                    <span x-show="!isLoggingOut" class="flex items-center gap-3"><i class="fas fa-sign-out-alt w-4 text-center"></i> Logout</span>
+                                    <span x-show="isLoggingOut" style="display:none;" class="flex items-center gap-3"><i class="fas fa-spinner fa-spin w-4 text-center"></i> Logging out...</span>
                                 </button>
                             </form>
                         </div>
@@ -454,10 +456,13 @@
                 </a>
             @endif
             <div style="height:1px;background:rgba(255,255,255,.1);margin:6px 0;"></div>
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('logout') }}" x-data="{ isLoggingOut: false }" @submit="isLoggingOut = true">
                 @csrf
-                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase text-red-300 hover:bg-red-900/30 hover:text-red-200 transition text-left">
-                    <i class="fas fa-sign-out-alt" style="width:16px;text-align:center;"></i> Logout
+                <button type="submit" :disabled="isLoggingOut"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase text-red-300 hover:bg-red-900/30 hover:text-red-200 transition text-left"
+                        :style="isLoggingOut ? 'opacity:0.75;cursor:not-allowed;' : ''">
+                    <span x-show="!isLoggingOut" class="flex items-center gap-3"><i class="fas fa-sign-out-alt" style="width:16px;text-align:center;"></i> Logout</span>
+                    <span x-show="isLoggingOut" style="display:none;" class="flex items-center gap-3"><i class="fas fa-spinner fa-spin" style="width:16px;text-align:center;"></i> Logging out...</span>
                 </button>
             </form>
         </div>

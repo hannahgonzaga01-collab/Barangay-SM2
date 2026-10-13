@@ -22,47 +22,54 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        Event::where('is_active', true)
-            ->where('frequency', 'REGEXP', '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
-            ->whereDate('frequency', '<', Carbon::now()->toDateString())
-            ->update(['is_active' => false, 'archived_at' => Carbon::now()]);
+        if (\Illuminate\Support\Facades\Cache::add('admin_events_announcements_throttle', true, now()->addHours(2))) {
+            Event::where('is_active', true)
+                ->where('frequency', 'REGEXP', '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+                ->whereDate('frequency', '<', Carbon::now()->toDateString())
+                ->update(['is_active' => false, 'archived_at' => Carbon::now()]);
 
-        Announcement::where('is_active', true)
-            ->whereNotNull('date')
-            ->whereDate('date', '<', Carbon::now()->toDateString())
-            ->update(['is_active' => false, 'archived_at' => Carbon::now()]);
+            Announcement::where('is_active', true)
+                ->whereNotNull('date')
+                ->whereDate('date', '<', Carbon::now()->toDateString())
+                ->update(['is_active' => false, 'archived_at' => Carbon::now()]);
+        }
 
-        $totalResidents    = Resident::count();
-        $totalUsers        = User::where('role', 'resident')->has('resident')->count();
-        $totalDocs         = DocumentRequest::count();
-        $pendingDocs       = DocumentRequest::where('status', 'pending')->count();
-        $processingDocs    = DocumentRequest::where('status', 'processing')->count();
-        $readyDocs         = DocumentRequest::where('status', 'ready')->count();
-        $totalIssues       = IssueReport::count();
-        $pendingIssues     = IssueReport::where('status', 'submitted')->count();
-        $vawcIssues        = IssueReport::where('department', 'VAWC')->count();
-        $peaceIssues       = IssueReport::where('department', 'Peace & Order')->count();
-        $justiceIssues     = IssueReport::where('department', 'Justice')->count();
-        $totalPets         = Pet::count();
-        $vaccinated        = Pet::where('vaccine_status', 'Vaccinated')->count();
-        $unvaccinated      = Pet::where('vaccine_status', 'Unvaccinated')->count();
-        $male              = Resident::where('gender', 'Male')->count();
-        $female            = Resident::where('gender', 'Female')->count();
-        $seniors           = Resident::where(function($q) {
-            $q->where('is_senior', true)
-              ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
-              ->orWhere('age', '>=', 60);
-        })->count();
-        $pwds              = Resident::where('is_pwd', true)->count();
-        $bedridden         = Resident::where('is_bedridden', true)->count();
-        $soloParents       = Resident::where('is_single_parent', true)->count();
-        $students          = Resident::where('is_student', true)->count();
-        $voters            = Resident::where('is_voter', true)->count();
-        $minors            = Resident::whereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) < 18')->count();
-        $adults            = Resident::whereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) BETWEEN 18 AND 59')->count();
-        $birthdayThisMonth = Resident::whereMonth('birthday', Carbon::now()->month)->count();
-        $totalHouseholds   = Resident::where('is_household_head', true)->count();
-        $nonVoters         = Resident::where('is_voter', false)->count();
+        $counts = \Illuminate\Support\Facades\Cache::remember('admin_dashboard_counts', 45, function() {
+            return [
+                'totalResidents'    => Resident::count(),
+                'totalUsers'        => User::where('role', 'resident')->has('resident')->count(),
+                'totalDocs'         => DocumentRequest::count(),
+                'pendingDocs'       => DocumentRequest::where('status', 'pending')->count(),
+                'processingDocs'    => DocumentRequest::where('status', 'processing')->count(),
+                'readyDocs'         => DocumentRequest::where('status', 'ready')->count(),
+                'totalIssues'       => IssueReport::count(),
+                'pendingIssues'     => IssueReport::where('status', 'submitted')->count(),
+                'vawcIssues'        => IssueReport::where('department', 'VAWC')->count(),
+                'peaceIssues'       => IssueReport::where('department', 'Peace & Order')->count(),
+                'justiceIssues'     => IssueReport::where('department', 'Justice')->count(),
+                'totalPets'         => Pet::count(),
+                'vaccinated'        => Pet::where('vaccine_status', 'Vaccinated')->count(),
+                'unvaccinated'      => Pet::where('vaccine_status', 'Unvaccinated')->count(),
+                'male'              => Resident::where('gender', 'Male')->count(),
+                'female'            => Resident::where('gender', 'Female')->count(),
+                'seniors'           => Resident::where(function($q) {
+                    $q->where('is_senior', true)
+                      ->orWhereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 60')
+                      ->orWhere('age', '>=', 60);
+                })->count(),
+                'pwds'              => Resident::where('is_pwd', true)->count(),
+                'bedridden'         => Resident::where('is_bedridden', true)->count(),
+                'soloParents'       => Resident::where('is_single_parent', true)->count(),
+                'students'          => Resident::where('is_student', true)->count(),
+                'voters'            => Resident::where('is_voter', true)->count(),
+                'minors'            => Resident::whereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) < 18')->count(),
+                'adults'            => Resident::whereRaw('TIMESTAMPDIFF(YEAR, birthday, CURDATE()) BETWEEN 18 AND 59')->count(),
+                'birthdayThisMonth' => Resident::whereMonth('birthday', Carbon::now()->month)->count(),
+                'totalHouseholds'   => Resident::where('is_household_head', true)->count(),
+                'nonVoters'         => Resident::where('is_voter', false)->count(),
+            ];
+        });
+        extract($counts);
 
         $officials         = Official::where('is_active', true)->get();
         $archivedOfficials = Official::where('is_active', false)->get();

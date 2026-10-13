@@ -2216,9 +2216,12 @@
 
                 <div class="tb-right">
                     <span class="tb-user">{{ Auth::user()->first_name ?? Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" x-data="{ isLoggingOut: false }" @submit="isLoggingOut = true">
                         @csrf
-                        <button type="submit" class="tb-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        <button type="submit" class="tb-logout" :disabled="isLoggingOut" :style="isLoggingOut ? 'opacity:0.75;cursor:not-allowed;' : ''">
+                            <span x-show="!isLoggingOut"><i class="fas fa-sign-out-alt"></i> Logout</span>
+                            <span x-show="isLoggingOut" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Logging out...</span>
+                        </button>
                     </form>
                 </div>
             </div>
@@ -2265,11 +2268,12 @@
                 <button class="mob-item" @click="addOffModal=true;photoPreview=null;mobileMenuOpen=false"><i
                         class="fas fa-plus-circle" style="color:#4ade80;"></i> Add Official</button>
                 <div class="mob-footer">
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" x-data="{ isLoggingOut: false }" @submit="isLoggingOut = true">
                         @csrf
-                        <button type="submit"
-                            style="width:100%;padding:11px;background:rgba(220,38,38,.25);border:1px solid rgba(220,38,38,.4);color:#fca5a5;font-family:inherit;font-size:11px;font-weight:800;text-transform:uppercase;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-                            <i class="fas fa-sign-out-alt"></i> Logout
+                        <button type="submit" :disabled="isLoggingOut"
+                            :style="isLoggingOut ? 'opacity:0.75;cursor:not-allowed;width:100%;padding:11px;background:rgba(220,38,38,.25);border:1px solid rgba(220,38,38,.4);color:#fca5a5;font-family:inherit;font-size:11px;font-weight:800;text-transform:uppercase;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;' : 'width:100%;padding:11px;background:rgba(220,38,38,.25);border:1px solid rgba(220,38,38,.4);color:#fca5a5;font-family:inherit;font-size:11px;font-weight:800;text-transform:uppercase;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;'">
+                            <span x-show="!isLoggingOut" style="display:flex;align-items:center;gap:8px;"><i class="fas fa-sign-out-alt"></i> Logout</span>
+                            <span x-show="isLoggingOut" style="display:none;align-items:center;gap:8px;"><i class="fas fa-spinner fa-spin"></i> Logging out...</span>
                         </button>
                     </form>
                 </div>

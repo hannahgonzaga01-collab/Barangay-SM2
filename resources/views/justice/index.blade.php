@@ -515,18 +515,13 @@ html, body {
 
         {{-- ══ HEARING CALENDAR TAB ══ --}}
         @php
-            $today = \Carbon\Carbon::now()->startOfDay();
-            $schedulesJSON = $reports->filter(function($r) use ($today) {
+            $schedulesJSON = $reports->filter(function($r) {
                 if(empty($r->hearing_date)) return false;
                 if(in_array($r->status, ['settled', 'resolved', 'escalated'])) return false;
-                
-                $hDate = \Carbon\Carbon::parse($r->hearing_date)->startOfDay();
-                if($hDate->lt($today)) return false;
-                
                 return true;
             })->map(function($r) {
                 $dt = \Carbon\Carbon::parse($r->hearing_date);
-                $createdAt = \Carbon\Carbon::parse($r->created_at)->startOfDay();
+                $createdAt = $r->created_at ? \Carbon\Carbon::parse($r->created_at)->startOfDay() : now()->startOfDay();
                 $diff = $dt->startOfDay()->diffInDays($createdAt);
                 
                 $phase = 'Mediation';
@@ -539,9 +534,10 @@ html, body {
                     $stage = '2nd Trial';
                 }
 
+                $yr = $r->created_at ? $r->created_at->format('Y') : date('Y');
                 return [
                     'id' => $r->id,
-                    'case_no' => 'JUS-'.$r->created_at->format('Y').'-'.str_pad($r->id,3,'0',STR_PAD_LEFT),
+                    'case_no' => 'JUS-'.$yr.'-'.str_pad($r->id,3,'0',STR_PAD_LEFT),
                     'issue_type' => $r->issue_type,
                     'date_str' => $dt->format('Y-m-d'),
                     'time_str' => $dt->format('h:i A'),
@@ -2608,20 +2604,39 @@ html, body {
                     });
                     const data = await res.json();
                     if (res.ok && data.success) {
+                        const newEvent = data.schedule_event || {
+                            id: this.selectedIssueId,
+                            case_no: this.confirmCaseSummary.case_no || ('JUS-2026-' + String(this.selectedIssueId).padStart(3, '0')),
+                            issue_type: 'Dispute',
+                            date_str: data.date_str,
+                            time_str: data.time_str,
+                            complainant: this.confirmCaseSummary.complainant || 'Complainant',
+                            respondent: this.confirmCaseSummary.respondent || 'Respondent',
+                            contact: '',
+                            description: '',
+                            phase: 'Mediation',
+                            stage: '1st Trial'
+                        };
+
                         if (this.activeRecord && this.activeRecord.id == this.selectedIssueId) {
                             this.activeRecord.hearing_date = data.hearing_date_formatted;
                             if (this.activeRecord.status === 'submitted') {
                                 this.activeRecord.status = 'under_review';
                             }
                         }
-                        if (data.date_str && data.time_str) {
-                            this.schedules.push({
-                                date_str: data.date_str,
-                                time_str: data.time_str,
-                                case_no: this.confirmCaseSummary.case_no,
-                                status: 'under_review'
-                            });
+
+                        // Update justicePortal schedules so modal slots know it's occupied
+                        this.schedules.push(newEvent);
+
+                        // Update global hearing schedules
+                        if (window._hearingSchedules) {
+                            window._hearingSchedules = window._hearingSchedules.filter(s => s.id !== newEvent.id);
+                            window._hearingSchedules.push(newEvent);
                         }
+
+                        // Dispatch event to calendar component so it renders dynamically in real-time
+                        window.dispatchEvent(new CustomEvent('hearing-scheduled', { detail: newEvent }));
+
                         this.confirmScheduleModal = false;
                         this.summonModal = false;
                         this.triggerToast('success', 'Hearing Scheduled Successfully', data.message);
@@ -2984,6 +2999,25 @@ function calendarComponent() {
             this.generateDays();
             let td = new Date();
             this.selDate(td.getDate());
+
+            window.addEventListener('hearing-scheduled', (e) => {
+                if (e.detail) {
+                    this.schedules = this.schedules.filter(s => s.id !== e.detail.id);
+                    this.schedules.push(e.detail);
+                    const parts = (e.detail.date_str || '').split('-');
+                    if (parts.length === 3) {
+                        const schedYear = parseInt(parts[0], 10);
+                        const schedMonth = parseInt(parts[1], 10) - 1;
+                        const schedDay = parseInt(parts[2], 10);
+                        this.currYear = schedYear;
+                        this.currMonth = schedMonth;
+                        this.generateDays();
+                        this.selDate(schedDay);
+                    } else {
+                        this.generateDays();
+                    }
+                }
+            });
         },
         generateDays() {
             let daysInMonth = new Date(this.currYear, this.currMonth + 1, 0).getDate();

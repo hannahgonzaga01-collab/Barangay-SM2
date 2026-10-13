@@ -83,9 +83,9 @@ class ResidentPortalController extends Controller
                 $user->update(['resident_code' => $resident->resident_code]);
             }
 
-            // ── Sync ALL resident details to user record ──
+            // ── Sync resident details to user record (only when changed to save DB writes) ──
             if ($resident) {
-                $user->update([
+                $syncFields = [
                     'resident_code'    => $resident->resident_code,
                     'first_name'       => $resident->first_name,
                     'last_name'        => $resident->last_name,
@@ -99,30 +99,35 @@ class ResidentPortalController extends Controller
                     'address'          => $resident->address,
                     'occupation'       => $resident->occupation,
                     'photo'            => $resident->photo,
-                    'is_voter'         => $resident->is_voter,
-                    'is_senior'        => $resident->is_senior,
-                    'is_pwd'           => $resident->is_pwd,
-                    'is_single_parent' => $resident->is_single_parent,
-                    'is_student'       => $resident->is_student,
-                    'is_non_voter'     => $resident->is_non_voter,
-                    'is_bedridden'     => $resident->is_bedridden,
-                ]);
+                    'is_voter'         => (bool)$resident->is_voter,
+                    'is_senior'        => (bool)$resident->is_senior,
+                    'is_pwd'           => (bool)$resident->is_pwd,
+                    'is_single_parent' => (bool)$resident->is_single_parent,
+                    'is_student'       => (bool)$resident->is_student,
+                    'is_non_voter'     => (bool)$resident->is_non_voter,
+                    'is_bedridden'     => (bool)$resident->is_bedridden,
+                ];
 
-                if (in_array($resident->verification_status, ['approved', 'verified'])) {
-                    $healData = [];
-                    if ($user->status === 'pending_verification') {
-                        $healData['status'] = 'active';
-                        $healData['is_active'] = 1;
-                    }
-                    if ($resident->voter_status === 'approved' && $user->voter_status !== 'approved') {
-                        $healData['voter_status'] = 'approved';
-                    }
-                    if (!empty($healData)) {
-                        $user->update($healData);
+                $changes = [];
+                foreach ($syncFields as $k => $v) {
+                    if ($user->{$k} != $v) {
+                        $changes[$k] = $v;
                     }
                 }
 
-                $user->refresh();
+                if (in_array($resident->verification_status, ['approved', 'verified'])) {
+                    if ($user->status === 'pending_verification') {
+                        $changes['status'] = 'active';
+                        $changes['is_active'] = 1;
+                    }
+                    if ($resident->voter_status === 'approved' && $user->voter_status !== 'approved') {
+                        $changes['voter_status'] = 'approved';
+                    }
+                }
+
+                if (!empty($changes)) {
+                    $user->update($changes);
+                }
             }
 
             // Fetch document requests
@@ -162,17 +167,19 @@ class ResidentPortalController extends Controller
             $sosHistory   = collect();
         }
 
-        // Auto-archive expired dates so residents see fresh active lists
-        Event::where('is_active', true)
-            ->whereNotNull('frequency')
-            ->whereRaw("frequency REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'")
-            ->whereDate('frequency', '<', now()->toDateString())
-            ->update(['is_active' => false, 'archived_at' => now()]);
+        // Auto-archive expired dates so residents see fresh active lists (throttled to avoid running on every single page view)
+        if (\Illuminate\Support\Facades\Cache::add('events_announcements_archived_throttle', true, now()->addHours(2))) {
+            Event::where('is_active', true)
+                ->whereNotNull('frequency')
+                ->whereRaw("frequency REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'")
+                ->whereDate('frequency', '<', now()->toDateString())
+                ->update(['is_active' => false, 'archived_at' => now()]);
 
-        Announcement::where('is_active', true)
-            ->whereNotNull('date')
-            ->whereDate('date', '<', now()->toDateString())
-            ->update(['is_active' => false, 'archived_at' => now()]);
+            Announcement::where('is_active', true)
+                ->whereNotNull('date')
+                ->whereDate('date', '<', now()->toDateString())
+                ->update(['is_active' => false, 'archived_at' => now()]);
+        }
 
         $announcements = Announcement::where('is_active', true)->latest()->take(5)->get();
         $events        = Event::where('is_active', true)->latest()->get();
@@ -1621,6 +1628,11 @@ class ResidentPortalController extends Controller
 
     public static function sendDueAppointmentReminders()
     {
+        // Throttle check to avoid running heavy DB scans and synchronous SMTP calls on every GET request
+        if (!\Illuminate\Support\Facades\Cache::add('appointment_reminders_run_throttle', true, now()->addMinutes(30))) {
+            return;
+        }
+
         try {
             $now = \Carbon\Carbon::now();
             $activeRequests = DocumentRequest::with('user')

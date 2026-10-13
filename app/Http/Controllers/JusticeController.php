@@ -26,9 +26,9 @@ class JusticeController extends Controller
             ->where('hearing_date', '<', $today)
             ->update(['status' => 'pending']);
 
-        $reports = IssueReport::where('department', 'Justice')->latest()->get();
+        $reports = IssueReport::whereIn('department', ['Justice', 'justice'])->latest()->get();
 
-        $schedules = IssueReport::where('department', 'Justice')
+        $schedules = IssueReport::whereIn('department', ['Justice', 'justice'])
             ->whereNotNull('hearing_date')
             ->whereNotIn('status', ['settled', 'resolved'])
             ->get()
@@ -42,7 +42,7 @@ class JusticeController extends Controller
             });
         
         $schedulesJSON = json_encode($schedules);
-        $justiceReports = \App\Models\DepartmentReport::where('department', 'Justice')->latest()->get();
+        $justiceReports = \App\Models\DepartmentReport::whereIn('department', ['Justice', 'justice'])->latest()->get();
         $customTemplate = \App\Http\Controllers\DepartmentReportController::getTemplateForDepartment('Justice');
 
         return view('justice.index', compact('reports', 'schedulesJSON', 'justiceReports', 'customTemplate'));
@@ -241,14 +241,43 @@ class JusticeController extends Controller
         }
 
         if ($request->ajax() || $request->wantsJson()) {
+            $freshIssue = $issue->fresh();
+            $createdAt = $freshIssue->created_at ? \Carbon\Carbon::parse($freshIssue->created_at)->startOfDay() : now()->startOfDay();
+            $diff = $datetime->startOfDay()->diffInDays($createdAt);
+            $phase = 'Mediation';
+            $stage = '1st Trial';
+            if ($diff > 30) {
+                $phase = 'Arbitration';
+                $stage = '3rd Trial';
+            } elseif ($diff > 15) {
+                $phase = 'Conciliation';
+                $stage = '2nd Trial';
+            }
+
+            $yearStr = $freshIssue->created_at ? $freshIssue->created_at->format('Y') : date('Y');
+            $caseNo = 'JUS-' . $yearStr . '-' . str_pad($freshIssue->id, 3, '0', STR_PAD_LEFT);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Hearing successfully scheduled for ' . $datetime->format('M d, Y h:i A') . '. Resident Email & SMS notifications dispatched.',
                 'hearing_date_formatted' => $datetime->format('M d, Y h:i A'),
                 'date_str' => $datetime->format('Y-m-d'),
                 'time_str' => $datetime->format('h:i A'),
-                'new_status' => $issue->status,
-                'issue' => $issue->fresh()
+                'new_status' => $freshIssue->status,
+                'schedule_event' => [
+                    'id' => $freshIssue->id,
+                    'case_no' => $caseNo,
+                    'issue_type' => $freshIssue->issue_type ?? 'Dispute',
+                    'date_str' => $datetime->format('Y-m-d'),
+                    'time_str' => $datetime->format('h:i A'),
+                    'complainant' => $freshIssue->complainant_name ?? 'Complainant',
+                    'respondent' => $freshIssue->respondent_name ?? 'Respondent',
+                    'contact' => $freshIssue->contact ?? '',
+                    'description' => $freshIssue->description ?? '',
+                    'phase' => $phase,
+                    'stage' => $stage
+                ],
+                'issue' => $freshIssue
             ]);
         }
 
