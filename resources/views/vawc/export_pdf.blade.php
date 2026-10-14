@@ -90,14 +90,31 @@
                     <td><strong>#{{ $code }}</strong></td>
                     <td>{{ $issue->issue_type }}</td>
                     <td>
-                        <strong>{{ $issue->complainant_name }}</strong>
-                        @if($issue->is_on_behalf && $issue->victim_name)
-                            <div style="font-size: 9.5px; color: #7c3aed;">
-                                <i class="fas fa-hands-helping"></i> Victim: {{ $issue->victim_name }} ({{ $issue->victim_relationship ?? 'Dependent' }})
-                            </div>
+                        @php $isAdminUser = strtolower(auth()->user()->role ?? '') === 'admin'; @endphp
+                        @if($isAdminUser)
+                            <span style="filter: blur(4.5px); user-select: none;">{{ $issue->complainant_name }}</span>
+                            <span style="font-size: 8px; color: #dc2626; font-weight: bold; margin-left: 3px;">[RA 9262]</span>
+                            @if($issue->is_on_behalf && $issue->victim_name)
+                                <div style="font-size: 9.5px; color: #7c3aed;">
+                                    <i class="fas fa-hands-helping"></i> Victim: <span style="filter: blur(4.5px); user-select: none;">{{ $issue->victim_name }}</span>
+                                </div>
+                            @endif
+                        @else
+                            <strong>{{ $issue->complainant_name }}</strong>
+                            @if($issue->is_on_behalf && $issue->victim_name)
+                                <div style="font-size: 9.5px; color: #7c3aed;">
+                                    <i class="fas fa-hands-helping"></i> Victim: {{ $issue->victim_name }} ({{ $issue->victim_relationship ?? 'Dependent' }})
+                                </div>
+                            @endif
                         @endif
                     </td>
-                    <td>{{ $issue->respondent_name ?: 'N/A' }}</td>
+                    <td>
+                        @if($isAdminUser)
+                            <span style="filter: blur(4.5px); user-select: none;">{{ $issue->respondent_name ?: 'N/A' }}</span>
+                        @else
+                            {{ $issue->respondent_name ?: 'N/A' }}
+                        @endif
+                    </td>
                     <td>{{ $issue->created_at->format('M d, Y') }}</td>
                     <td><strong>{{ strtoupper(str_replace('_', ' ', $issue->status)) }}</strong></td>
                 </tr>

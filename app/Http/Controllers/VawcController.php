@@ -422,7 +422,8 @@ class VawcController extends Controller
             'Date Filed'
         ];
 
-        $callback = function() use($reports, $columns) {
+        $isAdmin = strtolower(auth()->user()->role ?? '') === 'admin';
+        $callback = function() use($reports, $columns, $isAdmin) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
@@ -431,14 +432,14 @@ class VawcController extends Controller
                 fputcsv($file, [
                     $caseCode,
                     $r->issue_type,
-                    $r->complainant_name,
-                    ($r->complainant_age ? $r->complainant_age . ' / ' : '') . ($r->complainant_gender ?? 'N/A'),
+                    $isAdmin ? 'REDACTED (RA 9262)' : $r->complainant_name,
+                    $isAdmin ? 'REDACTED' : (($r->complainant_age ? $r->complainant_age . ' / ' : '') . ($r->complainant_gender ?? 'N/A')),
                     $r->is_on_behalf ? 'YES' : 'NO',
-                    $r->is_on_behalf ? ($r->victim_name ?? 'N/A') : 'Self',
-                    $r->is_on_behalf ? (($r->victim_age ? $r->victim_age . ' / ' : '') . ($r->victim_gender ?? 'N/A')) : 'N/A',
+                    $r->is_on_behalf ? ($isAdmin ? 'REDACTED (RA 9262)' : ($r->victim_name ?? 'N/A')) : 'Self',
+                    $r->is_on_behalf ? ($isAdmin ? 'REDACTED' : (($r->victim_age ? $r->victim_age . ' / ' : '') . ($r->victim_gender ?? 'N/A'))) : 'N/A',
                     $r->is_on_behalf ? ($r->victim_relationship ?? 'N/A') : 'Complainant is Victim',
-                    $r->contact,
-                    $r->respondent_name ?? 'N/A',
+                    $isAdmin ? 'REDACTED' : $r->contact,
+                    $isAdmin ? 'REDACTED' : ($r->respondent_name ?? 'N/A'),
                     $r->incident_date ? Carbon::parse($r->incident_date)->format('Y-m-d') : 'N/A',
                     $r->location ?? 'Barangay San Miguel II',
                     ucfirst(str_replace('_', ' ', $r->status)),

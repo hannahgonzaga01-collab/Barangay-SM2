@@ -1,5 +1,10 @@
 <x-app-layout>
+@php
+    $isAdmin = strtolower(auth()->user()->role ?? '') === 'admin';
+@endphp
 <style>
+.vawc-blur { filter: blur(5px); user-select: none; -webkit-user-select: none; display: inline-block; cursor: not-allowed; pointer-events: none; }
+.vawc-blur-block { filter: blur(5px); user-select: none; -webkit-user-select: none; cursor: not-allowed; pointer-events: none; }
 :root{
     --brand:#0E5393;--brand-dark:#04192D;--brand-darker:#000052;
     --body-bg:#f1f5f9;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--light:#94a3b8;
@@ -517,6 +522,24 @@ html, body {
             </div>
         </div>
 
+        @if($isAdmin)
+        {{-- ══ ADMIN RA 9262 PRIVACY NOTICE BANNER ══ --}}
+        <div style="background:linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);border:1.5px solid #fca5a5;border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:14px;margin-bottom:20px;box-shadow:0 2px 10px rgba(220,38,38,.08);">
+            <div style="width:40px;height:40px;border-radius:10px;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:12px;font-weight:900;color:#991b1b;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;">
+                    <span>Confidentiality Protection Active (Admin View)</span>
+                    <span style="background:#fee2e2;color:#dc2626;border:1px solid #f87171;font-size:8px;padding:2px 8px;border-radius:99px;font-weight:800;">RA 9262 COMPLIANT</span>
+                </div>
+                <div style="font-size:11px;font-weight:600;color:#b91c1c;margin-top:2px;line-height:1.4;">
+                    Personal identifying details of complainants and victims are blurred to uphold statutory privacy rights under Philippine Republic Act 9262. Full access is restricted strictly to authorized VAWC Desk Officers.
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- ACTION CARDS --}}
         <div class="action-grid">
             <div class="action-card" @click="activeTab='cases'" :class="activeTab==='cases'?'active':''">
@@ -733,8 +756,11 @@ html, body {
                                 </td>
                                 <td>
                                     <div style="font-size:12px;font-weight:800;color:var(--text);">
-                                        @if($issue->is_restricted && !in_array(strtolower(auth()->user()->role ?? ''), ['vawc', 'admin', 'captain', 'superadmin']))
-                                            <span style="filter: blur(4px); user-select: none;">REDACTED NAME</span>
+                                        @if($isAdmin)
+                                            <span class="vawc-blur" title="RA 9262 Confidential">{{ $issue->complainant_name }}</span>
+                                            <span class="cbadge" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:7.5px;padding:1px 5px;margin-left:4px;vertical-align:middle;"><i class="fas fa-lock" style="font-size:6px;"></i> RA 9262</span>
+                                        @elseif($issue->is_restricted && strtolower(auth()->user()->role ?? '') !== 'vawc')
+                                            <span class="vawc-blur" title="Restricted">{{ $issue->complainant_name }}</span>
                                         @else
                                             {{ $issue->complainant_name }}
                                             @if(!$issue->user_id)
@@ -744,12 +770,17 @@ html, body {
                                     </div>
                                     @if($issue->is_on_behalf && $issue->victim_name)
                                     <div style="font-size:10px;color:#7c3aed;font-weight:700;margin-top:2px;">
-                                        <i class="fas fa-hands-helping" style="font-size:9px;"></i> Victim: {{ $issue->victim_name }} ({{ $issue->victim_relationship ?? 'Dependent' }})
+                                        <i class="fas fa-hands-helping" style="font-size:9px;"></i> Victim: 
+                                        @if($isAdmin || ($issue->is_restricted && strtolower(auth()->user()->role ?? '') !== 'vawc'))
+                                            <span class="vawc-blur" title="RA 9262 Confidential">{{ $issue->victim_name }}</span>
+                                        @else
+                                            {{ $issue->victim_name }} ({{ $issue->victim_relationship ?? 'Dependent' }})
+                                        @endif
                                     </div>
                                     @endif
                                     <div style="font-size:10px;color:var(--muted);font-weight:600;">
-                                        @if($issue->is_restricted && !in_array(strtolower(auth()->user()->role ?? ''), ['vawc', 'admin', 'captain', 'superadmin']))
-                                            <span style="filter: blur(4px);">09000000000</span>
+                                        @if($isAdmin || ($issue->is_restricted && strtolower(auth()->user()->role ?? '') !== 'vawc'))
+                                            <span class="vawc-blur">{{ $issue->contact }}</span>
                                         @else
                                             {{ $issue->contact }}
                                         @endif
@@ -921,14 +952,30 @@ html, body {
                                 <td><div style="font-size:11px;font-weight:900;color:#dc2626;">#{{ $uCode }}</div></td>
                                 <td>
                                     <div style="font-size:12px;font-weight:800;color:var(--text);">
-                                        {{ $urgentIssue->complainant_name }}
+                                        @if($isAdmin)
+                                            <span class="vawc-blur" title="RA 9262 Confidential">{{ $urgentIssue->complainant_name }}</span>
+                                            <span class="cbadge" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:7.5px;padding:1px 5px;margin-left:4px;"><i class="fas fa-lock" style="font-size:6px;"></i> RA 9262</span>
+                                        @else
+                                            {{ $urgentIssue->complainant_name }}
+                                        @endif
                                     </div>
                                     @if($urgentIssue->is_on_behalf && $urgentIssue->victim_name)
                                     <div style="font-size:10px;color:#7c3aed;font-weight:700;">
-                                        Victim: {{ $urgentIssue->victim_name }} ({{ $urgentIssue->victim_relationship ?? 'Dependent' }})
+                                        Victim: 
+                                        @if($isAdmin)
+                                            <span class="vawc-blur" title="RA 9262 Confidential">{{ $urgentIssue->victim_name }}</span>
+                                        @else
+                                            {{ $urgentIssue->victim_name }} ({{ $urgentIssue->victim_relationship ?? 'Dependent' }})
+                                        @endif
                                     </div>
                                     @endif
-                                    <div style="font-size:10px;color:var(--muted);font-weight:600;">{{ $urgentIssue->contact }}</div>
+                                    <div style="font-size:10px;color:var(--muted);font-weight:600;">
+                                        @if($isAdmin)
+                                            <span class="vawc-blur">{{ $urgentIssue->contact }}</span>
+                                        @else
+                                            {{ $urgentIssue->contact }}
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     @if($urgentIssue->official_document)
@@ -1020,9 +1067,23 @@ html, body {
                                 <td><div style="font-size:11px;font-weight:900;color:#7c3aed;">#{{ $rCode }}</div></td>
                                 <td><span style="background:#f5f3ff;color:#7c3aed;font-size:9px;font-weight:900;padding:2px 8px;border-radius:99px;">{{ $resolvedIssue->issue_type }}</span></td>
                                 <td>
-                                    <div style="font-size:12px;font-weight:800;">{{ $resolvedIssue->complainant_name }}</div>
+                                    <div style="font-size:12px;font-weight:800;">
+                                        @if($isAdmin)
+                                            <span class="vawc-blur" title="RA 9262 Confidential">{{ $resolvedIssue->complainant_name }}</span>
+                                            <span class="cbadge" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:7.5px;padding:1px 5px;margin-left:4px;"><i class="fas fa-lock" style="font-size:6px;"></i> RA 9262</span>
+                                        @else
+                                            {{ $resolvedIssue->complainant_name }}
+                                        @endif
+                                    </div>
                                     @if($resolvedIssue->is_on_behalf && $resolvedIssue->victim_name)
-                                        <div style="font-size:10px;color:#7c3aed;font-weight:700;">Victim: {{ $resolvedIssue->victim_name }}</div>
+                                        <div style="font-size:10px;color:#7c3aed;font-weight:700;">
+                                            Victim: 
+                                            @if($isAdmin)
+                                                <span class="vawc-blur" title="RA 9262 Confidential">{{ $resolvedIssue->victim_name }}</span>
+                                            @else
+                                                {{ $resolvedIssue->victim_name }}
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                                 <td><div style="font-size:11px;color:var(--muted);">{{ $resolvedIssue->created_at->format('M d, Y') }}</div></td>
@@ -1485,25 +1546,25 @@ html, body {
 
                         {{-- COMPLAINANT --}}
                         <div class="ref-sect">Complainant Details</div>
-                        <div class="ref-row"><div class="ref-col-lbl">Full Name:</div><div class="ref-col-val" x-text="previewData.complainant_name"></div></div>
-                        <div class="ref-row"><div class="ref-col-lbl">Age / Gender:</div><div class="ref-col-val" x-text="(previewData.complainant_age || 'N/A') + ' / ' + (previewData.complainant_gender || 'N/A')"></div></div>
-                        <div class="ref-row"><div class="ref-col-lbl">Contact Number:</div><div class="ref-col-val" x-text="previewData.contact"></div></div>
-                        <div class="ref-row"><div class="ref-col-lbl">Address:</div><div class="ref-col-val" x-text="previewData.complainant_address || 'Barangay San Miguel II'"></div></div>
+                        <div class="ref-row"><div class="ref-col-lbl">Full Name:</div><div class="ref-col-val"><span x-text="previewData.complainant_name" @if($isAdmin) class="vawc-blur" @endif></span></div></div>
+                        <div class="ref-row"><div class="ref-col-lbl">Age / Gender:</div><div class="ref-col-val"><span x-text="(previewData.complainant_age || 'N/A') + ' / ' + (previewData.complainant_gender || 'N/A')" @if($isAdmin) class="vawc-blur" @endif></span></div></div>
+                        <div class="ref-row"><div class="ref-col-lbl">Contact Number:</div><div class="ref-col-val"><span x-text="previewData.contact" @if($isAdmin) class="vawc-blur" @endif></span></div></div>
+                        <div class="ref-row"><div class="ref-col-lbl">Address:</div><div class="ref-col-val"><span x-text="previewData.complainant_address || 'Barangay San Miguel II'" @if($isAdmin) class="vawc-blur" @endif></span></div></div>
 
                         {{-- DEDICATED VICTIM SECTION (IF FILED ON BEHALF) --}}
                         <template x-if="previewData.is_on_behalf && previewData.victim_name">
                             <div>
                                 <div class="ref-sect" style="color: #7c3aed;">Victim / Dependent Information (Filed On Behalf)</div>
-                                <div class="ref-row"><div class="ref-col-lbl">Victim Full Name:</div><div class="ref-col-val"><strong x-text="previewData.victim_name"></strong></div></div>
-                                <div class="ref-row"><div class="ref-col-lbl">Age / Gender:</div><div class="ref-col-val" x-text="(previewData.victim_age || 'N/A') + ' / ' + (previewData.victim_gender || 'N/A')"></div></div>
+                                <div class="ref-row"><div class="ref-col-lbl">Victim Full Name:</div><div class="ref-col-val"><strong x-text="previewData.victim_name" @if($isAdmin) class="vawc-blur" @endif></strong></div></div>
+                                <div class="ref-row"><div class="ref-col-lbl">Age / Gender:</div><div class="ref-col-val"><span x-text="(previewData.victim_age || 'N/A') + ' / ' + (previewData.victim_gender || 'N/A')" @if($isAdmin) class="vawc-blur" @endif></span></div></div>
                                 <div class="ref-row"><div class="ref-col-lbl">Relationship:</div><div class="ref-col-val" x-text="previewData.victim_relationship || 'Dependent'"></div></div>
                             </div>
                         </template>
 
                         {{-- RESPONDENT --}}
                         <div class="ref-sect">Respondent / Alleged Perpetrator</div>
-                        <div class="ref-row"><div class="ref-col-lbl">Full Name:</div><div class="ref-col-val" x-text="previewData.respondent_name || 'N/A'"></div></div>
-                        <div class="ref-row"><div class="ref-col-lbl">Address:</div><div class="ref-col-val" x-text="previewData.respondent_address || 'Barangay San Miguel II'"></div></div>
+                        <div class="ref-row"><div class="ref-col-lbl">Full Name:</div><div class="ref-col-val"><span x-text="previewData.respondent_name || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div></div>
+                        <div class="ref-row"><div class="ref-col-lbl">Address:</div><div class="ref-col-val"><span x-text="previewData.respondent_address || 'Barangay San Miguel II'" @if($isAdmin) class="vawc-blur" @endif></span></div></div>
 
                         {{-- NARRATION --}}
                         <div class="ref-sect">Incident Facts & Narration</div>
@@ -1511,13 +1572,13 @@ html, body {
                             <template x-if="previewData.admin_summary">
                                 <div>
                                     <strong>Staff Official Summary:</strong><br>
-                                    <span x-text="previewData.admin_summary"></span>
+                                    <span x-text="previewData.admin_summary" @if($isAdmin) class="vawc-blur-block" @endif></span>
                                 </div>
                             </template>
                             <template x-if="!previewData.admin_summary">
                                 <div>
                                     <strong>Original Statement:</strong><br>
-                                    <span x-text="previewData.description || 'No narration recorded.'"></span>
+                                    <span x-text="previewData.description || 'No narration recorded.'" @if($isAdmin) class="vawc-blur-block" @endif></span>
                                 </div>
                             </template>
                         </div>
@@ -1619,7 +1680,9 @@ html, body {
                             <div class="modal-ico" style="background:#fef3c7;color:#d97706;"><i class="fas fa-archive"></i></div>
                             <div>
                                 <div>Archive Blotter Case Record</div>
-                                <div style="font-size:9px;font-weight:700;color:#d97706;text-transform:none;" x-text="'Case #' + archiveData.case_code + ' — ' + archiveData.complainant_name"></div>
+                                <div style="font-size:9px;font-weight:700;color:#d97706;text-transform:none;">
+                                    <span>Case #</span><span x-text="archiveData.case_code"></span> — <span x-text="archiveData.complainant_name" @if($isAdmin) class="vawc-blur" @endif></span>
+                                </div>
                             </div>
                         </div>
                         <button @click="archiveModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
@@ -1841,6 +1904,22 @@ html, body {
                                 </template>
                             </div>
 
+                            @if($isAdmin)
+                            <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border: 1.5px solid #fca5a5; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; display:flex; align-items:center; gap:12px;">
+                                <div style="width:36px; height:36px; border-radius:50%; background:#ef4444; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <i class="fas fa-user-shield" style="font-size:16px;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size:11.5px; font-weight:900; color:#991b1b; text-transform:uppercase; letter-spacing:0.03em;">
+                                        RA 9262 Confidentiality Protection (Admin View)
+                                    </div>
+                                    <div style="font-size:10.5px; font-weight:600; color:#b91c1c; margin-top:2px; line-height:1.4;">
+                                        Complainant and victim identifying details are blurred to uphold statutory privacy rights under Philippine Republic Act 9262.
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+
                             {{-- Case Info --}}
                             <template x-if="activeIssue.admin_notes && activeIssue.admin_notes.includes('AUTO-FLAGGED')">
                                 <div style="background:#fdf4ff;border:1.5px solid #c4b5fd;border-radius:10px;padding:10px 14px;margin-bottom:12px;color:#6d28d9;font-size:11px;font-weight:800;line-height:1.4;">
@@ -1881,7 +1960,10 @@ html, body {
                                     <div class="dfield" style="grid-column:span 2;">
                                         <div class="dfield-lbl">Full Name</div>
                                         <div class="dfield-val">
-                                            <span x-text="activeIssue.complainant_name"></span>
+                                            <span x-text="activeIssue.complainant_name" @if($isAdmin) class="vawc-blur" @endif></span>
+                                            @if($isAdmin)
+                                                <span class="cbadge" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:7.5px;padding:1px 5px;margin-left:4px;"><i class="fas fa-lock" style="font-size:6px;"></i> BLURRED</span>
+                                            @endif
                                             <template x-if="!activeIssue.user_id">
                                                 <span class="cbadge cbadge-red" style="font-size:7px; padding:2px 6px; vertical-align:middle; margin-left:4px;">GUEST</span>
                                             </template>
@@ -1889,19 +1971,19 @@ html, body {
                                     </div>
                                     <div class="dfield">
                                         <div class="dfield-lbl">Age</div>
-                                        <div class="dfield-val" x-text="activeIssue.complainant_age || 'N/A'"></div>
+                                        <div class="dfield-val"><span x-text="activeIssue.complainant_age || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                     </div>
                                     <div class="dfield">
                                         <div class="dfield-lbl">Gender</div>
-                                        <div class="dfield-val" x-text="activeIssue.complainant_gender || 'N/A'"></div>
+                                        <div class="dfield-val"><span x-text="activeIssue.complainant_gender || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                     </div>
                                     <div class="dfield">
                                         <div class="dfield-lbl">Contact</div>
-                                        <div class="dfield-val" x-text="activeIssue.contact"></div>
+                                        <div class="dfield-val"><span x-text="activeIssue.contact" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                     </div>
                                     <div class="dfield">
                                         <div class="dfield-lbl">Address</div>
-                                        <div class="dfield-val" x-text="activeIssue.complainant_address || 'N/A'"></div>
+                                        <div class="dfield-val"><span x-text="activeIssue.complainant_address || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                     </div>
                                 </div>
                             </div>
@@ -1913,15 +1995,15 @@ html, body {
                                     <div class="fgrid2" style="gap:8px;">
                                         <div class="dfield" style="grid-column:span 2;background:#fff;border-color:#f5d0fe;">
                                             <div class="dfield-lbl" style="color:#a21caf;">Victim Full Name</div>
-                                            <div class="dfield-val" x-text="activeIssue.victim_name"></div>
+                                            <div class="dfield-val"><span x-text="activeIssue.victim_name" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                         </div>
                                         <div class="dfield" style="background:#fff;border-color:#f5d0fe;">
                                             <div class="dfield-lbl" style="color:#a21caf;">Victim Age</div>
-                                            <div class="dfield-val" x-text="activeIssue.victim_age || 'N/A'"></div>
+                                            <div class="dfield-val"><span x-text="activeIssue.victim_age || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                         </div>
                                         <div class="dfield" style="background:#fff;border-color:#f5d0fe;">
                                             <div class="dfield-lbl" style="color:#a21caf;">Victim Gender</div>
-                                            <div class="dfield-val" x-text="activeIssue.victim_gender || 'N/A'"></div>
+                                            <div class="dfield-val"><span x-text="activeIssue.victim_gender || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                         </div>
                                         <div class="dfield" style="grid-column:span 2;background:#fff;border-color:#f5d0fe;">
                                             <div class="dfield-lbl" style="color:#a21caf;">Relationship to Complainant</div>
@@ -1937,11 +2019,11 @@ html, body {
                                 <div class="fgrid2" style="gap:8px;">
                                     <div class="dfield" style="grid-column:span 2;">
                                         <div class="dfield-lbl">Full Name</div>
-                                        <div class="dfield-val" x-text="activeIssue.respondent_name || 'N/A'"></div>
+                                        <div class="dfield-val"><span x-text="activeIssue.respondent_name || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                     </div>
                                     <div class="dfield" style="grid-column:span 2;">
                                         <div class="dfield-lbl">Address</div>
-                                        <div class="dfield-val" x-text="activeIssue.respondent_address || 'N/A'"></div>
+                                        <div class="dfield-val"><span x-text="activeIssue.respondent_address || 'N/A'" @if($isAdmin) class="vawc-blur" @endif></span></div>
                                     </div>
                                 </div>
                             </div>
@@ -1949,7 +2031,7 @@ html, body {
                             {{-- Description --}}
                             <div class="sblk">
                                 <div class="sblk-ttl"><i class="fas fa-file-alt"></i> Resident's Original Narrative</div>
-                                <div style="background:#fff;border:1px solid #ede9fe;border-radius:8px;padding:12px;font-size:12px;font-weight:600;color:var(--text);line-height:1.7;white-space:pre-wrap;" x-text="activeIssue.description || 'No description provided.'"></div>
+                                <div style="background:#fff;border:1px solid #ede9fe;border-radius:8px;padding:12px;font-size:12px;font-weight:600;color:var(--text);line-height:1.7;white-space:pre-wrap;" @if($isAdmin) class="vawc-blur-block" @endif x-text="activeIssue.description || 'No description provided.'"></div>
                             </div>
 
                             {{-- Attached Official Scan if available --}}
