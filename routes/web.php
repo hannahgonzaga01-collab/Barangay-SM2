@@ -305,12 +305,20 @@ Route::get('/storage/{path}', function ($path) {
         }
     } catch (\Throwable $e) {}
 
-    // 3. Avatar / Resident photo fallback
+    // 3. Medical Mission fallback
+    if (str_contains(strtolower($cleanPath), 'medical') || str_contains(strtolower($cleanPath), 'mission')) {
+        $mmCandidate = public_path('images/medical_mission.jpg');
+        if (file_exists($mmCandidate)) {
+            return response()->file($mmCandidate, ['Content-Type' => 'image/jpeg']);
+        }
+    }
+
+    // 4. Avatar / Resident photo fallback
     if (str_contains($cleanPath, 'photos') || str_contains($cleanPath, 'avatar') || str_contains($cleanPath, 'residents') || str_contains($cleanPath, 'users')) {
         return redirect('https://ui-avatars.com/api/?name=Resident&background=0E5393&color=fff&size=128&bold=true');
     }
 
-    // 4. Gracefully return 404 for missing documents so the modal's error handler triggers
+    // 5. Gracefully return 404 for missing documents so the modal's error handler triggers
     abort(404);
 })->where('path', '.*');
 

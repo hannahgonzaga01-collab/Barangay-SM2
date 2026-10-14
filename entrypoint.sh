@@ -17,6 +17,9 @@ mkdir -p /var/www/html/storage/app/public/issue_evidence
 mkdir -p /var/www/html/storage/app/public/proofs/senior
 mkdir -p /var/www/html/storage/app/public/proofs/pwd
 mkdir -p /var/www/html/storage/app/public/proofs/bedridden
+mkdir -p /var/www/html/storage/app/public/events
+mkdir -p /var/www/html/storage/app/public/announcements
+mkdir -p /var/www/html/storage/app/public/projects
 rm -rf /var/www/html/public/storage || true
 php artisan storage:link || true
 

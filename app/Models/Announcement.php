@@ -23,7 +23,10 @@ class Announcement extends Model {
         }
         if (!empty($this->image_path)) {
             $url = $resolve($this->image_path);
-            return $url ? [$url] : [];
+            if ($url) return [$url];
+        }
+        if (stripos($this->title ?? '', 'medical') !== false || stripos($this->title ?? '', 'mission') !== false) {
+            return [asset('images/medical_mission.jpg')];
         }
         return [];
     }
