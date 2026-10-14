@@ -282,6 +282,9 @@ Route::get('/storage/{path}', function ($path) {
     $candidates = [
         storage_path('app/public/' . $cleanPath),
         public_path('storage/' . $cleanPath),
+        public_path($cleanPath),
+        public_path('images/' . basename($cleanPath)),
+        public_path('images/' . $cleanPath),
         storage_path('app/' . $cleanPath),
         storage_path('app/private/' . $cleanPath),
     ];

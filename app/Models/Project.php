@@ -46,19 +46,14 @@ class Project extends Model
             if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
                 return $img;
             }
-            if (str_starts_with($img, 'images/')) {
+            if (str_starts_with($img, 'images/') || str_starts_with($img, 'assets/')) {
                 return asset($img);
             }
             $clean = ltrim($img, '/');
             if (str_starts_with($clean, 'storage/')) {
                 $clean = substr($clean, 8);
             }
-            if (file_exists(public_path('storage/' . $clean)) || file_exists(storage_path('app/public/' . $clean))) {
-                return asset('storage/' . $clean);
-            }
-            if (file_exists(public_path($clean))) {
-                return asset($clean);
-            }
+            return asset('storage/' . $clean);
         }
 
         $list = $this->images;
@@ -69,19 +64,14 @@ class Project extends Model
                 if (str_starts_with($first, 'http://') || str_starts_with($first, 'https://')) {
                     return $first;
                 }
-                if (str_starts_with($first, 'images/')) {
+                if (str_starts_with($first, 'images/') || str_starts_with($first, 'assets/')) {
                     return asset($first);
                 }
                 $clean = ltrim($first, '/');
                 if (str_starts_with($clean, 'storage/')) {
                     $clean = substr($clean, 8);
                 }
-                if (file_exists(public_path('storage/' . $clean)) || file_exists(storage_path('app/public/' . $clean))) {
-                    return asset('storage/' . $clean);
-                }
-                if (file_exists(public_path($clean))) {
-                    return asset($clean);
-                }
+                return asset('storage/' . $clean);
             }
         }
 
@@ -110,20 +100,14 @@ class Project extends Model
                 if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
                     return $img;
                 }
-                if (str_starts_with($img, 'images/')) {
+                if (str_starts_with($img, 'images/') || str_starts_with($img, 'assets/')) {
                     return asset($img);
                 }
                 $clean = ltrim($img, '/');
                 if (str_starts_with($clean, 'storage/')) {
                     $clean = substr($clean, 8);
                 }
-                if (file_exists(public_path('storage/' . $clean)) || file_exists(storage_path('app/public/' . $clean))) {
-                    return asset('storage/' . $clean);
-                }
-                if (file_exists(public_path($clean))) {
-                    return asset($clean);
-                }
-                return $cover;
+                return asset('storage/' . $clean);
             }, $imgs);
         }
 

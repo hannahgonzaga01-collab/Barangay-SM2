@@ -742,7 +742,11 @@
     <script>
         function makePhotoUploader(initialPhotos = []) {
             return {
-                photos: (initialPhotos || []).map(u => ({ url: u, file: null })),
+                photos: (initialPhotos || []).map(u => ({
+                    url: typeof u === 'string' ? u : (u.url || ''),
+                    file: null,
+                    raw: typeof u === 'string' ? u : (u.raw || u.url || '')
+                })),
                 dt: new DataTransfer(),
                 addFiles(files) {
                     if (!files || !files.length) return;
@@ -751,7 +755,7 @@
                             this.dt.items.add(file);
                             const reader = new FileReader();
                             reader.onload = e => {
-                                this.photos.push({ url: e.target.result, file: file });
+                                this.photos.push({ url: e.target.result, file: file, raw: null });
                             };
                             reader.readAsDataURL(file);
                         }
@@ -2994,8 +2998,8 @@
                                         </div>
                                         @if($evt->image_path)
                                             <div style="width:50px;height:50px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);position:relative;">
-                                                <img src="{{ asset('storage/' . $evt->image_path) }}" 
-                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                <img src="{{ $evt->images_list[0] ?? asset('storage/' . $evt->image_path) }}" 
+                                                     onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';"
                                                      style="width:100%;height:100%;object-fit:cover;">
                                                 @if(count($evt->images_list) > 1)
                                                     <span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#fff;font-size:8px;font-weight:900;padding:1px 3px;border-radius:3px;">+{{ count($evt->images_list) }}</span>
@@ -3038,6 +3042,7 @@
                                                             <form action="{{ route('admin.events.update', $evt->id) }}" method="POST" enctype="multipart/form-data"
                                                                 x-data="makePhotoUploader({{ json_encode($evt->images_list) }})">
                                                                 @csrf @method('PUT')
+                                                                <input type="hidden" name="photo_manager_active" value="1">
                                                                 <div class="fgrp"><label class="flbl">Event Title *</label><input type="text" name="title"
                                                                         required class="finput" value="{{ $evt->title }}"></div>
                                                                 <div class="fgrp">
@@ -3056,7 +3061,10 @@
                                                                         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                                                             <template x-for="(p, idx) in photos" :key="idx">
                                                                                 <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                                                                    <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
+                                                                                    <template x-if="!p.file">
+                                                                                        <input type="hidden" name="existing_photos[]" :value="p.raw || p.url">
+                                                                                    </template>
+                                                                                    <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';" style="width:100%;height:100%;object-fit:cover;">
                                                                                     <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                                                                     <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                                                             style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -3200,8 +3208,8 @@
                                     <div class="ann-item" x-show="'{{ strtolower(addslashes($ann->title . ' ' . $ann->content)) }}'.includes(searchAnn.toLowerCase())">
                                         @if($ann->image_path)
                                             <div style="width:60px;height:60px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);position:relative;">
-                                                <img src="{{ asset('storage/' . $ann->image_path) }}" 
-                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                <img src="{{ $ann->images_list[0] ?? asset('storage/' . $ann->image_path) }}" 
+                                                     onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';"
                                                      style="width:100%;height:100%;object-fit:cover;">
                                                 @if(count($ann->images_list) > 1)
                                                     <span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;">+{{ count($ann->images_list) }}</span>
@@ -3242,6 +3250,7 @@
                                                             <form action="{{ route('admin.announcements.update', $ann->id) }}" method="POST" enctype="multipart/form-data"
                                                                   x-data="makePhotoUploader({{ json_encode($ann->images_list) }})">
                                                                 @csrf @method('PUT')
+                                                                <input type="hidden" name="photo_manager_active" value="1">
                                                                 <div class="fgrid2 fgrp">
                                                                     <div><label class="flbl">Title *</label><input type="text" name="title" required
                                                                             class="finput" value="{{ $ann->title }}"></div>
@@ -3274,7 +3283,10 @@
                                                                         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                                                             <template x-for="(p, idx) in photos" :key="idx">
                                                                                 <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                                                                    <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
+                                                                                    <template x-if="!p.file">
+                                                                                        <input type="hidden" name="existing_photos[]" :value="p.raw || p.url">
+                                                                                    </template>
+                                                                                    <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';" style="width:100%;height:100%;object-fit:cover;">
                                                                                     <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                                                                     <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                                                             style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -3374,7 +3386,7 @@
                                     <div style="display:flex;gap:10px;align-items:flex-start;">
                                         @if($proj->image_path || !empty($proj->images_list))
                                             <div style="width:65px;height:65px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);position:relative;">
-                                                <img src="{{ $proj->cover_image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/canal.jpg') }}';">
+                                                <img src="{{ $proj->cover_image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';">
                                                 @if(count($proj->images_list) > 1)
                                                     <span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.75);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;">+{{ count($proj->images_list) }}</span>
                                                 @endif
@@ -3441,6 +3453,7 @@
                                                                   x-data="makePhotoUploader({{ json_encode($proj->images_list) }})">
                                                                 @csrf
                                                                 @method('PUT')
+                                                                <input type="hidden" name="photo_manager_active" value="1">
 
                                                                 <div class="fgrp">
                                                                     <label class="flbl">Project Title *</label>
@@ -3458,7 +3471,10 @@
                                                                         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                                                             <template x-for="(p, idx) in photos" :key="idx">
                                                                                 <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;">
-                                                                                    <img :src="p.url" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/canal.jpg') }}';">
+                                                                                    <template x-if="!p.file">
+                                                                                        <input type="hidden" name="existing_photos[]" :value="p.raw || p.url">
+                                                                                    </template>
+                                                                                    <img :src="p.url" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';">
                                                                                     <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                                                                     <button type="button" @click.stop="removePhoto(idx)"
                                                                                             style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;">
@@ -3874,7 +3890,7 @@
                                             <div style="display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px;">
                                                 <div style="width:80px;height:50px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);background:#e2e8f0;">
                                                     <img src="{{ $sUrl }}" 
-                                                         onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
+                                                         onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';"
                                                          style="width:100%;height:100%;object-fit:cover;">
                                                 </div>
                                                 <div style="flex:1;min-width:0;">
@@ -3901,7 +3917,7 @@
                                                                         <div class="fgrp"><label class="flbl">Slide Image</label>
                                                                             <label style="cursor:pointer;display:block;">
                                                                                 <div style="height:150px;border-radius:10px;background:#f8fafc;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;transition:all .2s;" :style="photoPreview?'border:2px solid #0E5393':''">
-                                                                                    <img x-show="photoPreview" :src="photoPreview" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:contain;display:block;">
+                                                                                    <img x-show="photoPreview" :src="photoPreview" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';" style="width:100%;height:100%;object-fit:contain;display:block;">
                                                                                     <div x-show="!photoPreview" style="text-align:center;"><i class="fas fa-image" style="font-size:24px;color:var(--light);margin-bottom:6px;"></i><div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Change Photo</div></div>
                                                                                     <div x-show="photoPreview" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;"><i class="fas fa-camera"></i> Change Photo</div>
                                                                                 </div>
@@ -4805,7 +4821,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -4884,7 +4900,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -4959,7 +4975,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -5091,7 +5107,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;">
-                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;">

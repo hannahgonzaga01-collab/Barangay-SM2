@@ -209,6 +209,18 @@ class AdminController extends Controller
         ));
     }
 
+    private function cleanStoragePath(?string $urlOrPath): ?string
+    {
+        if (empty($urlOrPath)) return null;
+        if (preg_match('#(?:^|/)storage/(.+)$#i', $urlOrPath, $m)) {
+            return ltrim($m[1], '/');
+        }
+        if (str_starts_with($urlOrPath, 'images/') || str_starts_with($urlOrPath, 'assets/')) {
+            return $urlOrPath;
+        }
+        return ltrim(preg_replace('#^https?://[^/]+/#i', '', $urlOrPath), '/');
+    }
+
     // ── Announcements ──
     public function storeAnnouncement(Request $request)
     {
@@ -240,11 +252,15 @@ class AdminController extends Controller
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 6) as $imgFile) {
                 if ($imgFile) {
-                    $paths[] = $imgFile->store('announcements', 'public');
+                    $path = $imgFile->store('announcements', 'public');
+                    \App\Models\SystemUploadedFile::persist($path, $imgFile);
+                    $paths[] = $path;
                 }
             }
         } elseif ($request->hasFile('image')) {
-            $paths[] = $request->file('image')->store('announcements', 'public');
+            $path = $request->file('image')->store('announcements', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
+            $paths[] = $path;
         }
 
         if (!empty($paths)) {
@@ -253,6 +269,7 @@ class AdminController extends Controller
         }
 
         Announcement::create($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Announcement posted!');
     }
 
@@ -283,37 +300,56 @@ class AdminController extends Controller
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 6) as $imgFile) {
                 if ($imgFile) {
-                    $paths[] = $imgFile->store('announcements', 'public');
+                    $path = $imgFile->store('announcements', 'public');
+                    \App\Models\SystemUploadedFile::persist($path, $imgFile);
+                    $paths[] = $path;
                 }
             }
         } elseif ($request->hasFile('image')) {
-            $paths[] = $request->file('image')->store('announcements', 'public');
+            $path = $request->file('image')->store('announcements', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
+            $paths[] = $path;
         }
 
-        if (!empty($paths)) {
+        if ($request->has('photo_manager_active') || $request->has('existing_photos')) {
+            $kept = [];
+            foreach ($request->input('existing_photos', []) as $raw) {
+                $clean = $this->cleanStoragePath($raw);
+                if ($clean) {
+                    $kept[] = $clean;
+                }
+            }
+            $finalPaths = array_slice(array_merge($kept, $paths), 0, 6);
+            $data['image_path'] = $finalPaths[0] ?? null;
+            $data['images']     = $finalPaths;
+        } elseif (!empty($paths)) {
             $data['image_path'] = $paths[0];
-            $data['images'] = $paths;
+            $data['images']     = $paths;
         }
 
         $ann->update($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Announcement updated!');
     }
 
     public function archiveAnnouncement($id)
     {
         Announcement::findOrFail($id)->update(['is_active' => false]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Announcement archived.');
     }
 
     public function restoreAnnouncement($id)
     {
         Announcement::findOrFail($id)->update(['is_active' => true]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Announcement restored.');
     }
 
     public function destroyAnnouncement($id)
     {
         Announcement::findOrFail($id)->delete();
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Announcement permanently deleted.');
     }
 
@@ -350,11 +386,15 @@ class AdminController extends Controller
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 6) as $imgFile) {
                 if ($imgFile) {
-                    $paths[] = $imgFile->store('events', 'public');
+                    $path = $imgFile->store('events', 'public');
+                    \App\Models\SystemUploadedFile::persist($path, $imgFile);
+                    $paths[] = $path;
                 }
             }
         } elseif ($request->hasFile('image')) {
-            $paths[] = $request->file('image')->store('events', 'public');
+            $path = $request->file('image')->store('events', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
+            $paths[] = $path;
         }
 
         if (!empty($paths)) {
@@ -363,6 +403,7 @@ class AdminController extends Controller
         }
 
         Event::create($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Event created!');
     }
 
@@ -395,37 +436,56 @@ class AdminController extends Controller
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 6) as $imgFile) {
                 if ($imgFile) {
-                    $paths[] = $imgFile->store('events', 'public');
+                    $path = $imgFile->store('events', 'public');
+                    \App\Models\SystemUploadedFile::persist($path, $imgFile);
+                    $paths[] = $path;
                 }
             }
         } elseif ($request->hasFile('image')) {
-            $paths[] = $request->file('image')->store('events', 'public');
+            $path = $request->file('image')->store('events', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
+            $paths[] = $path;
         }
 
-        if (!empty($paths)) {
+        if ($request->has('photo_manager_active') || $request->has('existing_photos')) {
+            $kept = [];
+            foreach ($request->input('existing_photos', []) as $raw) {
+                $clean = $this->cleanStoragePath($raw);
+                if ($clean) {
+                    $kept[] = $clean;
+                }
+            }
+            $finalPaths = array_slice(array_merge($kept, $paths), 0, 6);
+            $data['image_path'] = $finalPaths[0] ?? null;
+            $data['images']     = $finalPaths;
+        } elseif (!empty($paths)) {
             $data['image_path'] = $paths[0];
-            $data['images'] = $paths;
+            $data['images']     = $paths;
         }
 
         $evt->update($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Event updated!');
     }
 
     public function archiveEvent($id)
     {
         Event::findOrFail($id)->update(['is_active' => false]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Event archived.');
     }
 
     public function restoreEvent($id)
     {
         Event::findOrFail($id)->update(['is_active' => true]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Event restored.');
     }
 
     public function destroyEvent($id)
     {
         Event::findOrFail($id)->delete();
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Event permanently deleted.');
     }
 
@@ -442,9 +502,12 @@ class AdminController extends Controller
             'is_active'  => true,
         ];
         if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('officials', 'public');
+            $path = $request->file('photo')->store('officials', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('photo'));
+            $data['photo'] = $path;
         }
         Official::create($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Official added!');
     }
 
@@ -460,27 +523,33 @@ class AdminController extends Controller
             'term_end'   => $request->term_end,
         ];
         if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('officials', 'public');
+            $path = $request->file('photo')->store('officials', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('photo'));
+            $data['photo'] = $path;
         }
         $off->update($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Official updated!');
     }
 
     public function archiveOfficial($id)
     {
         Official::findOrFail($id)->update(['is_active' => false]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Official archived.');
     }
 
     public function restoreOfficial($id)
     {
         Official::findOrFail($id)->update(['is_active' => true]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Official restored.');
     }
 
     public function destroyOfficial($id)
     {
         Official::findOrFail($id)->delete();
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Official permanently deleted.');
     }
 
@@ -541,6 +610,7 @@ class AdminController extends Controller
         }
         $request->validate(['image' => 'required|image|max:5120', 'title' => 'nullable|string']);
         $path = $request->file('image')->store('carousel', 'public');
+        \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
         
         $slides[] = [
             'id'         => time(), // Use timestamp as unique ID
@@ -571,7 +641,9 @@ class AdminController extends Controller
 
         if ($request->hasFile('image')) {
             $request->validate(['image' => 'image|max:5120']);
-            $slides[$foundIndex]['image_path'] = $request->file('image')->store('carousel', 'public');
+            $path = $request->file('image')->store('carousel', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
+            $slides[$foundIndex]['image_path'] = $path;
         }
         $slides[$foundIndex]['title'] = $request->title;
         $slides[$foundIndex]['is_active'] = $request->has('is_active');
@@ -649,11 +721,15 @@ class AdminController extends Controller
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 6) as $imgFile) {
                 if ($imgFile) {
-                    $paths[] = $imgFile->store('projects', 'public');
+                    $path = $imgFile->store('projects', 'public');
+                    \App\Models\SystemUploadedFile::persist($path, $imgFile);
+                    $paths[] = $path;
                 }
             }
         } elseif ($request->hasFile('image')) {
-            $paths[] = $request->file('image')->store('projects', 'public');
+            $path = $request->file('image')->store('projects', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
+            $paths[] = $path;
         }
 
         if (!empty($paths)) {
@@ -662,6 +738,7 @@ class AdminController extends Controller
         }
 
         Project::create($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Barangay project created successfully!');
     }
 
@@ -693,24 +770,39 @@ class AdminController extends Controller
             'contractor_lead' => $request->contractor_lead,
         ];
 
-        $paths = is_array($project->images) ? $project->images : [];
+        $paths = [];
         if ($request->hasFile('images')) {
-            $paths = [];
             foreach (array_slice($request->file('images'), 0, 6) as $imgFile) {
                 if ($imgFile) {
-                    $paths[] = $imgFile->store('projects', 'public');
+                    $path = $imgFile->store('projects', 'public');
+                    \App\Models\SystemUploadedFile::persist($path, $imgFile);
+                    $paths[] = $path;
                 }
             }
         } elseif ($request->hasFile('image')) {
-            $paths = [$request->file('image')->store('projects', 'public')];
+            $path = $request->file('image')->store('projects', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('image'));
+            $paths[] = $path;
         }
 
-        if (!empty($paths)) {
+        if ($request->has('photo_manager_active') || $request->has('existing_photos')) {
+            $kept = [];
+            foreach ($request->input('existing_photos', []) as $raw) {
+                $clean = $this->cleanStoragePath($raw);
+                if ($clean) {
+                    $kept[] = $clean;
+                }
+            }
+            $finalPaths = array_slice(array_merge($kept, $paths), 0, 6);
+            $data['image_path'] = $finalPaths[0] ?? null;
+            $data['images']     = $finalPaths;
+        } elseif (!empty($paths)) {
             $data['image_path'] = $paths[0];
-            $data['images'] = $paths;
+            $data['images']     = $paths;
         }
 
         $project->update($data);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Barangay project updated successfully!');
     }
 
@@ -718,6 +810,7 @@ class AdminController extends Controller
     {
         $project = Project::findOrFail($id);
         $project->update(['is_archived' => true]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Barangay project archived.');
     }
 
@@ -725,6 +818,7 @@ class AdminController extends Controller
     {
         $project = Project::findOrFail($id);
         $project->update(['is_archived' => false]);
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Barangay project restored.');
     }
 
@@ -732,6 +826,7 @@ class AdminController extends Controller
     {
         $project = Project::findOrFail($id);
         $project->delete();
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
         return redirect()->back()->with('success', 'Barangay project permanently deleted.');
     }
 
@@ -741,10 +836,12 @@ class AdminController extends Controller
         if ($request->hasFile('organizational_chart')) {
             $request->validate(['organizational_chart' => 'image|max:10240']);
             $path = $request->file('organizational_chart')->store('settings', 'public');
+            \App\Models\SystemUploadedFile::persist($path, $request->file('organizational_chart'));
             SiteSetting::updateOrCreate(
                 ['key' => 'organizational_chart'],
                 ['value' => $path]
             );
+            \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
             return redirect()->back()->with('success', 'Organizational Chart updated!');
         }
         return redirect()->back();
