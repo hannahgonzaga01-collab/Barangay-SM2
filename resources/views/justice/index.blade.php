@@ -677,6 +677,9 @@ html, body {
                                         <span style="font-size:11px; font-weight:800;"
                                               :style="ev.phase === 'Conciliation' ? 'color:#7c3aed;' : (ev.phase === 'Arbitration' ? 'color:#dc2626;' : 'color:#1d4ed8;')"
                                               x-text="ev.stage + ' (' + ev.phase + ')'"></span>
+                                        <span style="font-size:8px; font-weight:800; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:1px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:3px;">
+                                            <i class="fas fa-check-circle" style="font-size:7px;"></i> Dispatched
+                                        </span>
                                     </div>
                                     <span style="font-size:9.5px; font-weight:900; color:#1e293b; background:#f1f5f9; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:3px;">
                                         <i class="fas fa-clock" style="font-size:8px; color:var(--brand);"></i> <span x-text="ev.time_str"></span>
@@ -697,8 +700,8 @@ html, body {
                                     <button type="button" @click="settleSchedule(ev)" class="btn btn-sm" style="background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; font-size:8.5px; justify-content:center; padding:4px 0;" title="Mark as Settled (KP Form 16)">
                                         <i class="fas fa-handshake"></i> Mark Settled
                                     </button>
-                                    <button type="button" @click="selectedIssueId = ev.id; summonModal = true" class="btn btn-sm" style="background:#eff6ff; color:var(--brand); border:1px solid #bfdbfe; font-size:8.5px; justify-content:center; padding:4px 0;" title="Schedule 2nd / Next Trial">
-                                        <i class="fas fa-calendar-plus"></i> Next Trial Sched
+                                    <button type="button" @click="selectedIssueId = ev.id; summonModal = true" class="btn btn-sm" style="background:#eff6ff; color:var(--brand); border:1px solid #bfdbfe; font-size:8.5px; justify-content:center; padding:4px 0;" title="Reschedule hearing or schedule next trial stage">
+                                        <i class="fas fa-calendar-alt"></i> Resched / Next
                                     </button>
                                 </div>
                             </div>
@@ -1258,10 +1261,29 @@ html, body {
                             <label class="flbl">Select Active Case <span class="req">*</span></label>
                             <select name="issue_id" class="finput fselect" required x-model="selectedIssueId">
                                 <option value="">— Select Case —</option>
-                                @foreach($reports->whereNotIn('status',['settled','resolved']) as $rep)
-                                    @php $cno = 'JUS-'.$rep->created_at->format('Y').'-'.str_pad($rep->id,3,'0',STR_PAD_LEFT); @endphp
-                                    <option value="{{ $rep->id }}">#{{ $cno }} : {{ $rep->complainant_name }} (vs {{ $rep->respondent_name }})</option>
-                                @endforeach
+                                @php
+                                    $unscheduledReports = $reports->filter(fn($r) => empty($r->hearing_date) && !in_array($r->status, ['settled', 'resolved', 'escalated']));
+                                    $scheduledReports = $reports->filter(fn($r) => !empty($r->hearing_date) && !in_array($r->status, ['settled', 'resolved', 'escalated']));
+                                @endphp
+                                @if($unscheduledReports->isNotEmpty())
+                                    <optgroup label="📋 Pending Scheduling (Action Needed)">
+                                        @foreach($unscheduledReports as $rep)
+                                            @php $cno = 'JUS-'.$rep->created_at->format('Y').'-'.str_pad($rep->id,3,'0',STR_PAD_LEFT); @endphp
+                                            <option value="{{ $rep->id }}">#{{ $cno }} : {{ $rep->complainant_name }} (vs {{ $rep->respondent_name }})</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                                @if($scheduledReports->isNotEmpty())
+                                    <optgroup label="🗓️ Already Scheduled (Reschedule / Next Trial)">
+                                        @foreach($scheduledReports as $rep)
+                                            @php 
+                                                $cno = 'JUS-'.$rep->created_at->format('Y').'-'.str_pad($rep->id,3,'0',STR_PAD_LEFT);
+                                                $hDateStr = \Carbon\Carbon::parse($rep->hearing_date)->format('M d, Y h:i A');
+                                            @endphp
+                                            <option value="{{ $rep->id }}">#{{ $cno }} : {{ $rep->complainant_name }} (vs {{ $rep->respondent_name }}) — [Current: {{ $hDateStr }}]</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
                             </select>
                         </div>
 
@@ -2505,12 +2527,24 @@ html, body {
                 if (!this.selectedIssueId) return { case_no: '', complainant: '', respondent: '' };
                 if (this.activeRecord && this.activeRecord.id == this.selectedIssueId) {
                     return {
-                        case_no: this.activeRecord.case_no || '',
-                        complainant: this.activeRecord.complainant || this.activeRecord.complainant_name || '',
-                        respondent: this.activeRecord.respondent || this.activeRecord.respondent_name || ''
+                        case_no: this.activeRecord.case_no || ('Case #' + this.selectedIssueId),
+                        complainant: this.activeRecord.complainant || this.activeRecord.complainant_name || 'Complainant',
+                        respondent: this.activeRecord.respondent || this.activeRecord.respondent_name || 'Respondent'
                     };
                 }
-                return { case_no: this.selectedIssueId, complainant: 'Complainant', respondent: 'Respondent' };
+                const sel = document.querySelector('select[name="issue_id"]');
+                if (sel && sel.selectedOptions && sel.selectedOptions[0]) {
+                    const txt = sel.selectedOptions[0].textContent || '';
+                    const match = txt.match(/#(JUS-[^:]+)\s*:\s*([^(]+)\s*\(vs\s*([^)]+)\)/);
+                    if (match) {
+                        return {
+                            case_no: match[1].trim(),
+                            complainant: match[2].trim(),
+                            respondent: match[3].trim()
+                        };
+                    }
+                }
+                return { case_no: 'Case #' + this.selectedIssueId, complainant: 'Complainant', respondent: 'Respondent' };
             },
             get selectedTimeSlotLabel() {
                 const slot = this.slotsList.find(s => s.val === this.selectedTimeSlot);
@@ -2639,7 +2673,14 @@ html, body {
 
                         this.confirmScheduleModal = false;
                         this.summonModal = false;
+                        this.selectedIssueId = '';
+                        this.scheduledDate = '';
+                        this.selectedTimeSlot = '';
                         this.triggerToast('success', 'Hearing Scheduled Successfully', data.message);
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1200);
                     } else {
                         this.triggerToast('error', 'Scheduling Failed', data.message || 'Could not schedule hearing.');
                     }

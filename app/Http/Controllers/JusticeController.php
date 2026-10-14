@@ -203,10 +203,11 @@ class JusticeController extends Controller
             return redirect()->back()->with('error', 'Hearing schedule cannot be set beyond 3 months in advance.');
         }
 
-        // Check if a hearing is already scheduled for this exact time
+        // Check if a hearing is already scheduled for this exact time by another case
         $exists = IssueReport::where('department', 'Justice')
             ->where('hearing_date', $datetime->toDateTimeString())
             ->whereNotIn('status', ['settled', 'resolved'])
+            ->where('id', '!=', $validated['issue_id'])
             ->exists();
 
         if ($exists) {
@@ -237,7 +238,9 @@ class JusticeController extends Controller
 
         // 2. Resident SMS Notification Dispatch
         if (!empty($issue->contact)) {
-            \Illuminate\Support\Facades\Log::info("SMS Notification queued for resident ({$issue->contact}): Hearing scheduled for Case #{$issue->case_no} on " . $datetime->format('F d, Y \a\t h:i A') . " at Barangay Hall Mediation Center.");
+            $yr = $issue->created_at ? $issue->created_at->format('Y') : date('Y');
+            $caseNo = 'JUS-' . $yr . '-' . str_pad($issue->id, 3, '0', STR_PAD_LEFT);
+            \Illuminate\Support\Facades\Log::info("SMS Notification queued for resident ({$issue->contact}): Hearing scheduled for Case #{$caseNo} on " . $datetime->format('F d, Y \a\t h:i A') . " at Barangay Hall Mediation Center.");
         }
 
         if ($request->ajax() || $request->wantsJson()) {

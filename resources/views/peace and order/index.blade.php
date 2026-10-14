@@ -815,6 +815,10 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
             } else if (newStatus === 'responding') {
                 const numId = Number(alertId);
                 if (!this.knownSosIds.includes(numId)) this.knownSosIds.push(numId);
+                const found = (this.sosAlerts || []).find(a => a.id === alertId);
+                if (found) {
+                    found.status = 'responding';
+                }
             }
 
             fetch('/peace/sos-alerts/' + alertId + '/status', {
@@ -826,7 +830,23 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                 },
                 body: JSON.stringify({ status: newStatus })
             }).then(r => r.json()).then(res => {
-                if (newStatus === 'resolved' && typeof Swal !== 'undefined') {
+                if (newStatus === 'responding' && typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        html: `
+                            <div style="text-align:center;padding:12px 6px;">
+                                <div style="width:48px;height:48px;border-radius:50%;background:#fef3c7;color:#d97706;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:22px;">
+                                    <i class="fas fa-motorcycle"></i>
+                                </div>
+                                <div style="font-size:16px;font-weight:900;color:#0f172a;margin-bottom:3px;">Tanod Dispatched!</div>
+                                <div style="font-size:12px;color:#64748b;font-weight:600;">Na-dispatch na ang tanod responders para sa emergency na ito.</div>
+                            </div>
+                        `,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        timerProgressBar: true,
+                        customClass: { popup: 'brgy-swal-modal' }
+                    });
+                } else if (newStatus === 'resolved' && typeof Swal !== 'undefined') {
                     Swal.fire({
                         html: `
                             <div style="text-align:center;padding:12px 6px;">
