@@ -59,8 +59,11 @@ html, body {
 .filter-search{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 10px;flex:1;min-width:150px;}
 .filter-search input{background:transparent;border:none;color:#fff;font-family:inherit;font-size:10px;font-weight:700;outline:none;width:100%;}
 .filter-search input::placeholder{color:rgba(255,255,255,.5);}
-.filter-bar select{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:10px;font-weight:700;outline:none;}
+.filter-bar select,
+.filter-bar input[type="date"]{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 10px;font-family:inherit;font-size:10px;font-weight:700;outline:none;height:31px;box-sizing:border-box;color-scheme:dark;}
 .filter-bar select option{background:#04192D;color:#fff;}
+.filter-bar input[type="date"]{cursor:pointer;}
+.filter-bar input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.75;cursor:pointer;font-size:11px;}
 
 .tbl{width:100%;border-collapse:collapse;}
 .tbl thead tr{background:#f8fafc;}
@@ -1208,18 +1211,19 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                 </div>
 
                 {{-- PATROL FILTER BAR --}}
-                <div class="filter-bar" style="justify-content: flex-start; gap: 10px;">
+                <div class="filter-bar" style="justify-content: flex-start; gap: 8px;">
                     <i class="fas fa-filter" style="color:rgba(255,255,255,.6);font-size:11px;flex-shrink:0;"></i>
                     <select x-model="patrolFilterTeam" style="width: 140px; flex: none;">
                         <option value="">All Teams</option>
                         <option value="Team A">Team A</option>
                         <option value="Team B">Team B</option>
                     </select>
-                    <div class="filter-search" style="width: 180px; flex: none;">
-                        <i class="fas fa-calendar" style="color:rgba(255,255,255,.5);font-size:10px;flex-shrink:0;"></i>
-                        <input type="date" x-model="patrolFilterDate" style="color:#fff;">
-                    </div>
+                    <input type="date" x-model="patrolFilterDate" style="width: 140px; flex: none;" title="Filter by Schedule Date">
+                    <button type="button" x-show="patrolFilterDate !== '' || patrolFilterTeam !== ''" @click="patrolFilterDate=''; patrolFilterTeam=''" style="background:none;border:none;color:rgba(255,255,255,.75);font-size:10px;font-weight:700;cursor:pointer;padding:4px 8px;display:inline-flex;align-items:center;gap:4px;border-radius:6px;transition:all 0.15s;" onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.color='rgba(255,255,255,.75)';this.style.background='none'" title="Reset filters">
+                        <i class="fas fa-times-circle"></i> Clear
+                    </button>
                 </div>
+
 
                 <div style="overflow-x:auto;">
                     <table class="tbl">
