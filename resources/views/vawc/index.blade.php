@@ -778,14 +778,14 @@ html, body {
                                                 'submitted'       => 1,
                                                 'pending'         => 1,
                                                 'under_review'    => 2,
-                                                'on_going'        => 3,
-                                                'urgent'          => 3,
                                                 'approved'        => 3,
-                                                'referred_to_pnp' => 4,
-                                                'settled'         => 4,
-                                                'resolved'        => 4,
-                                                'rejected'        => 4,
-                                                'archived'        => 4,
+                                                'on_going'        => 4,
+                                                'urgent'          => 4,
+                                                'referred_to_pnp' => 5,
+                                                'settled'         => 5,
+                                                'resolved'        => 5,
+                                                'rejected'        => 5,
+                                                'archived'        => 5,
                                             ];
                                             $curVawcRank = $vawcRankMap[$issue->status] ?? 1;
                                             $isVawcTerminal = in_array($issue->status, ['settled', 'resolved', 'rejected', 'archived', 'referred_to_pnp']);
@@ -816,20 +816,22 @@ html, body {
                                                     @csrf @method('PATCH')
                                                     <select name="status" @change="if($el.value === 'rejected') { openReject({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else { document.getElementById('vawc-status-form-{{ $issue->id }}').submit(); }"
                                                             style="height:32px;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;background:#f8fafc;cursor:pointer;outline:none;font-family:inherit;">
-                                                        @if($curVawcRank === 1)
+                                                        @if($curVawcRank <= 1)
                                                             <option value="pending"         {{ in_array($issue->status, ['submitted','pending']) ? 'selected' : '' }}>Pending</option>
                                                         @endif
                                                         @if($curVawcRank <= 2)
                                                             <option value="under_review"    {{ $issue->status==='under_review' ? 'selected' : '' }}>Under Review</option>
                                                         @endif
                                                         @if($curVawcRank <= 3)
-                                                            <option value="on_going"        {{ $issue->status==='on_going'        ? 'selected' : '' }}>On-going</option>
-                                                            <option value="referred_to_pnp" {{ $issue->status==='referred_to_pnp' ? 'selected' : '' }}>Referred to PNP</option>
-                                                            <option value="urgent"          {{ $issue->status==='urgent'          ? 'selected' : '' }}>Urgent Rescue</option>
                                                             <option value="approved"        {{ $issue->status==='approved'        ? 'selected' : '' }}>Approved</option>
                                                         @endif
-                                                        <option value="settled"         {{ in_array($issue->status, ['settled','resolved']) ? 'selected' : '' }}>Resolved</option>
-                                                        <option value="rejected"        {{ $issue->status==='rejected'        ? 'selected' : '' }}>Rejected</option>
+                                                        @if($curVawcRank <= 4)
+                                                            <option value="on_going"        {{ $issue->status==='on_going'        ? 'selected' : '' }}>On-going</option>
+                                                            <option value="urgent"          {{ $issue->status==='urgent'          ? 'selected' : '' }}>Urgent Rescue</option>
+                                                        @endif
+                                                        <option value="referred_to_pnp">Referred to PNP</option>
+                                                        <option value="settled">Resolved</option>
+                                                        <option value="rejected">Rejected</option>
                                                     </select>
                                                 </form>
                                             @else
@@ -884,7 +886,7 @@ html, body {
                             <th style="text-align:right;">Action</th>
                         </tr></thead>
                         <tbody>
-                            @forelse(\App\Models\IssueReport::where('department','VAWC')->whereIn('status',['urgent','on_going','referred_to_pnp'])->latest()->get() as $urgentIssue)
+                            @forelse(\App\Models\IssueReport::where('department','VAWC')->whereIn('status',['urgent','referred_to_pnp'])->latest()->get() as $urgentIssue)
                             @php 
                                 $uCode = 'VAWC-'.$urgentIssue->created_at->format('Y').'-'.str_pad($urgentIssue->id, 3, '0', STR_PAD_LEFT); 
                                 $urgentData = [

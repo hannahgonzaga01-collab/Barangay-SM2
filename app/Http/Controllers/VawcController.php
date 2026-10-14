@@ -123,14 +123,14 @@ class VawcController extends Controller
             'submitted'       => 1,
             'pending'         => 1,
             'under_review'    => 2,
-            'on_going'        => 3,
-            'urgent'          => 3,
             'approved'        => 3,
-            'referred_to_pnp' => 4,
-            'settled'         => 4,
-            'resolved'        => 4,
-            'rejected'        => 4,
-            'archived'        => 4,
+            'on_going'        => 4,
+            'urgent'          => 4,
+            'referred_to_pnp' => 5,
+            'settled'         => 5,
+            'resolved'        => 5,
+            'rejected'        => 5,
+            'archived'        => 5,
         ];
 
         $currentStatus = $issue->status;
