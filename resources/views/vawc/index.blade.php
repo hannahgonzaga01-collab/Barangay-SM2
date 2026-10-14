@@ -766,32 +766,6 @@ html, body {
                                 </td>
                                 <td style="text-align:right;">
                                     {{-- REFINED ACTION BUTTON GROUP (ALIGNED, CLEAN SPACING) --}}
-                                    <div class="action-btn-group">
-                                        {{-- 1. VIEW BUTTON --}}
-                                        <button type="button" @click="openView({{ json_encode($issueData) }})"
-                                                class="btn-action-icon btn-action-view" title="View Case Details">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-
-                                        {{-- 2. TRANSFER (⇄) BUTTON TRIGGERING CONFIRMATION MODAL WITH REASON --}}
-                                        <button type="button" @click="openReroute({{ json_encode($issueData) }})"
-                                                class="btn-action-icon btn-action-reroute" title="Re-route Case to Peace & Order / KP Desk">
-                                            <i class="fas fa-exchange-alt"></i>
-                                        </button>
-
-                                        {{-- 3. ARCHIVE BUTTON TRIGGERING CONFIRMATION MODAL WITH MANDATORY NOTE --}}
-                                        @if($issue->status === 'archived')
-                                            <span class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;cursor:default;" title="Case Already Archived">
-                                                <i class="fas fa-archive"></i>
-                                            </span>
-                                        @else
-                                            <button type="button" @click="openArchive({{ json_encode($issueData) }})"
-                                                    class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;" title="Archive Blotter Case (Requires Note)">
-                                                <i class="fas fa-archive"></i>
-                                            </button>
-                                        @endif
-
-                                        {{-- 4. STATUS UPDATE DROPDOWN --}}
                                         @php
                                             $vawcRankMap = [
                                                 'submitted'       => 1,
@@ -809,6 +783,38 @@ html, body {
                                             $curVawcRank = $vawcRankMap[$issue->status] ?? 1;
                                             $isVawcTerminal = in_array($issue->status, ['settled', 'resolved', 'rejected', 'archived']);
                                         @endphp
+
+                                        {{-- 1. VIEW BUTTON --}}
+                                        <button type="button" @click="openView({{ json_encode($issueData) }})"
+                                                class="btn-action-icon btn-action-view" title="View Case Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        {{-- 2. TRANSFER (⇄) BUTTON TRIGGERING CONFIRMATION MODAL WITH REASON --}}
+                                        @if(!$isVawcTerminal)
+                                            <button type="button" @click="openReroute({{ json_encode($issueData) }})"
+                                                    class="btn-action-icon btn-action-reroute" title="Re-route Case to Peace & Order / KP Desk">
+                                                <i class="fas fa-exchange-alt"></i>
+                                            </button>
+                                        @endif
+
+                                        {{-- 3. ARCHIVE BUTTON TRIGGERING CONFIRMATION MODAL WITH MANDATORY NOTE --}}
+                                        @if($issue->status === 'archived')
+                                            <span class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;cursor:default;" title="Case Already Archived">
+                                                <i class="fas fa-archive"></i>
+                                            </span>
+                                        @elseif($isVawcTerminal)
+                                            <span class="btn-action-icon" style="background:#dcfce7;color:#15803d;border:1.5px solid #bbf7d0;cursor:default;" title="Case {{ ucfirst($issue->status) }} and Closed">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        @else
+                                            <button type="button" @click="openArchive({{ json_encode($issueData) }})"
+                                                    class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;" title="Archive Blotter Case (Requires Note)">
+                                                <i class="fas fa-archive"></i>
+                                            </button>
+                                        @endif
+
+                                        {{-- 4. STATUS UPDATE DROPDOWN --}}
                                         @if($isVawcTerminal)
                                             <select disabled style="height:32px;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;background:#f8fafc;color:#94a3b8;cursor:not-allowed;outline:none;font-family:inherit;opacity:0.75;" title="This case is already {{ $issue->status === 'settled' ? 'Resolved' : ($issue->status === 'archived' ? 'Archived' : ucfirst($issue->status)) }} and locked.">
                                                 <option selected>{{ $issue->status === 'archived' ? 'Archived' : ($issue->status === 'settled' ? 'Resolved' : ucfirst(str_replace('_',' ',$issue->status))) }}</option>
@@ -1016,7 +1022,7 @@ html, body {
                                     @endif
                                     @if($resolvedIssue->admin_notes)
                                         <div style="font-size:9.5px;color:var(--muted);margin-top:3px;max-width:240px;line-height:1.3;white-space:normal;">
-                                            {{ Str::limit($resolvedIssue->admin_notes, 90) }}
+                                            {{ \Illuminate\Support\Str::limit($resolvedIssue->admin_notes, 90) }}
                                         </div>
                                     @endif
                                 </td>

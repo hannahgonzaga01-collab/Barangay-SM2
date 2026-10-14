@@ -2193,8 +2193,16 @@ div:where(.swal2-container) div:where(.swal2-popup).brgy-swal-modal .swal2-actio
                                     <div style="background:#fff;border:1px solid #fecaca;border-radius:8px;padding:12px;font-size:12px;font-weight:600;color:#dc2626;line-height:1.7;white-space:pre-wrap;" x-text="activeIssue.rejection_reason"></div>
                                 </div>
                             </template>
-                            <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-                                <button type="button" @click="viewModal=false; openEscalate(activeIssue.id)" class="btn btn-warn btn-sm" style="background:linear-gradient(135deg,#d97706,#b45309);color:#fff;"><i class="fas fa-gavel"></i> Escalate to KP (Justice)</button>
+                            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <template x-if="activeIssue.status !== 'settled' && activeIssue.status !== 'resolved' && activeIssue.status !== 'rejected'">
+                                    <button type="button" @click="viewModal=false; openEscalate(activeIssue.id)" class="btn btn-warn btn-sm" style="background:linear-gradient(135deg,#d97706,#b45309);color:#fff;"><i class="fas fa-gavel"></i> Escalate to KP (Justice)</button>
+                                </template>
+                                <template x-if="activeIssue.status === 'settled' || activeIssue.status === 'resolved'">
+                                    <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#dcfce7;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;font-size:10px;font-weight:900;"><i class="fas fa-check-circle"></i> Case Settled & Closed (Actions Locked)</span>
+                                </template>
+                                <template x-if="activeIssue.status === 'rejected'">
+                                    <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca;border-radius:8px;font-size:10px;font-weight:900;"><i class="fas fa-times-circle"></i> Case Rejected (Closed)</span>
+                                </template>
                                 <button @click="viewModal=false" class="btn btn-ghost btn-sm">Close</button>
                             </div>
                         </div>

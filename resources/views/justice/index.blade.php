@@ -1613,14 +1613,16 @@ html, body {
                                 <div style="font-size:10px;font-weight:900;color:var(--brand-dark);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
                                     <i class="fas fa-tasks" style="color:var(--brand);"></i> Case Actions & Proceedings
                                 </div>
-                                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                    <!-- Schedule Hearing -->
-                                    <button type="button" @click="selectedIssueId=activeRecord.id; summonModal=true" class="btn btn-sm" style="background:#eef2ff;color:#4338ca;border:1.5px solid #c7d2fe;">
-                                        <i class="fas fa-calendar-plus"></i> Schedule Hearing
-                                    </button>
+                                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                    <!-- Schedule Hearing (Only available if not settled/resolved/escalated) -->
+                                    <template x-if="activeRecord.status !== 'settled' && activeRecord.status !== 'resolved' && activeRecord.status !== 'escalated'">
+                                        <button type="button" @click="selectedIssueId=activeRecord.id; summonModal=true" class="btn btn-sm" style="background:#eef2ff;color:#4338ca;border:1.5px solid #c7d2fe;">
+                                            <i class="fas fa-calendar-plus"></i> Schedule Hearing
+                                        </button>
+                                    </template>
 
                                     <!-- Issue Settlement (KP Form 16) -->
-                                    <template x-if="activeRecord.status !== 'settled' && activeRecord.status !== 'resolved'">
+                                    <template x-if="activeRecord.status !== 'settled' && activeRecord.status !== 'resolved' && activeRecord.status !== 'escalated'">
                                         <button type="button" @click.prevent="promptConfirmSettlement()" class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1.5px solid #bbf7d0;">
                                             <i class="fas fa-handshake"></i> Finalize Settlement (KP Form 16)
                                         </button>
@@ -1631,6 +1633,18 @@ html, body {
                                         <button type="button" @click.prevent="promptConfirmEscalate()" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca;">
                                             <i class="fas fa-gavel"></i> Escalate to Court (KP Form 20)
                                         </button>
+                                    </template>
+
+                                    <!-- Locked Badges for Completed Cases -->
+                                    <template x-if="activeRecord.status === 'settled' || activeRecord.status === 'resolved'">
+                                        <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#dcfce7;color:#15803d;border:1.5px solid #bbf7d0;border-radius:8px;font-size:10.5px;font-weight:900;">
+                                            <i class="fas fa-lock"></i> Case Settled (KP Form 16 Completed — Actions Locked)
+                                        </div>
+                                    </template>
+                                    <template x-if="activeRecord.status === 'escalated'">
+                                        <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca;border-radius:8px;font-size:10.5px;font-weight:900;">
+                                            <i class="fas fa-gavel"></i> Escalated to Court (KP Form 20 Issued — Actions Locked)
+                                        </div>
                                     </template>
                                 </div>
                             </div>

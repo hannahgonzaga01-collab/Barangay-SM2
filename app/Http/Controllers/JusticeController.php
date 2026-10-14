@@ -177,6 +177,14 @@ class JusticeController extends Controller
 
         $issue = IssueReport::findOrFail($validated['issue_id']);
         
+        // Cannot schedule hearing for already settled, resolved, or escalated cases
+        if (in_array($issue->status, ['settled', 'resolved', 'escalated'])) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'This case is already ' . ($issue->status === 'settled' ? 'settled' : ($issue->status === 'escalated' ? 'escalated to court' : 'resolved')) . ' and cannot be scheduled for hearing.'], 422);
+            }
+            return redirect()->back()->with('error', 'This case is already ' . ($issue->status === 'settled' ? 'settled' : ($issue->status === 'escalated' ? 'escalated to court' : 'resolved')) . ' and cannot be scheduled for hearing.');
+        }
+
         $datetime = \Carbon\Carbon::parse($validated['hearing_date'] . ' ' . $validated['time']);
 
         // Check if the scheduled time is in the past
