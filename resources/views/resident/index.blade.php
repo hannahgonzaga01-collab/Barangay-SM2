@@ -2047,9 +2047,7 @@ html, body {
                                 @if($sos->status === 'resolved')
                                     <span style="font-weight:900;text-transform:uppercase;color:#15803d;background:#dcfce7;padding:2px 8px;border-radius:99px;border:1px solid #bbf7d0;font-size:9px;"><i class="fas fa-check"></i> Resolved</span>
                                 @elseif($sos->status === 'responding')
-                                    <span style="font-weight:900;text-transform:uppercase;color:#1d4ed8;background:#eff6ff;padding:2px 8px;border-radius:99px;border:1px solid #bfdbfe;font-size:9px;"><i class="fas fa-motorcycle"></i> Tanod Responding</span>
-                                @elseif($sos->status === 'acknowledged')
-                                    <span style="font-weight:900;text-transform:uppercase;color:#7c3aed;background:#fdf4ff;padding:2px 8px;border-radius:99px;border:1px solid #e9d5ff;font-size:9px;"><i class="fas fa-check-double"></i> Acknowledged</span>
+                                    <span style="font-weight:900;text-transform:uppercase;color:#92400e;background:#fef3c7;padding:2px 8px;border-radius:99px;border:1px solid #fde68a;font-size:9px;"><i class="fas fa-motorcycle"></i> Tanod Dispatched</span>
                                 @else
                                     <span style="font-weight:900;text-transform:uppercase;color:#be123c;background:#fff1f2;padding:2px 8px;border-radius:99px;border:1px solid #fecdd3;font-size:9px;"><i class="fas fa-satellite-dish"></i> Alert Dispatched</span>
                                 @endif
@@ -3815,53 +3813,35 @@ html, body {
                         </div>
                         <span style="font-size:9.5px;font-weight:900;padding:4px 11px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;"
                               :style="selectedSos?.status === 'resolved' ? 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;' :
-                                     (selectedSos?.status === 'responding' ? 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;' :
-                                     (selectedSos?.status === 'acknowledged' ? 'background:#fdf4ff;color:#7c3aed;border:1px solid #e9d5ff;' :
-                                     'background:#fff1f2;color:#be123c;border:1px solid #fecdd3;'))"
-                              x-text="selectedSos?.status === 'responding' ? 'Tanod Responding' : (selectedSos?.status === 'acknowledged' ? 'Acknowledged' : (selectedSos?.status === 'resolved' ? 'Resolved' : 'Alert Dispatched'))"></span>
+                                     (selectedSos?.status === 'responding' ? 'background:#fef3c7;color:#92400e;border:1px solid #fde68a;' :
+                                     'background:#fff1f2;color:#be123c;border:1px solid #fecdd3;')"
+                              x-text="selectedSos?.status === 'resolved' ? 'Resolved' : (selectedSos?.status === 'responding' ? 'Tanod Dispatched' : 'Alert Dispatched')"></span>
                     </div>
                 </div>
 
-                {{-- 4-Step Progress Stepper --}}
-                <div style="padding:10px 6px;margin-bottom:14px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
-                        <div style="position:absolute;top:14px;left:20px;right:20px;height:3px;background:#e2e8f0;z-index:1;"></div>
+                {{-- 2-Step Progress Stepper (Dispatched -> Resolved) --}}
+                <div style="padding:16px 20px 12px;margin-bottom:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;position:relative;max-width:320px;margin:0 auto;">
+                        <div style="position:absolute;top:15px;left:40px;right:40px;height:4px;background:#e2e8f0;z-index:1;border-radius:99px;overflow:hidden;">
+                            <div style="height:100%;transition:all .3s ease;"
+                                 :style="selectedSos?.status === 'resolved' ? 'width:100%;background:#059669;' : 'width:0%;background:#e2e8f0;'"></div>
+                        </div>
                         
                         {{-- Step 1: Dispatched --}}
-                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
-                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;background:#059669;color:#fff;">
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+                            <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;background:#059669;color:#fff;box-shadow:0 2px 8px rgba(5,150,105,0.35);">
                                 <i class="fas fa-check"></i>
                             </div>
-                            <span style="font-size:9.5px;font-weight:800;color:var(--text);margin-top:5px;text-align:center;">Dispatched</span>
+                            <span style="font-size:11px;font-weight:800;color:var(--text);margin-top:6px;text-align:center;">Dispatched</span>
                         </div>
 
-                        {{-- Step 2: Acknowledged --}}
-                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
-                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
-                                 :style="['acknowledged','responding','resolved'].includes(selectedSos?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
-                                <i class="fas" :class="['acknowledged','responding','resolved'].includes(selectedSos?.status) ? 'fa-check' : 'fa-check-double'"></i>
+                        {{-- Step 2: Resolved --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+                            <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;transition:all .3s ease;"
+                                 :style="selectedSos?.status === 'resolved' ? 'background:#059669;color:#fff;box-shadow:0 2px 8px rgba(5,150,105,0.35);' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="selectedSos?.status === 'resolved' ? 'fa-check' : 'fa-check-circle'"></i>
                             </div>
-                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
-                                  :style="['acknowledged','responding','resolved'].includes(selectedSos?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Acknowledged</span>
-                        </div>
-
-                        {{-- Step 3: Responding --}}
-                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
-                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
-                                 :style="['responding','resolved'].includes(selectedSos?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
-                                <i class="fas" :class="['responding','resolved'].includes(selectedSos?.status) ? 'fa-check' : 'fa-motorcycle'"></i>
-                            </div>
-                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
-                                  :style="['responding','resolved'].includes(selectedSos?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Responding</span>
-                        </div>
-
-                        {{-- Step 4: Resolved --}}
-                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
-                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
-                                 :style="selectedSos?.status === 'resolved' ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
-                                <i class="fas" :class="selectedSos?.status === 'resolved' ? 'fa-check' : 'fa-shield-heart'"></i>
-                            </div>
-                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
+                            <span style="font-size:11px;font-weight:800;margin-top:6px;text-align:center;"
                                   :style="selectedSos?.status === 'resolved' ? 'color:var(--text);' : 'color:#94a3b8;'">Resolved</span>
                         </div>
                     </div>
