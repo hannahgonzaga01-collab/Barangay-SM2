@@ -1292,16 +1292,42 @@ class OfficeController extends Controller
 
     public function storePet(Request $request)
     {
-        if (auth()->check() && in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
-            return redirect()->back()->with('error', '⚠️ Ang pagpaparehistro ng alagang hayop ay para lamang sa mga opisyal at beripikadong residente.');
-        }
-
-        if (auth()->check() && empty($request->resident_id)) {
+        if (auth()->check()) {
             $user = auth()->user();
-            $rId = $user->resident?->id ?: \App\Models\Resident::where('user_id', $user->id)->value('id');
-            if ($rId) {
-                $request->merge(['resident_id' => $rId]);
+            $isVerified = ($user->status === 'active') 
+                || ($user->voter_status === 'approved') 
+                || ($user->resident?->verification_status === 'approved');
+
+            if (!$isVerified && in_array($user->status, ['pending_verification', 'declined'])) {
+                return redirect()->back()->with('error', '⚠️ Ang pagpaparehistro ng alagang hayop ay para lamang sa mga opisyal at beripikadong residente.');
             }
+
+            // Ensure linked resident record exists and merge its id
+            $rId = $user->resident?->id ?: \App\Models\Resident::where('user_id', $user->id)->value('id');
+            if (!$rId) {
+                $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
+                $random = strtoupper(substr(uniqid(), -6));
+                $newRes = \App\Models\Resident::create([
+                    'user_id'             => $user->id,
+                    'resident_code'       => $user->resident_code ?? "R-{$prefix}-{$random}",
+                    'first_name'          => $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'Resident'),
+                    'middle_name'         => $user->middle_name,
+                    'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? 'User') : 'User'),
+                    'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
+                    'birthplace'          => $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite',
+                    'gender'              => $user->gender ?? 'Other',
+                    'civil_status'        => $user->civil_status ?? 'Single',
+                    'address'             => $user->address ?? 'Barangay San Miguel II',
+                    'is_voter'            => (bool)($user->is_voter ?? false),
+                    'is_non_voter'        => (bool)($user->is_non_voter ?? false),
+                    'is_senior'           => (bool)($user->is_senior ?? false),
+                    'is_household_head'   => true,
+                    'verification_status' => 'approved',
+                ]);
+                $rId = $newRes->id;
+                $user->update(['resident_code' => $newRes->resident_code]);
+            }
+            $request->merge(['resident_id' => $rId]);
         }
 
         $request->validate([
@@ -1370,7 +1396,7 @@ class OfficeController extends Controller
         $pet = Pet::findOrFail($id);
         if (auth()->check() && auth()->user()->role === 'resident') {
             $userResidentId = auth()->user()->resident?->id ?: \App\Models\Resident::where('user_id', auth()->id())->value('id');
-            if ($userResidentId && $pet->resident_id != $userResidentId) {
+            if ($userResidentId && $pet->resident_id != $userResidentId && $pet->resident_id != auth()->id()) {
                 abort(403, 'Hindi mo pagmamay-ari ang alagang ito.');
             }
         }

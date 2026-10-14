@@ -5327,7 +5327,26 @@ html, body {
                 </div>
 
                 {{-- PETS --}}
-                @php $myPets = $authUser?->pets ?? collect(); @endphp
+                @php 
+                    $myPets = $myPets ?? collect();
+                    if ($myPets->isEmpty()) {
+                        $resId = $resident?->id ?? $authUser?->resident?->id ?? (\App\Models\Resident::where('user_id', $authUser?->id)->value('id'));
+                        $uId = $authUser?->id;
+                        $myPets = \App\Models\Pet::where('is_archived', false)
+                            ->where(function($q) use ($resId, $uId) {
+                                if ($resId) {
+                                    $q->where('resident_id', $resId);
+                                    if ($uId) {
+                                        $q->orWhere('resident_id', $uId);
+                                    }
+                                } elseif ($uId) {
+                                    $q->where('resident_id', $uId);
+                                }
+                            })
+                            ->latest()
+                            ->get();
+                    }
+                @endphp
                 <div x-data="{ petStatusModal: false, editingPet: null }">
                     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:11px;padding:12px;margin-bottom:14px;">
                         <div style="font-size:9px;font-weight:900;color:var(--brand-dark);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
@@ -5628,7 +5647,7 @@ html, body {
                 </div>
                 <form action="{{ route('pets.store') }}" method="POST" enctype="multipart/form-data" x-data="{ petPhotoPreview: null, vaccineProofPreview: null, vStatus: 'unvaccinated', petTypeOther: false }">
                     @csrf
-                    <input type="hidden" name="resident_id" value="{{ $resident?->id ?? $authUser?->resident?->id ?? '' }}">
+                    <input type="hidden" name="resident_id" value="{{ $resident?->id ?? $authUser?->resident?->id ?? (\App\Models\Resident::where('user_id', $authUser?->id)->value('id')) ?? '' }}">
                     
                     <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;">
                         {{-- Pet Photo --}}

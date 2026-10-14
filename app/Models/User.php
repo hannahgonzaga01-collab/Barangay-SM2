@@ -95,7 +95,27 @@ class User extends Authenticatable
 
     public function pets()
     {
-        return $this->hasMany(\App\Models\Pet::class, 'resident_id');
+        return $this->hasManyThrough(\App\Models\Pet::class, \App\Models\Resident::class, 'user_id', 'resident_id', 'id', 'id');
+    }
+
+    public function getPetsAttribute()
+    {
+        $residentId = $this->resident?->id ?: \App\Models\Resident::where('user_id', $this->id)->value('id');
+        $userId = $this->id;
+
+        return \App\Models\Pet::where('is_archived', false)
+            ->where(function($q) use ($residentId, $userId) {
+                if ($residentId) {
+                    $q->where('resident_id', $residentId);
+                    if ($userId) {
+                        $q->orWhere('resident_id', $userId);
+                    }
+                } elseif ($userId) {
+                    $q->where('resident_id', $userId);
+                }
+            })
+            ->latest()
+            ->get();
     }
 
     public function resident()

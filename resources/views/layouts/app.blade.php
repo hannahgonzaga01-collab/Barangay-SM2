@@ -96,6 +96,15 @@
             });
         </script>
     @endif
+    @if(isset($errors) && $errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof showToast === 'function') {
+                    showToast(@json($errors->first()), 'error');
+                }
+            });
+        </script>
+    @endif
 
 </body>
 </html>

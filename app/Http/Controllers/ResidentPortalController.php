@@ -209,6 +209,22 @@ class ResidentPortalController extends Controller
             ? Resident::where('household_head_id', $resident->id)->where('id', '!=', $resident->id)->get() 
             : collect();
 
+        $residentId = $resident?->id ?? (auth()->check() ? \App\Models\Resident::where('user_id', auth()->id())->value('id') : null);
+        $userId = auth()->id();
+        $myPets = \App\Models\Pet::where('is_archived', false)
+            ->where(function($q) use ($residentId, $userId) {
+                if ($residentId) {
+                    $q->where('resident_id', $residentId);
+                    if ($userId) {
+                        $q->orWhere('resident_id', $userId);
+                    }
+                } elseif ($userId) {
+                    $q->where('resident_id', $userId);
+                }
+            })
+            ->latest()
+            ->get();
+
         $unreadNotifications = collect();
         $allNotifications    = collect();
         if (auth()->check()) {
@@ -417,7 +433,7 @@ class ResidentPortalController extends Controller
         }
 
         return view('resident.index', compact(
-            'requests', 'digitalId', 'resident', 'myFamily', 'issueReports', 'sosHistory',
+            'requests', 'digitalId', 'resident', 'myFamily', 'myPets', 'issueReports', 'sosHistory',
             'announcements', 'events', 'recentUpdates',
             'unreadNotifications', 'allNotifications',
             'carouselSlides', 'orgChartPath',
@@ -1559,7 +1575,14 @@ class ResidentPortalController extends Controller
 
     public function updatePet(Request $request, $id)
     {
-        $pet = Pet::where('id', $id)->where('resident_id', auth()->user()->resident->id)->firstOrFail();
+        $user = auth()->user();
+        $residentId = $user->resident?->id ?: \App\Models\Resident::where('user_id', $user->id)->value('id');
+        $pet = Pet::where('id', $id)
+            ->where(function($q) use ($residentId, $user) {
+                if ($residentId) $q->where('resident_id', $residentId);
+                $q->orWhere('resident_id', $user->id);
+            })
+            ->firstOrFail();
 
         $request->validate([
             'pet_photo'     => 'nullable|image|max:5120',
