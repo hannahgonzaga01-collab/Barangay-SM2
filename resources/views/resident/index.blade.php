@@ -2320,8 +2320,13 @@ html, body {
                     @php $tc = $tagColors[$upd->tag] ?? ['bg'=>'#f1f5f9','color'=>'#475569']; @endphp
                     <div class="recent-ann-card" style="cursor:pointer;" x-show="(filterMonth === '' || '{{ $upd->created_at->format('m') }}' === filterMonth) && (filterYear === '' || '{{ $upd->created_at->format('Y') }}' === filterYear)" @click="activeItem={type:{{ json_encode($upd->type) }},title:{{ json_encode($upd->title) }},description:{{ json_encode($upd->content ?? $upd->description) }},image:{{ json_encode($upd->images_list[0] ?? null) }},images:{{ json_encode($upd->images_list) }},tag:{{ json_encode($upd->tag) }},date:{{ json_encode($upd->created_at->format('M d, Y')) }},location:{{ json_encode($upd->location ?? '') }},time_range:{{ json_encode($upd->time_range ?? '') }}}; activeImgIndex=0; itemModal=true">
                         @if($upd->image_path)
-                        <div style="position:relative;">
-                            <img src="{{ $upd->images_list[0] ?? asset('storage/'.$upd->image_path) }}" class="recent-ann-img" alt="{{ $upd->title }}" onerror="this.onerror=null; this.parentElement.outerHTML='<div class=\'recent-ann-img-placeholder\'><i class=\'fas {{ $upd->type === \'Event\' ? \'fa-calendar-alt\' : \'fa-bullhorn\' }}\'></i></div>';">
+                        <div style="position:relative;width:100%;height:120px;background:linear-gradient(135deg,#eff6ff,#dbeafe);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                            <i class="fas {{ $upd->type === 'Event' ? 'fa-calendar-alt' : 'fa-bullhorn' }}" style="font-size:28px;color:#bfdbfe;"></i>
+                            <img src="{{ $upd->images_list[0] ?? asset('storage/'.$upd->image_path) }}" 
+                                 class="recent-ann-img" 
+                                 alt="{{ $upd->title }}" 
+                                 style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" 
+                                 onerror="this.style.display='none';">
                             @if(count($upd->images_list) > 1)
                                 <span style="position:absolute;bottom:8px;right:8px;background:rgba(4,25,45,0.85);color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
                                     <i class="fas fa-images"></i> +{{ count($upd->images_list) }}
