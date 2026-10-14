@@ -75,7 +75,8 @@
                     $navUnreadCount = $navUser->unreadNotifications()->count();
                     $navNotifications = $navUser->notifications()->latest()->take(10)->get();
                 @endphp
-                {{-- Notification Bell (Between Language Toggle and User Profile) --}}
+                {{-- Notification Bell (Between Language Toggle and User Profile) - Hidden strictly for Office Staff who have a dedicated Pending Tasks bell in portal header --}}
+                @if($navUser?->role !== 'office')
                 <div class="relative" x-data="{ 
                     notifOpen: false,
                     unreadCount: {{ $navUnreadCount }},
@@ -261,6 +262,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen=false">
                     <button @click="profileOpen=!profileOpen"
