@@ -60,6 +60,22 @@ class ResidentPortalController extends Controller
                     }
                 }
 
+                // ── 2.5 Match by name and birthday before auto-creating to prevent duplicate residents ──
+                if (!$resident && !empty($user->first_name) && !empty($user->last_name)) {
+                    $candidate = Resident::where('first_name', $user->first_name)
+                        ->where('last_name', $user->last_name)
+                        ->where(function($q) use ($user) {
+                            $q->whereNull('user_id')->orWhere('user_id', $user->id);
+                        })
+                        ->where('resident_code', 'not like', 'RSM-%')
+                        ->first();
+                    if ($candidate) {
+                        $candidate->update(['user_id' => $user->id]);
+                        $resident = $candidate;
+                        $user->update(['resident_code' => $candidate->resident_code]);
+                    }
+                }
+
                 // ── 3. Auto-create dedicated resident profile if active user still has none (not for pending/declined) ──
                 if (!$resident && !in_array($user->status, ['pending_verification', 'declined'])) {
                     $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));

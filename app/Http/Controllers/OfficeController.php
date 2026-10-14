@@ -560,7 +560,13 @@ class OfficeController extends Controller
         }
 
         if (!$resident->user_id) {
-            $user = User::where('name', $resident->first_name . ' ' . $resident->last_name)->first();
+            $user = User::where('resident_code', $resident->resident_code)
+                ->orWhere(function($q) use ($resident) {
+                    $q->where('first_name', $resident->first_name)
+                      ->where('last_name', $resident->last_name);
+                })
+                ->orWhere('name', trim(($resident->first_name ?? '') . ' ' . ($resident->last_name ?? '')))
+                ->first();
             if (!$user) {
                 $user = User::create([
                     'name' => trim(($resident->first_name ?? '') . ' ' . ($resident->last_name ?? '')),
@@ -1058,6 +1064,19 @@ class OfficeController extends Controller
 
         if ($recentDuplicate) {
             return redirect()->route('office.index')->with('success', 'Nai-save na ang residente!');
+        }
+
+        // Duplicate resident prevention: check if resident is already registered in masterlist
+        if ($request->filled('birthday')) {
+            $existingResident = Resident::where('first_name', $request->first_name)
+                ->where('last_name', $request->last_name)
+                ->where('birthday', $request->birthday)
+                ->whereNull('archived_at')
+                ->first();
+
+            if ($existingResident) {
+                return redirect()->route('office.index')->with('error', 'Ang residenteng ito ay rehistrado na sa Masterlist (Code: ' . ($existingResident->resident_code ?? 'Existing') . ').');
+            }
         }
 
         $photoPath = null;

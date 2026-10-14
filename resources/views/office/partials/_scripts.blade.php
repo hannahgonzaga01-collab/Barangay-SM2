@@ -74,6 +74,7 @@ function officePortal() {
         openDigitalId: false,
         digitalIdViewMode: false,
         showEditEC: false,
+        isGeneratingDigitalId: false,
         digitalIdSearch: '',
         digitalIdResident: null,
         digitalIdOpen: false,
@@ -207,6 +208,7 @@ function officePortal() {
             this.digitalIdCardView = 'front';
             this.digitalIdViewMode = false;
             this.showEditEC = true;
+            this.isGeneratingDigitalId = false;
         },
         onDigitalIdSearchInput() {
             if (this.digitalIdResident) {

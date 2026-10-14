@@ -1928,6 +1928,10 @@ $docConfigs = [
                               method="POST"
                               style="margin:0;"
                               @submit="
+                                  if (isGeneratingDigitalId) {
+                                      $event.preventDefault();
+                                      return false;
+                                  }
                                   if (!digitalIdResident || !digitalIdResident.id) {
                                       $event.preventDefault();
                                       alert('Please select a resident first.');
@@ -1948,6 +1952,7 @@ $docConfigs = [
                                       alert('Please enter a valid 11-digit Contact Number (e.g. 09123456789) before generating.');
                                       return false;
                                   }
+                                  isGeneratingDigitalId = true;
                               ">
                             @csrf
                             <input type="hidden" name="resident_id" :value="digitalIdResident ? digitalIdResident.id : ''">
@@ -1955,9 +1960,14 @@ $docConfigs = [
                             <input type="hidden" name="ecAddress" :value="ecAddress">
                             <input type="hidden" name="ecNum" :value="ecNum">
                             <button type="submit" class="btn-plain btn-green"
-                                    :disabled="!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
-                                    :style="(!digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;padding:10px 17px;font-size:11px;font-weight:900;' : 'padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;'">
-                                <i class="fas fa-id-badge"></i> <span x-text="digitalIdResident && digitalIdResident.digital_id_generated ? 'Update & Re-save ID' : 'Generate ID'"></span>
+                                    :disabled="isGeneratingDigitalId || !digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')"
+                                    :style="(isGeneratingDigitalId || !digitalIdResident || !digitalIdResident.id || !ecName || !ecName.trim() || !ecAddress || !ecAddress.trim() || !ecNum || ecNum.trim().length !== 11 || !ecNum.trim().startsWith('09')) ? 'opacity:0.45;cursor:not-allowed;padding:10px 17px;font-size:11px;font-weight:900;' : 'padding:10px 17px;font-size:11px;font-weight:900;letter-spacing:.05em;'">
+                                <template x-if="isGeneratingDigitalId">
+                                    <span style="display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-spinner fa-spin"></i> Saving ID...</span>
+                                </template>
+                                <template x-if="!isGeneratingDigitalId">
+                                    <span style="display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-id-badge"></i> <span x-text="digitalIdResident && digitalIdResident.digital_id_generated ? 'Update & Re-save ID' : 'Generate ID'"></span></span>
+                                </template>
                             </button>
                         </form>
                     </div>
