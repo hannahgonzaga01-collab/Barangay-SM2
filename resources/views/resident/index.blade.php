@@ -1072,7 +1072,17 @@ html, body {
                 return (dict[this.lang] && dict[this.lang][key]) ? dict[this.lang][key] : (dict['en'][key] || key);
             },
 
-            activitySlides: @json($carouselSlides->map(function($s){ return ['title'=>$s->title, 'image'=>asset('storage/'.$s->image_path)]; })),
+            activitySlides: @json($carouselSlides->map(function($s){
+                $img = $s->image_path ?? '';
+                if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
+                    $src = $img;
+                } elseif (str_starts_with($img, 'images/') || str_starts_with($img, 'assets/') || str_starts_with($img, 'storage/')) {
+                    $src = asset($img);
+                } else {
+                    $src = asset('storage/' . $img);
+                }
+                return ['title' => $s->title ?? '', 'image' => $src];
+            })),
             currentActivitySlide: 0,
             activityTimer: null,
             getDefaultActivities(){

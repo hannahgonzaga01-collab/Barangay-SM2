@@ -3862,9 +3862,19 @@
                                 @else
                                     <div style="display:grid;gap:12px;">
                                         @foreach($carouselSlides as $slide)
+                                            @php
+                                                $sImg = $slide->image_path ?? '';
+                                                if (str_starts_with($sImg, 'http://') || str_starts_with($sImg, 'https://')) {
+                                                    $sUrl = $sImg;
+                                                } elseif (str_starts_with($sImg, 'images/') || str_starts_with($sImg, 'assets/') || str_starts_with($sImg, 'storage/')) {
+                                                    $sUrl = asset($sImg);
+                                                } else {
+                                                    $sUrl = asset('storage/' . $sImg);
+                                                }
+                                            @endphp
                                             <div style="display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px;">
-                                                <div style="width:80px;height:50px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);">
-                                                    <img src="{{ asset('storage/' . $slide->image_path) }}" 
+                                                <div style="width:80px;height:50px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);background:#e2e8f0;">
+                                                    <img src="{{ $sUrl }}" 
                                                          onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
                                                          style="width:100%;height:100%;object-fit:cover;">
                                                 </div>
@@ -3876,8 +3886,8 @@
                                                     </div>
                                                 </div>
                                                 <div style="display:flex;gap:5px;">
-                                                    <div x-data="{ editModal: false, photoPreview: '{{ asset('storage/' . $slide->image_path) }}' }">
-                                                        <button @click="editModal=true" class="btn btn-sm btn-ghost" style="padding:6px;"><i class="fas fa-edit"></i></button>
+                                                    <div x-data="{ editModal: false, photoPreview: '{{ $sUrl }}' }">
+                                                        <button @click="editModal=true" class="btn btn-sm btn-ghost" style="padding:6px;" title="Edit Slide"><i class="fas fa-edit"></i></button>
                                                         
                                                         {{-- Individual Carousel Edit Modal --}}
                                                         <div x-show="editModal" x-cloak class="modal-ov" x-transition style="text-align:left;z-index:9999;">
@@ -3891,9 +3901,10 @@
                                                                         @csrf @method('PUT')
                                                                         <div class="fgrp"><label class="flbl">Slide Image</label>
                                                                             <label style="cursor:pointer;display:block;">
-                                                                                <div style="height:150px;border-radius:10px;background:#f8fafc;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .2s;" :style="photoPreview?'border:2px solid #0E5393':''">
-                                                                                    <img x-show="photoPreview" :src="photoPreview" style="width:100%;height:100%;object-fit:contain;">
+                                                                                <div style="height:150px;border-radius:10px;background:#f8fafc;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;transition:all .2s;" :style="photoPreview?'border:2px solid #0E5393':''">
+                                                                                    <img x-show="photoPreview" :src="photoPreview" @error="$el.src='{{ asset('images/cleanup.jpg') }}'" style="width:100%;height:100%;object-fit:contain;display:block;">
                                                                                     <div x-show="!photoPreview" style="text-align:center;"><i class="fas fa-image" style="font-size:24px;color:var(--light);margin-bottom:6px;"></i><div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Change Photo</div></div>
+                                                                                    <div x-show="photoPreview" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;"><i class="fas fa-camera"></i> Change Photo</div>
                                                                                 </div>
                                                                                 <input type="file" name="image" accept="image/*" style="display:none;" @change="const f=$event.target.files[0];if(f){const r=new FileReader();r.onload=e=>photoPreview=e.target.result;r.readAsDataURL(f)}">
                                                                             </label>
@@ -3913,7 +3924,7 @@
                                                     </div>
                                                     <form action="{{ route('admin.carousel.destroy', $slide->id) }}" method="POST" @submit.prevent="triggerConfirm('Delete Slide', 'Remove this slide from the carousel?', () => $el.submit())">
                                                         @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-ghost" style="padding:6px;color:#ef4444;"><i class="fas fa-trash"></i></button>
+                                                        <button type="submit" class="btn btn-sm btn-ghost" style="padding:6px;color:#ef4444;" title="Delete Slide"><i class="fas fa-trash"></i></button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -3975,61 +3986,7 @@
 
                 </div>
 
-                {{-- QUICK LINK FROM EVENTS/ANNOUNCEMENTS --}}
-                <div style="margin-top:var(--gap);">
-                    <div class="card">
-                        <div class="card-head">
-                            <div class="card-title"><i class="fas fa-link"></i> Link Past Events/Announcements to Slideshow</div>
-                        </div>
-                        <div style="padding:16px;">
-                            <p style="font-size:10px;color:var(--muted);margin-bottom:12px;font-weight:600;">Quickly add recent activities to the homepage slideshow. (Requires record to have an image)</p>
-                            
-                            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:12px;">
-                                {{-- Recent Events --}}
-                                @foreach($events->take(3) as $evt)
-                                    @if($evt->image_path)
-                                        <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;">
-                                            <div style="width:60px;height:40px;border-radius:6px;overflow:hidden;flex-shrink:0;">
-                                                <img src="{{ asset('storage/' . $evt->image_path) }}" 
-                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
-                                                     style="width:100%;height:100%;object-fit:cover;">
-                                            </div>
-                                            <div style="flex:1;min-width:0;">
-                                                <div style="font-size:11px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $evt->title }}</div>
-                                                <div style="font-size:8px;color:var(--muted);font-weight:700;text-transform:uppercase;">Event</div>
-                                            </div>
-                                            <form action="{{ route('admin.carousel.link', ['type' => 'event', 'id' => $evt->id]) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-ghost" {{ $carouselSlides->count() >= 6 ? 'disabled' : '' }} title="Link to Slideshow"><i class="fas fa-plus"></i></button>
-                                            </form>
-                                        </div>
-                                    @endif
-                                @endforeach
 
-                                {{-- Recent Announcements --}}
-                                @foreach($announcements->take(3) as $ann)
-                                    @if($ann->image_path)
-                                        <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;">
-                                            <div style="width:60px;height:40px;border-radius:6px;overflow:hidden;flex-shrink:0;">
-                                                <img src="{{ asset('storage/' . $ann->image_path) }}" 
-                                                     onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';"
-                                                     style="width:100%;height:100%;object-fit:cover;">
-                                            </div>
-                                            <div style="flex:1;min-width:0;">
-                                                <div style="font-size:11px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $ann->title }}</div>
-                                                <div style="font-size:8px;color:var(--muted);font-weight:700;text-transform:uppercase;">Announcement</div>
-                                            </div>
-                                            <form action="{{ route('admin.carousel.link', ['type' => 'announcement', 'id' => $ann->id]) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-ghost" {{ $carouselSlides->count() >= 6 ? 'disabled' : '' }} title="Link to Slideshow"><i class="fas fa-plus"></i></button>
-                                            </form>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {{-- ══ SYSTEM / BACKUP ══ --}}

@@ -218,7 +218,10 @@ class ResidentPortalController extends Controller
             $recentUpdates = $recentAnnouncements->concat($recentEvents)->sortByDesc('sort_date')->values();
             
             $carouselData   = SiteSetting::where('key', 'carousel_data')->first()?->value;
-            $carouselSlides = $carouselData ? collect(json_decode($carouselData))->where('is_active', true)->sortBy('sort_order') : collect();
+            $decodedCarousel = $carouselData ? json_decode($carouselData) : null;
+            $carouselSlides = (is_array($decodedCarousel) && count($decodedCarousel) > 0)
+                ? collect($decodedCarousel)->where('is_active', true)->sortBy('sort_order')
+                : collect(\App\Http\Controllers\AdminController::defaultSlides())->where('is_active', true)->map(fn($item) => (object)$item);
             $orgChartPath   = SiteSetting::where('key', 'organizational_chart')->first()?->value;
 
             // Fetch Patrol Schedules for Tanod Duty Display

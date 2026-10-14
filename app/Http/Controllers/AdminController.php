@@ -143,7 +143,10 @@ class AdminController extends Controller
         });
 
         $carouselData = SiteSetting::where('key', 'carousel_data')->first()?->value;
-        $carouselSlides = $carouselData ? collect(json_decode($carouselData))->sortBy('sort_order') : collect();
+        $decodedCarousel = $carouselData ? json_decode($carouselData) : null;
+        $carouselSlides = (is_array($decodedCarousel) && count($decodedCarousel) > 0)
+            ? collect($decodedCarousel)->sortBy('sort_order')
+            : collect(self::defaultSlides())->map(fn($item) => (object)$item);
         $orgChartPath   = SiteSetting::where('key', 'organizational_chart')->first()?->value;
         $departmentReports = \App\Models\DepartmentReport::latest()->get();
 
@@ -482,10 +485,43 @@ class AdminController extends Controller
     }
 
     // ── Carousel ──
+    public static function defaultSlides(): array
+    {
+        return [
+            [
+                'id'         => 1001,
+                'image_path' => 'images/womens.jpg',
+                'title'      => "Celebrating Women's Month",
+                'is_active'  => true,
+                'sort_order' => 0,
+            ],
+            [
+                'id'         => 1002,
+                'image_path' => 'images/canal.jpg',
+                'title'      => 'Operational Linis Canal',
+                'is_active'  => true,
+                'sort_order' => 1,
+            ],
+            [
+                'id'         => 1003,
+                'image_path' => 'images/cleanup.jpg',
+                'title'      => 'Manila Bay Weekly Clean Up Drive',
+                'is_active'  => true,
+                'sort_order' => 2,
+            ],
+        ];
+    }
+
     private function getCarouselData()
     {
         $setting = SiteSetting::where('key', 'carousel_data')->first();
-        return $setting ? json_decode($setting->value, true) : [];
+        if ($setting && $setting->value) {
+            $decoded = json_decode($setting->value, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                return $decoded;
+            }
+        }
+        return self::defaultSlides();
     }
 
     private function saveCarouselData($slides)
@@ -494,6 +530,7 @@ class AdminController extends Controller
             ['key' => 'carousel_data'],
             ['value' => json_encode(array_values($slides))]
         );
+        \Illuminate\Support\Facades\Cache::forget('resident_portal_public_data');
     }
 
     public function storeCarouselSlide(Request $request)
@@ -522,7 +559,7 @@ class AdminController extends Controller
         $slides = $this->getCarouselData();
         $foundIndex = null;
         foreach ($slides as $index => $slide) {
-            if ($slide['id'] == $id) {
+            if ((string)($slide['id'] ?? '') === (string)$id) {
                 $foundIndex = $index;
                 break;
             }
@@ -547,7 +584,7 @@ class AdminController extends Controller
     {
         $slides = $this->getCarouselData();
         $newSlides = array_filter($slides, function ($slide) use ($id) {
-            return $slide['id'] != $id;
+            return (string)($slide['id'] ?? '') !== (string)$id;
         });
 
         $this->saveCarouselData($newSlides);
