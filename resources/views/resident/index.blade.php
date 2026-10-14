@@ -703,6 +703,39 @@ html, body {
                 this.selectedTrackerReq = req;
                 this.trackerModal = true;
             },
+            incidentTrackerModal: false,
+            selectedIncident: null,
+            openIncidentTrackerModal(rep) {
+                this.selectedIncident = rep;
+                this.incidentTrackerModal = true;
+            },
+            sosTrackerModal: false,
+            selectedSos: null,
+            openSosTrackerModal(sos) {
+                this.selectedSos = sos;
+                this.sosTrackerModal = true;
+            },
+            getIncidentEvidenceList(rep) {
+                if (!rep || !rep.evidence) return [];
+                try {
+                    if (Array.isArray(rep.evidence)) return rep.evidence;
+                    let parsed = JSON.parse(rep.evidence);
+                    return Array.isArray(parsed) ? parsed : [parsed];
+                } catch(e) {
+                    return [rep.evidence];
+                }
+            },
+            formatDateTime(dateStr) {
+                if (!dateStr) return 'N/A';
+                try {
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return dateStr;
+                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+                           d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                } catch(e) {
+                    return dateStr;
+                }
+            },
             jobseekerLockedModal: false,
             hasAvailedJobseeker: {{ $hasAvailedJobseeker ? 'true' : 'false' }},
             isAuth: {{ $isAuth ? 'true' : 'false' }},
@@ -1992,7 +2025,11 @@ html, body {
                         <i class="fas fa-history" style="color:var(--brand);"></i> <span>Resolved dispatches are automatically cleared from your history after 30 days.</span>
                     </div>
                     @foreach($sosHistory as $index => $sos)
-                    <div class="event-item" x-show="showAllSos || {{ $index }} < 3" x-transition style="margin-bottom:8px;">
+                    <div class="event-item" x-show="showAllSos || {{ $index }} < 3" x-transition
+                         @click="openSosTrackerModal({{ json_encode($sos) }})"
+                         style="cursor:pointer; transition:all .15s; border-radius:10px; padding:10px 12px; margin-bottom:8px;"
+                         onmouseover="this.style.background='#fef2f2'; this.style.borderColor='#fca5a5';" onmouseout="this.style.background='#fff'; this.style.borderColor='var(--border)';"
+                         title="Pindutin para buksan ang Live SOS Dispatch Tracker">
                         <div style="background:{{ $sos->status === 'resolved' ? '#f0fdf4' : '#fef2f2' }};border:1px solid {{ $sos->status === 'resolved' ? '#bbf7d0' : '#fecaca' }};border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="fas {{ $sos->status === 'resolved' ? 'fa-check-circle' : 'fa-ambulance' }}" style="color:{{ $sos->status === 'resolved' ? '#16a34a' : '#dc2626' }};font-size:14px;"></i>
                         </div>
@@ -2000,6 +2037,7 @@ html, body {
                             <div style="font-size:12px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                                 <span>{{ $sos->emergency_type ?? 'Emergency SOS' }}</span>
                                 <span style="font-size:10px;font-weight:700;color:var(--muted);">#SOS-{{ sprintf('%04d', $sos->id) }}</span>
+                                <span style="font-size:9px;color:#dc2626;font-weight:800;background:#fef2f2;border:1px solid #fee2e2;padding:1px 6px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-location-crosshairs"></i> Live Tracker</span>
                             </div>
                             <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;">
                                 @if($sos->landmark)
@@ -2057,13 +2095,20 @@ html, body {
                 {{-- 2. INCIDENT REPORTS TAB CONTENT --}}
                 <div x-show="reportHistoryTab === 'incidents'" id="incident-reports" x-cloak style="padding:10px 14px 14px;">
                     @foreach($issueReports as $index => $rep)
-                    <div class="event-item" x-show="showAllIncidents || {{ $index }} < 3" x-transition style="margin-bottom:8px;">
+                    <div class="event-item" x-show="showAllIncidents || {{ $index }} < 3" x-transition
+                         @click="openIncidentTrackerModal({{ json_encode($rep) }})"
+                         style="cursor:pointer; transition:all .15s; border-radius:10px; padding:10px 12px; margin-bottom:8px;"
+                         onmouseover="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd';" onmouseout="this.style.background='#fff'; this.style.borderColor='var(--border)';"
+                         title="Pindutin para buksan ang Live Incident Report Tracker">
                         <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="fas fa-flag" style="color:#dc2626;font-size:13px;"></i>
                         </div>
                         <div style="flex:1;min-width:0;">
-                            <div style="font-size:12px;font-weight:800;color:var(--text);">{{ $rep->issue_type }} — {{ $rep->department }}</div>
-                            <div style="font-size:10px;color:var(--muted);font-weight:600;">
+                            <div style="font-size:12px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span>{{ $rep->issue_type }} — {{ $rep->department }}</span>
+                                <span style="font-size:9px;color:var(--brand);font-weight:800;background:#eff6ff;border:1px solid #bfdbfe;padding:1px 6px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-search-location"></i> Live Tracker</span>
+                            </div>
+                            <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;">
                                 Case No: {{ $rep->case_no ?? 'Pending' }} •
                                 Status: 
                                 @if($rep->status === 'under_review' && str_contains((string)$rep->admin_notes, 'AUTO-FLAGGED'))
@@ -3534,6 +3579,393 @@ html, body {
 
                 <div style="display:flex;justify-content:flex-end;">
                     <button type="button" @click="trackerModal=false" class="btn-plain btn-ghost" style="font-size:11px;padding:6px 16px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ✦ Live Incident Report Tracker Modal ✦ --}}
+    <div x-show="incidentTrackerModal" x-cloak class="modal-ov" style="z-index:99999;" x-transition>
+        <div class="modal-box" style="max-width:560px; max-height:92vh; overflow-y:auto;" @click.away="incidentTrackerModal=false">
+            <div class="modal-in" x-show="selectedIncident" style="padding:20px;">
+                <div class="modal-hd" style="margin-bottom:12px;">
+                    <div class="modal-ttl">
+                        <div class="modal-ico" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-shield-halved"></i></div>
+                        <div>
+                            <div style="font-weight:900;color:var(--text);font-size:14px;">Live Incident Tracker</div>
+                            <div style="font-size:9.5px;color:var(--muted);font-weight:600;" x-text="'Tracking Code: ' + (selectedIncident?.case_no || ('INC-' + (selectedIncident?.created_at ? new Date(selectedIncident.created_at).getFullYear() : '2026') + '-' + String(selectedIncident?.id || '').padStart(5,'0')))"></div>
+                        </div>
+                    </div>
+                    <button type="button" @click="incidentTrackerModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                </div>
+
+                {{-- Summary Header Card --}}
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                        <div>
+                            <div style="font-size:13.5px;font-weight:900;color:var(--text);" x-text="(selectedIncident?.issue_type || '').toUpperCase()"></div>
+                            <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">
+                                Kagawaran / Dept: <strong style="color:var(--text);" x-text="selectedIncident?.department || 'Lupon / Peace & Order'"></strong>
+                            </div>
+                        </div>
+                        <span style="font-size:9.5px;font-weight:900;padding:4px 11px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;"
+                              :style="['settled','resolved','closed'].includes(selectedIncident?.status) ? 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;' :
+                                     (['on_going','on-going','hearing_scheduled','referred_to_pnp','urgent'].includes(selectedIncident?.status) ? 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;' :
+                                     (selectedIncident?.status === 'under_review' ? 'background:#fdf4ff;color:#7c3aed;border:1px solid #e9d5ff;' :
+                                     (['rejected','disapproved'].includes(selectedIncident?.status) ? 'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;' :
+                                     'background:#fef3c7;color:#b45309;border:1px solid #fde68a;')))"
+                              x-text="(selectedIncident?.status || 'pending').replace(/_/g,' ')"></span>
+                    </div>
+                </div>
+
+                {{-- 4-Step Progress Stepper --}}
+                <div style="padding:10px 6px;margin-bottom:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
+                        <div style="position:absolute;top:14px;left:20px;right:20px;height:3px;background:#e2e8f0;z-index:1;"></div>
+                        
+                        {{-- Step 1: Submitted --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;background:#059669;color:#fff;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;color:var(--text);margin-top:5px;text-align:center;">Submitted</span>
+                        </div>
+
+                        {{-- Step 2: Under Review --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="['under_review','on_going','on-going','hearing_scheduled','referred_to_pnp','urgent','settled','resolved','closed'].includes(selectedIncident?.status) || (selectedIncident?.admin_notes && selectedIncident.admin_notes.includes('AUTO-FLAGGED')) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="['under_review','on_going','on-going','hearing_scheduled','referred_to_pnp','urgent','settled','resolved','closed'].includes(selectedIncident?.status) ? 'fa-check' : 'fa-hourglass-half'"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="['under_review','on_going','on-going','hearing_scheduled','referred_to_pnp','urgent','settled','resolved','closed'].includes(selectedIncident?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Under Review</span>
+                        </div>
+
+                        {{-- Step 3: Action / Hearing --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="['on_going','on-going','hearing_scheduled','referred_to_pnp','urgent','settled','resolved','closed'].includes(selectedIncident?.status) || selectedIncident?.hearing_date ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="['on_going','on-going','hearing_scheduled','referred_to_pnp','urgent','settled','resolved','closed'].includes(selectedIncident?.status) ? 'fa-check' : 'fa-gavel'"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="['on_going','on-going','hearing_scheduled','referred_to_pnp','urgent','settled','resolved','closed'].includes(selectedIncident?.status) || selectedIncident?.hearing_date ? 'color:var(--text);' : 'color:#94a3b8;'">Action / Hearing</span>
+                        </div>
+
+                        {{-- Step 4: Resolved --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="['settled','resolved','closed'].includes(selectedIncident?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="['settled','resolved','closed'].includes(selectedIncident?.status) ? 'fa-check' : 'fa-shield-halved'"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="['settled','resolved','closed'].includes(selectedIncident?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Resolved</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Prominent Hearing Date Alert --}}
+                <template x-if="selectedIncident?.hearing_date">
+                    <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:12px;padding:13px 15px;margin-bottom:14px;box-shadow:0 3px 10px rgba(59,130,246,0.12);">
+                        <div style="font-size:12px;font-weight:900;color:#1e40af;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.04em;">
+                            <i class="fas fa-calendar-check" style="color:#2563eb;font-size:15px;"></i> NAKATAKDANG PAGDINIG (SCHEDULED HEARING)
+                        </div>
+                        <div style="font-size:11.5px;color:#1e3a8a;line-height:1.6;">
+                            <div>
+                                📅 <strong>Petsa at Oras ng Hearing:</strong> 
+                                <span style="color:#1d4ed8;font-weight:900;" x-text="formatDateTime(selectedIncident.hearing_date)"></span>
+                            </div>
+                            <div>
+                                🏢 <strong>Lugar / Desk:</strong> Barangay San Miguel II Hall — Lupon / Mediation Hearing Room
+                            </div>
+                            <div>
+                                👥 <strong>Kagawaran:</strong> <strong style="color:#1d4ed8;" x-text="selectedIncident?.department || 'Lupon Tagapamayapa'"></strong>
+                            </div>
+                            <div style="font-size:10.5px;color:#3b82f6;margin-top:4px;">
+                                <i class="fas fa-info-circle"></i> Paalala: Mangyaring dumalo sa itinakdang oras. Maaari kayong magdala ng mga karagdagang ebidensya o saksi kung kinakailangan.
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Prominent Rejection Alert --}}
+                <template x-if="['rejected','disapproved'].includes(selectedIncident?.status) || selectedIncident?.rejection_reason">
+                    <div style="background:#fee2e2;border:1.5px solid #fecaca;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+                        <div style="font-size:11.5px;font-weight:900;color:#991b1b;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                            <i class="fas fa-circle-xmark" style="color:#dc2626;"></i> TALA UKOL SA REJECTION O PAG-DISMISS:
+                        </div>
+                        <div style="font-size:11px;color:#7f1d1d;line-height:1.5;" x-text="selectedIncident?.rejection_reason || 'Ang sumbong ay hindi saklaw ng hurisdiksyon ng barangay o kinakailangan ng kaukulang referral sa ibang ahensya.'"></div>
+                    </div>
+                </template>
+
+                {{-- Admin Notes / Action Summary if available --}}
+                <template x-if="selectedIncident?.admin_summary || (selectedIncident?.admin_notes && !selectedIncident.admin_notes.includes('AUTO-FLAGGED'))">
+                    <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:11px 13px;margin-bottom:14px;">
+                        <div style="font-size:10.5px;font-weight:800;color:#475569;margin-bottom:4px;display:flex;align-items:center;gap:5px;">
+                            <i class="fas fa-clipboard-list" style="color:#64748b;"></i> Barangay Action / Staff Notes:
+                        </div>
+                        <div style="font-size:11px;color:#334155;line-height:1.5;" x-text="selectedIncident?.admin_summary || selectedIncident?.admin_notes"></div>
+                    </div>
+                </template>
+
+                {{-- Submitted Incident Details Card --}}
+                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:13px 15px;margin-bottom:14px;">
+                    <div style="font-size:11px;font-weight:900;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-file-lines"></i> Mga Detalye ng Sinumite (Submitted Incident Details)
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:11px;line-height:1.45;">
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Nagrereklamo (Complainant):</span>
+                            <strong style="color:var(--text);" x-text="selectedIncident?.complainant_name || 'Resident'"></strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Contact Number:</span>
+                            <span style="color:var(--text);font-weight:700;" x-text="selectedIncident?.contact || 'N/A'"></span>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Inirereklamo (Respondent):</span>
+                            <strong style="color:#b91c1c;" x-text="selectedIncident?.respondent_name || 'N/A'"></strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Tirahan ng Inirereklamo:</span>
+                            <span style="color:var(--text);font-weight:700;" x-text="selectedIncident?.respondent_address || 'N/A'"></span>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Lugar ng Pangyayari:</span>
+                            <strong style="color:var(--text);" x-text="selectedIncident?.location || 'Barangay San Miguel II'"></strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Petsa ng Pangyayari:</span>
+                            <span style="color:var(--text);font-weight:700;" x-text="selectedIncident?.incident_date || 'N/A'"></span>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Petsa ng Pagsumite:</span>
+                            <span style="color:var(--text);font-weight:700;" x-text="formatDateTime(selectedIncident?.created_at)"></span>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Kagawaran:</span>
+                            <span style="color:var(--brand);font-weight:800;" x-text="selectedIncident?.department || 'Peace & Order'"></span>
+                        </div>
+
+                        {{-- Full Narration / Salaysay --}}
+                        <div style="grid-column: span 2;">
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;margin-bottom:3px;">Salaysay / Buod ng Reklamo:</span>
+                            <div style="background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:9px 11px;font-size:11px;color:#1e293b;line-height:1.55;white-space:pre-wrap;max-height:160px;overflow-y:auto;" x-text="selectedIncident?.description || 'Walang salaysay.'"></div>
+                        </div>
+
+                        {{-- Attached Evidence / Katibayan --}}
+                        <template x-if="getIncidentEvidenceList(selectedIncident).length > 0">
+                            <div style="grid-column: span 2; padding-top:8px; border-top:1px solid #e2e8f0;">
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;margin-bottom:6px;">Mga Kalakip na Katibayan (Evidence Files):</span>
+                                <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                                    <template x-for="(evPath, eIdx) in getIncidentEvidenceList(selectedIncident)" :key="eIdx">
+                                        <button type="button" @click="openPhotoModal('/storage/' + evPath, 'Ebidensya #' + (eIdx + 1))"
+                                                style="padding:5px 10px;border-radius:6px;background:#fff;border:1px solid #cbd5e1;font-size:10px;font-weight:800;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                                            <i class="fas fa-image"></i>
+                                            <span x-text="'Katibayan #' + (eIdx + 1)"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Lupon & Security Schedule Notice --}}
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:11px 14px;margin-bottom:14px;">
+                    <div style="font-size:10.5px;font-weight:800;color:#1e40af;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-building-shield"></i> Barangay Peace & Order / Lupon Desk:
+                    </div>
+                    <div style="font-size:11px;color:#1e3a8a;line-height:1.5;">
+                        <div><strong>Oras ng Tanggapan:</strong> 8:00 AM – 5:00 PM (Lunes hanggang Biyernes)</div>
+                        <div><strong>Hotline:</strong> (046) 416-0238 • 24/7 Barangay Patrol Desk</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;">
+                    <button type="button" @click="incidentTrackerModal=false" class="btn-plain btn-ghost" style="font-size:11px;padding:6px 16px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ✦ Live Emergency SOS Dispatch Tracker Modal ✦ --}}
+    <div x-show="sosTrackerModal" x-cloak class="modal-ov" style="z-index:99999;" x-transition>
+        <div class="modal-box" style="max-width:560px; max-height:92vh; overflow-y:auto;" @click.away="sosTrackerModal=false">
+            <div class="modal-in" x-show="selectedSos" style="padding:20px;">
+                <div class="modal-hd" style="margin-bottom:12px;">
+                    <div class="modal-ttl">
+                        <div class="modal-ico" style="background:#fef2f2;color:#dc2626;"><i class="fas fa-ambulance"></i></div>
+                        <div>
+                            <div style="font-weight:900;color:var(--text);font-size:14px;">Live Emergency SOS Tracker</div>
+                            <div style="font-size:9.5px;color:var(--muted);font-weight:600;" x-text="'Tracking Code: SOS-' + (selectedSos?.created_at ? new Date(selectedSos.created_at).getFullYear() : '2026') + '-' + String(selectedSos?.id || '').padStart(5,'0')"></div>
+                        </div>
+                    </div>
+                    <button type="button" @click="sosTrackerModal=false" class="modal-close"><i class="fas fa-times-circle"></i></button>
+                </div>
+
+                {{-- Summary Header Card --}}
+                <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                        <div>
+                            <div style="font-size:13.5px;font-weight:900;color:#9f1239;" x-text="(selectedSos?.emergency_type || 'EMERGENCY SOS').toUpperCase()"></div>
+                            <div style="font-size:11px;color:#881337;font-weight:600;margin-top:2px;display:flex;align-items:center;gap:4px;">
+                                <i class="fas fa-map-marker-alt" style="color:#e11d48;"></i>
+                                <span x-text="selectedSos?.landmark || selectedSos?.home_address || 'Brgy. San Miguel II'"></span>
+                            </div>
+                        </div>
+                        <span style="font-size:9.5px;font-weight:900;padding:4px 11px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;"
+                              :style="selectedSos?.status === 'resolved' ? 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;' :
+                                     (selectedSos?.status === 'responding' ? 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;' :
+                                     (selectedSos?.status === 'acknowledged' ? 'background:#fdf4ff;color:#7c3aed;border:1px solid #e9d5ff;' :
+                                     'background:#fff1f2;color:#be123c;border:1px solid #fecdd3;'))"
+                              x-text="selectedSos?.status === 'responding' ? 'Tanod Responding' : (selectedSos?.status === 'acknowledged' ? 'Acknowledged' : (selectedSos?.status === 'resolved' ? 'Resolved' : 'Alert Dispatched'))"></span>
+                    </div>
+                </div>
+
+                {{-- 4-Step Progress Stepper --}}
+                <div style="padding:10px 6px;margin-bottom:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
+                        <div style="position:absolute;top:14px;left:20px;right:20px;height:3px;background:#e2e8f0;z-index:1;"></div>
+                        
+                        {{-- Step 1: Dispatched --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;background:#059669;color:#fff;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;color:var(--text);margin-top:5px;text-align:center;">Dispatched</span>
+                        </div>
+
+                        {{-- Step 2: Acknowledged --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="['acknowledged','responding','resolved'].includes(selectedSos?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="['acknowledged','responding','resolved'].includes(selectedSos?.status) ? 'fa-check' : 'fa-check-double'"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="['acknowledged','responding','resolved'].includes(selectedSos?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Acknowledged</span>
+                        </div>
+
+                        {{-- Step 3: Responding --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="['responding','resolved'].includes(selectedSos?.status) ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="['responding','resolved'].includes(selectedSos?.status) ? 'fa-check' : 'fa-motorcycle'"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="['responding','resolved'].includes(selectedSos?.status) ? 'color:var(--text);' : 'color:#94a3b8;'">Responding</span>
+                        </div>
+
+                        {{-- Step 4: Resolved --}}
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:25%;">
+                            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;"
+                                 :style="selectedSos?.status === 'resolved' ? 'background:#059669;color:#fff;' : 'background:#e2e8f0;color:#94a3b8;'">
+                                <i class="fas" :class="selectedSos?.status === 'resolved' ? 'fa-check' : 'fa-shield-heart'"></i>
+                            </div>
+                            <span style="font-size:9.5px;font-weight:800;margin-top:5px;text-align:center;"
+                                  :style="selectedSos?.status === 'resolved' ? 'color:var(--text);' : 'color:#94a3b8;'">Resolved</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Prominent Assigned Tanod Unit Banner --}}
+                <template x-if="selectedSos?.dispatched_units || selectedSos?.status === 'responding'">
+                    <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:12px;padding:13px 15px;margin-bottom:14px;box-shadow:0 3px 10px rgba(59,130,246,0.12);">
+                        <div style="font-size:12px;font-weight:900;color:#1e40af;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.04em;">
+                            <i class="fas fa-shield-alt" style="color:#2563eb;font-size:15px;"></i> ASSIGNED TANOD PATROL RESPONSE
+                        </div>
+                        <div style="font-size:11.5px;color:#1e3a8a;line-height:1.6;">
+                            <div>
+                                🛡️ <strong>Assigned Unit / Responders:</strong> 
+                                <span style="color:#1d4ed8;font-weight:900;" x-text="selectedSos?.dispatched_units || 'Tanod Mobile Response Unit (On Route)'"></span>
+                            </div>
+                            <template x-if="selectedSos?.responder_notes">
+                                <div style="margin-top:4px;background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:7px 10px;font-size:11px;">
+                                    📝 <strong>Tanod Notes / Live Report:</strong>
+                                    <span style="color:#1e293b;" x-text="selectedSos.responder_notes"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Prominent Resolved Notice --}}
+                <template x-if="selectedSos?.status === 'resolved'">
+                    <div style="background:#ecfdf5;border:2px solid #10b981;border-radius:12px;padding:13px 15px;margin-bottom:14px;box-shadow:0 3px 10px rgba(16,185,129,0.12);">
+                        <div style="font-size:12px;font-weight:900;color:#065f46;margin-bottom:4px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.04em;">
+                            <i class="fas fa-check-circle" style="color:#059669;font-size:15px;"></i> LIGTAS NA NARESOLBA (EMERGENCY RESOLVED)
+                        </div>
+                        <div style="font-size:11.5px;color:#064e3b;line-height:1.5;">
+                            Ang emergency dispatch na ito ay matagumpay at ligtas nang narespondehan at naresolba ng ating Barangay Peace & Order team.
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Submitted SOS Details Card --}}
+                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:13px 15px;margin-bottom:14px;">
+                    <div style="font-size:11px;font-weight:900;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-tower-broadcast"></i> Mga Detalye ng Emergency Alert (SOS Dispatch Info)
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:11px;line-height:1.45;">
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Nagpadala ng Alert:</span>
+                            <strong style="color:var(--text);" x-text="selectedSos?.resident_name || 'Resident'"></strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Contact Number:</span>
+                            <span style="color:var(--text);font-weight:700;" x-text="selectedSos?.contact_number || 'N/A'"></span>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Oras ng Pag-dispatch:</span>
+                            <span style="color:var(--text);font-weight:700;" x-text="formatDateTime(selectedSos?.created_at)"></span>
+                        </div>
+                        <div>
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Uri ng Emergency:</span>
+                            <span style="color:#dc2626;font-weight:900;" x-text="selectedSos?.emergency_type || 'SOS Alert'"></span>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Landmark / Lokasyon:</span>
+                            <strong style="color:var(--text);" x-text="selectedSos?.landmark || selectedSos?.home_address || 'Barangay San Miguel II'"></strong>
+                        </div>
+                        <template x-if="selectedSos?.home_address && selectedSos?.landmark">
+                            <div style="grid-column: span 2;">
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;">Tirahan (Home Address):</span>
+                                <span style="color:var(--text);font-weight:700;" x-text="selectedSos.home_address"></span>
+                            </div>
+                        </template>
+
+                        <template x-if="selectedSos?.message">
+                            <div style="grid-column: span 2;">
+                                <span style="color:var(--muted);font-weight:700;display:block;font-size:9.5px;text-transform:uppercase;margin-bottom:3px;">Mensahe / Karagdagang Impormasyon:</span>
+                                <div style="background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:9px 11px;font-size:11px;color:#1e293b;line-height:1.55;" x-text="selectedSos.message"></div>
+                            </div>
+                        </template>
+
+                        {{-- Google Maps Button --}}
+                        <template x-if="selectedSos?.google_maps_url || (selectedSos?.latitude && selectedSos?.longitude)">
+                            <div style="grid-column: span 2; padding-top:6px;">
+                                <a :href="selectedSos?.google_maps_url || ('https://www.google.com/maps?q=' + selectedSos?.latitude + ',' + selectedSos?.longitude)" 
+                                   target="_blank" 
+                                   style="padding:6px 12px;background:#fff;border:1.5px solid #fca5a5;border-radius:8px;font-size:10.5px;font-weight:800;color:#dc2626;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s;">
+                                    <i class="fas fa-map-location-dot"></i> Buksan ang Lokasyon sa Google Maps
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Emergency Hotlines Reference Box --}}
+                <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:11px 14px;margin-bottom:14px;">
+                    <div style="font-size:10.5px;font-weight:800;color:#991b1b;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-phone-volume"></i> Emergency Hotlines & Dispatch:
+                    </div>
+                    <div style="font-size:11px;color:#7f1d1d;line-height:1.5;">
+                        <div><strong>Brgy. San Miguel II Tanod Desk:</strong> (046) 416-0238</div>
+                        <div><strong>Dasmariñas City Emergency Hotline:</strong> 911 / (046) 416-0440</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;">
+                    <button type="button" @click="sosTrackerModal=false" class="btn-plain btn-ghost" style="font-size:11px;padding:6px 16px;">Close</button>
                 </div>
             </div>
         </div>
