@@ -3386,7 +3386,7 @@
                                     <div style="display:flex;gap:10px;align-items:flex-start;">
                                         @if($proj->image_path || !empty($proj->images_list))
                                             <div style="width:65px;height:65px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);position:relative;">
-                                                <img src="{{ $proj->cover_image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';">
+                                                <img src="{{ $proj->cover_image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('images/canal.jpg') }}';">
                                                 @if(count($proj->images_list) > 1)
                                                     <span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.75);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;">+{{ count($proj->images_list) }}</span>
                                                 @endif

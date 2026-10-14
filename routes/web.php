@@ -313,7 +313,15 @@ Route::get('/storage/{path}', function ($path) {
         }
     }
 
-    // 4. Avatar / Resident photo fallback
+    // 4. Project / Drainage / Canal fallback
+    if (str_contains(strtolower($cleanPath), 'canal') || str_contains(strtolower($cleanPath), 'drainage')) {
+        $canalCandidate = public_path('images/canal.jpg');
+        if (file_exists($canalCandidate)) {
+            return response()->file($canalCandidate, ['Content-Type' => 'image/jpeg']);
+        }
+    }
+
+    // 5. Avatar / Resident photo fallback
     if (str_contains($cleanPath, 'photos') || str_contains($cleanPath, 'avatar') || str_contains($cleanPath, 'residents') || str_contains($cleanPath, 'users')) {
         return redirect('https://ui-avatars.com/api/?name=Resident&background=0E5393&color=fff&size=128&bold=true');
     }

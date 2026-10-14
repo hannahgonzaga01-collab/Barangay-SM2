@@ -41,37 +41,31 @@ class Project extends Model
 
     public function getCoverImageUrlAttribute(): string
     {
-        if (!empty($this->image_path)) {
-            $img = $this->image_path;
+        $hasCustomDiskImage = function(?string $img): ?string {
+            if (!$img) return null;
             if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
                 return $img;
             }
             if (str_starts_with($img, 'images/') || str_starts_with($img, 'assets/')) {
                 return asset($img);
             }
-            $clean = ltrim($img, '/');
-            if (str_starts_with($clean, 'storage/')) {
-                $clean = substr($clean, 8);
+            $clean = ltrim(preg_replace('#^storage/#', '', $img), '/');
+            if (file_exists(storage_path('app/public/' . $clean)) || file_exists(public_path('storage/' . $clean)) || file_exists(public_path($clean))) {
+                return asset('storage/' . $clean);
             }
-            return asset('storage/' . $clean);
+            return null;
+        };
+
+        if ($valid = $hasCustomDiskImage($this->image_path)) {
+            return $valid;
         }
 
-        $list = $this->images;
-        if (!empty($list)) {
-            $imgs = is_array($list) ? $list : json_decode($list, true);
+        if (!empty($this->images)) {
+            $imgs = is_array($this->images) ? $this->images : json_decode($this->images, true);
             if (is_array($imgs) && !empty($imgs)) {
-                $first = $imgs[0];
-                if (str_starts_with($first, 'http://') || str_starts_with($first, 'https://')) {
-                    return $first;
+                if ($valid = $hasCustomDiskImage($imgs[0])) {
+                    return $valid;
                 }
-                if (str_starts_with($first, 'images/') || str_starts_with($first, 'assets/')) {
-                    return asset($first);
-                }
-                $clean = ltrim($first, '/');
-                if (str_starts_with($clean, 'storage/')) {
-                    $clean = substr($clean, 8);
-                }
-                return asset('storage/' . $clean);
             }
         }
 
@@ -91,26 +85,29 @@ class Project extends Model
         $cover = $this->cover_image_url;
 
         if (empty($this->images)) {
-            return !empty($this->image_path) || $cover ? [$cover] : [];
+            return $cover ? [$cover] : [];
         }
 
         $imgs = is_array($this->images) ? $this->images : json_decode($this->images, true);
         if (is_array($imgs) && count($imgs) > 0) {
-            return array_map(function ($img) use ($cover) {
+            $validList = [];
+            foreach ($imgs as $img) {
                 if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
-                    return $img;
+                    $validList[] = $img;
+                } elseif (str_starts_with($img, 'images/') || str_starts_with($img, 'assets/')) {
+                    $validList[] = asset($img);
+                } else {
+                    $clean = ltrim(preg_replace('#^storage/#', '', $img), '/');
+                    if (file_exists(storage_path('app/public/' . $clean)) || file_exists(public_path('storage/' . $clean)) || file_exists(public_path($clean))) {
+                        $validList[] = asset('storage/' . $clean);
+                    }
                 }
-                if (str_starts_with($img, 'images/') || str_starts_with($img, 'assets/')) {
-                    return asset($img);
-                }
-                $clean = ltrim($img, '/');
-                if (str_starts_with($clean, 'storage/')) {
-                    $clean = substr($clean, 8);
-                }
-                return asset('storage/' . $clean);
-            }, $imgs);
+            }
+            if (!empty($validList)) {
+                return $validList;
+            }
         }
 
-        return [$cover];
+        return $cover ? [$cover] : [];
     }
 }

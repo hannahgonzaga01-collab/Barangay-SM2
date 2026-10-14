@@ -2321,7 +2321,7 @@ html, body {
                     <div class="recent-ann-card" style="cursor:pointer;" x-show="(filterMonth === '' || '{{ $upd->created_at->format('m') }}' === filterMonth) && (filterYear === '' || '{{ $upd->created_at->format('Y') }}' === filterYear)" @click="activeItem={type:{{ json_encode($upd->type) }},title:{{ json_encode($upd->title) }},description:{{ json_encode($upd->content ?? $upd->description) }},image:{{ json_encode($upd->images_list[0] ?? null) }},images:{{ json_encode($upd->images_list) }},tag:{{ json_encode($upd->tag) }},date:{{ json_encode($upd->created_at->format('M d, Y')) }},location:{{ json_encode($upd->location ?? '') }},time_range:{{ json_encode($upd->time_range ?? '') }}}; activeImgIndex=0; itemModal=true">
                         @if($upd->image_path)
                         <div style="position:relative;">
-                            <img src="{{ $upd->images_list[0] ?? asset('storage/'.$upd->image_path) }}" class="recent-ann-img" alt="{{ $upd->title }}" onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}';">
+                            <img src="{{ $upd->images_list[0] ?? asset('storage/'.$upd->image_path) }}" class="recent-ann-img" alt="{{ $upd->title }}" onerror="this.onerror=null; this.parentElement.outerHTML='<div class=\'recent-ann-img-placeholder\'><i class=\'fas {{ $upd->type === \'Event\' ? \'fa-calendar-alt\' : \'fa-bullhorn\' }}\'></i></div>';">
                             @if(count($upd->images_list) > 1)
                                 <span style="position:absolute;bottom:8px;right:8px;background:rgba(4,25,45,0.85);color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
                                     <i class="fas fa-images"></i> +{{ count($upd->images_list) }}
@@ -4564,13 +4564,13 @@ html, body {
             
             {{-- FB STYLE PHOTO VIEWER / CAROUSEL --}}
             <template x-if="(activeItem.images && activeItem.images.length > 0) || activeItem.image">
-                <div style="position:relative;background:#090d16;overflow:hidden;border-top-left-radius:20px;border-top-right-radius:20px;">
+                <div class="photo-box-wrap" style="position:relative;background:#090d16;overflow:hidden;border-top-left-radius:20px;border-top-right-radius:20px;">
                     {{-- Main Photo Display --}}
                     <div style="width:100%;height:380px;display:flex;align-items:center;justify-content:center;position:relative;user-select:none;">
                         <img :src="activeItem.images && activeItem.images.length > 0 ? activeItem.images[activeImgIndex] : activeItem.image" 
                              style="max-width:100%;max-height:100%;object-fit:contain;transition:all .2s ease-in-out;" 
                              alt="Item Image"
-                             onerror="this.onerror=null; this.src='{{ asset('images/brgysm2_logo.png') }}'; this.style.maxHeight='180px'; this.style.opacity='0.85';">
+                             onerror="this.onerror=null; if(activeItem.type==='Project'){this.src='{{ asset('images/canal.jpg') }}';}else{this.closest('.photo-box-wrap').style.display='none';}">
                         
                         {{-- Counter Pill (e.g. 1 / 4) --}}
                         <template x-if="activeItem.images && activeItem.images.length > 1">
