@@ -646,6 +646,11 @@ class OfficeController extends Controller
         $currentRank = $ranks[$currentStatus] ?? 0;
         $newRank = $ranks[$newStatus] ?? 0;
 
+        // Rejection is strictly permitted only while the request is in Pending status
+        if ($newStatus === 'disapproved' && $currentStatus !== 'pending') {
+            return redirect()->back()->with('error', 'Ang dokumento ay maaari lamang i-reject habang ito ay nasa Pending status pa.');
+        }
+
         // Strict one-way forward progression
         if ($newStatus !== 'disapproved' && $newRank < $currentRank) {
             return redirect()->back()->with('error', 'Status progression is one-way. Cannot revert to ' . ucfirst($newStatus) . '.');

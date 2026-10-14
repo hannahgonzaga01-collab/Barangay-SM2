@@ -522,17 +522,8 @@
                                     <i class="fas fa-print"></i> Print
                                 </button>
                                 
-                                @if($isOverdue)
-                                    {{-- Release Button strictly for Overdue items in Actions column --}}
-                                    <button type="button" 
-                                            @click="releaseTarget = { id: {{ $req->id }}, name: '{{ addslashes($displayName) }}', docType: '{{ ucwords(str_replace('_',' ',$req->document_type)) }}' }; releaseConfirmModal = true;"
-                                            class="tbl-btn" style="background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Direct Release Overdue Document">
-                                        <i class="fas fa-check-circle"></i> Release
-                                    </button>
-                                @endif
-
-                                @if(in_array($req->status, ['pending', 'processing', 'ready']))
-                                    {{-- Reject Button with Modal --}}
+                                @if($req->status === 'pending')
+                                    {{-- Reject Button strictly for Pending requests (includes Overdue) --}}
                                     <div x-data="{ showReject: false, reasonSelect: '', reasonCustom: '' }" style="display:inline;">
                                         <button @click="showReject = !showReject" type="button" class="tbl-btn" style="background:#fee2e2;color:var(--danger);border:1.5px solid #fca5a5;width:auto;padding:0 8px;font-size:9.5px;gap:3px;font-weight:700;" title="Reject Request">
                                             <i class="fas fa-times-circle"></i> Reject
