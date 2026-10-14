@@ -1296,6 +1296,14 @@ class OfficeController extends Controller
             return redirect()->back()->with('error', '⚠️ Ang pagpaparehistro ng alagang hayop ay para lamang sa mga opisyal at beripikadong residente.');
         }
 
+        if (auth()->check() && empty($request->resident_id)) {
+            $user = auth()->user();
+            $rId = $user->resident?->id ?: \App\Models\Resident::where('user_id', $user->id)->value('id');
+            if ($rId) {
+                $request->merge(['resident_id' => $rId]);
+            }
+        }
+
         $request->validate([
             'resident_id'    => 'required|exists:residents,id',
             'pet_name'       => 'required|string|max:255',
@@ -1312,6 +1320,7 @@ class OfficeController extends Controller
         $petPhotoPath = null;
         if ($request->hasFile('pet_photo')) {
             $petPhotoPath = $request->file('pet_photo')->store('pet_photos', 'public');
+            \App\Models\SystemUploadedFile::persist($petPhotoPath, $request->file('pet_photo'));
         }
 
         $proofPath = null;
@@ -1319,6 +1328,7 @@ class OfficeController extends Controller
         
         if ($request->hasFile('vaccine_proof')) {
             $proofPath = $request->file('vaccine_proof')->store('pet_vaccine_proofs', 'public');
+            \App\Models\SystemUploadedFile::persist($proofPath, $request->file('vaccine_proof'));
             // If it was already set to 'vaccinated' (verified) by office staff, keep it. 
             // Otherwise, set to pending for verification.
             if ($vStatus !== 'vaccinated' && $vStatus !== 'verified') {
@@ -1357,7 +1367,14 @@ class OfficeController extends Controller
 
     public function destroyPet($id)
     {
-        Pet::findOrFail($id)->update(['is_archived' => true]);
+        $pet = Pet::findOrFail($id);
+        if (auth()->check() && auth()->user()->role === 'resident') {
+            $userResidentId = auth()->user()->resident?->id ?: \App\Models\Resident::where('user_id', auth()->id())->value('id');
+            if ($userResidentId && $pet->resident_id != $userResidentId) {
+                abort(403, 'Hindi mo pagmamay-ari ang alagang ito.');
+            }
+        }
+        $pet->update(['is_archived' => true]);
         return redirect()->back()->with('success', 'Pet archived successfully!');
     }
 

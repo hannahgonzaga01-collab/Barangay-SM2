@@ -5216,7 +5216,7 @@ html, body {
                 </div>
                 <form action="{{ route('pets.store') }}" method="POST" enctype="multipart/form-data" x-data="{ petPhotoPreview: null, vaccineProofPreview: null, vStatus: 'unvaccinated', petTypeOther: false }">
                     @csrf
-                    <input type="hidden" name="resident_id" value="{{ $authUser?->resident?->id ?? '' }}">
+                    <input type="hidden" name="resident_id" value="{{ $resident?->id ?? $authUser?->resident?->id ?? '' }}">
                     
                     <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;">
                         {{-- Pet Photo --}}

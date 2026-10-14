@@ -55,6 +55,14 @@ Route::middleware('auth')->group(function () {
     // Global Notifications Read Route (Accessible by all authenticated users: residents, staff, admin)
     Route::post('/notifications/read', [ResidentPortalController::class, 'markNotificationsRead'])->name('notifications.read');
     Route::post('/resident/notifications/read', [ResidentPortalController::class, 'markNotificationsRead'])->name('resident.notifications.read');
+
+    // Pet Registration & Management (Accessible by authenticated residents, office staff, and admin)
+    Route::post('/pets/store', [OfficeController::class, 'storePet'])->name('pets.store');
+    Route::get('/pets/store', fn() => redirect()->route('resident.index'));
+    Route::post('/resident/pet', [OfficeController::class, 'storePet'])->name('resident.pet.store');
+    Route::get('/resident/pet', fn() => redirect()->route('resident.index'));
+    Route::delete('/pets/{id}', [OfficeController::class, 'destroyPet'])->name('pets.destroy');
+    Route::get('/pets/{id}', fn() => redirect()->route('resident.index'));
 });
 
 // 4. RESIDENT PORTAL
@@ -194,9 +202,7 @@ Route::middleware(['auth', 'verified', 'role:admin,office,staff,barangay_officia
     Route::get('/import-residents', [ResidentImportController::class, 'show'])->name('residents.import');
     Route::post('/import-residents', [ResidentImportController::class, 'store']);
 
-    // PETS
-    Route::post('/pets/store', [OfficeController::class, 'storePet'])->name('pets.store');
-    Route::delete('/pets/{id}', [OfficeController::class, 'destroyPet'])->name('pets.destroy');
+    // PETS (Office / Staff Actions)
     Route::patch('/pets/{id}/restore', [OfficeController::class, 'restorePet'])->name('pets.restore');
     Route::patch('/pets/{id}/status', [OfficeController::class, 'updatePetStatus'])->name('pets.status');
     Route::post('/pets/{id}/approve-vaccine', [OfficeController::class, 'approvePetVaccine'])->name('office.pets.approve-vaccine');

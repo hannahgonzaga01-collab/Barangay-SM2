@@ -33,8 +33,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'resident/voter/upload',
             'resident/message',
             'resident/notifications/read',
-            'resident/profile-photo',
+            'resident/pet',
             'resident/pet/*',
+            'pets/store',
+            'pets/*',
             'resident/emergency-sos',
         ]);
     })

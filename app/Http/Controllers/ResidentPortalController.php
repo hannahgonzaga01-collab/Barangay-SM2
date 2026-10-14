@@ -1577,6 +1577,7 @@ class ResidentPortalController extends Controller
         if ($request->has('vaccination_status') && $request->vaccination_status === 'pending') {
             if ($request->hasFile('vaccine_proof')) {
                 $data['vaccine_proof'] = $request->file('vaccine_proof')->store('pet_vaccine_proofs', 'public');
+                \App\Models\SystemUploadedFile::persist($data['vaccine_proof'], $request->file('vaccine_proof'));
                 $data['vaccination_status'] = 'pending';
                 // Reset rejection reason if they are re-uploading
                 $data['rejection_reason'] = null;
@@ -1591,6 +1592,7 @@ class ResidentPortalController extends Controller
             }
 
             $data['pet_photo'] = $request->file('pet_photo')->store('pet_photos', 'public');
+            \App\Models\SystemUploadedFile::persist($data['pet_photo'], $request->file('pet_photo'));
             $data['photo_updated_at'] = now();
         }
 
