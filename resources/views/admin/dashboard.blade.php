@@ -2526,7 +2526,6 @@
                         ['Minors (Under 18)', 'fa-child', $minors, '#0E5393', '#eff6ff', 'linear-gradient(90deg,#0E5393,#3b82f6)', 'minor'],
                         ['Adults (18–59)', 'fa-user', $adults, '#0E5393', '#eff6ff', 'linear-gradient(90deg,#0E5393,#3b82f6)', 'adult'],
                         ['Registered Voters', 'fa-vote-yea', $voters, '#0E5393', '#eff6ff', 'linear-gradient(90deg,#0E5393,#3b82f6)', 'voter'],
-                        ['With Accounts', 'fa-user-check', $totalUsers, '#0E5393', '#eff6ff', 'linear-gradient(90deg,#0E5393,#3b82f6)', 'with_account'],
                     ];
                 @endphp
                 <div class="demo-grid">
