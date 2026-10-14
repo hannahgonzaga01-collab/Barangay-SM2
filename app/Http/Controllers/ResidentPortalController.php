@@ -205,9 +205,32 @@ class ResidentPortalController extends Controller
                 ->update(['is_active' => false, 'archived_at' => now()]);
         }
 
-        $myFamily = ($resident && $resident->is_household_head) 
-            ? Resident::where('household_head_id', $resident->id)->where('id', '!=', $resident->id)->get() 
-            : collect();
+        $resId = $resident?->id ?? (auth()->check() ? (\App\Models\Resident::where('user_id', auth()->id())->value('id') ?? \App\Models\Resident::where('resident_code', auth()->user()->resident_code)->value('id')) : null);
+
+        $myFamily = collect();
+        if ($resId) {
+            $currRes = $resident ?? \App\Models\Resident::find($resId);
+            $targetHeadId = ($currRes && $currRes->household_head_id) ? $currRes->household_head_id : $resId;
+
+            $myFamily = Resident::where('household_head_id', $targetHeadId)
+                ->where('id', '!=', $resId)
+                ->get();
+
+            if ($currRes && $currRes->household_head_id && $targetHeadId !== $resId) {
+                $headMember = Resident::find($targetHeadId);
+                if ($headMember && !$myFamily->contains('id', $headMember->id)) {
+                    $headMember->relationship = $headMember->relationship ?: 'Household Head';
+                    $myFamily->prepend($headMember);
+                }
+            }
+
+            if ($myFamily->isEmpty() && $currRes && !empty($currRes->household_id)) {
+                $myFamily = Resident::where('household_id', $currRes->household_id)
+                    ->where('id', '!=', $resId)
+                    ->get();
+            }
+        }
+
 
         $residentId = $resident?->id ?? (auth()->check() ? \App\Models\Resident::where('user_id', auth()->id())->value('id') : null);
         $userId = auth()->id();
@@ -801,8 +824,20 @@ class ResidentPortalController extends Controller
 
     public function storeFamilyMember(Request $request)
     {
-        if (auth()->check() && in_array(auth()->user()->status, ['pending_verification', 'declined'])) {
-            return redirect()->back()->with('error', '⚠️ Ang pagdaragdag ng miyembro ng pamilya sa Masterlist ay para lamang sa mga beripikadong residente. Pakilagay ang mga kasamang lilipat sa inyong Move-In certificate request.');
+        if (auth()->check()) {
+            $user = auth()->user();
+            $isVerified = ($user->status === 'active') 
+                || ($user->voter_status === 'approved') 
+                || ($user->resident?->verification_status === 'approved')
+                || ($user->digitalId?->status === 'generated');
+
+            if (!$isVerified && in_array($user->status, ['pending_verification', 'declined'])) {
+                return redirect()->back()->with('error', '⚠️ Ang pagdaragdag ng miyembro ng pamilya sa Masterlist ay para lamang sa mga opisyal at beripikadong residente. Pakilagay ang mga kasamang lilipat sa inyong Move-In certificate request.');
+            }
+
+            if ($user->status !== 'active') {
+                $user->update(['status' => 'active', 'is_active' => 1]);
+            }
         }
 
         $request->validate([
@@ -847,7 +882,7 @@ class ResidentPortalController extends Controller
                     'birthplace'          => !empty($user->birthplace) ? $user->birthplace : 'Barangay San Miguel II, Dasmariñas, Cavite',
                     'gender'              => $user->gender ?? 'Other',
                     'civil_status'        => $user->civil_status ?? 'Single',
-                    'address'             => $user->address ?? 'Barangay San Miguel II',
+                    'address'             => !empty($user->address) ? $user->address : 'Barangay San Miguel II',
                     'is_voter'            => (bool)($user->is_voter ?? false),
                     'is_non_voter'        => (bool)($user->is_non_voter ?? false),
                     'is_senior'           => (bool)($user->is_senior ?? false),
@@ -858,6 +893,9 @@ class ResidentPortalController extends Controller
             } else {
                 if (!$headResident->user_id) {
                     $headResident->update(['user_id' => $user->id]);
+                }
+                if (!$headResident->is_household_head) {
+                    $headResident->update(['is_household_head' => true]);
                 }
             }
 
@@ -909,7 +947,7 @@ class ResidentPortalController extends Controller
             $resident->birthplace = !empty($headResident->birthplace) ? $headResident->birthplace : (!empty($user->birthplace) ? $user->birthplace : 'Barangay San Miguel II, Dasmariñas, Cavite');
             $resident->gender = $request->gender;
             $resident->civil_status = $request->civil_status;
-            $resident->address = $headResident->address ?? $user->address ?? 'Barangay San Miguel II';
+            $resident->address = !empty($headResident->address) ? $headResident->address : (!empty($user->address) ? $user->address : 'Barangay San Miguel II, Dasmariñas, Cavite');
             
             $resident->is_voter = $isVoter;
             $resident->is_non_voter = !$isVoter;
@@ -949,6 +987,35 @@ class ResidentPortalController extends Controller
             return redirect()->route('resident.index')->with('error', 'Error adding family member: ' . $e->getMessage());
         }
     }
+
+    public function removeFamilyMember($id)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $user = auth()->user();
+        $resId = $user->resident?->id ?: \App\Models\Resident::where('user_id', $user->id)->value('id');
+        if (!$resId && $user->resident_code) {
+            $resId = \App\Models\Resident::where('resident_code', $user->resident_code)->value('id');
+        }
+
+        $member = Resident::where('id', $id)
+            ->where('household_head_id', $resId)
+            ->first();
+
+        if ($member) {
+            if ($member->verification_status === 'pending' || str_starts_with($member->resident_code, 'R-')) {
+                $member->delete();
+            } else {
+                $member->update(['household_head_id' => null, 'relationship' => null]);
+            }
+            return redirect()->back()->with('success', 'Naalis na ang miyembro ng pamilya.');
+        }
+
+        return redirect()->back()->with('error', 'Hindi mahanap ang miyembro ng pamilya.');
+    }
+
 
     public function requestDigitalId(Request $request)
     {

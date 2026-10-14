@@ -5295,6 +5295,28 @@ html, body {
                 {{-- MY FAMILY --}}
                 @php 
                     $myFamily = $myFamily ?? collect();
+                    if ($myFamily->isEmpty() && auth()->check()) {
+                        $fResId = $resident?->id ?? $authUser?->resident?->id ?? (\App\Models\Resident::where('user_id', $authUser?->id)->value('id')) ?? ($authUser?->resident_code ? \App\Models\Resident::where('resident_code', $authUser->resident_code)->value('id') : null);
+                        if ($fResId) {
+                            $fRes = $resident ?? \App\Models\Resident::find($fResId);
+                            $fHeadId = ($fRes && $fRes->household_head_id) ? $fRes->household_head_id : $fResId;
+                            $myFamily = \App\Models\Resident::where('household_head_id', $fHeadId)
+                                ->where('id', '!=', $fResId)
+                                ->get();
+                            if ($fRes && $fRes->household_head_id && $fHeadId !== $fResId) {
+                                $hMem = \App\Models\Resident::find($fHeadId);
+                                if ($hMem && !$myFamily->contains('id', $hMem->id)) {
+                                    $hMem->relationship = $hMem->relationship ?: 'Household Head';
+                                    $myFamily->prepend($hMem);
+                                }
+                            }
+                            if ($myFamily->isEmpty() && $fRes && !empty($fRes->household_id)) {
+                                $myFamily = \App\Models\Resident::where('household_id', $fRes->household_id)
+                                    ->where('id', '!=', $fResId)
+                                    ->get();
+                            }
+                        }
+                    }
                 @endphp
                 <div>
                     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:12px;margin-bottom:14px;">
@@ -5313,6 +5335,18 @@ html, body {
                                 @if($fm->is_single_parent)<span style="font-size:8px;background:#fce7f3;color:#be185d;padding:1px 6px;border-radius:99px;font-weight:900;">Solo Parent</span>@endif
                                 @if($fm->is_student)<span style="font-size:8px;background:#fef3c7;color:#a16207;padding:1px 6px;border-radius:99px;font-weight:900;">Student</span>@endif
                                 @if($fm->verification_status === 'pending')<span style="font-size:8px;opacity:.8;color:#d97706;background:#fef3c7;padding:1px 4px;border-radius:3px;margin-left:4px;" title="Awaiting office approval">(Pending)</span>@endif
+                                @php
+                                    $currResId = $resident?->id ?? $authUser?->resident?->id ?? (\App\Models\Resident::where('user_id', $authUser?->id)->value('id'));
+                                @endphp
+                                @if($currResId && $fm->household_head_id == $currResId)
+                                <form action="{{ route('resident.family.remove', $fm->id) }}" method="POST" style="display:inline;margin-left:3px;" onsubmit="return confirm('Sigurado ka bang nais mong alisin ang miyembrong ito?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;font-size:9px;line-height:1;vertical-align:middle;" title="Alisin ang miyembro">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                             @empty
                             <span style="font-size:10px;color:var(--light);font-weight:600;">No family members added.</span>
@@ -5931,7 +5965,7 @@ html, body {
                     <button type="button" @click="familyModal=false;profileModal=true" class="modal-close"><i class="fas fa-arrow-circle-left"></i></button>
                 </div>
                 <p style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:14px;">Family members added here are pending approval. You cannot edit them once submitted.</p>
-                <form action="{{ route('resident.family.store') }}" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
+                <form action="{{ route('resident.family.store') }}" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false, famBirthday: '', famAge: 0, famClassification: '' }" @submit="isSubmitting = true">
                     @csrf
                     <div class="fgrid4" style="gap:7px;margin-bottom:12px;">
                         <div class="fspan2"><label class="flbl">First Name</label><input type="text" name="first_name" required class="finput" style="padding:8px;"></div>
@@ -5974,11 +6008,11 @@ html, body {
                     <div class="fgrid2" style="grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:12px;">
                         <div>
                             <label class="flbl">Birthday</label>
-                            <input type="date" name="birthday" x-model="birthday" required @input="if(birthday){const bd=new Date(birthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;age=a;}" @change="if(birthday){const bd=new Date(birthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;age=a;}" class="finput" style="padding:8px;">
+                            <input type="date" name="birthday" x-model="famBirthday" required @input="if(famBirthday){const bd=new Date(famBirthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;famAge=a;}" @change="if(famBirthday){const bd=new Date(famBirthday);const t=new Date();let a=t.getFullYear()-bd.getFullYear();const m=t.getMonth()-bd.getMonth();if(m<0||(m===0&&t.getDate()<bd.getDate()))a--;famAge=a;}" class="finput" style="padding:8px;">
                         </div>
                         <div>
                             <label class="flbl">Age</label>
-                            <input type="number" name="age" x-model="age" readonly class="finput" style="padding:8px;background:#e2e8f0;font-weight:700;">
+                            <input type="number" name="age" x-model="famAge" readonly class="finput" style="padding:8px;background:#e2e8f0;font-weight:700;">
                         </div>
                     </div>
 
@@ -5993,7 +6027,7 @@ html, body {
                         </div>
                         <div>
                             <label class="flbl">Classification</label>
-                            <select name="classification" x-model="classification" class="finput fselect" style="padding:8px; font-weight:600;">
+                            <select name="classification" x-model="famClassification" class="finput fselect" style="padding:8px; font-weight:600;">
                                 <option value="">None / Regular</option>
                                 <option value="PWD">PWD</option>
                                 <option value="Senior">Senior</option>

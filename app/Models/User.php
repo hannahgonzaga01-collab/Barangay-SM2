@@ -123,6 +123,36 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\Resident::class, 'user_id');
     }
 
+    public function getFamilyMembersAttribute()
+    {
+        $residentId = $this->resident?->id ?: \App\Models\Resident::where('user_id', $this->id)->value('id');
+        if (!$residentId && $this->resident_code) {
+            $residentId = \App\Models\Resident::where('resident_code', $this->resident_code)->value('id');
+        }
+
+        if (!$residentId) {
+            return collect();
+        }
+
+        $res = \App\Models\Resident::find($residentId);
+        $headId = ($res && $res->household_head_id) ? $res->household_head_id : $residentId;
+
+        $members = \App\Models\Resident::where('household_head_id', $headId)
+            ->where('id', '!=', $residentId)
+            ->get();
+
+        if ($res && $res->household_head_id && $headId !== $residentId) {
+            $headMember = \App\Models\Resident::find($headId);
+            if ($headMember && !$members->contains('id', $headMember->id)) {
+                $headMember->relationship = $headMember->relationship ?: 'Household Head';
+                $members->prepend($headMember);
+            }
+        }
+
+        return $members;
+    }
+
+
     public function getProfilePhotoUrlAttribute(): string
     {
         $name = trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? '')) ?: ($this->name ?? 'User');
