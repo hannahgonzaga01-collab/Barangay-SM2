@@ -78,7 +78,7 @@ html, body {
 .filter-search input{background:transparent;border:none;color:#fff;font-family:inherit;font-size:10px;font-weight:700;outline:none;width:100%;}
 
 /* TABLE */
-.tbl{width:100%;border-collapse:collapse;}
+.tbl{width:100%;min-width:680px;border-collapse:collapse;}
 .tbl thead tr{background:#f8fafc;}
 .tbl th{padding:11px 14px;font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:left;}
 .tbl tbody tr{border-bottom:1px solid #f8fafc;transition:background .1s;}
@@ -164,25 +164,31 @@ html, body {
 .ref-box{border:1px solid #94a3b8;padding:10px 12px;margin-top:4px;min-height:80px;font-size:12px;line-height:1.5;background:#fafbfc;}
 
 @media(max-width:768px){
-    .action-grid{grid-template-columns:repeat(2,1fr);}
+    .action-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
     .hero-stats{gap:8px;}
     .hero{padding:18px 14px 16px;}
     .hero-title{font-size:16px;}
+    .hstat{flex:1 1 30%;min-width:70px;padding:8px;}
     .conf-banner{flex-direction:column;align-items:stretch;}
     .conf-banner-content{min-width:100%;}
     .conf-btn{width:100%;text-align:center;justify-content:center;}
     .portal-wrap{padding:14px 10px 40px;}
     .tbl th,.tbl td{padding:8px 10px;}
-    .filter-bar{gap:6px;}
-    .filter-search{min-width:120px;}
+    .filter-bar{gap:8px;flex-direction:column;align-items:stretch;}
+    .filter-search{min-width:100%;}
+    .filter-bar select{width:100%;}
     .card-head{flex-direction:column;align-items:flex-start;}
     .fgrid2{grid-template-columns:1fr;}
     .fspan2{grid-column:span 1;}
 }
 @media(max-width:480px){
-    .action-grid{grid-template-columns:repeat(2,1fr);}
-    .hstat{min-width:56px;padding:8px 10px;}
+    .action-grid{grid-template-columns:1fr;gap:8px;}
+    .hstat{flex:1 1 45%;min-width:60px;padding:8px;}
     .hstat-n{font-size:16px;}
+    .modal-ov{padding:8px;}
+    .modal-in{padding:14px;}
+    .modal-box{border-radius:14px;}
+    .action-btn-group{flex-wrap:wrap;}
 }
 </style>
 
@@ -1022,7 +1028,7 @@ html, body {
                                     @endif
                                     @if($resolvedIssue->admin_notes)
                                         <div style="font-size:9.5px;color:var(--muted);margin-top:3px;max-width:240px;line-height:1.3;white-space:normal;">
-                                            {{ \Illuminate\Support\Str::limit($resolvedIssue->admin_notes, 90) }}
+                                            {{ strlen($resolvedIssue->admin_notes) > 90 ? substr($resolvedIssue->admin_notes, 0, 90) . '...' : $resolvedIssue->admin_notes }}
                                         </div>
                                     @endif
                                 </td>
@@ -1260,6 +1266,7 @@ html, body {
                     <div style="font-size:11px;font-weight:900;color:var(--text);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
                         <i class="fas fa-history" style="color:var(--vawc);"></i> Submitted Compliance Reports to Admin History
                     </div>
+                    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
                     <table class="tbl">
                         <thead><tr>
                             <th>Report Title</th>
@@ -1295,6 +1302,7 @@ html, body {
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
