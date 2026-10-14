@@ -593,7 +593,8 @@ html, body {
                                 @endforeach
                             </select>
                             <select name="status_filter" @change="fetchFilters()">
-                                <option value="">All Statuses</option>
+                                <option value="">Active Cases Only</option>
+                                <option value="all"             {{ request('status_filter')==='all'             ?'selected':'' }}>All Statuses (Including Closed)</option>
                                 <option value="submitted"       {{ request('status_filter')==='submitted'       ?'selected':'' }}>New / Submitted</option>
                                 <option value="under_review"    {{ request('status_filter')==='under_review'    ?'selected':'' }}>Under Review</option>
                                 <option value="pending"         {{ request('status_filter')==='pending'         ?'selected':'' }}>Pending</option>
@@ -778,76 +779,80 @@ html, body {
                                                 'pending'         => 1,
                                                 'under_review'    => 2,
                                                 'on_going'        => 3,
-                                                'referred_to_pnp' => 3,
                                                 'urgent'          => 3,
                                                 'approved'        => 3,
+                                                'referred_to_pnp' => 4,
                                                 'settled'         => 4,
                                                 'resolved'        => 4,
                                                 'rejected'        => 4,
                                                 'archived'        => 4,
                                             ];
                                             $curVawcRank = $vawcRankMap[$issue->status] ?? 1;
-                                            $isVawcTerminal = in_array($issue->status, ['settled', 'resolved', 'rejected', 'archived']);
+                                            $isVawcTerminal = in_array($issue->status, ['settled', 'resolved', 'rejected', 'archived', 'referred_to_pnp']);
                                         @endphp
 
-                                        {{-- 1. VIEW BUTTON --}}
-                                        <button type="button" @click="openView({{ json_encode($issueData) }})"
-                                                class="btn-action-icon btn-action-view" title="View Case Details">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-
-                                        {{-- 2. TRANSFER (⇄) BUTTON TRIGGERING CONFIRMATION MODAL WITH REASON --}}
-                                        @if(!$isVawcTerminal)
-                                            <button type="button" @click="openReroute({{ json_encode($issueData) }})"
-                                                    class="btn-action-icon btn-action-reroute" title="Re-route Case to Peace & Order / KP Desk">
-                                                <i class="fas fa-exchange-alt"></i>
+                                        <div class="action-btn-group">
+                                            {{-- 1. VIEW BUTTON (ALWAYS ACCESSIBLE) --}}
+                                            <button type="button" @click="openView({{ json_encode($issueData) }})"
+                                                    class="btn-action-icon btn-action-view" title="View Case Details">
+                                                <i class="fas fa-eye"></i>
                                             </button>
-                                        @endif
 
-                                        {{-- 3. ARCHIVE BUTTON TRIGGERING CONFIRMATION MODAL WITH MANDATORY NOTE --}}
-                                        @if($issue->status === 'archived')
-                                            <span class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;cursor:default;" title="Case Already Archived">
-                                                <i class="fas fa-archive"></i>
-                                            </span>
-                                        @elseif($isVawcTerminal)
-                                            <span class="btn-action-icon" style="background:#dcfce7;color:#15803d;border:1.5px solid #bbf7d0;cursor:default;" title="Case {{ ucfirst($issue->status) }} and Closed">
-                                                <i class="fas fa-check"></i>
-                                            </span>
-                                        @else
-                                            <button type="button" @click="openArchive({{ json_encode($issueData) }})"
-                                                    class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;" title="Archive Blotter Case (Requires Note)">
-                                                <i class="fas fa-archive"></i>
-                                            </button>
-                                        @endif
+                                            @if(!$isVawcTerminal)
+                                                {{-- 2. TRANSFER (⇄) BUTTON --}}
+                                                <button type="button" @click="openReroute({{ json_encode($issueData) }})"
+                                                        class="btn-action-icon btn-action-reroute" title="Re-route Case to Peace & Order / KP Desk">
+                                                    <i class="fas fa-exchange-alt"></i>
+                                                </button>
 
-                                        {{-- 4. STATUS UPDATE DROPDOWN --}}
-                                        @if($isVawcTerminal)
-                                            <select disabled style="height:32px;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;background:#f8fafc;color:#94a3b8;cursor:not-allowed;outline:none;font-family:inherit;opacity:0.75;" title="This case is already {{ $issue->status === 'settled' ? 'Resolved' : ($issue->status === 'archived' ? 'Archived' : ucfirst($issue->status)) }} and locked.">
-                                                <option selected>{{ $issue->status === 'archived' ? 'Archived' : ($issue->status === 'settled' ? 'Resolved' : ucfirst(str_replace('_',' ',$issue->status))) }}</option>
-                                            </select>
-                                        @else
-                                            <form :id="'vawc-status-form-{{ $issue->id }}'" action="{{ url('/vawc/issues/'.$issue->id.'/status') }}" method="POST" style="display:inline;margin:0;">
-                                                @csrf @method('PATCH')
-                                                <select name="status" @change="if($el.value === 'rejected') { openReject({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else { document.getElementById('vawc-status-form-{{ $issue->id }}').submit(); }"
-                                                        style="height:32px;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;background:#f8fafc;cursor:pointer;outline:none;font-family:inherit;">
-                                                    @if($curVawcRank === 1)
-                                                        <option value="pending"         {{ in_array($issue->status, ['submitted','pending']) ? 'selected' : '' }}>Pending</option>
-                                                    @endif
-                                                    @if($curVawcRank <= 2)
-                                                        <option value="under_review"    {{ $issue->status==='under_review' ? 'selected' : '' }}>Under Review</option>
-                                                    @endif
-                                                    @if($curVawcRank <= 3)
-                                                        <option value="on_going"        {{ $issue->status==='on_going'        ? 'selected' : '' }}>On-going</option>
-                                                        <option value="referred_to_pnp" {{ $issue->status==='referred_to_pnp' ? 'selected' : '' }}>Referred to PNP</option>
-                                                        <option value="urgent"          {{ $issue->status==='urgent'          ? 'selected' : '' }}>Urgent Rescue</option>
-                                                        <option value="approved"        {{ $issue->status==='approved'        ? 'selected' : '' }}>Approved</option>
-                                                    @endif
-                                                    <option value="settled"         {{ in_array($issue->status, ['settled','resolved']) ? 'selected' : '' }}>Resolved</option>
-                                                    <option value="rejected"        {{ $issue->status==='rejected'        ? 'selected' : '' }}>Rejected</option>
-                                                </select>
-                                            </form>
-                                        @endif
-                                    </div>
+                                                {{-- 3. ARCHIVE BUTTON --}}
+                                                <button type="button" @click="openArchive({{ json_encode($issueData) }})"
+                                                        class="btn-action-icon" style="background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;" title="Archive Blotter Case (Requires Note)">
+                                                    <i class="fas fa-archive"></i>
+                                                </button>
+
+                                                {{-- 4. STATUS UPDATE DROPDOWN (ONLY SHOWS FORWARD PROGRESSION) --}}
+                                                <form :id="'vawc-status-form-{{ $issue->id }}'" action="{{ url('/vawc/issues/'.$issue->id.'/status') }}" method="POST" style="display:inline;margin:0;">
+                                                    @csrf @method('PATCH')
+                                                    <select name="status" @change="if($el.value === 'rejected') { openReject({{ $issue->id }}); $el.value='{{ $issue->status }}'; } else { document.getElementById('vawc-status-form-{{ $issue->id }}').submit(); }"
+                                                            style="height:32px;font-size:9px;font-weight:800;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;background:#f8fafc;cursor:pointer;outline:none;font-family:inherit;">
+                                                        @if($curVawcRank === 1)
+                                                            <option value="pending"         {{ in_array($issue->status, ['submitted','pending']) ? 'selected' : '' }}>Pending</option>
+                                                        @endif
+                                                        @if($curVawcRank <= 2)
+                                                            <option value="under_review"    {{ $issue->status==='under_review' ? 'selected' : '' }}>Under Review</option>
+                                                        @endif
+                                                        @if($curVawcRank <= 3)
+                                                            <option value="on_going"        {{ $issue->status==='on_going'        ? 'selected' : '' }}>On-going</option>
+                                                            <option value="referred_to_pnp" {{ $issue->status==='referred_to_pnp' ? 'selected' : '' }}>Referred to PNP</option>
+                                                            <option value="urgent"          {{ $issue->status==='urgent'          ? 'selected' : '' }}>Urgent Rescue</option>
+                                                            <option value="approved"        {{ $issue->status==='approved'        ? 'selected' : '' }}>Approved</option>
+                                                        @endif
+                                                        <option value="settled"         {{ in_array($issue->status, ['settled','resolved']) ? 'selected' : '' }}>Resolved</option>
+                                                        <option value="rejected"        {{ $issue->status==='rejected'        ? 'selected' : '' }}>Rejected</option>
+                                                    </select>
+                                                </form>
+                                            @else
+                                                {{-- COMPLETED / TERMINAL BADGE (NO CLICKABLE EXTRA ACTIONS) --}}
+                                                @if($issue->status === 'referred_to_pnp')
+                                                    <span class="spill spill-urgent" style="font-size:8.5px;padding:4px 8px;background:#fee2e2;color:#dc2626;border:1px solid #fecaca;cursor:default;" title="Case escalated and referred to PNP. Actions locked.">
+                                                        <i class="fas fa-lock" style="font-size:8px;"></i> Referred to PNP
+                                                    </span>
+                                                @elseif(in_array($issue->status, ['settled', 'resolved']))
+                                                    <span class="spill spill-settled" style="font-size:8.5px;padding:4px 8px;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;cursor:default;" title="Case resolved and closed. Actions locked.">
+                                                        <i class="fas fa-lock" style="font-size:8px;"></i> Resolved
+                                                    </span>
+                                                @elseif($issue->status === 'archived')
+                                                    <span class="spill" style="font-size:8.5px;padding:4px 8px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;cursor:default;" title="Case archived. Actions locked.">
+                                                        <i class="fas fa-lock" style="font-size:8px;"></i> Archived
+                                                    </span>
+                                                @else
+                                                    <span class="spill spill-new" style="font-size:8.5px;padding:4px 8px;cursor:default;" title="Case rejected. Actions locked.">
+                                                        <i class="fas fa-lock" style="font-size:8px;"></i> Rejected
+                                                    </span>
+                                                @endif
+                                            @endif
+                                        </div>
                                 </td>
                             </tr>
                             @empty

@@ -34,7 +34,13 @@ class VawcController extends Controller
 
         // Status Select Filter
         if ($request->filled('status_filter')) {
-            $query->where('status', $request->status_filter);
+            if ($request->status_filter !== 'all') {
+                $query->where('status', $request->status_filter);
+            }
+        } else {
+            // Default: Blotter intake table only shows active/ongoing cases
+            // Referred to PNP moves to Referrals tab, Resolved/Archived moves to Archive tab
+            $query->whereNotIn('status', ['settled', 'resolved', 'archived', 'referred_to_pnp']);
         }
 
         // Issue Type Filter
@@ -78,6 +84,10 @@ class VawcController extends Controller
 
         $issue = IssueReport::findOrFail($id);
 
+        if (in_array($issue->status, ['archived', 'referred_to_pnp'])) {
+            return redirect()->back()->with('error', 'This case is already ' . str_replace('_', ' ', $issue->status) . ' and cannot be archived.');
+        }
+
         $caseCode = 'VAWC-' . $issue->created_at->format('Y') . '-' . str_pad($issue->id, 3, '0', STR_PAD_LEFT);
         $timestamp = now()->format('M d, Y h:i A');
         $staffName = auth()->user()->name ?? 'VAWC Staff';
@@ -114,9 +124,9 @@ class VawcController extends Controller
             'pending'         => 1,
             'under_review'    => 2,
             'on_going'        => 3,
-            'referred_to_pnp' => 3,
             'urgent'          => 3,
             'approved'        => 3,
+            'referred_to_pnp' => 4,
             'settled'         => 4,
             'resolved'        => 4,
             'rejected'        => 4,
@@ -126,9 +136,9 @@ class VawcController extends Controller
         $currentStatus = $issue->status;
         $newStatus = $request->status;
 
-        // Terminal lock
-        if (in_array($currentStatus, ['settled', 'resolved', 'rejected', 'archived'])) {
-            return redirect()->back()->with('error', 'This case is already ' . ($currentStatus === 'settled' ? 'resolved' : $currentStatus) . ' and cannot be changed.');
+        // Terminal lock: If already resolved, referred to PNP, archived, or rejected, strictly locked
+        if (in_array($currentStatus, ['settled', 'resolved', 'rejected', 'archived', 'referred_to_pnp'])) {
+            return redirect()->back()->with('error', 'This case is already ' . ($currentStatus === 'settled' ? 'resolved' : str_replace('_', ' ', $currentStatus)) . ' and cannot be modified.');
         }
 
         $currentRank = $ranks[$currentStatus] ?? 0;
@@ -321,6 +331,10 @@ class VawcController extends Controller
 
         $issue = IssueReport::findOrFail($id);
         
+        if (in_array($issue->status, ['settled', 'resolved', 'rejected', 'archived', 'referred_to_pnp'])) {
+            return redirect()->back()->with('error', 'This case is already ' . ($issue->status === 'settled' ? 'resolved' : str_replace('_', ' ', $issue->status)) . ' and cannot be re-routed.');
+        }
+
         if ($issue->transfer_count >= 1) {
             return redirect()->back()->with('error', 'This case has already been transferred once and cannot be moved again due to audit guardrails.');
         }
