@@ -219,9 +219,25 @@ class ResidentPortalController extends Controller
             
             $carouselData   = SiteSetting::where('key', 'carousel_data')->first()?->value;
             $decodedCarousel = $carouselData ? json_decode($carouselData) : null;
-            $carouselSlides = (is_array($decodedCarousel) && count($decodedCarousel) > 0)
+            $rawSlides = (is_array($decodedCarousel) && count($decodedCarousel) > 0)
                 ? collect($decodedCarousel)->where('is_active', true)->sortBy('sort_order')
                 : collect(\App\Http\Controllers\AdminController::defaultSlides())->where('is_active', true)->map(fn($item) => (object)$item);
+
+            $carouselSlides = $rawSlides->map(function($s) {
+                $sTitle = is_object($s) ? ($s->title ?? '') : ($s['title'] ?? '');
+                $sImg   = is_object($s) ? ($s->image_path ?? '') : ($s['image_path'] ?? '');
+                if (str_starts_with($sImg, 'http://') || str_starts_with($sImg, 'https://')) {
+                    $src = $sImg;
+                } elseif (str_starts_with($sImg, 'images/') || str_starts_with($sImg, 'assets/') || str_starts_with($sImg, 'storage/')) {
+                    $src = asset($sImg);
+                } else {
+                    $src = asset('storage/' . $sImg);
+                }
+                return [
+                    'title' => $sTitle,
+                    'image' => $src,
+                ];
+            })->values();
             $orgChartPath   = SiteSetting::where('key', 'organizational_chart')->first()?->value;
 
             // Fetch Patrol Schedules for Tanod Duty Display

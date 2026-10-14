@@ -18,15 +18,20 @@ class VerifiedResidentMiddleware
     {
         $user = Auth::user();
 
-        // If an authenticated staff/admin tries to access the resident portal, block with 403 Forbidden
+        // Admin has superuser authority to preview the public / resident portal
+        if ($user && $user->role === 'admin') {
+            return $next($request);
+        }
+
+        // If an authenticated department staff (office, justice, vawc, peace) tries to access the resident portal, block with 403 Forbidden
         if ($user && $user->role !== 'resident') {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'error'   => 'Forbidden',
-                    'message' => 'Unauthorized access. Staff accounts are not permitted to access the Resident Portal.'
+                    'message' => 'Unauthorized access. Department staff accounts are not permitted to access the Resident Portal.'
                 ], 403);
             }
-            abort(403, 'Wala kayong pahintulot na ma-access ang Resident Portal gamit ang Department Staff / Admin account.');
+            abort(403, 'Wala kayong pahintulot na ma-access ang Resident Portal gamit ang Department Staff account.');
         }
 
         // If not authenticated, allow guests to view the landing page and public notices

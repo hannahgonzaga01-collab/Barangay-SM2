@@ -3057,7 +3057,7 @@
                                                                         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                                                             <template x-for="(p, idx) in photos" :key="idx">
                                                                                 <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                                                                    <img :src="p.url" style="width:100%;height:100%;object-fit:cover;">
+                                                                                    <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
                                                                                     <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                                                                     <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                                                             style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -3275,7 +3275,7 @@
                                                                         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                                                             <template x-for="(p, idx) in photos" :key="idx">
                                                                                 <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                                                                    <img :src="p.url" style="width:100%;height:100%;object-fit:cover;">
+                                                                                    <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
                                                                                     <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                                                                     <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                                                             style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -4806,7 +4806,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                            <img :src="p.url" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -4885,7 +4885,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                            <img :src="p.url" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -4960,7 +4960,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-                                            <img :src="p.url" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)" title="Remove Photo"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:.15s;"
@@ -5092,7 +5092,7 @@
                                 <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:8px;width:100%;">
                                     <template x-for="(p, idx) in photos" :key="idx">
                                         <div style="position:relative;height:75px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);background:#fff;">
-                                            <img :src="p.url" style="width:100%;height:100%;object-fit:cover;">
+                                            <img :src="p.url" onerror="this.onerror=null; this.src='{{ asset('images/cleanup.jpg') }}';" style="width:100%;height:100%;object-fit:cover;">
                                             <span style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;" x-text="'#' + (idx+1)"></span>
                                             <button type="button" @click.stop="removePhoto(idx)"
                                                     style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;">

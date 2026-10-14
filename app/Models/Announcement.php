@@ -11,13 +11,19 @@ class Announcement extends Model {
     protected $appends = ['images_list'];
 
     public function getImagesListAttribute() {
+        $resolve = function($img) {
+            if (!$img) return null;
+            if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) return $img;
+            if (str_starts_with($img, 'images/') || str_starts_with($img, 'assets/') || str_starts_with($img, 'storage/')) return asset($img);
+            return asset('storage/' . $img);
+        };
+
         if (!empty($this->images) && is_array($this->images)) {
-            return array_values(array_map(function($img) {
-                return str_starts_with($img, 'http') ? $img : asset('storage/' . $img);
-            }, $this->images));
+            return array_values(array_filter(array_map($resolve, $this->images)));
         }
         if (!empty($this->image_path)) {
-            return [str_starts_with($this->image_path, 'http') ? $this->image_path : asset('storage/' . $this->image_path)];
+            $url = $resolve($this->image_path);
+            return $url ? [$url] : [];
         }
         return [];
     }

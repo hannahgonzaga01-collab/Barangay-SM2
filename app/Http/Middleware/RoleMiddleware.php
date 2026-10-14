@@ -19,8 +19,13 @@ class RoleMiddleware
             return redirect()->route('login')->with('error', 'Mangyaring mag-log in muna upang ma-access ang pahinang ito.');
         }
 
-        // 2. Check kung ang role ng user ay kasama sa allowed roles
+        // 2. Admin has master access to all portals
         $userRole = Auth::user()->role;
+        if ($userRole === 'admin') {
+            return $next($request);
+        }
+
+        // 3. Check kung ang role ng user ay kasama sa allowed roles
         if (!in_array($userRole, $roles)) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
