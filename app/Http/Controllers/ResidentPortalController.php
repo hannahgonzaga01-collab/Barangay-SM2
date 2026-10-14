@@ -32,136 +32,144 @@ class ResidentPortalController extends Controller
             /** @var User $user */
             $user = auth()->user();
 
-            if ($user->role !== 'resident') {
-                abort(403, 'Wala kayong pahintulot na ma-access ang Resident Portal gamit ang Department Staff / Admin account.');
+            if ($user->role !== 'resident' && $user->role !== 'admin') {
+                abort(403, 'Wala kayong pahintulot na ma-access ang Resident Portal gamit ang Department Staff account.');
             }
 
-            // ── 1. Already linked by user_id ──
-            $resident = Resident::where('user_id', $user->id)->first();
+            if ($user->role === 'resident') {
+                // ── 1. Already linked by user_id ──
+                $resident = Resident::where('user_id', $user->id)->first();
 
-            // CRITICAL SAFEGUARD: If a test/dummy account was somehow linked to an official RSM-% resident, unlink immediately!
-            if ($resident && str_starts_with($resident->resident_code, 'RSM-')) {
-                if (preg_match('/^(resident_eval|evaluator|admin)/i', $user->email) || str_contains($user->email, 'hannah')) {
-                    $resident->update(['user_id' => null]);
-                    $resident = null;
-                }
-            }
-
-            // ── 2. Match by resident_code stored on user (strictly for non-official or pre-linked records) ──
-            if (!$resident && $user->resident_code) {
-                // Official masterlist residents (RSM-%) must NEVER be dynamically linked by index view!
-                if (!str_starts_with($user->resident_code, 'RSM-')) {
-                    $candidate = Resident::where('resident_code', $user->resident_code)->first();
-                    if ($candidate && (is_null($candidate->user_id) || $candidate->user_id == $user->id)) {
-                        $candidate->update(['user_id' => $user->id]);
-                        $resident = $candidate;
-                    }
-                }
-            }
-
-            // ── 3. Auto-create dedicated resident profile if active user still has none (not for pending/declined) ──
-            if (!$resident && $user->role === 'resident' && !in_array($user->status, ['pending_verification', 'declined'])) {
-                $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
-                $random = strtoupper(substr(uniqid(), -6));
-                $resident = Resident::create([
-                    'user_id'             => $user->id,
-                    'resident_code'       => $user->resident_code ?? "R-{$prefix}-{$random}",
-                    'first_name'          => $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'Resident'),
-                    'middle_name'         => $user->middle_name,
-                    'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
-                    'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
-                    'birthplace'          => $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite',
-                    'gender'              => $user->gender ?? 'Other',
-                    'civil_status'        => $user->civil_status ?? 'Single',
-                    'address'             => $user->address ?? 'Barangay San Miguel II',
-                    'is_voter'            => (bool)($user->is_voter ?? false),
-                    'is_non_voter'        => (bool)($user->is_non_voter ?? false),
-                    'is_senior'           => (bool)($user->is_senior ?? false),
-                    'is_household_head'   => true,
-                    'verification_status' => 'approved',
-                ]);
-                $user->update(['resident_code' => $resident->resident_code]);
-            }
-
-            // ── Sync resident details to user record (only when changed to save DB writes) ──
-            if ($resident) {
-                $syncFields = [
-                    'resident_code'    => $resident->resident_code,
-                    'first_name'       => $resident->first_name,
-                    'last_name'        => $resident->last_name,
-                    'middle_name'      => $resident->middle_name,
-                    'birthday'         => $resident->birthday,
-                    'birthplace'       => $resident->birthplace,
-                    'gender'           => $resident->gender,
-                    'civil_status'     => $resident->civil_status,
-                    'spouse_name'      => $resident->spouse_name,
-                    'contact_number'   => $resident->contact_number,
-                    'address'          => $resident->address,
-                    'occupation'       => $resident->occupation,
-                    'photo'            => $resident->photo,
-                    'is_voter'         => (bool)$resident->is_voter,
-                    'is_senior'        => (bool)$resident->is_senior,
-                    'is_pwd'           => (bool)$resident->is_pwd,
-                    'is_single_parent' => (bool)$resident->is_single_parent,
-                    'is_student'       => (bool)$resident->is_student,
-                    'is_non_voter'     => (bool)$resident->is_non_voter,
-                    'is_bedridden'     => (bool)$resident->is_bedridden,
-                ];
-
-                $changes = [];
-                foreach ($syncFields as $k => $v) {
-                    if ($user->{$k} != $v) {
-                        $changes[$k] = $v;
+                // CRITICAL SAFEGUARD: If a test/dummy account was somehow linked to an official RSM-% resident, unlink immediately!
+                if ($resident && str_starts_with($resident->resident_code, 'RSM-')) {
+                    if (preg_match('/^(resident_eval|evaluator|admin)/i', $user->email) || str_contains($user->email, 'hannah')) {
+                        $resident->update(['user_id' => null]);
+                        $resident = null;
                     }
                 }
 
-                if (in_array($resident->verification_status, ['approved', 'verified'])) {
-                    if ($user->status === 'pending_verification') {
-                        $changes['status'] = 'active';
-                        $changes['is_active'] = 1;
-                    }
-                    if ($resident->voter_status === 'approved' && $user->voter_status !== 'approved') {
-                        $changes['voter_status'] = 'approved';
+                // ── 2. Match by resident_code stored on user (strictly for non-official or pre-linked records) ──
+                if (!$resident && $user->resident_code) {
+                    // Official masterlist residents (RSM-%) must NEVER be dynamically linked by index view!
+                    if (!str_starts_with($user->resident_code, 'RSM-')) {
+                        $candidate = Resident::where('resident_code', $user->resident_code)->first();
+                        if ($candidate && (is_null($candidate->user_id) || $candidate->user_id == $user->id)) {
+                            $candidate->update(['user_id' => $user->id]);
+                            $resident = $candidate;
+                        }
                     }
                 }
 
-                if (!empty($changes)) {
-                    $user->update($changes);
+                // ── 3. Auto-create dedicated resident profile if active user still has none (not for pending/declined) ──
+                if (!$resident && !in_array($user->status, ['pending_verification', 'declined'])) {
+                    $prefix = strtoupper(substr($user->last_name ?? 'R', 0, 1) . substr($user->first_name ?? 'U', 0, 1));
+                    $random = strtoupper(substr(uniqid(), -6));
+                    $resident = Resident::create([
+                        'user_id'             => $user->id,
+                        'resident_code'       => $user->resident_code ?? "R-{$prefix}-{$random}",
+                        'first_name'          => $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'Resident'),
+                        'middle_name'         => $user->middle_name,
+                        'last_name'           => $user->last_name ?? ($user->name ? (explode(' ', $user->name)[1] ?? '') : 'User'),
+                        'birthday'            => $user->birthday ?? now()->subYears(20)->toDateString(),
+                        'birthplace'          => $user->birthplace ?? 'Barangay San Miguel II, Dasmariñas, Cavite',
+                        'gender'              => $user->gender ?? 'Other',
+                        'civil_status'        => $user->civil_status ?? 'Single',
+                        'address'             => $user->address ?? 'Barangay San Miguel II',
+                        'is_voter'            => (bool)($user->is_voter ?? false),
+                        'is_non_voter'        => (bool)($user->is_non_voter ?? false),
+                        'is_senior'           => (bool)($user->is_senior ?? false),
+                        'is_household_head'   => true,
+                        'verification_status' => 'approved',
+                    ]);
+                    $user->update(['resident_code' => $resident->resident_code]);
                 }
+
+                // ── Sync resident details to user record (only when changed to save DB writes) ──
+                if ($resident) {
+                    $syncFields = [
+                        'resident_code'    => $resident->resident_code,
+                        'first_name'       => $resident->first_name,
+                        'last_name'        => $resident->last_name,
+                        'middle_name'      => $resident->middle_name,
+                        'birthday'         => $resident->birthday,
+                        'birthplace'       => $resident->birthplace,
+                        'gender'           => $resident->gender,
+                        'civil_status'     => $resident->civil_status,
+                        'spouse_name'      => $resident->spouse_name,
+                        'contact_number'   => $resident->contact_number,
+                        'address'          => $resident->address,
+                        'occupation'       => $resident->occupation,
+                        'photo'            => $resident->photo,
+                        'is_voter'         => (bool)$resident->is_voter,
+                        'is_senior'        => (bool)$resident->is_senior,
+                        'is_pwd'           => (bool)$resident->is_pwd,
+                        'is_single_parent' => (bool)$resident->is_single_parent,
+                        'is_student'       => (bool)$resident->is_student,
+                        'is_non_voter'     => (bool)$resident->is_non_voter,
+                        'is_bedridden'     => (bool)$resident->is_bedridden,
+                    ];
+
+                    $changes = [];
+                    foreach ($syncFields as $k => $v) {
+                        if ($user->{$k} != $v) {
+                            $changes[$k] = $v;
+                        }
+                    }
+
+                    if (in_array($resident->verification_status, ['approved', 'verified'])) {
+                        if ($user->status === 'pending_verification') {
+                            $changes['status'] = 'active';
+                            $changes['is_active'] = 1;
+                        }
+                        if ($resident->voter_status === 'approved' && $user->voter_status !== 'approved') {
+                            $changes['voter_status'] = 'approved';
+                        }
+                    }
+
+                    if (!empty($changes)) {
+                        $user->update($changes);
+                    }
+                }
+
+                // Fetch document requests
+                $requests = DocumentRequest::where('user_id', $user->id)->latest()->get();
+
+                // Fetch digital ID
+                $digitalId = DigitalId::where('user_id', $user->id)->latest()->first();
+
+                // Fetch issue reports (Justice/VAWC/Peace) — hide resolved older than 30 days
+                $issueReports = IssueReport::where('user_id', $user->id)
+                    ->where(function ($query) {
+                        $query->whereNotIn('status', ['resolved', 'closed'])
+                              ->orWhere('updated_at', '>=', now()->subDays(30));
+                    })
+                    ->latest()
+                    ->get();
+
+                // Fetch emergency SOS dispatches — hide resolved alerts older than 30 days so resident portal stays clean
+                $sosHistory = \App\Models\EmergencySosAlert::where('user_id', $user->id)
+                    ->where(function ($query) {
+                        $query->where('status', '!=', 'resolved')
+                              ->orWhere(function ($q) {
+                                  $q->where('status', 'resolved')
+                                    ->where(function ($sub) {
+                                        $sub->where('resolved_at', '>=', now()->subDays(30))
+                                            ->orWhere(function ($sub2) {
+                                                $sub2->whereNull('resolved_at')
+                                                     ->where('updated_at', '>=', now()->subDays(30));
+                                            });
+                                    });
+                              });
+                    })
+                    ->latest()
+                    ->get();
+            } else {
+                $resident     = null;
+                $requests     = collect();
+                $digitalId    = null;
+                $issueReports = collect();
+                $sosHistory   = collect();
             }
-
-            // Fetch document requests
-            $requests = DocumentRequest::where('user_id', $user->id)->latest()->get();
-
-            // Fetch digital ID
-            $digitalId = DigitalId::where('user_id', $user->id)->latest()->first();
-
-            // Fetch issue reports (Justice/VAWC/Peace) — hide resolved older than 30 days
-            $issueReports = IssueReport::where('user_id', $user->id)
-                ->where(function ($query) {
-                    $query->whereNotIn('status', ['resolved', 'closed'])
-                          ->orWhere('updated_at', '>=', now()->subDays(30));
-                })
-                ->latest()
-                ->get();
-
-            // Fetch emergency SOS dispatches — hide resolved alerts older than 30 days so resident portal stays clean
-            $sosHistory = \App\Models\EmergencySosAlert::where('user_id', $user->id)
-                ->where(function ($query) {
-                    $query->where('status', '!=', 'resolved')
-                          ->orWhere(function ($q) {
-                              $q->where('status', 'resolved')
-                                ->where(function ($sub) {
-                                    $sub->where('resolved_at', '>=', now()->subDays(30))
-                                        ->orWhere(function ($sub2) {
-                                            $sub2->whereNull('resolved_at')
-                                                 ->where('updated_at', '>=', now()->subDays(30));
-                                        });
-                                });
-                          });
-                })
-                ->latest()
-                ->get();
         } else {
             $issueReports = collect();
             $sosHistory   = collect();

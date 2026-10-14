@@ -2430,7 +2430,7 @@ html, body {
                 <div x-show="selectedDoc" x-transition>
                     <button @click="selectedDoc=''" class="btn-plain btn-ghost btn-sm" style="margin-bottom:12px;"><i class="fas fa-arrow-left"></i> <span x-text="lang==='fil'?'Bumalik':'Back'">Back</span></button>
                     @php
-                        $rawSelfAddress = $isAuth ? ($resident->address ?? $authUser?->address ?? '') : old('address', '');
+                        $rawSelfAddress = $isAuth ? ($resident?->address ?? $authUser?->address ?? '') : old('address', '');
                     @endphp
                     <script>
                     function residentDocFormState() {
@@ -2461,8 +2461,8 @@ html, body {
                             validationAlertMsg: '',
                             showDocConfirmModal: false,
                             isSubmitting: false,
-                            age: @json($isAuth ? ($resident->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : '')) : ''),
-                            birthday: @json($isAuth ? ($resident->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format('Y-m-d') : '')) : ''),
+                            age: @json($isAuth ? ($resident?->age ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->age : '')) : ''),
+                            birthday: @json($isAuth ? ($resident?->birthday ?? ($authUser?->birthday ? \Carbon\Carbon::parse($authUser->birthday)->format('Y-m-d') : '')) : ''),
                             authLetterName: '',
                             authIdName: '',
                             authId2Name: '',
