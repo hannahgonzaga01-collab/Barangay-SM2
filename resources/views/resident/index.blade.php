@@ -51,15 +51,22 @@ html, body {
 .privacy-footer{text-align:center;margin-top:10px;font-size:11px;color:var(--light);font-weight:600;}
 
 /* HERO */
-.hero-section{background:linear-gradient(135deg,#000052 0%,#04192D 55%,#0E5393 100%);position:relative;}
-.hero-carousel{width:100%;min-height:340px;max-height:480px;position:relative;overflow:hidden;}
-@media(max-width:600px){.hero-carousel{min-height:350px;max-height:500px;}}
-.carousel-slide{position:absolute;inset:0;opacity:0;transition:opacity .8s cubic-bezier(0.4, 0, 0.2, 1);display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:28px 24px 44px;pointer-events:none;}
+.hero-section{background:linear-gradient(135deg,#000052 0%,#04192D 55%,#0E5393 100%);position:relative;padding-bottom:12px;}
+.hero-seal-wrap{text-align:center;padding:24px 16px 6px;position:relative;z-index:4;}
+.hero-logo-img{width:88px;height:88px;border-radius:50%;object-fit:contain;margin:0 auto;display:block;box-shadow:0 8px 25px rgba(0,0,0,0.35);border:3.5px solid rgba(255,255,255,0.95);background:#ffffff;padding:2px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;}
+.hero-logo-img:hover{transform:scale(1.08);box-shadow:0 12px 30px rgba(0,0,0,0.5);}
+.hero-carousel{width:100%;min-height:190px;max-height:320px;position:relative;overflow:hidden;}
+@media(max-width:600px){
+    .hero-seal-wrap{padding:18px 12px 4px;}
+    .hero-logo-img{width:74px;height:74px;}
+    .hero-carousel{min-height:205px;max-height:340px;}
+}
+.carousel-slide{position:absolute;inset:0;opacity:0;transition:opacity .6s cubic-bezier(0.4, 0, 0.2, 1);display:flex;align-items:center;justify-content:flex-start;flex-direction:column;text-align:center;padding:6px 20px 42px;pointer-events:none;}
 .carousel-slide.active{opacity:1;pointer-events:auto;z-index:2;}
-.slide-tag{font-size:13px;font-weight:900;background:rgba(255,255,255,0.18);backdrop-filter:blur(4px);color:#fff;padding:6px 18px;border-radius:99px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;display:inline-block;border:1px solid rgba(255,255,255,0.25);}
-.carousel-slide h2{font-size:clamp(28px,6vw,44px);font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.15;margin-bottom:12px;text-shadow:0 4px 15px rgba(0,0,0,0.5);}
-.carousel-slide p{font-size:clamp(16px,2.8vw,23px);color:rgba(255,255,255,.95);font-weight:700;max-width:820px;line-height:1.65;text-shadow:0 2px 10px rgba(0,0,0,0.35);}
-.carousel-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:5;}
+.slide-tag{font-size:11.5px;font-weight:900;background:rgba(255,255,255,0.18);backdrop-filter:blur(4px);color:#fff;padding:5px 16px;border-radius:99px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;display:inline-block;border:1px solid rgba(255,255,255,0.25);}
+.carousel-slide h2{font-size:clamp(22px,4.5vw,34px);font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.04em;line-height:1.2;margin-bottom:8px;text-shadow:0 4px 15px rgba(0,0,0,0.45);word-break:break-word;}
+.carousel-slide p{font-size:clamp(14px,2.2vw,17.5px);color:rgba(255,255,255,.95);font-weight:600;max-width:780px;line-height:1.55;text-shadow:0 2px 8px rgba(0,0,0,0.3);word-break:break-word;}
+.carousel-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:5;}
 .carousel-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:all .25s;border:none;padding:0;}
 .carousel-dot.active{background:#fff;width:24px;border-radius:99px;}
 .c-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:all .18s;font-size:12px;}
@@ -70,25 +77,40 @@ html, body {
 .section-gap{height:50px;background:var(--body-bg);}
 
 /* SENIOR CITIZEN ACCESSIBILITY MODE (A+) */
-.senior-font-mode .carousel-slide h2 { font-size: clamp(36px, 7vw, 54px) !important; letter-spacing: .06em !important; }
-.senior-font-mode .carousel-slide p { font-size: clamp(21px, 3.5vw, 28px) !important; line-height: 1.7 !important; font-weight: 800 !important; color: #ffffff !important; }
-.senior-font-mode .slide-tag { font-size: 16px !important; padding: 8px 22px !important; }
-.senior-font-mode .duty-lbl { font-size: 17.5px !important; }
-.senior-font-mode .duty-name { font-size: 26px !important; line-height: 1.35 !important; }
-.senior-font-mode .duty-tag-lbl { font-size: 14.5px !important; }
-.senior-font-mode .duty-sub-lbl { font-size: 15px !important; color: #ffffff !important; }
-.senior-font-mode .duty-day-txt { font-size: 15px !important; padding: 5px 16px !important; }
-.senior-font-mode .duty-view-btn { font-size: 15px !important; padding: 11px 26px !important; }
-.senior-font-mode .section-lbl { font-size: 18px !important; }
-.senior-font-mode .service-name { font-size: 18px !important; }
-.senior-font-mode .service-sub { font-size: 15px !important; }
-.senior-font-mode .wcard-title { font-size: 16px !important; }
-.senior-font-mode .ann-title { font-size: 20px !important; }
-.senior-font-mode .ann-body { font-size: 16.5px !important; }
-.senior-font-mode .about-ttl { font-size: 17px !important; }
-.senior-font-mode .about-desc { font-size: 15.5px !important; line-height: 1.7 !important; }
-.senior-font-mode .flbl { font-size: 15px !important; }
-.senior-font-mode .finput { font-size: 17px !important; }
+.senior-font-mode .hero-carousel{min-height:220px;max-height:360px;}
+@media(max-width:600px){.senior-font-mode .hero-carousel{min-height:240px;max-height:380px;}}
+.senior-font-mode .carousel-slide h2 { font-size: clamp(26px, 5.2vw, 38px) !important; letter-spacing: .05em !important; margin-bottom: 9px !important; }
+.senior-font-mode .carousel-slide p { font-size: clamp(16px, 2.5vw, 20.5px) !important; line-height: 1.6 !important; font-weight: 700 !important; color: #ffffff !important; max-width: 820px !important; }
+.senior-font-mode .slide-tag { font-size: 13px !important; padding: 6px 18px !important; }
+
+/* Duty Section Senior Scaling */
+.senior-font-mode .duty-lbl { font-size: 15px !important; }
+.senior-font-mode .duty-name { font-size: 21px !important; line-height: 1.35 !important; overflow-wrap: break-word !important; word-break: break-word !important; }
+.senior-font-mode .duty-tag-lbl { font-size: 13px !important; }
+.senior-font-mode .duty-sub-lbl { font-size: 14px !important; color: #ffffff !important; }
+.senior-font-mode .duty-day-txt { font-size: 14px !important; padding: 5px 15px !important; }
+.senior-font-mode .duty-view-btn { font-size: 14px !important; padding: 10px 22px !important; }
+
+/* Service Cards Senior Scaling - strictly preventing overflow */
+.senior-font-mode .section-lbl { font-size: 16px !important; }
+.senior-font-mode .service-card { min-height: 155px !important; height: auto !important; padding: 18px 10px 16px !important; }
+.senior-font-mode .service-name { font-size: 15px !important; line-height: 1.3 !important; overflow-wrap: break-word !important; word-break: break-word !important; }
+.senior-font-mode .service-sub { font-size: 13px !important; line-height: 1.35 !important; overflow-wrap: break-word !important; word-break: break-word !important; }
+
+/* Announcements, Tabs & Cards Senior Scaling */
+.senior-font-mode .wcard-title { font-size: 14.5px !important; }
+.senior-font-mode .ann-title { font-size: 18px !important; line-height: 1.35 !important; }
+.senior-font-mode .ann-body { font-size: 14.5px !important; line-height: 1.6 !important; }
+.senior-font-mode .about-ttl { font-size: 15px !important; }
+.senior-font-mode .about-desc { font-size: 13.5px !important; line-height: 1.6 !important; }
+.senior-font-mode .about-tab { font-size: 13px !important; padding: 8px 16px !important; }
+
+/* Form Fields & Modals Senior Scaling */
+.senior-font-mode .flbl { font-size: 13.5px !important; }
+.senior-font-mode .finput { font-size: 15.5px !important; padding: 12px 14px !important; }
+.senior-font-mode .modal-ttl { font-size: 15.5px !important; }
+.senior-font-mode .btn { font-size: 14px !important; }
+.senior-font-mode .sos-float, .senior-font-mode .ask-float { font-size: 12px !important; padding: 11px 16px !important; }
 
 /* WRAP */
 .rp-wrap{max-width:960px;margin:0 auto;padding:0 16px 60px;}
@@ -104,7 +126,13 @@ html, body {
 .activity-carousel-box{position:relative;width:100%;height:360px;}
 @media(max-width:640px){.activity-carousel-box{height:230px;}}
 @media(max-width:420px){.activity-carousel-box{height:200px;}}
-.service-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px 12px 20px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-width:0;overflow:hidden;word-break:break-word;}
+.service-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px 12px 20px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:140px;min-width:0;overflow:hidden;word-break:break-word;}
+.service-card:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);transform:translateY(-5px);box-shadow:0 12px 30px rgba(0,0,0,0.3);}
+.service-ico{width:52px;height:52px;background:rgba(255,255,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .3s;}
+.service-ico i{color:#fff;font-size:20px;}
+.service-card:hover .service-ico{background:var(--brand);transform:scale(1.1);box-shadow:0 0 20px rgba(14,83,147,0.4);}
+.service-name{font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.3;word-break:break-word;overflow-wrap:break-word;}
+.service-sub{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);margin-top:6px;word-break:break-word;overflow-wrap:break-word;}
 .service-card:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);transform:translateY(-5px);box-shadow:0 12px 30px rgba(0,0,0,0.3);}
 .service-ico{width:52px;height:52px;background:rgba(255,255,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .3s;}
 .service-ico i{color:#fff;font-size:20px;}
@@ -407,10 +435,10 @@ html, body {
     .login-notice-btns a, .login-notice-btns button, .lp-btns a, .lp-btns button { width: 100%; justify-content: center; }
     .ask-float{bottom:16px;right:14px;padding:9px 13px;font-size:10px;}
     .sos-float{bottom:16px;left:14px;padding:9px 13px;font-size:10px;}
-    .hero-carousel{min-height:300px;max-height:430px;}
-    .carousel-slide{padding:20px 14px 36px;}
-    .carousel-slide h2{font-size:22px;}
-    .carousel-slide p{font-size:13.5px;line-height:1.55;}
+    .hero-carousel{min-height:205px;max-height:330px;}
+    .carousel-slide{padding:6px 14px 38px;}
+    .carousel-slide h2{font-size:20px;line-height:1.2;}
+    .carousel-slide p{font-size:13px;line-height:1.45;}
 
     /* Modal adaptations for mobile */
     .issue-modal-header { padding: 12px 14px !important; }
@@ -1645,19 +1673,23 @@ html, body {
 
     <div x-data="residentPortalApp()" x-on:lang-changed.window="lang = $event.detail">
 
-    {{-- HERO CAROUSEL --}}
+    {{-- HERO SECTION --}}
     <div class="hero-section" @mouseenter="clearInterval(heroTimer)" @mouseleave="heroTimer = setInterval(() => nextHeroSlide(), 6500)">
+        
+        {{-- Static Seal/Logo: Always perfectly framed and never cut off --}}
+        <div class="hero-seal-wrap">
+            <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;" title="Barangay San Miguel II • Home">
+                <img src="{{ asset('images/circlelogo.png') }}" 
+                     alt="Barangay San Miguel II Logo"
+                     class="hero-logo-img"
+                     onerror="this.style.display='none'">
+            </a>
+        </div>
+
+        {{-- Sliding Text (Tag, Title, Subtitle) --}}
         <div class="hero-carousel">
             {{-- Slide 1: Welcome & Barangay Name --}}
             <div class="carousel-slide" :class="heroSlide===0 ? 'active' : ''">
-                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;margin:0 auto 12px;" title="Barangay San Miguel II • Home">
-                    <img src="{{ asset('images/circlelogo.png') }}" 
-                         alt="Barangay San Miguel II Logo"
-                         style="width:96px;height:96px;border-radius:50%;object-fit:contain;margin:0 auto;display:block;opacity:1;box-shadow:0 8px 25px rgba(0,0,0,0.35);border:3.5px solid rgba(255,255,255,0.95);background:#ffffff;padding:2px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;" 
-                         onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.5)'" 
-                         onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.35)'" 
-                         onerror="this.style.display='none'">
-                </a>
                 <span class="slide-tag" x-text="t('welcome')">Welcome</span>
                 <h2 x-text="t('hero_title')">Barangay San Miguel II</h2>
                 <p x-text="t('hero_subtitle')">Your community. Our commitment. Serving residents of Dasmariñas, Cavite.</p>
@@ -1665,16 +1697,8 @@ html, body {
 
             {{-- Slide 2: Mission --}}
             <div class="carousel-slide" :class="heroSlide===1 ? 'active' : ''">
-                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;margin:0 auto 12px;" title="Barangay San Miguel II • Home">
-                    <img src="{{ asset('images/circlelogo.png') }}" 
-                         alt="Barangay San Miguel II Logo"
-                         style="width:96px;height:96px;border-radius:50%;object-fit:contain;margin:0 auto;display:block;opacity:1;box-shadow:0 8px 25px rgba(0,0,0,0.35);border:3.5px solid rgba(255,255,255,0.95);background:#ffffff;padding:2px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;" 
-                         onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.5)'" 
-                         onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.35)'" 
-                         onerror="this.style.display='none'">
-                </a>
-                <span class="slide-tag" style="background:rgba(56,189,248,0.2);border-color:rgba(56,189,248,0.4);color:#bae6fd;">
-                    <i class="fas fa-bullseye" style="margin-right:4px;"></i> <span x-text="t('mission_tag')">Our Mission</span>
+                <span class="slide-tag" style="background:rgba(56,189,248,0.22);border-color:rgba(56,189,248,0.45);color:#bae6fd;">
+                    <i class="fas fa-bullseye" style="margin-right:5px;"></i> <span x-text="t('mission_tag')">Our Mission</span>
                 </span>
                 <h2 x-text="t('mission_title')">Barangay Mission</h2>
                 <p x-text="t('mission_desc')">
@@ -1684,16 +1708,8 @@ html, body {
 
             {{-- Slide 3: Vision --}}
             <div class="carousel-slide" :class="heroSlide===2 ? 'active' : ''">
-                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;margin:0 auto 12px;" title="Barangay San Miguel II • Home">
-                    <img src="{{ asset('images/circlelogo.png') }}" 
-                         alt="Barangay San Miguel II Logo"
-                         style="width:96px;height:96px;border-radius:50%;object-fit:contain;margin:0 auto;display:block;opacity:1;box-shadow:0 8px 25px rgba(0,0,0,0.35);border:3.5px solid rgba(255,255,255,0.95);background:#ffffff;padding:2px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;" 
-                         onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.5)'" 
-                         onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.35)'" 
-                         onerror="this.style.display='none'">
-                </a>
-                <span class="slide-tag" style="background:rgba(52,211,153,0.2);border-color:rgba(52,211,153,0.4);color:#a7f3d0;">
-                    <i class="fas fa-eye" style="margin-right:4px;"></i> <span x-text="t('vision_tag')">Our Vision</span>
+                <span class="slide-tag" style="background:rgba(52,211,153,0.22);border-color:rgba(52,211,153,0.45);color:#a7f3d0;">
+                    <i class="fas fa-eye" style="margin-right:5px;"></i> <span x-text="t('vision_tag')">Our Vision</span>
                 </span>
                 <h2 x-text="t('vision_title')">Barangay Vision</h2>
                 <p x-text="t('vision_desc')">
