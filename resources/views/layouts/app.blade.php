@@ -21,6 +21,9 @@
         .swal2-container{z-index:999999 !important;}
     </style>
     <script>
+        if (localStorage.getItem('resident_font_scale') === 'senior') {
+            document.documentElement.classList.add('senior-font-mode');
+        }
         // Styled Toast notification helper
         window.showToast = function(message, type = 'success') {
             if (typeof Swal !== 'undefined') {

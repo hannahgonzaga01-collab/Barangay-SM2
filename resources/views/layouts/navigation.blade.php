@@ -50,6 +50,39 @@
 
             <div class="flex items-center gap-2">
                 @if(request()->is('resident*') || request()->is('/'))
+                {{-- Font Size Switcher (A Normal / A+ Senior Mode) --}}
+                <div class="flex items-center rounded-lg p-0.5 border" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);"
+                     x-data="{ 
+                         currentScale: localStorage.getItem('resident_font_scale') || 'normal',
+                         setScale(s) {
+                             this.currentScale = s;
+                             localStorage.setItem('resident_font_scale', s);
+                             if (s === 'senior') {
+                                 document.documentElement.classList.add('senior-font-mode');
+                             } else {
+                                 document.documentElement.classList.remove('senior-font-mode');
+                             }
+                             window.dispatchEvent(new CustomEvent('font-scale-changed', {detail: s}));
+                         }
+                     }">
+                    <button type="button" 
+                            @click="setScale('normal')"
+                            :class="currentScale === 'normal' ? 'bg-white text-blue-950 font-black shadow-sm' : 'text-white/80 font-bold hover:text-white'"
+                            class="px-2 py-1 rounded text-[10.5px] tracking-wider transition"
+                            title="Normal Font Size">
+                        A
+                    </button>
+                    <span class="text-white/40 text-[10px] mx-0.5">|</span>
+                    <button type="button" 
+                            @click="setScale('senior')"
+                            :class="currentScale === 'senior' ? 'bg-amber-400 text-blue-950 font-black shadow-sm' : 'text-white/80 font-bold hover:text-white'"
+                            class="px-2 py-1 rounded text-[10.5px] tracking-wider transition flex items-center gap-1"
+                            title="Senior Citizen / Malaking Letra Mode">
+                        <span class="font-black">A+</span>
+                        <span class="text-[9px] font-extrabold uppercase opacity-90">SR</span>
+                    </button>
+                </div>
+
                 {{-- Language Toggle EN | FIL --}}
                 <div class="flex items-center rounded-lg p-0.5 border" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);"
                      x-data="{ currentLang: localStorage.getItem('resident_lang') || 'en' }"

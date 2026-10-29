@@ -52,13 +52,13 @@ html, body {
 
 /* HERO */
 .hero-section{background:linear-gradient(135deg,#000052 0%,#04192D 55%,#0E5393 100%);position:relative;}
-.hero-carousel{width:100%;min-height:280px;max-height:400px;position:relative;overflow:hidden;}
-@media(max-width:600px){.hero-carousel{min-height:220px;max-height:320px;}}
-.carousel-slide{position:absolute;inset:0;opacity:0;transition:opacity .8s cubic-bezier(0.4, 0, 0.2, 1);display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:32px 24px;}
-.carousel-slide.active{opacity:1;}
-.slide-tag{font-size:10px;font-weight:900;background:rgba(255,255,255,0.15);backdrop-filter:blur(4px);color:#fff;padding:5px 14px;border-radius:99px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:inline-block;border:1px solid rgba(255,255,255,0.2);}
-.carousel-slide h2{font-size:clamp(20px,5vw,32px);font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.1;margin-bottom:10px;text-shadow:0 4px 15px rgba(0,0,0,0.4);}
-.carousel-slide p{font-size:clamp(12px,2.5vw,15px);color:rgba(255,255,255,.85);font-weight:500;max-width:580px;line-height:1.6;}
+.hero-carousel{width:100%;min-height:340px;max-height:480px;position:relative;overflow:hidden;}
+@media(max-width:600px){.hero-carousel{min-height:350px;max-height:500px;}}
+.carousel-slide{position:absolute;inset:0;opacity:0;transition:opacity .8s cubic-bezier(0.4, 0, 0.2, 1);display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:28px 24px 44px;pointer-events:none;}
+.carousel-slide.active{opacity:1;pointer-events:auto;z-index:2;}
+.slide-tag{font-size:13px;font-weight:900;background:rgba(255,255,255,0.18);backdrop-filter:blur(4px);color:#fff;padding:6px 18px;border-radius:99px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;display:inline-block;border:1px solid rgba(255,255,255,0.25);}
+.carousel-slide h2{font-size:clamp(28px,6vw,44px);font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.15;margin-bottom:12px;text-shadow:0 4px 15px rgba(0,0,0,0.5);}
+.carousel-slide p{font-size:clamp(16px,2.8vw,23px);color:rgba(255,255,255,.95);font-weight:700;max-width:820px;line-height:1.65;text-shadow:0 2px 10px rgba(0,0,0,0.35);}
 .carousel-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:5;}
 .carousel-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:all .25s;border:none;padding:0;}
 .carousel-dot.active{background:#fff;width:24px;border-radius:99px;}
@@ -69,12 +69,33 @@ html, body {
 .wave-gap svg{display:block;width:100%;height:auto;}
 .section-gap{height:50px;background:var(--body-bg);}
 
+/* SENIOR CITIZEN ACCESSIBILITY MODE (A+) */
+.senior-font-mode .carousel-slide h2 { font-size: clamp(36px, 7vw, 54px) !important; letter-spacing: .06em !important; }
+.senior-font-mode .carousel-slide p { font-size: clamp(21px, 3.5vw, 28px) !important; line-height: 1.7 !important; font-weight: 800 !important; color: #ffffff !important; }
+.senior-font-mode .slide-tag { font-size: 16px !important; padding: 8px 22px !important; }
+.senior-font-mode .duty-lbl { font-size: 17.5px !important; }
+.senior-font-mode .duty-name { font-size: 26px !important; line-height: 1.35 !important; }
+.senior-font-mode .duty-tag-lbl { font-size: 14.5px !important; }
+.senior-font-mode .duty-sub-lbl { font-size: 15px !important; color: #ffffff !important; }
+.senior-font-mode .duty-day-txt { font-size: 15px !important; padding: 5px 16px !important; }
+.senior-font-mode .duty-view-btn { font-size: 15px !important; padding: 11px 26px !important; }
+.senior-font-mode .section-lbl { font-size: 18px !important; }
+.senior-font-mode .service-name { font-size: 18px !important; }
+.senior-font-mode .service-sub { font-size: 15px !important; }
+.senior-font-mode .wcard-title { font-size: 16px !important; }
+.senior-font-mode .ann-title { font-size: 20px !important; }
+.senior-font-mode .ann-body { font-size: 16.5px !important; }
+.senior-font-mode .about-ttl { font-size: 17px !important; }
+.senior-font-mode .about-desc { font-size: 15.5px !important; line-height: 1.7 !important; }
+.senior-font-mode .flbl { font-size: 15px !important; }
+.senior-font-mode .finput { font-size: 17px !important; }
+
 /* WRAP */
 .rp-wrap{max-width:960px;margin:0 auto;padding:0 16px 60px;}
 
 /* NAVY BOX */
 .navy-box{background:linear-gradient(165deg,#000052 0%,#04192D 60%,#0E5393 100%);border-radius:24px;padding:28px;margin-bottom:24px;box-shadow:var(--card-shadow);border:1px solid rgba(255,255,255,0.1);}
-.section-lbl{font-size:11px;font-weight:900;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.section-lbl{font-size:12.5px;font-weight:900;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
 .service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
 @media(max-width:768px){.service-grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
 @media(max-width:440px){.service-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
@@ -92,13 +113,15 @@ html, body {
 .service-sub{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);margin-top:6px;word-break:break-word;overflow-wrap:break-word;}
 
 /* DUTY WIDGET */
-.duty-widget{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px 20px;margin-bottom:20px;backdrop-filter:blur(10px);}
+.duty-widget{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:18px 22px;margin-bottom:20px;backdrop-filter:blur(10px);}
 .duty-widget-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.duty-lbl{font-size:11.5px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:6px;opacity:0.9;}
-.duty-name{font-size:18px;font-weight:900;color:#fff;margin-top:4px;letter-spacing:0.02em;}
-.duty-day-txt{font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;margin-top:2px;background:var(--brand);padding:3px 12px;border-radius:99px;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
-.duty-view-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:800;padding:8px 20px;border-radius:99px;cursor:pointer;font-family:inherit;text-transform:uppercase;transition:all .2s;display:flex;align-items:center;gap:8px;letter-spacing:0.05em;}
-.duty-view-btn:hover{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);}
+.duty-lbl{font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:6px;opacity:0.95;}
+.duty-name{font-size:20px;font-weight:900;color:#fff;margin-top:4px;letter-spacing:0.02em;line-height:1.3;}
+.duty-tag-lbl{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;display:flex;align-items:center;gap:6px;}
+.duty-sub-lbl{font-size:13px;color:rgba(255,255,255,0.85);font-weight:600;margin-top:8px;}
+.duty-day-txt{font-size:13px;font-weight:800;color:#fff;text-transform:uppercase;margin-top:2px;background:var(--brand);padding:4px 14px;border-radius:99px;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.duty-view-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:13.5px;font-weight:900;padding:9px 22px;border-radius:99px;cursor:pointer;font-family:inherit;text-transform:uppercase;transition:all .2s;display:flex;align-items:center;gap:8px;letter-spacing:0.05em;}
+.duty-view-btn:hover{background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.5);}
 .duty-menu{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);border:1px solid var(--border);overflow:hidden;margin-top:10px;}
 .duty-menu-item{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f8fafc;gap:8px;}
 .duty-menu-item:last-child{border-bottom:none;}
@@ -384,10 +407,10 @@ html, body {
     .login-notice-btns a, .login-notice-btns button, .lp-btns a, .lp-btns button { width: 100%; justify-content: center; }
     .ask-float{bottom:16px;right:14px;padding:9px 13px;font-size:10px;}
     .sos-float{bottom:16px;left:14px;padding:9px 13px;font-size:10px;}
-    .hero-carousel{min-height:220px;max-height:300px;}
-    .carousel-slide{padding:24px 16px;}
+    .hero-carousel{min-height:300px;max-height:430px;}
+    .carousel-slide{padding:20px 14px 36px;}
     .carousel-slide h2{font-size:22px;}
-    .carousel-slide p{font-size:12px;}
+    .carousel-slide p{font-size:13.5px;line-height:1.55;}
 
     /* Modal adaptations for mobile */
     .issue-modal-header { padding: 12px 14px !important; }
@@ -744,6 +767,8 @@ html, body {
             pendingLockModal: false,
             annIdx: 0,
             annTotal: {{ $announcements->count() }},
+            heroSlide: 0,
+            heroTimer: null,
 
             lang: localStorage.getItem('resident_lang') || 'en',
             setLang(l) {
@@ -757,6 +782,12 @@ html, body {
                         welcome: 'Welcome',
                         hero_title: 'Barangay San Miguel II',
                         hero_subtitle: 'Your community. Our commitment. Serving residents of Dasmariñas, Cavite.',
+                        mission_tag: 'Our Mission',
+                        mission_title: 'Barangay Mission',
+                        mission_desc: 'To deliver accessible, efficient, and transparent barangay services that uphold the dignity and welfare of every resident.',
+                        vision_tag: 'Our Vision',
+                        vision_title: 'Barangay Vision',
+                        vision_desc: 'A progressive, peaceful, and self-reliant barangay where every resident thrives in a safe and inclusive environment.',
                         duty_today: 'BARANGAY DUTY TODAY',
                         tanod_patrol: 'On-Duty Tanod Patrol',
                         view_schedules: 'VIEW SCHEDULES',
@@ -931,6 +962,12 @@ html, body {
                         welcome: 'Maligayang Pagdating',
                         hero_title: 'Barangay San Miguel II',
                         hero_subtitle: 'Ang inyong komunidad. Aming serbisyo. Naglilingkod sa mga residente ng Dasmariñas, Cavite.',
+                        mission_tag: 'Aming Misyon',
+                        mission_title: 'Misyon ng Barangay',
+                        mission_desc: 'Upang maghatid ng abot-kamay, mahusay, at tapat na serbisyo pambarangay na nagtataguyod sa dignidad at kapakanan ng bawat mamamayan.',
+                        vision_tag: 'Aming Bisyon',
+                        vision_title: 'Bisyon ng Barangay',
+                        vision_desc: 'Isang maunlad, mapayapa, at may sariling-kakayahang barangay kung saan ang bawat residente ay umuunlad sa isang ligtas at inklusibong komunidad.',
                         duty_today: 'NAGTATRABAHO NGAYONG ARAW',
                         tanod_patrol: 'Naka-Duty na Patrol ng Tanod',
                         view_schedules: 'TINGNAN ANG MGA SKEDYUL',
@@ -1582,12 +1619,16 @@ html, body {
             },
 
             init(){
+                this.heroTimer = setInterval(() => this.nextHeroSlide(), 6500);
                 if(this.activeSlides.length > 0){
                     this.activityTimer = setInterval(()=>this.nextActivitySlide(), 5000);
                 }
                 window.addEventListener('open-profile-modal', () => { this.profileModal = true; });
                 window.addEventListener('lang-changed', (e) => { this.lang = e.detail; });
             },
+            nextHeroSlide(){ this.heroSlide = (this.heroSlide + 1) % 3; },
+            prevHeroSlide(){ this.heroSlide = (this.heroSlide - 1 + 3) % 3; },
+            goHeroSlide(i){ this.heroSlide = i; clearInterval(this.heroTimer); this.heroTimer = setInterval(() => this.nextHeroSlide(), 6500); },
             nextActivitySlide(){ this.currentActivitySlide=(this.currentActivitySlide+1)%this.activeSlides.length; },
             prevActivitySlide(){ this.currentActivitySlide=(this.currentActivitySlide-1+this.activeSlides.length)%this.activeSlides.length; },
             goActivitySlide(i){ this.currentActivitySlide=i; clearInterval(this.activityTimer); this.activityTimer=setInterval(()=>this.nextActivitySlide(),5000); },
@@ -1605,9 +1646,10 @@ html, body {
     <div x-data="residentPortalApp()" x-on:lang-changed.window="lang = $event.detail">
 
     {{-- HERO CAROUSEL --}}
-    <div class="hero-section">
+    <div class="hero-section" @mouseenter="clearInterval(heroTimer)" @mouseleave="heroTimer = setInterval(() => nextHeroSlide(), 6500)">
         <div class="hero-carousel">
-            <div class="carousel-slide active">
+            {{-- Slide 1: Welcome & Barangay Name --}}
+            <div class="carousel-slide" :class="heroSlide===0 ? 'active' : ''">
                 <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;margin:0 auto 12px;" title="Barangay San Miguel II • Home">
                     <img src="{{ asset('images/circlelogo.png') }}" 
                          alt="Barangay San Miguel II Logo"
@@ -1620,6 +1662,55 @@ html, body {
                 <h2 x-text="t('hero_title')">Barangay San Miguel II</h2>
                 <p x-text="t('hero_subtitle')">Your community. Our commitment. Serving residents of Dasmariñas, Cavite.</p>
             </div>
+
+            {{-- Slide 2: Mission --}}
+            <div class="carousel-slide" :class="heroSlide===1 ? 'active' : ''">
+                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;margin:0 auto 12px;" title="Barangay San Miguel II • Home">
+                    <img src="{{ asset('images/circlelogo.png') }}" 
+                         alt="Barangay San Miguel II Logo"
+                         style="width:96px;height:96px;border-radius:50%;object-fit:contain;margin:0 auto;display:block;opacity:1;box-shadow:0 8px 25px rgba(0,0,0,0.35);border:3.5px solid rgba(255,255,255,0.95);background:#ffffff;padding:2px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;" 
+                         onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.5)'" 
+                         onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.35)'" 
+                         onerror="this.style.display='none'">
+                </a>
+                <span class="slide-tag" style="background:rgba(56,189,248,0.2);border-color:rgba(56,189,248,0.4);color:#bae6fd;">
+                    <i class="fas fa-bullseye" style="margin-right:4px;"></i> <span x-text="t('mission_tag')">Our Mission</span>
+                </span>
+                <h2 x-text="t('mission_title')">Barangay Mission</h2>
+                <p x-text="t('mission_desc')">
+                    To deliver accessible, efficient, and transparent barangay services that uphold the dignity and welfare of every resident.
+                </p>
+            </div>
+
+            {{-- Slide 3: Vision --}}
+            <div class="carousel-slide" :class="heroSlide===2 ? 'active' : ''">
+                <a href="{{ url('/') }}" style="display:inline-block;text-decoration:none;cursor:pointer;margin:0 auto 12px;" title="Barangay San Miguel II • Home">
+                    <img src="{{ asset('images/circlelogo.png') }}" 
+                         alt="Barangay San Miguel II Logo"
+                         style="width:96px;height:96px;border-radius:50%;object-fit:contain;margin:0 auto;display:block;opacity:1;box-shadow:0 8px 25px rgba(0,0,0,0.35);border:3.5px solid rgba(255,255,255,0.95);background:#ffffff;padding:2px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;" 
+                         onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.5)'" 
+                         onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.35)'" 
+                         onerror="this.style.display='none'">
+                </a>
+                <span class="slide-tag" style="background:rgba(52,211,153,0.2);border-color:rgba(52,211,153,0.4);color:#a7f3d0;">
+                    <i class="fas fa-eye" style="margin-right:4px;"></i> <span x-text="t('vision_tag')">Our Vision</span>
+                </span>
+                <h2 x-text="t('vision_title')">Barangay Vision</h2>
+                <p x-text="t('vision_desc')">
+                    A progressive, peaceful, and self-reliant barangay where every resident thrives in a safe and inclusive environment.
+                </p>
+            </div>
+
+            {{-- Navigation Dots --}}
+            <div class="carousel-dots">
+                <button type="button" @click="goHeroSlide(0)" class="carousel-dot" :class="heroSlide===0?'active':''" aria-label="Welcome Slide"></button>
+                <button type="button" @click="goHeroSlide(1)" class="carousel-dot" :class="heroSlide===1?'active':''" aria-label="Mission Slide"></button>
+                <button type="button" @click="goHeroSlide(2)" class="carousel-dot" :class="heroSlide===2?'active':''" aria-label="Vision Slide"></button>
+            </div>
+
+            {{-- Next / Prev Arrows --}}
+            <button type="button" @click="prevHeroSlide()" class="c-arrow c-prev" aria-label="Previous Slide"><i class="fas fa-chevron-left"></i></button>
+            <button type="button" @click="nextHeroSlide()" class="c-arrow c-next" aria-label="Next Slide"><i class="fas fa-chevron-right"></i></button>
         </div>
         <div class="wave-gap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
@@ -1651,22 +1742,22 @@ html, body {
                 <div class="duty-grid-cols">
                     
                     {{-- Column 1: Official on Duty (Kagawad) --}}
-                    <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:14px; padding:16px 18px; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
-                                <span style="font-size:9.5px; font-weight:900; color:#93c5fd; text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:5px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+                                <span class="duty-tag-lbl" style="color:#93c5fd;">
                                     <i class="fas fa-user-tie"></i> <span x-text="t('official_on_duty')">Official on Duty</span>
                                 </span>
                                 <span class="duty-day-txt" style="margin-top:0;" x-text="todayDay"></span>
                             </div>
-                            <div class="duty-name" style="font-size:16px; font-weight:900; color:#fff;" x-text="dutyToday"></div>
+                            <div class="duty-name" x-text="dutyToday"></div>
                             <template x-if="isKagawadOverriddenToday">
-                                <div style="font-size:10px; color:#fde047; font-weight:800; margin-top:5px; display:inline-flex; align-items:center; gap:5px; background:rgba(250,204,21,0.18); border:1px solid rgba(250,204,21,0.35); padding:2px 8px; border-radius:99px;">
+                                <div style="font-size:11px; color:#fde047; font-weight:800; margin-top:6px; display:inline-flex; align-items:center; gap:5px; background:rgba(250,204,21,0.18); border:1px solid rgba(250,204,21,0.35); padding:3px 10px; border-radius:99px;">
                                     <i class="fas fa-user-clock"></i> <span>Substitute Duty for <strong x-text="originalKagawadToday"></strong></span>
                                 </div>
                             </template>
                         </div>
-                        <div style="font-size:10.5px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:8px;">
+                        <div class="duty-sub-lbl">
                             <span x-text="t('kagawad_of_day')">Barangay Kagawad of the Day</span>
                         </div>
                     </div>
@@ -1677,19 +1768,19 @@ html, body {
                         $tanodTeamLabel = $activeTanodTeamName ?? 'Team A';
                         $tanodDaysLabel = $activeTanodDays ?? 'Monday, Wednesday, Friday';
                     @endphp
-                    <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:14px; padding:16px 18px; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
-                                <span style="font-size:9.5px; font-weight:900; color:#7dd3fc; text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:5px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+                                <span class="duty-tag-lbl" style="color:#7dd3fc;">
                                     <i class="fas fa-shield-alt"></i> <span x-text="t('tanod_patrol')">On-Duty Tanod Patrol</span>
                                 </span>
                                 <span class="duty-day-txt" style="margin-top:0;" x-text="todayDay"></span>
                             </div>
-                            <div style="font-size:15px; font-weight:900; color:#fff; line-height:1.35; letter-spacing:0.02em;">
+                            <div class="duty-name">
                                 {{ $tanodMembers }}
                             </div>
                         </div>
-                        <div style="font-size:10.5px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:8px;">
+                        <div class="duty-sub-lbl">
                             <span x-text="t('peace_order_patrol')">Peace & Order Patrol</span> — {{ $tanodTeamLabel }} ({{ $tanodDaysLabel }})
                         </div>
                     </div>
