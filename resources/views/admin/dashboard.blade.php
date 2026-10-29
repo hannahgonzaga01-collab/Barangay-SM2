@@ -14,6 +14,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
+        if (localStorage.getItem('resident_font_scale') === 'senior') {
+            document.documentElement.classList.add('senior-font-mode');
+        }
+        window.addEventListener('font-scale-changed', function(e) {
+            if (e.detail === 'senior') {
+                document.documentElement.classList.add('senior-font-mode');
+            } else {
+                document.documentElement.classList.remove('senior-font-mode');
+            }
+        });
+    </script>
+    <script>
         window._officials = @json($officials ?? []);
         window._announcements = @json($announcements ?? []);
         window._events = @json($events ?? []);
@@ -811,6 +823,19 @@
         [x-cloak] {
             display: none !important;
         }
+
+        /* ADMIN SENIOR CITIZEN ACCESSIBILITY MODE (A+ SR) */
+        html.senior-font-mode { font-size: 108% !important; }
+        .senior-font-mode .topbar { height: auto !important; min-height: 58px !important; padding: 6px 0; }
+        .senior-font-mode table th { font-size: 13.5px !important; padding-top: 13px !important; padding-bottom: 13px !important; }
+        .senior-font-mode table td { font-size: 14.5px !important; padding-top: 13px !important; padding-bottom: 13px !important; line-height: 1.45 !important; }
+        .senior-font-mode .card-title, .senior-font-mode .sb-title { font-size: 14px !important; }
+        .senior-font-mode .kpi-num { font-size: 28px !important; }
+        .senior-font-mode .kpi-lbl { font-size: 13px !important; }
+        .senior-font-mode label, .senior-font-mode .flbl { font-size: 13.5px !important; font-weight: 800 !important; }
+        .senior-font-mode input, .senior-font-mode select, .senior-font-mode textarea { font-size: 15px !important; }
+        .senior-font-mode .modal-box { max-height: 90vh !important; overflow-y: auto !important; }
+        .senior-font-mode * { overflow-wrap: break-word; }
 
         /* TOPBAR */
         .topbar {
@@ -2218,7 +2243,40 @@
                     <i class="fas fa-bars"></i>
                 </button>
 
-                <div class="tb-right">
+                <div class="tb-right" style="display:flex;align-items:center;gap:10px;">
+                    {{-- Font Size Switcher (A Normal / A+ Senior Mode) --}}
+                    <div style="display:flex;align-items:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:2px;"
+                         x-data="{ 
+                             currentScale: localStorage.getItem('resident_font_scale') || 'normal',
+                             setScale(s) {
+                                 this.currentScale = s;
+                                 localStorage.setItem('resident_font_scale', s);
+                                 if (s === 'senior') {
+                                     document.documentElement.classList.add('senior-font-mode');
+                                 } else {
+                                     document.documentElement.classList.remove('senior-font-mode');
+                                 }
+                                 window.dispatchEvent(new CustomEvent('font-scale-changed', {detail: s}));
+                             }
+                         }">
+                        <button type="button" 
+                                @click="setScale('normal')"
+                                :style="currentScale === 'normal' ? 'background:#fff;color:#000052;font-weight:900;' : 'background:transparent;color:rgba(255,255,255,.8);font-weight:700;'"
+                                style="border:none;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .15s;"
+                                title="Normal Font Size">
+                            A
+                        </button>
+                        <span style="color:rgba(255,255,255,.4);font-size:10px;margin:0 2px;">|</span>
+                        <button type="button" 
+                                @click="setScale('senior')"
+                                :style="currentScale === 'senior' ? 'background:#fbbf24;color:#000052;font-weight:900;' : 'background:transparent;color:rgba(255,255,255,.8);font-weight:700;'"
+                                style="border:none;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;transition:all .15s;"
+                                title="Senior Citizen / Malaking Letra Mode">
+                            <span style="font-weight:900;">A+</span>
+                            <span style="font-size:9px;font-weight:800;text-transform:uppercase;opacity:.9;">SR</span>
+                        </button>
+                    </div>
+
                     <span class="tb-user">{{ Auth::user()->first_name ?? Auth::user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}" x-data="{ isLoggingOut: false }" @submit="isLoggingOut = true">
                         @csrf

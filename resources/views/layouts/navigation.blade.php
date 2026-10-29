@@ -49,8 +49,7 @@
             @endauth
 
             <div class="flex items-center gap-2">
-                @if(request()->is('resident*') || request()->is('/'))
-                {{-- Font Size Switcher (A Normal / A+ Senior Mode) --}}
+                {{-- Font Size Switcher (A Normal / A+ Senior Mode) - Accessible Across All Departments & Portals --}}
                 <div class="flex items-center rounded-lg p-0.5 border" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);"
                      x-data="{ 
                          currentScale: localStorage.getItem('resident_font_scale') || 'normal',
@@ -83,6 +82,7 @@
                     </button>
                 </div>
 
+                @if(request()->is('resident*') || request()->is('/'))
                 {{-- Language Toggle EN | FIL --}}
                 <div class="flex items-center rounded-lg p-0.5 border" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);"
                      x-data="{ currentLang: localStorage.getItem('resident_lang') || 'en' }"

@@ -105,12 +105,93 @@ html, body {
 .senior-font-mode .about-desc { font-size: 13.5px !important; line-height: 1.6 !important; }
 .senior-font-mode .about-tab { font-size: 13px !important; padding: 8px 16px !important; }
 
-/* Form Fields & Modals Senior Scaling */
-.senior-font-mode .flbl { font-size: 13.5px !important; }
-.senior-font-mode .finput { font-size: 15.5px !important; padding: 12px 14px !important; }
-.senior-font-mode .modal-ttl { font-size: 15.5px !important; }
+/* General Form Fields & Modals Senior Scaling */
+.senior-font-mode .flbl { font-size: 13.5px !important; height: auto !important; }
+.senior-font-mode .finput, .senior-font-mode .fselect { font-size: 15.5px !important; padding: 12px 14px !important; min-height: 44px !important; height: auto !important; }
+.senior-font-mode .modal-ttl { font-size: 16.5px !important; }
+.senior-font-mode .modal-box { max-height: 90vh !important; overflow-y: auto !important; }
 .senior-font-mode .btn { font-size: 14px !important; }
 .senior-font-mode .sos-float, .senior-font-mode .ask-float { font-size: 12px !important; padding: 11px 16px !important; }
+
+/* ─── 1. MY PROFILE MODAL & SUBMODALS SENIOR SCALING ─── */
+.senior-font-mode .profile-field { padding: 12px 14px !important; margin-bottom: 10px !important; min-height: 58px !important; height: auto !important; }
+.senior-font-mode .profile-field-lbl { font-size: 12.5px !important; font-weight: 900 !important; color: #475569 !important; margin-bottom: 4px !important; letter-spacing: .04em !important; line-height: 1.3 !important; }
+.senior-font-mode .profile-field-val { font-size: 16px !important; font-weight: 800 !important; color: #0f172a !important; line-height: 1.4 !important; overflow-wrap: break-word !important; }
+.senior-font-mode .profile-field-val button, 
+.senior-font-mode .profile-field-val a { font-size: 12.5px !important; padding: 6px 12px !important; }
+.senior-font-mode [x-show="profileModal"] div[style*="font-size:17px"] { font-size: 21px !important; line-height: 1.3 !important; }
+.senior-font-mode [x-show="profileModal"] div[style*="font-size:10px"] { font-size: 13.5px !important; }
+.senior-font-mode [x-show="profileModal"] span[style*="font-size:8px"] { font-size: 11.5px !important; padding: 3px 9px !important; }
+.senior-font-mode [x-show="profileModal"] div[style*="font-size:9.5px"],
+.senior-font-mode [x-show="profileModal"] div[style*="font-size:9px"] { font-size: 13px !important; line-height: 1.4 !important; }
+.senior-font-mode [x-show="profileModal"] p[style*="font-size:10.5px"],
+.senior-font-mode [x-show="profileModal"] p[style*="font-size:10px"] { font-size: 13.5px !important; line-height: 1.5 !important; }
+.senior-font-mode [x-show="profileModal"] span[style*="font-size:8.5px"] { font-size: 11.5px !important; padding: 3px 8px !important; }
+.senior-font-mode [x-show="profileModal"] button[style*="font-size:10px"],
+.senior-font-mode [x-show="profileModal"] button[style*="font-size:9.5px"],
+.senior-font-mode [x-show="profileModal"] button[style*="font-size:9px"] { font-size: 12.5px !important; padding: 6px 12px !important; }
+.senior-font-mode [x-show="profileModal"] .btn-sm { font-size: 13px !important; padding: 8px 16px !important; }
+
+/* ─── 2. DOCUMENT REQUEST MODAL (docuModal) SENIOR SCALING ─── */
+.senior-font-mode .docu-grid { gap: 12px !important; }
+.senior-font-mode .docu-pick { min-height: 105px !important; height: auto !important; padding: 14px 8px 12px !important; }
+.senior-font-mode .docu-pick-ico { width: 38px !important; height: 38px !important; }
+.senior-font-mode .docu-pick-ico i { font-size: 16px !important; }
+.senior-font-mode .docu-pick-lbl { font-size: 13px !important; font-weight: 900 !important; line-height: 1.35 !important; }
+.senior-font-mode [x-show="docuModal"] p[style*="font-size:9px"] { font-size: 13px !important; }
+.senior-font-mode .voter-free, 
+.senior-font-mode .voter-pay, 
+.senior-font-mode [x-show="docuModal"] .card-badge { font-size: 12.5px !important; padding: 4px 12px !important; }
+.senior-font-mode .sblk-ttl { font-size: 15.5px !important; }
+.senior-font-mode .sblk label { font-size: 14.5px !important; }
+.senior-font-mode [x-show="docuModal"] .auth-blue-box div[style*="font-size:13px"] { font-size: 15px !important; }
+.senior-font-mode [x-show="docuModal"] .auth-blue-box div[style*="font-size:12px"] { font-size: 13.5px !important; }
+.senior-font-mode [x-show="docuModal"] .auth-blue-box div[style*="font-size:10.5px"] { font-size: 12px !important; }
+.senior-font-mode [x-show="docuModal"] .btn-grad { font-size: 14.5px !important; padding: 11px 22px !important; }
+
+/* ─── 3. EMERGENCY SOS MODAL (sosModal) SENIOR SCALING ─── */
+.senior-font-mode [x-show="sosModal"] .modal-box { max-width: 560px !important; }
+.senior-font-mode [x-show="sosModal"] div[style*="font-size:16px"] { font-size: 19px !important; }
+.senior-font-mode [x-show="sosModal"] div[style*="font-size:11.5px"] { font-size: 13.5px !important; }
+.senior-font-mode [x-show="sosModal"] div[style*="font-size:12px"] { font-size: 14px !important; }
+.senior-font-mode [x-show="sosModal"] span[style*="font-size:9px"] { font-size: 11.5px !important; }
+.senior-font-mode [x-show="sosModal"] button[style*="display:flex"] div[style*="font-size:10.5px"] { font-size: 13px !important; font-weight: 900 !important; }
+.senior-font-mode [x-show="sosModal"] button[style*="display:flex"] div[style*="font-size:12.5px"] { font-size: 16px !important; font-weight: 900 !important; }
+.senior-font-mode [x-show="sosModal"] button[style*="display:flex"] div[style*="width:32px"] { width: 38px !important; height: 38px !important; font-size: 16px !important; }
+.senior-font-mode [x-show="sosModal"] .flbl { font-size: 14.5px !important; }
+.senior-font-mode [x-show="sosModal"] .finput, 
+.senior-font-mode [x-show="sosModal"] .fselect { font-size: 15.5px !important; padding: 13px 15px !important; }
+.senior-font-mode [x-show="sosModal"] div[style*="font-size:11px"] { font-size: 13px !important; line-height: 1.4 !important; }
+.senior-font-mode [x-show="sosModal"] .btn-grad, 
+.senior-font-mode [x-show="sosModal"] .btn-plain { font-size: 15px !important; padding: 13px 20px !important; }
+
+/* ─── 4. REPORT ISSUE / COMPLAINT MODAL (issueModal & issueConfirmModal) SENIOR SCALING ─── */
+.senior-font-mode [x-show="issueModal"] .modal-box { max-width: 620px !important; }
+.senior-font-mode .issue-modal-header div[style*="font-size:clamp"] { font-size: 16.5px !important; }
+.senior-font-mode .issue-modal-header span[style*="font-size:10px"] { font-size: 12px !important; }
+.senior-font-mode .issue-modal-header div[style*="font-size:11px"] { font-size: 13px !important; }
+.senior-font-mode .issue-modal-body .flbl { font-size: 13.5px !important; height: auto !important; margin-bottom: 5px !important; line-height: 1.35 !important; }
+.senior-font-mode .issue-modal-body input, 
+.senior-font-mode .issue-modal-body select, 
+.senior-font-mode .issue-modal-body textarea { font-size: 15px !important; min-height: 44px !important; height: auto !important; padding: 10px 14px !important; }
+.senior-font-mode .issue-modal-body div[style*="font-size:12px"] { font-size: 14.5px !important; }
+.senior-font-mode .issue-modal-body div[style*="font-size:10.5px"] { font-size: 13px !important; line-height: 1.55 !important; }
+.senior-font-mode .issue-modal-body span[style*="font-size:11px"] { font-size: 13.5px !important; }
+.senior-font-mode .issue-modal-body div[style*="font-size:9.5px"] { font-size: 12.5px !important; }
+.senior-font-mode .issue-modal-footer .btn-grad, 
+.senior-font-mode .issue-modal-footer .btn-plain { font-size: 14px !important; padding: 10px 18px !important; }
+
+/* issueConfirmModal Senior Scaling */
+.senior-font-mode [x-show="issueConfirmModal"] .modal-box { max-width: 580px !important; }
+.senior-font-mode [x-show="issueConfirmModal"] div[style*="font-size:14px"] { font-size: 16.5px !important; }
+.senior-font-mode [x-show="issueConfirmModal"] div[style*="font-size:11px"] { font-size: 13px !important; }
+.senior-font-mode [x-show="issueConfirmModal"] span[style*="font-size:10.5px"] { font-size: 12px !important; }
+.senior-font-mode [x-show="issueConfirmModal"] span[style*="font-size:13px"] { font-size: 15px !important; }
+.senior-font-mode [x-show="issueConfirmModal"] span[style*="font-size:11.5px"],
+.senior-font-mode [x-show="issueConfirmModal"] div[style*="font-size:11.5px"] { font-size: 13.5px !important; line-height: 1.55 !important; }
+.senior-font-mode [x-show="issueConfirmModal"] span[style*="font-size:12.5px"] { font-size: 14.5px !important; }
+.senior-font-mode [x-show="issueConfirmModal"] .btn-grad, 
+.senior-font-mode [x-show="issueConfirmModal"] .btn-plain { font-size: 14px !important; padding: 11px 18px !important; }
 
 /* WRAP */
 .rp-wrap{max-width:960px;margin:0 auto;padding:0 16px 60px;}
@@ -5212,28 +5293,28 @@ html, body {
                         @endif
                     </div>
                     <div>
-                        <div style="font-size:17px;font-weight:900;color:var(--text);">{{ ($authUser?->first_name??'').' '.($authUser?->last_name??'') }}</div>
-                        <div style="font-size:10px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;">{{ $authUser?->resident_code ?? 'NO-CODE' }}</div>
+                        <div class="prof-name" style="font-size:17px;font-weight:900;color:var(--text);">{{ ($authUser?->first_name??'').' '.($authUser?->last_name??'') }}</div>
+                        <div class="prof-code" style="font-size:10px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;">{{ $authUser?->resident_code ?? 'NO-CODE' }}</div>
                         <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">
                             @if($authUser?->is_voter)
                                 @if($authUser->voter_status == 'pending')
-                                    <span style="font-size:8px;font-weight:900;background:#fef3c7;color:#a16207;padding:2px 7px;border-radius:99px;">Voter (Pending)</span>
+                                    <span class="prof-badge" style="font-size:8px;font-weight:900;background:#fef3c7;color:#a16207;padding:2px 7px;border-radius:99px;">Voter (Pending)</span>
                                 @elseif($authUser->voter_status == 'declined')
-                                    <span style="font-size:8px;font-weight:900;background:#fee2e2;color:#dc2626;padding:2px 7px;border-radius:99px;">Voter (Declined)</span>
+                                    <span class="prof-badge" style="font-size:8px;font-weight:900;background:#fee2e2;color:#dc2626;padding:2px 7px;border-radius:99px;">Voter (Declined)</span>
                                 @else
-                                    <span style="font-size:8px;font-weight:900;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:99px;">Voter</span>
+                                    <span class="prof-badge" style="font-size:8px;font-weight:900;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:99px;">Voter</span>
                                 @endif
                             @endif
                             @if($authUser && $authUser->voter_status === 'pending' && !$authUser->is_voter)
-                                <span style="font-size:8px;font-weight:900;background:#fef3c7;color:#a16207;padding:2px 7px;border-radius:99px;">Voter (Pending)</span>
+                                <span class="prof-badge" style="font-size:8px;font-weight:900;background:#fef3c7;color:#a16207;padding:2px 7px;border-radius:99px;">Voter (Pending)</span>
                             @endif
                             @if($authUser?->is_non_voter && $authUser->voter_status !== 'pending' && $authUser->voter_status !== 'approved')
-                                <span style="font-size:8px;font-weight:900;background:#fef3c7;color:#a16207;padding:2px 7px;border-radius:99px;">Non-Voter</span>
+                                <span class="prof-badge" style="font-size:8px;font-weight:900;background:#fef3c7;color:#a16207;padding:2px 7px;border-radius:99px;">Non-Voter</span>
                             @endif
-                            @if($authUser?->is_senior)<span style="font-size:8px;font-weight:900;background:#ffedd5;color:#ea580c;padding:2px 7px;border-radius:99px;">Senior</span>@endif
-                            @if($authUser?->is_pwd)<span style="font-size:8px;font-weight:900;background:#ede9fe;color:#7c3aed;padding:2px 7px;border-radius:99px;">PWD</span>@endif
-                            @if($authUser?->is_bedridden)<span style="font-size:8px;font-weight:900;background:#fee2e2;color:#dc2626;padding:2px 7px;border-radius:99px;">Bed-ridden</span>@endif
-                            @if($authUser?->is_single_parent)<span style="font-size:8px;font-weight:900;background:#fce7f3;color:#be185d;padding:2px 7px;border-radius:99px;">Solo Parent</span>@endif
+                            @if($authUser?->is_senior)<span class="prof-badge" style="font-size:8px;font-weight:900;background:#ffedd5;color:#ea580c;padding:2px 7px;border-radius:99px;">Senior</span>@endif
+                            @if($authUser?->is_pwd)<span class="prof-badge" style="font-size:8px;font-weight:900;background:#ede9fe;color:#7c3aed;padding:2px 7px;border-radius:99px;">PWD</span>@endif
+                            @if($authUser?->is_bedridden)<span class="prof-badge" style="font-size:8px;font-weight:900;background:#fee2e2;color:#dc2626;padding:2px 7px;border-radius:99px;">Bed-ridden</span>@endif
+                            @if($authUser?->is_single_parent)<span class="prof-badge" style="font-size:8px;font-weight:900;background:#fce7f3;color:#be185d;padding:2px 7px;border-radius:99px;">Solo Parent</span>@endif
                         </div>
                     </div>
                 </div>
@@ -5256,7 +5337,7 @@ html, body {
                         <div class="profile-field-lbl">Registered Mobile / Cellphone Number (For Login &amp; SMS OTP)</div>
                         <div class="profile-field-val" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
                             <span style="font-weight:800; font-family:monospace; font-size:13px; color:#0f172a;">{{ $authUser?->contact_number ?? 'No mobile number set' }}</span>
-                            <button type="button" @click="profileModal=false; phoneEditModal=true" class="btn-plain btn-sm" style="padding:4px 10px;font-size:9.5px;font-weight:800;color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;">
+                            <button type="button" @click="profileModal=false; phoneEditModal=true" class="btn-plain btn-sm prof-field-btn" style="padding:4px 10px;font-size:9.5px;font-weight:800;color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;">
                                 <i class="fas fa-mobile-alt"></i> Change Mobile Number
                             </button>
                         </div>
@@ -5265,7 +5346,7 @@ html, body {
                         <div class="profile-field-lbl">Registered Email Address (For Notifications &amp; Receipts)</div>
                         <div class="profile-field-val" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
                             <span style="word-break:break-all;">{{ $authUser?->email ?? 'No email set' }}</span>
-                            <button type="button" @click="profileModal=false; emailEditModal=true" class="btn-plain btn-sm" style="padding:4px 10px;font-size:9.5px;font-weight:800;color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;">
+                            <button type="button" @click="profileModal=false; emailEditModal=true" class="btn-plain btn-sm prof-field-btn" style="padding:4px 10px;font-size:9.5px;font-weight:800;color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;">
                                 <i class="fas fa-edit"></i> Change Email
                             </button>
                         </div>
@@ -5274,7 +5355,7 @@ html, body {
                         <div class="profile-field-lbl">Account Security &amp; Password</div>
                         <div class="profile-field-val" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
                             <span style="font-size:12px; color:#64748b;">••••••••••••</span>
-                            <button type="button" @click="profileModal=false; passwordEditModal=true" class="btn-plain btn-sm" style="padding:4px 10px;font-size:9.5px;font-weight:800;color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;">
+                            <button type="button" @click="profileModal=false; passwordEditModal=true" class="btn-plain btn-sm prof-field-btn" style="padding:4px 10px;font-size:9.5px;font-weight:800;color:var(--brand);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;">
                                 <i class="fas fa-key"></i> Change Password
                             </button>
                         </div>

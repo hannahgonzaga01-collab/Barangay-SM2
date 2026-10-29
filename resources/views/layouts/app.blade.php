@@ -19,11 +19,107 @@
         input, button, select, textarea{font-family:inherit;}
         main{flex:1;width:100%;max-width:100vw;overflow-x:hidden;}
         .swal2-container{z-index:999999 !important;}
+
+        /* ========================================================
+           GLOBAL SENIOR CITIZEN ACCESSIBILITY MODE (A+ SR)
+           Scales up typography & elements across all department portals
+           (Office, Peace & Order, VAWC, Justice, Resident, Admin)
+           ======================================================== */
+        html.senior-font-mode {
+            font-size: 108% !important;
+        }
+        .senior-font-mode table th {
+            font-size: 13.5px !important;
+            padding-top: 13px !important;
+            padding-bottom: 13px !important;
+            letter-spacing: .03em !important;
+        }
+        .senior-font-mode table td {
+            font-size: 14.5px !important;
+            padding-top: 13px !important;
+            padding-bottom: 13px !important;
+            line-height: 1.45 !important;
+        }
+        .senior-font-mode .card-title,
+        .senior-font-mode .section-lbl {
+            font-size: 14px !important;
+            letter-spacing: .06em !important;
+        }
+        .senior-font-mode label,
+        .senior-font-mode .form-label,
+        .senior-font-mode .flbl {
+            font-size: 13.5px !important;
+            font-weight: 800 !important;
+            line-height: 1.4 !important;
+        }
+        .senior-font-mode input,
+        .senior-font-mode select,
+        .senior-font-mode textarea,
+        .senior-font-mode .finput,
+        .senior-font-mode .fselect {
+            font-size: 15px !important;
+            line-height: 1.4 !important;
+        }
+        .senior-font-mode .badge,
+        .senior-font-mode [class*="badge"],
+        .senior-font-mode .cbadge,
+        .senior-font-mode .card-badge,
+        .senior-font-mode .pill-cnt {
+            font-size: 11.5px !important;
+            padding: 4px 10px !important;
+        }
+        .senior-font-mode .btn,
+        .senior-font-mode .btn-grad,
+        .senior-font-mode .btn-plain,
+        .senior-font-mode button[type="button"],
+        .senior-font-mode button[type="submit"] {
+            font-size: 13.5px !important;
+        }
+        .senior-font-mode .btn-sm,
+        .senior-font-mode .btn-grad-sm {
+            font-size: 12px !important;
+            padding: 6px 12px !important;
+        }
+        .senior-font-mode .filter-pill,
+        .senior-font-mode .tab-pill {
+            font-size: 12px !important;
+            padding: 7px 15px !important;
+        }
+        .senior-font-mode .ac-name {
+            font-size: 13px !important;
+            line-height: 1.35 !important;
+        }
+        .senior-font-mode .ac-sub {
+            font-size: 12px !important;
+        }
+        .senior-font-mode .hstat-n {
+            font-size: 26px !important;
+        }
+        .senior-font-mode .hstat-l {
+            font-size: 11px !important;
+        }
+        .senior-font-mode .modal-box {
+            max-height: 90vh !important;
+            overflow-y: auto !important;
+        }
+        .senior-font-mode .modal-ttl {
+            font-size: 17px !important;
+        }
+        .senior-font-mode * {
+            overflow-wrap: break-word;
+        }
     </style>
     <script>
         if (localStorage.getItem('resident_font_scale') === 'senior') {
             document.documentElement.classList.add('senior-font-mode');
         }
+        window.addEventListener('font-scale-changed', function(e) {
+            if (e.detail === 'senior') {
+                document.documentElement.classList.add('senior-font-mode');
+            } else {
+                document.documentElement.classList.remove('senior-font-mode');
+            }
+        });
         // Styled Toast notification helper
         window.showToast = function(message, type = 'success') {
             if (typeof Swal !== 'undefined') {
