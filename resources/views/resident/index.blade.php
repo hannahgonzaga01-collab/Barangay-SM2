@@ -2420,38 +2420,29 @@ html, body {
             </div>
 
             <div x-show="eventTab==='officials'" x-transition x-cloak style="padding:20px;">
-                @if($isAuth)
-                    <div style="text-align:center;">
-                        <h3 style="font-size:16px; font-weight:900; color:var(--brand-dark); text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px;">Organizational Chart</h3>
-                        <p style="font-size:10px; color:var(--muted); font-weight:600; margin-bottom:20px;">Barangay San Miguel II — Current Term</p>
-                        
-                        @if($orgChartPath)
-                            <div style="background:#fff; border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:var(--card-shadow);">
-                                <img src="{{ asset('storage/' . $orgChartPath) }}" style="width:100%; height:auto; display:block;" alt="Barangay Organizational Chart" onerror="this.parentElement.style.display='none'; document.getElementById('org-chart-missing').style.display='block';">
-                            </div>
-                            <div id="org-chart-missing" style="display:none; padding:40px 20px; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; color:var(--light); text-align:center;">
-                                <i class="fas fa-sitemap" style="font-size:40px; margin-bottom:12px; opacity:.3;"></i>
-                                <div style="font-size:12px; font-weight:800;">Organizational Chart is currently being updated.</div>
-                                <div style="font-size:10px; font-weight:600; margin-top:4px;">Please check back later.</div>
-                            </div>
-                        @else
-                            <div style="padding:40px 20px; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; color:var(--light); text-align:center;">
-                                <i class="fas fa-sitemap" style="font-size:40px; margin-bottom:12px; opacity:.3;"></i>
-                                <div style="font-size:12px; font-weight:800;">Organizational Chart is currently being updated.</div>
-                                <div style="font-size:10px; font-weight:600; margin-top:4px;">Please check back later.</div>
-                            </div>
-                        @endif
-                    </div>
-                @else
-                    <div style="text-align:center; padding:30px 20px; background:linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius:16px; border:1.5px solid #bfdbfe;">
-                        <div style="width:50px; height:50px; background:var(--brand); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; font-size:20px;">
-                            <i class="fas fa-lock"></i>
+                <div style="text-align:center;">
+                    <h3 style="font-size:16px; font-weight:900; color:var(--brand-dark); text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px;">Organizational Chart</h3>
+                    <p style="font-size:10px; color:var(--muted); font-weight:600; margin-bottom:20px;">Barangay San Miguel II — Current Term</p>
+                    
+                    @if($orgChartPath)
+                        <div style="background:#fff; border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:var(--card-shadow);">
+                            <a href="{{ asset('storage/' . $orgChartPath) }}" target="_blank" title="Click to view full image in a new tab">
+                                <img src="{{ asset('storage/' . $orgChartPath) }}" style="width:100%; height:auto; display:block; cursor:pointer;" alt="Barangay Organizational Chart" onerror="this.closest('div').style.display='none'; document.getElementById('org-chart-missing').style.display='block';">
+                            </a>
                         </div>
-                        <h3 style="font-size:14px; font-weight:900; color:var(--brand-dark); margin-bottom:8px;">Protected Information</h3>
-                        <p style="font-size:11px; color:var(--muted); font-weight:600; line-height:1.6; max-width:300px; margin:0 auto 15px;">To protect the privacy of our community leaders and maintain security, the organizational chart is only visible to <strong>legitimate residents</strong>.</p>
-                        <a href="{{ route('login') }}" class="btn-grad btn-sm"><i class="fas fa-sign-in-alt"></i> Login to View</a>
-                    </div>
-                @endif
+                        <div id="org-chart-missing" style="display:none; padding:40px 20px; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; color:var(--light); text-align:center;">
+                            <i class="fas fa-sitemap" style="font-size:40px; margin-bottom:12px; opacity:.3;"></i>
+                            <div style="font-size:12px; font-weight:800;">Organizational Chart is currently being updated.</div>
+                            <div style="font-size:10px; font-weight:600; margin-top:4px;">Please check back later.</div>
+                        </div>
+                    @else
+                        <div style="padding:40px 20px; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; color:var(--light); text-align:center;">
+                            <i class="fas fa-sitemap" style="font-size:40px; margin-bottom:12px; opacity:.3;"></i>
+                            <div style="font-size:12px; font-weight:800;">Organizational Chart is currently being updated.</div>
+                            <div style="font-size:10px; font-weight:600; margin-top:4px;">Please check back later.</div>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <div x-show="eventTab==='projects'" x-transition x-cloak>
