@@ -75,10 +75,9 @@
                     <button type="button" 
                             @click="setScale('senior')"
                             :class="currentScale === 'senior' ? 'bg-amber-400 text-blue-950 font-black shadow-sm' : 'text-white/80 font-bold hover:text-white'"
-                            class="px-2 py-1 rounded text-[10.5px] tracking-wider transition flex items-center gap-1"
+                            class="px-2 py-1 rounded text-[10.5px] tracking-wider transition"
                             title="Senior Citizen / Malaking Letra Mode">
                         <span class="font-black">A+</span>
-                        <span class="text-[9px] font-extrabold uppercase opacity-90">SR</span>
                     </button>
                 </div>
 
@@ -330,10 +329,18 @@
                                     <div class="text-white font-black text-sm leading-tight">
                                         {{ trim(($navUser?->first_name ?? '') . ' ' . ($navUser?->last_name ?? '')) ?: ($navUser?->name ?? 'User') }}
                                     </div>
+                                    @php
+                                        $isUnverifiedResident = ($navUser?->role === 'resident') && (
+                                            in_array($navUser?->status, ['pending_verification', 'declined']) 
+                                            || (!$navUser?->resident_code && $navUser?->resident?->verification_status !== 'approved')
+                                        );
+                                    @endphp
+                                    @if(!$isUnverifiedResident)
                                     <div class="text-[10px] font-bold uppercase tracking-wide mt-0.5" style="color:rgba(255,255,255,.6);">
                                         {{ $navUser?->role === 'peace' ? 'Peace Staff' : ($navUser?->role === 'office' ? 'Office Staff' : ($navUser?->role === 'vawc' ? 'VAWC Staff' : ($navUser?->role === 'justice' ? 'Justice Officer' : ucfirst($navUser?->role ?? 'User')))) }}
                                         @if($navUser?->resident_code) • {{ $navUser->resident_code }} @endif
                                     </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

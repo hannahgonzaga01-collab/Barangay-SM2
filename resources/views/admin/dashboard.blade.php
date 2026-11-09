@@ -2270,10 +2270,9 @@
                         <button type="button" 
                                 @click="setScale('senior')"
                                 :style="currentScale === 'senior' ? 'background:#fbbf24;color:#000052;font-weight:900;' : 'background:transparent;color:rgba(255,255,255,.8);font-weight:700;'"
-                                style="border:none;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;transition:all .15s;"
+                                style="border:none;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .15s;"
                                 title="Senior Citizen / Malaking Letra Mode">
                             <span style="font-weight:900;">A+</span>
-                            <span style="font-size:9px;font-weight:800;text-transform:uppercase;opacity:.9;">SR</span>
                         </button>
                     </div>
 
